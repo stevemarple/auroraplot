@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import urllib2
-import awplot
+import auroraplot as ap
 
 data_dir = '/data/aurorawatch/net'
 
@@ -29,19 +29,19 @@ def convert_awn_data(file_name, archive_data,
 
     data_type_info = {
         'MagData': {
-            'class': awplot.MagData,
+            'class': ap.MagData,
             'col_offset': 1,
             'scaling': 1e-9,
             'data_check': check_mag_data,
             },
         'TemperatureData' : {
-            'class': awplot.TemperatureData,
+            'class': ap.TemperatureData,
             'col_offset': 4,
             'scaling': 1,
             'data_check': check_temperature,
             },
         'VoltageData': {
-            'class': awplot.VoltageData,
+            'class': ap.VoltageData,
             'col_offset': 6,
             'scaling': 1,
             'data_check': check_voltage,
@@ -59,10 +59,10 @@ def convert_awn_data(file_name, archive_data,
             uh = urllib2.urlopen('file:' + file_name)
         else:
             uh = urllib2.urlopen(file_name)
-
+        print(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = awplot.epoch64_ns + \
+            sample_start_time = ap.epoch64_ns + \
                 (np.timedelta64(1, 's') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1, 's')
@@ -98,54 +98,6 @@ def convert_awn_data(file_name, archive_data,
         if kwargs.get('verbose'):
             print('Could not open ' + file_name)
     return None
-    
-# def convert_awn_temp_data(file_name, archive_data, 
-#                           network, site, data_type, channels, start_time, 
-#                           end_time, **kwargs):
-#     '''Convert AuroraWatchNet temperature data to match standard data type'''
-
-#     assert data_type == 'TemperatureData'
-#     chan_tup = tuple(archive_data['channels'])
-#     col_idx = []
-#     for c in channels:
-#         col_idx.append(4 + chan_tup.index(c))
-#     try:
-#         if file_name.startswith('/'):
-#             uh = urllib2.urlopen('file:' + file_name)
-#         else:
-#             uh = urllib2.urlopen(file_name)
-
-#         try:
-#             data = np.loadtxt(uh, unpack=True)
-#             sample_start_time = awplot.epoch64_ns + \
-#                 (np.timedelta64(1, 's') * data[0])
-#             # end time and integration interval are guesstimates
-#             sample_end_time = sample_start_time + np.timedelta64(1, 's')
-#             integration_interval = np.timedelta64(1, 's').repeat(len(data[0]))
-
-#             r = awplot.MagData(network=network,
-#                                site=site,
-#                                channels=channels,
-#                                start_time=start_time,
-#                                end_time=end_time,
-#                                sample_start_time=sample_start_time, 
-#                                sample_end_time=sample_end_time,
-#                                integration_interval=integration_interval,
-#                                nominal_cadence=archive_data['nominal_cadence'],
-#                                data=data[col_idx]*1e9,
-#                                units='T',
-#                                sort=True)
-#             return r
-#         except Exception as e:
-#             if kwargs.get('verbose'):
-#                 print('Could not read ' + file_name)
-#                 print(str(e))
-#         finally:
-#             uh.close()
-#     except Exception as e:
-#         if kwargs.get('verbose'):
-#             print('Could not open ' + file_name)
-#     return None
     
 
 sites = {
@@ -273,5 +225,5 @@ sites = {
         },
     }
 
-awplot.add_network('AURORAWATCHNET', sites)
+ap.add_network('AURORAWATCHNET', sites)
 

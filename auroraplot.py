@@ -476,10 +476,13 @@ class Data(object):
         
         if axes is not None:
             axes2 = copy.copy(axes)
-            try:
-                axes2.reverse()
-            except:
-                pass
+            if not hasattr(axes2, '__iter__'):
+                axes2 = [axes2]
+            if len(axes2) == 1:
+                axes2 * len(channels)
+            else:
+                assert len(axes2) == len(channels), \
+                    'axes and channels must be same length'
         elif figure is None:
             figure=plt.figure()
         else:
@@ -487,14 +490,11 @@ class Data(object):
         
 
         if subplot is not None:
-            try:
-                iterator = iter(subplot)
-                subplot2 = copy.copy(subplot) # will reverse in place
-                subplot2.reverse()
-            except:
-                subplot2 = [subplot]
+            subplot2 = copy.copy(subplot)
+            if not hasattr(subplot2, '__iter__'):
+                subplot2 = [subplot2]
             if len(subplot2) == 1:
-                subplot2 *= len(channels)
+                subplot2 * len(channels)
             else:
                 assert len(subplot2) == len(channels), \
                     'subplot and channels must be same length'
@@ -517,28 +517,21 @@ class Data(object):
             cu = str_units(np.nanmax(np.abs(self.data[allcidx])), self.units, 
                            prefix=units_prefix, wantstr=False)
 
-        for c in channels:
+        first_axes = None
+        for n in range(len(channels)):
             if axes is not None:
-                try:
-                    ax = plt.axes(axes2.pop())
-                except:
-                    ax = plt.axes(axes2)
+                ax = plt.axes(axes2[n])
             elif subplot is not None:
-                try:
-                    p = subplot2.pop()
-                    ax = plt.subplot(p)
-                except Exception as e:
-                    print(str(e))
-                    ax = plt.subplot(subplot2)
+                ax = plt.subplot(subplot2[n])
             else:
                 ax = plt.gca()
             ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter(useOffset=False))
-            cidx = chan_tup.index(c)
+            cidx = chan_tup.index(channels[n])
             u = str_units(np.nanmax(np.abs(self.data[cidx])), self.units, 
                           prefix=units_prefix, wantstr=False)
             xdata = dt64.mean(self.sample_start_time, self.sample_end_time)
             if u['mul'] == 1:
-                # Can avoid copying
+                # Can avoid a copy
                 ydata = self.data[cidx]
             else:
                 ydata = self.data[cidx] / u['mul']
@@ -553,7 +546,10 @@ class Data(object):
                 # u['channel'] = self.channels[cidx]
                 # plt.ylabel('%(channel)s (%(prefix)s%(unit)s)' % u)
                 plt.ylabel(self.channels[cidx] + ' (' + u['fmtunit'] + ')')
-
+            
+            if n == 0:
+                first_axes = ax
+                
         if need_legend:
             lh = plt.legend(self.channels[allcidx], loc='best', fancybox=True)
             lh.get_frame().set_alpha(0.7)
@@ -561,6 +557,7 @@ class Data(object):
             plt.ylabel(str(subtitle) + ' (' + cu['fmtunit'] + ')')
 
         # Add title
+        plt.axes(first_axes)
         tstr = self.network + ' / ' + self.site
         # if len(channels) == 1:
         #    tstr += '\n' + self.channels[0]
@@ -706,16 +703,24 @@ class MagData(Data):
         if channels is None:
             channels = self.channels
         if subplot is None:
-            subplot = []
+            subplot2 = []
             for n in range(1, len(channels) + 1):
-                subplot.append(len(channels)*100 + 10 + n)
+                subplot2.append(len(channels)*100 + 10 + n)
+        else:
+            subplot2=subplot
         if units_prefix is None and self.units == 'T':
             # Use nT for plotting
             units_prefix = 'n'
         
-        return Data.plot(self, channels=channels, figure=figure, axes=axes,
-                         subplot=subplot, units_prefix=units_prefix,
-                         subtitle=subtitle)
+        r = Data.plot(self, channels=channels, figure=figure, axes=axes,
+                      subplot=subplot2, units_prefix=units_prefix,
+                      subtitle=subtitle)
+        # if subplot is None and axes is None:
+        #     # Remove xaxis ticks from all but the last
+        #     for a in plt.gcf().axes:
+        #         a.xaxis.set_major_formatter(mpl.ticker.NullFormatter())
+
+        return r
 
 class MagQDC(MagData):
     '''Class to load and manipulate magnetometer quiet-day curves (QDC).'''

@@ -2,7 +2,7 @@ import os
 import numpy as np
 import urllib2
 
-import awplot
+import auroraplot as ap
 
 data_dir = '/data/samnet'
 
@@ -13,31 +13,36 @@ def convert_rt_data(file_name, archive_data,
                     network, site, data_type, channels, start_time, 
                     end_time, **kwargs):
     assert(data_type == 'MagData')
-
     try:
         chan_tup = tuple(archive_data['channels'])
         col_idx = []
         for c in channels:
             col_idx.append(1 + chan_tup.index(c))
-        
-        uh = urllib2.urlopen(file_name)
+
+        if file_name.startswith('/'):
+            uh = urllib2.urlopen('file:' + file_name)
+        else:
+            uh = urllib2.urlopen(file_name)
+
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = start_time + (np.timedelta64(1, 's') * data[0])
             sample_end_time = sample_start_time + np.timedelta64(1, 's')
-            integration_interval = np.timedelta64(1, 's').repeat(len(data[0]))
-            r = awplot.MagData(network=network,
-                               site=site,
-                               channels=channels,
-                               start_time=start_time,
-                               end_time=end_time,
-                               sample_start_time=sample_start_time, 
-                               sample_end_time=sample_end_time,
-                               integration_interval=integration_interval,
-                               nominal_cadence=archive_data['nominal_cadence'],
-                               data=data[col_idx]*1e9,
-                               units='T',
-                               sort=True)
+            integration_interval = np.ones([len(channels), 
+                                            len(sample_start_time)],
+                                            dtype='m8[s]')
+            r = ap.MagData(network=network,
+                           site=site,
+                           channels=channels,
+                           start_time=start_time,
+                           end_time=end_time,
+                           sample_start_time=sample_start_time, 
+                           sample_end_time=sample_end_time,
+                           integration_interval=integration_interval,
+                           nominal_cadence=archive_data['nominal_cadence'],
+                           data=data[col_idx]*1e-9,
+                           units='T',
+                           sort=True)
             return r
         except Exception as e:
             if kwargs.get('verbose'):
@@ -47,7 +52,7 @@ def convert_rt_data(file_name, archive_data,
             uh.close()
     except Exception as e:
         if kwargs.get('verbose'):
-            print('Could not open ' + file_name)
+            print('Could not open ' + file_name + ': ' + str(e))
     return None
 
 sites = {
@@ -64,7 +69,6 @@ sites = {
                     #                     'samnet/1s_archive/%Y/%m/la%d%m%y.dgz'),
                     'path': 'http://www.dcs.lancs.ac.uk/iono/miadata/magnetometer/samnet/5s_archive/%Y/%m/la%d%m%Y.5s.gz',
                     'duration': np.timedelta64(1, 'D'),
-                    'format': 'samnet_1s',
                     'converter': load_samnet_data,
                     'nominal_cadence': np.timedelta64(1, 's'),
                     'units': 'T',
@@ -74,7 +78,6 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'samnet/1s_archive/%Y/%m/la%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(1, 'D'),
-                    'format': 'samnet_5s',
                     'converter': load_samnet_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
@@ -83,9 +86,8 @@ sites = {
                     'channels': ['H', 'D', 'Z'],
                     #'path': os.path.join(data_dir,
                     #                     'realtime/lan/%Y/%m/lan%Y%m%d.rt'),
-                    'path': 'http://spears.lancs.ac.uk/~marple/realtime/lan/%Y/%m/lan%Y%m%d.rt',
+                    'path': '/data/samnet/realtime/lan/%Y/%m/lan%Y%m%d.rt',
                     'duration': np.timedelta64(1, 'D'),
-                    'format': 'samnetrt',
                     'converter': convert_rt_data,
                     'nominal_cadence': np.timedelta64(1, 's'),
                     'units': 'T',
@@ -97,7 +99,6 @@ sites = {
                     'path': os.path.join(data_dir, 
                                          'samnet/activity/quiet/%Y/la00%m%Y.5s'),
                     'duration': np.timedelta64(1, 'D'),
-                    'format': 'samnet_qdc',
                     'converter': load_samnet_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
@@ -116,5 +117,5 @@ for k in sites:
         sites[k]['data_types']['MagData']['1s']
     
     
-awplot.add_network('SAMNET', sites)
+ap.add_network('SAMNET', sites)
 
