@@ -11,6 +11,10 @@ epoch64_ns = np.datetime64('1970-01-01T00:00:00Z','ns')
 def dt64_to(t, unit):
     return (t - epoch64_ns) / np.timedelta64(1, unit)
 
+def isnat(x):
+    # Do not trust that NaT will compare equal with NaT!
+    return np.array(x).astype('int') == -(2**63)
+    
 def mean(*a):
     if len(a) == 1:
         return np.mean(a[0] - epoch64_ns) + epoch64_ns
