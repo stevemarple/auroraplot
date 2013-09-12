@@ -145,8 +145,8 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    # 'units': u'\N{DEGREE SIGN}C',
-                    'units': 'C',
+                    'units': u'\N{DEGREE SIGN}C',
+                    #'units': 'C',
                     },
                 },
             'VoltageData': {
@@ -206,8 +206,8 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    # 'units': u'\N{DEGREE SIGN}C',
-                    'units': 'C',
+                    'units': u'\N{DEGREE SIGN}C',
+                    # 'units': 'C',
                     },
                 },
             'VoltageData': {
