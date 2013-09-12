@@ -41,6 +41,8 @@ class Data(object):
         units = self.units
         if units == u'\N{DEGREE SIGN}C':
             units = 'degrees C'
+        elif units = u'\N{DEGREE SIGN}':
+            units = 'degrees'
 
         return (type(self).__name__ + ':\n' +
                 '          network : ' + str(self.network) + '\n' +
