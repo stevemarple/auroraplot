@@ -225,7 +225,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
                              end_time, **kwargs2)
 
     data = []
-    t = start_time
+    t = dt64.floor(start_time, ad['duration'])
     while t < end_time:
         t2 = t + ad['duration']
         if hasattr(path, '__call__'):
