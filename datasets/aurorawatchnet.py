@@ -2,6 +2,9 @@ import os
 import numpy as np
 import urllib2
 import auroraplot as ap
+from auroraplot.magdata import MagData as MagData
+from auroraplot.temperaturedata import TemperatureData
+from auroraplot.voltagedata import VoltageData
 
 data_dir = '/data/aurorawatch/net'
 
@@ -29,19 +32,19 @@ def convert_awn_data(file_name, archive_data,
 
     data_type_info = {
         'MagData': {
-            'class': ap.MagData,
+            'class': MagData,
             'col_offset': 1,
             'scaling': 1e-9,
             'data_check': check_mag_data,
             },
         'TemperatureData' : {
-            'class': ap.TemperatureData,
+            'class': TemperatureData,
             'col_offset': 4,
             'scaling': 1,
             'data_check': check_temperature,
             },
         'VoltageData': {
-            'class': ap.VoltageData,
+            'class': VoltageData,
             'col_offset': 6,
             'scaling': 1,
             'data_check': check_voltage,
@@ -97,6 +100,7 @@ def convert_awn_data(file_name, archive_data,
     except Exception as e:
         if kwargs.get('verbose'):
             print('Could not open ' + file_name)
+            print(str(e))
     return None
     
 

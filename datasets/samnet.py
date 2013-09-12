@@ -3,6 +3,7 @@ import numpy as np
 import urllib2
 
 import auroraplot as ap
+from auroraplot.magdata import MagData as MagData
 
 data_dir = '/data/samnet'
 
@@ -31,18 +32,18 @@ def convert_rt_data(file_name, archive_data,
             integration_interval = np.ones([len(channels), 
                                             len(sample_start_time)],
                                             dtype='m8[s]')
-            r = ap.MagData(network=network,
-                           site=site,
-                           channels=channels,
-                           start_time=start_time,
-                           end_time=end_time,
-                           sample_start_time=sample_start_time, 
-                           sample_end_time=sample_end_time,
-                           integration_interval=integration_interval,
-                           nominal_cadence=archive_data['nominal_cadence'],
-                           data=data[col_idx]*1e-9,
-                           units='T',
-                           sort=True)
+            r = MagData(network=network,
+                        site=site,
+                        channels=channels,
+                        start_time=start_time,
+                        end_time=end_time,
+                        sample_start_time=sample_start_time, 
+                        sample_end_time=sample_end_time,
+                        integration_interval=integration_interval,
+                        nominal_cadence=archive_data['nominal_cadence'],
+                        data=data[col_idx]*1e-9,
+                        units='T',
+                        sort=True)
             return r
         except Exception as e:
             if kwargs.get('verbose'):
