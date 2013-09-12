@@ -38,6 +38,10 @@ class Data(object):
             self.sort(inplace=True)
 
     def __repr__(self):
+        units = self.units
+        if units == u'\N{DEGREE SIGN}C':
+            units = 'degrees C'
+
         return (type(self).__name__ + ':\n' +
                 '          network : ' + str(self.network) + '\n' +
                 '             site : ' + str(self.site) + '\n' +
@@ -49,7 +53,7 @@ class Data(object):
                 'integration intv. : ' + repr(self.integration_interval)+'\n'+
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
                 '             data : ' + repr(self.data) + '\n' + 
-                '            units : ' + str(self.units))
+                '            units : ' + units)
 
     def data_description(self):
         return 'Data'
@@ -190,8 +194,8 @@ class Data(object):
             for c in channels:
                 allcidx.append(chan_tup.index(c))
                 cu = ap.str_units(np.nanmax(np.abs(self.data[allcidx])), 
-                                  self.units, 
-                                  prefix=units_prefix, wantstr=False)
+                                  self.units, prefix=units_prefix,
+                                  ascii=False, wantstr=False)
 
         first_axes = None
         for n in range(len(channels)):
@@ -204,7 +208,7 @@ class Data(object):
             ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter(useOffset=False))
             cidx = chan_tup.index(channels[n])
             u = ap.str_units(np.nanmax(np.abs(self.data[cidx])), self.units, 
-                             prefix=units_prefix, wantstr=False)
+                             prefix=units_prefix, ascii=False, wantstr=False)
             xdata = dt64.mean(self.sample_start_time, self.sample_end_time)
             if u['mul'] == 1:
                 # Can avoid a copy
@@ -243,7 +247,7 @@ class Data(object):
         plt.title(tstr)
         return r
 
-    def set_cadence(self, cadence, method=scipy.stats.nanmean, 
+    def set_cadence(self, cadence, ignore_nan=True,
                     offset_interval=np.timedelta64(0, 'ns'), inplace=False):
         if cadence > self.nominal_cadence:
             sam_st = np.arange(dt64.ceil(self.start_time, cadence) 
@@ -252,27 +256,42 @@ class Data(object):
 
             sample_time = dt64.mean(self.sample_start_time, 
                                     self.sample_end_time)
-            d = np.empty([len(self.channels), len(sam_st)])
+            d = np.ones([len(self.channels), len(sam_st)]) * ap.NaN
             if self.integration_interval is not None:
-                integ_intv = np.empty([len(self.channels), len(sam_st)], 
+                assert not np.any(dt64.isnat(self.integration_interval)), \
+                    'integration_interval must not contain NaT'
+                integ_intv = np.zeros([len(self.channels), len(sam_st)], 
                                       dtype=self.integration_interval.dtype)
             else:
                 integ_intv = None
+
             for sn in range(len(sam_st)):
                 tidx = np.where(np.logical_and(sample_time >= sam_st[sn],
                                                sample_time <= sam_et[sn]))[0]
-                ### TODO: Resulting integration interval cannot take into
-                ### account nans which occur in one channel but not
-                ### another
-                
                 for cn in range(len(self.channels)):
-                    if self.integration_interval is not None:
+                    if ignore_nan:
                         notnanidx = np.where(np.logical_not(np.isnan(self.data[cn, tidx])))[0]
-                        integ_intv[cn,sn] = np.nansum(self.integration_interval[cn, tidx[notnanidx]])
-                        
-                    d[cn,sn] = method(self.data[cn, tidx])
+                        tidx2 = tidx[notnanidx]
+                    else:
+                        tidx2 = tidx
                     
-                
+                    if self.integration_interval is not None:
+                        # Update integration_interval
+                        if len(tidx2) != 0:
+                            integ_intv[cn,sn] = \
+                                np.sum(self.integration_interval[cn, tidx2])
+                        
+                    if len(tidx2) != 0:
+                        # Update data. Weight the mean according to
+                        # integration_interval if possible.
+                        if self.integration_interval is not None:
+                            weights = self.integration_interval[cn, tidx2]
+                            weights[dt64.isnat(weights)] = 0
+                            d[cn,sn] = \
+                                scipy.average(np.mean(self.data[cn, tidx2]))
+                        else:
+                            d[cn,sn] = np.mean(self.data[cn, tidx2])
+                                    
 
             if inplace:
                 r = self
@@ -290,6 +309,7 @@ class Data(object):
             r.nominal_cadence = copy.copy(cadence)
             r.data = d
             return r
+
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
         else:
