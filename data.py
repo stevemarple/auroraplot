@@ -1,7 +1,12 @@
 import copy
+# import pickle
+import cPickle as pickle
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import scipy
+import scipy.interpolate
 import scipy.stats
 
 import auroraplot as ap
@@ -61,6 +66,7 @@ class Data(object):
         return 'Data'
 
     def assert_valid(self):
+        import re
         for n in ('network', 'site', 'channels', 'start_time', 'end_time', 
                   'sample_start_time', 'sample_end_time',
                   'nominal_cadence',
@@ -88,6 +94,10 @@ class Data(object):
             'data incorrect shape'
 
         return True
+
+    def pickle(self, filename):
+        with open(filename, 'wb') as output:
+            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
     def extract(self, start_time=None, end_time=None, channels=None, 
                 inplace=False):
@@ -323,38 +333,100 @@ class Data(object):
                 return copy.deepcopy(self)
         
         
-    def mark_missing_data(self, cadence=None, inplace=False):
+    def mark_missing_data(self, cadence=None, inplace=False,
+                          start_time=None, end_time=None):
+        trim = False
         if cadence is None:
             cadence = self.nominal_cadence
-        sample_time = dt64.mean(self.sample_start_time, 
-                                self.sample_end_time)
-        idx = np.where(np.diff(sample_time) > cadence)[0]
-        
-        if inplace:
+        if start_time is None:
+            start_time = self.start_time
+        elif start_time > self.start_time:
+            trim = True
+        if end_time is None:
+            end_time = self.end_time
+        elif end_time < self.end_time:
+            trim = true
+            
+        if trim:
+            r = self.extract(start_time=start_time, end_time=end_time)
+        elif inplace:
             r = self
         else:
             r = copy.deepcopy(self)
+
+
+        sample_time = dt64.mean(r.sample_start_time, 
+                                r.sample_end_time)
+        idx = np.where(np.diff(sample_time) > cadence)[0]
         
-        data = np.ones([len(self.channels), len(idx)]) * NaN
-        if self.integration_interval is None:
+        
+        num_channels = len(r.channels)
+        data = np.ones([num_channels, len(idx)]) * ap.NaN
+        if r.integration_interval is None:
             ii = None
         else:
-            ii = np.ones([len(self.channels), len(idx)]) * NaT
+            ii = np.zeros([len(r.channels), len(idx)]).astype('m8[ns]')
 
-        missing = type(self)(network=self.network,
-                             site=self.site,
-                             channels=self.channels,
-                             start_time=self.start_time,
-                             end_time=self.end_time,
-                             sample_start_time=self.sample_end_time[idx],
-                             sample_end_time=self.sample_start_time[idx+1],
+        missing = type(self)(network=r.network,
+                             site=r.site,
+                             channels=r.channels,
+                             start_time=r.start_time,
+                             end_time=r.end_time,
+                             sample_start_time=r.sample_end_time[idx],
+                             sample_end_time=r.sample_start_time[idx+1],
                              integration_interval=ii,
-                             nominal_cadence=self.nominal_cadence,
+                             nominal_cadence=r.nominal_cadence,
                              data=data,
-                             units=self.units,
+                             units=r.units,
                              sort=False)
+        obj_list = [r, missing]
+
+        # Check for missing data at start
+        if r.sample_start_time[0] - start_time > cadence:
+            obj_list.append(type(self)(
+                    network=r.network,
+                    site=r.site,
+                    channels=r.channels,
+                    start_time=start_time,
+                    end_time=r.sample_start_time[0],
+                    sample_start_time=np.array([start_time]),
+                    sample_end_time=r.sample_start_time[:1],
+                    integration_interval=np.zeros([num_channels, 1]).astype('m8[ns]'),
+                    nominal_cadence=r.nominal_cadence,
+                    data=np.ones([num_channels, 1]) * ap.NaN,
+                    units=r.units,
+                    sort=False))
+
+        # Check for missing data at end
+        if end_time - r.sample_end_time[-1] > cadence:
+            obj_list.append(type(self)(
+                        network=r.network,
+                        site=r.site,
+                        channels=r.channels,
+                        start_time=r.sample_end_time[-1],
+                        end_time=end_time,
+                        sample_start_time=r.sample_end_time[-1:],
+                        sample_end_time=np.array([end_time]),
+                        integration_interval=np.zeros([num_channels, 1]).astype('m8[ns]'),
+                        nominal_cadence=r.nominal_cadence,
+                        data=np.ones([num_channels, 1]) * ap.NaN,
+                        units=r.units,
+                        sort=False))
         
-        r = concatenate([self, missing])
+        r = ap.concatenate(obj_list)
         if inplace:
             self = r
+        return r
+
+    def interp(self, sample_start_time, sample_end_time, kind='linear'):
+        one_ns = np.timedelta64(1, 'ns')
+        r = copy.deepcopy(self)
+        xi = dt64.mean(self.sample_start_time, self.sample_end_time).astype('m8[ns]') / one_ns
+
+        r.sample_start_time = sample_start_time
+        r.sample_end_time = sample_end_time
+        xo = dt64.mean(sample_start_time, sample_end_time).astype('m8[ns]') / one_ns
+        r.data = scipy.interpolate.interp1d(xi, r.data, kind=kind,
+                                            bounds_error=False)(xo)
+        r.integration_interval = None
         return r
