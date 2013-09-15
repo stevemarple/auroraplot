@@ -62,7 +62,6 @@ def convert_awn_data(file_name, archive_data,
             uh = urllib2.urlopen('file:' + file_name)
         else:
             uh = urllib2.urlopen(file_name)
-        print(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = ap.epoch64_ns + \

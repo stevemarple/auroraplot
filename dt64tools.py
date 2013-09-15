@@ -2,27 +2,57 @@
 '''Tools for numpy.datetime64 and numpy.timedelta64 time classes'''
 
 import datetime
+import re
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Locator
 from matplotlib.ticker import Formatter
 
+import copy
+
 epoch64_ns = np.datetime64('1970-01-01T00:00:00Z','ns')
 def dt64_to(t, unit):
-    return (t - epoch64_ns) / np.timedelta64(1, unit)
+    # return (t - epoch64_ns) / np.timedelta64(1, unit)
+    return t.astype('m8[' + unit + ']').astype('int64')
 
 def isnat(x):
     # Do not trust that NaT will compare equal with NaT!
     return np.array(x).astype('int') == -(2**63)
     
+def get_units(t):
+    #assert isinstance(t, (np.datetime64, np.timedelta64)), \
+    #    'Must be of type numpy.datetime64 or numpy.timedelta64'
+    match = re.search('\[(.*)\]', t.dtype.str)
+    assert match is not None, 'Failed to parse units in numpy.datetime64 type'
+    return match.groups()[0]
+
+def get_time_of_day(t):
+    td64_units = t.dtype.str.lower() # timedelta64 equivalent units
+    d = np.timedelta64(1, 'D').astype(td64_units).astype('int64')
+    return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
+
 def mean(*a):
+    if len(a) == 0:
+        raise Exception('Require at least one argument')
+
+    d = copy.copy(a[0].dtype)
     if len(a) == 1:
-        return np.mean(a[0] - epoch64_ns) + epoch64_ns
+        if len(a[0]):
+            return np.mean(a[0].astype('int64')).astype(d)
+        else:
+            return np.datetime64('nat').astype(d)
     else:
-        tmp = a[0] - epoch64_ns
+        tmp = a[0].astype('int64')
         for b in a[1:]:
-            tmp += b - epoch64_ns
-        return (tmp / len(a)) + epoch64_ns
+            # Check that the elements of 'b are the same type as
+            # elements of a[0]. They do not have to use the same units
+            # (days, seconds, ns etc) but a temporary copy will be
+            # cast to that unit for the calculation.
+            assert isinstance(b.dtype.type(), d.type), \
+                'Arrays must hold the same data type'
+            tmp += b.astype(d).astype('int')
+        return (tmp / len(a)).astype(d)
 
 def round(dt, td):
     return (int(np.round((dt - epoch64_ns) / td)) * td) + epoch64_ns

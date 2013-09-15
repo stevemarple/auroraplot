@@ -95,9 +95,29 @@ class Data(object):
 
         return True
 
+
+    def get_channel_index(self, channels):
+        '''
+        Find the location of the listed channels in the objects channel list.
+        
+        channels: list of channels to find.
+
+        return list of integers correpsonging to location in the
+        object's channels attribute.
+        '''
+        chan_tup = tuple(self.channels)
+        cidx = []
+        for c in channels:
+            cidx.append(chan_tup.index(c))
+        return cidx
+
+    def get_mean_sample_time(self):
+        return dt64.mean(self.sample_start_time, self.sample_end_time)
+
     def pickle(self, filename):
         with open(filename, 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
+
 
     def extract(self, start_time=None, end_time=None, channels=None, 
                 inplace=False):
@@ -120,8 +140,11 @@ class Data(object):
                 start_time = self.start_time
             if end_time is None:
                 end_time = self.end_time
+
+            ### TODO: Add option to accept sample which staddle
+            ### boundary conditions.
             tidx = (self.sample_start_time >= start_time) & \
-                (self.sample_end_time < end_time)
+                (self.sample_end_time <= end_time)
             r.start_time = start_time
             r.end_time = end_time
             r.sample_start_time = r.sample_start_time[tidx]
@@ -153,8 +176,19 @@ class Data(object):
         return new
             
 
+    def split(self, interval):
+        r = []
+        t1 = self.start_time
+        while t1 < self.end_time:
+            t2 = t1 + interval
+            r.append(self.extract(start_time=t1, end_time=t2))
+            t1 = t2
+        return r
+
+
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
-             units_prefix=None, subtitle=None):
+             units_prefix=None, subtitle=None, 
+             start_time=None, end_time=None, time_units=None):
         if channels is None:
             channels=self.channels
         elif isinstance(channels, basestring):
@@ -166,7 +200,9 @@ class Data(object):
                 channels = [channels]
         
         if axes is not None:
-            axes2 = copy.copy(axes)
+            # axes2 = copy.copy(axes)
+            # axes2 = copy.copy(axes)
+            axes2 = axes
             if not hasattr(axes2, '__iter__'):
                 axes2 = [axes2]
             if len(axes2) == 1:
@@ -192,6 +228,13 @@ class Data(object):
 
         if subtitle is None:
             subtitle = self.data_description()
+
+        if start_time is None:
+            start_time = self.start_time
+        if end_time is None:
+            end_time = self.end_time
+        if time_units is None:
+            time_units = 'ns'
 
         chan_tup = tuple(self.channels)
 
@@ -230,13 +273,11 @@ class Data(object):
 
             r = dt64.plot_dt64(xdata, ydata)
             
-            plt.xlim(xmin=dt64.dt64_to(self.start_time, 'ns'),
-                     xmax=dt64.dt64_to(self.end_time, 'ns'))
-
+            #plt.xlim(xmin=dt64.dt64_to(start_time, time_units),
+            #        xmax=dt64.dt64_to(end_time, time_units))
+            
             if not need_legend:
                 # Lines plotted on different axes
-                # u['channel'] = self.channels[cidx]
-                # plt.ylabel('%(channel)s (%(prefix)s%(unit)s)' % u)
                 plt.ylabel(self.channels[cidx] + ' (' + u['fmtunit'] + ')')
             
             if n == 0:
@@ -251,11 +292,8 @@ class Data(object):
         # Add title
         plt.axes(first_axes)
         tstr = self.network + ' / ' + self.site
-        # if len(channels) == 1:
-        #    tstr += '\n' + self.channels[0]
         if subtitle:
             tstr += '\n' + subtitle
-        # tstr += '\n' + dt64.fmt_dt64_range(self.start_time, self.end_time)
         plt.title(tstr)
         return r
 
@@ -430,3 +468,20 @@ class Data(object):
                                             bounds_error=False)(xo)
         r.integration_interval = None
         return r
+
+    def space_regularly(self, cadence, start_time=None, end_time=None,
+                        missing_cadence=None, kind='linear'):
+        if start_time is None:
+            start_time = self.start_time
+        if end_time is None:
+            end_time = self.end_time
+        if missing_cadence is None:
+            missing_cadence = self.cadence
+        s = self.mark_missing_data(start_time=start_time, end_time=end_time,
+                                   cadence=missing_cadence)
+        one_ns = np.timedelta64(1, 'ns')
+        
+        sam_st = start_time + np.arange(0, (end_time - start_time) / one_ns, 
+                                        cadence / one_ns).astype('m8[ns]')
+        sam_et = sam_st + cadence
+        return s.interp(sam_st, sam_et, kind='linear')
