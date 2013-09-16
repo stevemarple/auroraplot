@@ -48,7 +48,7 @@ class MagData(Data):
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, subtitle=None, 
-             start_time=None, end_time=None, time_units=None):
+             start_time=None, end_time=None, time_units=None, **kwargs):
         if channels is None:
             channels = self.channels
 
@@ -69,7 +69,7 @@ class MagData(Data):
                       subplot=subplot2, units_prefix=units_prefix,
                       subtitle=subtitle, 
                       start_time=start_time, end_time=end_time, 
-                      time_units=time_units)
+                      time_units=time_units, **kwargs)
         # if subplot is None and axes is None:
         #     # Remove xaxis ticks from all but the last
         #     for a in plt.gcf().axes:
@@ -291,7 +291,7 @@ class MagQDC(MagData):
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, subtitle=None, 
-             start_time=None, end_time=None, time_units=None):
+             start_time=None, end_time=None, time_units=None, **kwargs):
         
         if start_time is None:
             start_time = np.timedelta64(0, 'ns')
@@ -302,11 +302,11 @@ class MagQDC(MagData):
                       subplot=subplot, units_prefix=units_prefix,
                       subtitle=subtitle, 
                          start_time=start_time, end_time=end_time, 
-                         time_units=time_units)
+                         time_units=time_units, **kwargs)
         return r
 
     
-    def align(self, md):
+    def align(self, md, lsq_fit=False):
         # assert isinstance(md, MagData), 'Incorrect data type'
         day = np.timedelta64(1, 'D').astype('m8[ns]')
         r = copy.deepcopy(md)
@@ -324,7 +324,11 @@ class MagQDC(MagData):
         yi[:, -1] = yi[:, 1]
 
         xo = dt64.get_time_of_day(md.get_mean_sample_time()).astype('m8[ns]')
-        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)(xo.astype('int64'))
+        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
+            (xo.astype('int64'))
+
+        if lsq_fit:
+            r.least_squares_fit(md, inplace=True)
         
         return r
         
