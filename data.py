@@ -200,8 +200,6 @@ class Data(object):
                 channels = [channels]
         
         if axes is not None:
-            # axes2 = copy.copy(axes)
-            # axes2 = copy.copy(axes)
             axes2 = axes
             if not hasattr(axes2, '__iter__'):
                 axes2 = [axes2]
