@@ -188,7 +188,7 @@ class Data(object):
 
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
              units_prefix=None, subtitle=None, 
-             start_time=None, end_time=None, time_units=None):
+             start_time=None, end_time=None, time_units=None, **kwargs):
         if channels is None:
             channels=self.channels
         elif isinstance(channels, basestring):
@@ -269,10 +269,10 @@ class Data(object):
             else:
                 ydata = self.data[cidx] / u['mul']
 
-            r = dt64.plot_dt64(xdata, ydata)
+            r = dt64.plot_dt64(xdata, ydata, **kwargs)
             
-            #plt.xlim(xmin=dt64.dt64_to(start_time, time_units),
-            #        xmax=dt64.dt64_to(end_time, time_units))
+            plt.xlim(xmin=dt64.dt64_to(start_time, time_units),
+                     xmax=dt64.dt64_to(end_time, time_units))
             
             if not need_legend:
                 # Lines plotted on different axes
@@ -483,3 +483,49 @@ class Data(object):
                                         cadence / one_ns).astype('m8[ns]')
         sam_et = sam_st + cadence
         return s.interp(sam_st, sam_et, kind='linear')
+
+
+    def _leastsq_residuals(self, p, obj, channel):
+        adj, = p
+        err = self.data[self.get_channel_index(channel)[0]] \
+            - (obj.data[obj.get_channel_index(channel)[0]] + adj)
+        return err
+
+
+    def least_squares_fit(self, obj, inplace=False):
+        '''
+        Fit a dataset to a reference dataset by applying an offset to
+        find the least-squared error. Uses scipy.optimize.leastsq()
+
+        obj: reference object, of instance Data.
+        
+        inplace: if True modify self, otherwise modify a copy.
+
+        Returns self (or a copy if 'inplace' is False) with an
+        adjustment applied for best fit.
+        '''
+
+        # See http://www.tau.ac.il/~kineret/amit/scipy_tutorial/ for
+        # helpful tutorial on using leastsq().
+        import scipy.optimize
+
+        for c in self.channels:
+            assert c in obj.channels, 'Channel not in reference object'
+
+        err_func = self._leastsq_residuals
+        
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+
+        # Fit each channel separately
+        for c in self.channels:
+            channel = self.channels[0]
+            p0 = [0.0]
+            plsq = scipy.optimize.leastsq(self._leastsq_residuals, p0, 
+                                      args=(obj, channel))
+            r.data[self.get_channel_index(c)] -= plsq[0]
+
+        return r
+
