@@ -101,6 +101,60 @@ def convert_awn_data(file_name, archive_data,
             print('Could not open ' + file_name)
             print(str(e))
     return None
+
+
+def convert_awn_qdc_data(file_name, archive_data, 
+                         network, site, data_type, channels, start_time, 
+                         end_time, **kwargs):
+    '''Convert AuroraWatchNet data to match standard data type
+
+    archive: name of archive from which data was loaded
+    archive_info: archive metadata
+    '''
+
+    assert data_type == 'MagQDC', 'Illegal data_type'
+    chan_tup = tuple(archive_data['channels'])
+    col_idx = []
+    for c in channels:
+        col_idx.append(chan_tup.index(c) + 1)
+    try:
+        if file_name.startswith('/'):
+            uh = urllib2.urlopen('file:' + file_name)
+        else:
+            uh = urllib2.urlopen(file_name)
+        try:
+            data = np.loadtxt(uh, unpack=True)
+            sample_start_time = (np.timedelta64(1, 's') * data[0])
+            sample_end_time = sample_end_time + ad['nominal_cadence']
+            
+            integration_interval = None
+            data = data[col_idx] * 1e-9 # Stored as nT
+            r = MagQDC(network=network,
+                       site=site,
+                       channels=channels,
+                       start_time=start_time,
+                       end_time=end_time,
+                       sample_start_time=sample_start_time, 
+                       sample_end_time=sample_end_time,
+                       integration_interval=integration_interval,
+                       nominal_cadence=archive_data['nominal_cadence'],
+                       data=data,
+                       units=archive_data['units'],
+                       sort=True)
+            return r
+
+        except Exception as e:
+            if kwargs.get('verbose'):
+                print('Could not read ' + file_name)
+                print(str(e))
+
+        finally:
+            uh.close()
+    except Exception as e:
+        if kwargs.get('verbose'):
+            print('Could not open ' + file_name)
+            print(str(e))
+    return None
     
 
 sites = {
@@ -129,7 +183,7 @@ sites = {
                                          'lan1/%Y/%m/lan1_%Y%m%d.txt'),
                     'duration': np.timedelta64(1, 'D'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_data,
+                    'converter': convert_awn_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -190,7 +244,7 @@ sites = {
                                          'lan3/qdc/%Y/lan_%Y%m.qdc'),
                     'duration': np.timedelta64(1, 'D'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_data,
+                    'converter': convert_awn_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
