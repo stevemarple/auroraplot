@@ -7,7 +7,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
-import scipy.stats
+# import scipy.stats
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
@@ -188,7 +188,9 @@ class Data(object):
 
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
              units_prefix=None, subtitle=None, 
-             start_time=None, end_time=None, time_units=None, **kwargs):
+             # Our own options
+             start_time=None, end_time=None, time_units=None, 
+             **kwargs):
         if channels is None:
             channels=self.channels
         elif isinstance(channels, basestring):
@@ -296,7 +298,8 @@ class Data(object):
         return r
 
     def set_cadence(self, cadence, ignore_nan=True,
-                    offset_interval=np.timedelta64(0, 'ns'), inplace=False):
+                    offset_interval=np.timedelta64(0, 'ns'), inplace=False,
+                    aggregate=scipy.average):
         if cadence > self.nominal_cadence:
             sam_st = np.arange(dt64.ceil(self.start_time, cadence) 
                                + offset_interval, self.end_time, cadence)
@@ -332,14 +335,14 @@ class Data(object):
                     if len(tidx2) != 0:
                         # Update data. Weight the mean according to
                         # integration_interval if possible.
-                        if self.integration_interval is not None:
+                        if self.integration_interval is None:
+                            weights = None
+                        else:
                             weights = self.integration_interval[cn, tidx2]
                             weights[dt64.isnat(weights)] = 0
-                            d[cn,sn] = \
-                                scipy.average(np.mean(self.data[cn, tidx2]))
-                        else:
-                            d[cn,sn] = np.mean(self.data[cn, tidx2])
-                                    
+
+                        d[cn,sn] = aggregate(self.data[cn, tidx2], 
+                                             weights=weights)
 
             if inplace:
                 r = self
@@ -491,7 +494,6 @@ class Data(object):
             - (obj.data[obj.get_channel_index(channel)[0]] + adj)
         return err
 
-
     def least_squares_fit(self, obj, inplace=False):
         '''
         Fit a dataset to a reference dataset by applying an offset to
@@ -523,7 +525,7 @@ class Data(object):
         for c in self.channels:
             channel = self.channels[0]
             p0 = [0.0]
-            plsq = scipy.optimize.leastsq(self._leastsq_residuals, p0, 
+            plsq = scipy.optimize.leastsq(err_func, p0, 
                                       args=(obj, channel))
             r.data[self.get_channel_index(c)] -= plsq[0]
 
