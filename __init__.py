@@ -203,11 +203,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     verbose = kwargs.get('verbose', globals()['verbose'])
     path = kwargs.get('path', ad['path'])
 
-    load_function=None
-    if kwargs.has_key(load_function):
-        load_function = kwargs['load_function']
-    if ad.has_key('load_function'):
-        load_function = ad['load_function']
+    load_function = kwargs.get('load_function', ad.get('load_function'))
 
 
     kwargs2 = kwargs.copy()
