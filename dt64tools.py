@@ -111,7 +111,11 @@ def fmt_dt64_range(st, et):
         return strftime64(st, '%Y-%m-%d %H:%M:%S - ') + \
             strftime64(et, '%Y-%m-%d %H:%M:%S')
 
-def plot_dt64(x, y, axes=None, x_time_units=None, y_time_units=None, **kwargs):
+def plot_dt64(x, y, axes=None, 
+              # Our own options
+              x_time_units=None, y_time_units=None, plot_func=plt.plot,
+              #
+              **kwargs):
     if axes is None:
         axes = plt.gca()
     
@@ -191,7 +195,10 @@ def plot_dt64(x, y, axes=None, x_time_units=None, y_time_units=None, **kwargs):
     else:
         yy = y
         
-    r = plt.plot(xx, yy, **kwargs)
+    if plot_func is None:
+        r = plt.plot(xx, yy, **kwargs)
+    else:
+        r = plot_func(xx, yy, **kwargs)
     axes.tick_params(direction='out')
     return r
 
