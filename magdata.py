@@ -4,11 +4,70 @@ import numpy as np
 import numpy.fft
 import matplotlib.pyplot as plt
 
+import auroraplot as ap
 from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
 from scipy.stats import nanmean
 import scipy.interpolate
+import warnings
 
+def load_qdc(network, site, start_time, end_time, verbose=None, **kwargs):
+    if not networks.has_key(network):
+        raise Exception('Unknown network')
+    elif not networks[network].has_key(site):
+        raise Exception('Unknown site')
+    elif not networks[network][site]['data_types'].has_key(data_type):
+        raise Exception('Unknown data_type')
+
+    if kwargs.get('archive') is None:
+        if len(networks[network][site]['data_types'][data_type]) == 1:
+            # Only one archive, so default is implicit
+            archive = networks[network][site]['data_types'][data_type].keys()[0]
+        elif networks[network][site]['data_types'][data_type].has_key('default'):
+            # Use explicit default
+            archive = 'default'
+        else:
+            raise Exception('archive must be specified')
+    else:
+        archive = kwargs.get('archive')
+
+    if not networks[network][site]['data_types'][data_type].has_key(archive):
+        raise Exception('Unknown archive')
+
+    # archive data
+    ad = networks[network][site]['data_types'][data_type][archive] 
+    channels = kwargs.get('channels')
+    if channels:
+        # Could be as single channel name or a list of channels
+        if isinstance(channels, basestring):
+            if channels not in ad['channels']:
+                raise Exception('Unknown channel')
+        else:
+            for c in channels:
+                if c not in ad['channels']:
+                    raise Exception('Unknown channel')
+    else:
+        channels = ad['channels']
+
+    if verbose is None:
+        verbose = ap.verbose
+    tries = kwargs.get('tries', 1)
+
+    t = dt64.get_start_of_month(dt64.mean(start_time, end_time))
+    for n in range(tries):
+        try:
+            r = load_data(network, site, 'MagQDC', t, t, verbose=verbose)
+               
+            if r is not None:
+                return r
+        finally:
+            # Go to start of previous month
+            t = dt64.get_start_of_month(t - np.timedelta64(1, 'D'))
+
+    return None
+
+
+    
 class MagData(Data):
     '''Class to manipulate and display magnetometer data.'''
 
@@ -42,9 +101,19 @@ class MagData(Data):
     def data_description(self):
         return 'Magnetic field'
 
-    def save(self, filename):
-        np.savetxt(filename, np.array([self.sample_start_time, self.data[0],
-                                       self.data[1], self.data[2]]).transpose())
+
+    def savetxt(self, filename):
+        a = np.zeros([self.channels.size+1, self.data.shape[-1]], 
+                     dtype='float')
+        a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
+        if self.units == 'T':
+            # Convert to nT
+            a[1:] = self.data * 1e9
+        else:
+            warnings.warn('Unknown units')
+            a[1:] = self.data 
+        np.savetxt(filename,  a.transpose())
+
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, subtitle=None, 
@@ -70,11 +139,6 @@ class MagData(Data):
                       subtitle=subtitle, 
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, **kwargs)
-        # if subplot is None and axes is None:
-        #     # Remove xaxis ticks from all but the last
-        #     for a in plt.gcf().axes:
-        #         a.xaxis.set_major_formatter(mpl.ticker.NullFormatter())
-
         return r
 
     def plot_with_qdc(self, qdc, **kwargs):
@@ -174,25 +238,6 @@ class MagData(Data):
         else:
             raise Exception('Unknown method')
 
-        # for n in range(num_days):
-        #     if method == 'monthly_mean':
-        #         # Estimate daily activity based on RMS departure from
-        #         # monthly mean
-        #         daily_act[n] = \
-        #             nanmean(np.sqrt(nanmean((daily_data[n].data[cidx] \
-        #                                          .transpose() - 
-        #                                      monthly_means)**2, axis=1)))
-        #     elif method == 'daily_mean':
-        #         # Estimate daily activity based on RMS departure from
-        #         # daily mean
-        #         daily_means = nanmean(daily_data[n].data[cidx], axis=1)
-        #         daily_act[n] = \
-        #             nanmean(np.sqrt(nanmean((daily_data[n].data[cidx] \
-        #                                          .transpose() - 
-        #                                      daily_means)**2, axis=1)))
-        #     else:
-        #         raise Exception('Unknown method')
-
         # Don't use days where more than 25% of data is missing
         for n in range(num_days):
             if np.mean(np.isnan(daily_data[n].data[cidx])) > 0.25:
@@ -274,7 +319,6 @@ class MagQDC(MagData):
 
     def data_description(self):
         return 'Magnetic field QDC'
-
 
 
     def smooth(self, fit_order=5, inplace=False):
