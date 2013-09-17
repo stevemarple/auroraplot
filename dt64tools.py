@@ -54,8 +54,6 @@ def dt64_to(t, to_unit):
         # Possible loss of precision, no overflow
         return t.astype('int64') / int(np.round(to_mul / from_mul))
     
-    # return t.astype('m8[' + unit + ']').astype('int64')
-
 def isnat(x):
     # Do not trust that NaT will compare equal with NaT!
     return np.array(x).astype('int') == -(2**63)
@@ -65,14 +63,25 @@ def get_time_of_day(t):
     d = np.timedelta64(1, 'D').astype(td64_units).astype('int64')
     return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
 
+def get_start_of_month(a):
+    aa = np.array(a)
+    aaf = aa.flatten() # Handle all array-like possibilities
+    for n in range(aaf.size):
+        d = aaf[n].tolist()
+        som = datetime.date(d.year, d.month, 1)
+        aaf[n] = np.datetime64(som).astype(aa.dtype)
+        
+    return aaf.reshape(aa.shape)
+        
 def mean(*a):
     if len(a) == 0:
         raise Exception('Require at least one argument')
 
-    d = copy.copy(a[0].dtype)
+    a0 = np.array(a[0])
+    d = a0.dtype
     if len(a) == 1:
-        if len(a[0]):
-            return np.mean(a[0].astype('int64')).astype(d)
+        if a0.size:
+            return np.mean(a0.astype('int64')).astype(d)
         else:
             return np.datetime64('nat').astype(d)
     else:
