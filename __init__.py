@@ -127,11 +127,72 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         d['fmtunit'] = d['prefix'] + unit
         return d
 
-### TODO: allow load path to be overriden by function argument
-# def load_data(network, site, data_type, 
-#               start_time, end_time,
-#               archive=None, channels=None, path=None, 
-#               resolution=None, verbose=None):
+
+def get_archive_details(network, site, data_type, **kwargs):
+    '''
+    Get relevant details about a data archive
+    
+    network: name of the network (upper case)
+    
+    site: site abbreviation (upper case)
+    
+    data_type: class name of the data type to be loaded
+    
+    The following optional parameters are recognised: 
+    
+    archive: name of the archive. Required if more than one archive is
+    present and there is not an archive called "default".
+
+
+    returns: 
+    Dictionary of archive details. This includes the following keys:
+
+    channels: numpy array of channel names (or possibly numbers)
+
+    path: strftime format path or URL to load/save data
+
+    converter: function reference for converting a file into a single
+        object of type data_type. Used by load_data(). Not required if
+        load_function is included.
+    
+    load_function: function reference used to load data. If not None
+        then load_data() hans over the entire data loading process to
+        this function.
+
+    nominal_cadence: numpy timedelta64 interval indicating maximum
+        normal interval between samples. Used to mark missing data
+        when plotting.
+
+    format: name of the data file format (optional).
+    '''
+
+    # Sanity checking
+    if not networks.has_key(network):
+        raise Exception('Unknown network')
+    elif not networks[network].has_key(site):
+        raise Exception('Unknown site')
+    elif not networks[network][site]['data_types'].has_key(data_type):
+        raise Exception('Unknown data_type')
+    
+    if kwargs.get('archive') is None:
+        if len(networks[network][site]['data_types'][data_type]) == 1:
+            # Only one archive, so default is implicit
+            archive = networks[network][site]['data_types'][data_type].keys()[0]
+        elif networks[network][site]['data_types'][data_type].has_key('default'):
+            # Use explicit default
+            archive = 'default'
+        else:
+            raise Exception('archive must be specified')
+    else:
+        archive = kwargs.get('archive')
+
+    if not networks[network][site]['data_types'][data_type].has_key(archive):
+        raise Exception('Unknown archive')
+
+    # archive data
+    return networks[network][site]['data_types'][data_type][archive] 
+
+
 def load_data(network, site, data_type, start_time, end_time, **kwargs):
     '''Load data. 
     network: name of the network (upper case)
@@ -151,9 +212,10 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
 
     channels: data channel(s) to load. All are loaded if not specified
 
-    path: URL or file path, specified as a strftime format specifier. 
-        Alternatively can be a function reference which is passed the time 
-        and returns the filename.
+    path: URL or file path, specified as a strftime format specifier.
+        Alternatively can be a function reference which is passed the
+        time and returns the filename. If given this overrides the
+        standard load path.
 
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
@@ -162,31 +224,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         printed. If None then the global verbose parameter is checked.
 
     '''
-    # Sanity checking
-    if not networks.has_key(network):
-        raise Exception('Unknown network')
-    elif not networks[network].has_key(site):
-        raise Exception('Unknown site')
-    elif not networks[network][site]['data_types'].has_key(data_type):
-        raise Exception('Unknown data_type')
-
-    if kwargs.get('archive') is None:
-        if len(networks[network][site]['data_types'][data_type]) == 1:
-            # Only one archive, so default is implicit
-            archive = networks[network][site]['data_types'][data_type].keys()[0]
-        elif networks[network][site]['data_types'][data_type].has_key('default'):
-            # Use explicit default
-            archive = 'default'
-        else:
-            raise Exception('archive must be specified')
-    else:
-        archive = kwargs.get('archive')
-
-    if not networks[network][site]['data_types'][data_type].has_key(archive):
-        raise Exception('Unknown archive')
-
-    # archive data
-    ad = networks[network][site]['data_types'][data_type][archive] 
+    ad = get_archive_details(network, site, data_type, **kwargs):
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
