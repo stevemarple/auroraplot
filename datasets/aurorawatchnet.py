@@ -64,7 +64,7 @@ def convert_awn_data(file_name, archive_data,
             uh = urllib2.urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = ap.epoch64_ns + \
+            sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1, 's') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1, 's')

@@ -234,7 +234,7 @@ class Data(object):
         if end_time is None:
             end_time = self.end_time
         if time_units is None:
-            time_units = 'ns'
+            time_units = 'us'
 
         chan_tup = tuple(self.channels)
 
@@ -298,7 +298,7 @@ class Data(object):
         return r
 
     def set_cadence(self, cadence, ignore_nan=True,
-                    offset_interval=np.timedelta64(0, 'ns'), inplace=False,
+                    offset_interval=np.timedelta64(0, 'us'), inplace=False,
                     aggregate=scipy.average):
         if cadence > self.nominal_cadence:
             sam_st = np.arange(dt64.ceil(self.start_time, cadence) 
@@ -404,7 +404,7 @@ class Data(object):
         if r.integration_interval is None:
             ii = None
         else:
-            ii = np.zeros([len(r.channels), len(idx)]).astype('m8[ns]')
+            ii = np.zeros([len(r.channels), len(idx)]).astype('m8[us]')
 
         missing = type(self)(network=r.network,
                              site=r.site,
@@ -430,7 +430,7 @@ class Data(object):
                     end_time=r.sample_start_time[0],
                     sample_start_time=np.array([start_time]),
                     sample_end_time=r.sample_start_time[:1],
-                    integration_interval=np.zeros([num_channels, 1]).astype('m8[ns]'),
+                    integration_interval=np.zeros([num_channels, 1]).astype('m8[us]'),
                     nominal_cadence=r.nominal_cadence,
                     data=np.ones([num_channels, 1]) * ap.NaN,
                     units=r.units,
@@ -446,7 +446,7 @@ class Data(object):
                         end_time=end_time,
                         sample_start_time=r.sample_end_time[-1:],
                         sample_end_time=np.array([end_time]),
-                        integration_interval=np.zeros([num_channels, 1]).astype('m8[ns]'),
+                        integration_interval=np.zeros([num_channels, 1]).astype('m8[us]'),
                         nominal_cadence=r.nominal_cadence,
                         data=np.ones([num_channels, 1]) * ap.NaN,
                         units=r.units,
@@ -458,13 +458,13 @@ class Data(object):
         return r
 
     def interp(self, sample_start_time, sample_end_time, kind='linear'):
-        one_ns = np.timedelta64(1, 'ns')
+        one_us = np.timedelta64(1, 'us')
         r = copy.deepcopy(self)
-        xi = dt64.mean(self.sample_start_time, self.sample_end_time).astype('m8[ns]') / one_ns
+        xi = dt64.mean(self.sample_start_time, self.sample_end_time).astype('m8[us]') / one_us
 
         r.sample_start_time = sample_start_time
         r.sample_end_time = sample_end_time
-        xo = dt64.mean(sample_start_time, sample_end_time).astype('m8[ns]') / one_ns
+        xo = dt64.mean(sample_start_time, sample_end_time).astype('m8[us]') / one_us
         r.data = scipy.interpolate.interp1d(xi, r.data, kind=kind,
                                             bounds_error=False)(xo)
         r.integration_interval = None
@@ -480,10 +480,10 @@ class Data(object):
             missing_cadence = self.cadence
         s = self.mark_missing_data(start_time=start_time, end_time=end_time,
                                    cadence=missing_cadence)
-        one_ns = np.timedelta64(1, 'ns')
+        one_us = np.timedelta64(1, 'us')
         
-        sam_st = start_time + np.arange(0, (end_time - start_time) / one_ns, 
-                                        cadence / one_ns).astype('m8[ns]')
+        sam_st = start_time + np.arange(0, (end_time - start_time) / one_us, 
+                                        cadence / one_us).astype('m8[us]')
         sam_et = sam_st + cadence
         return s.interp(sam_st, sam_et, kind='linear')
 

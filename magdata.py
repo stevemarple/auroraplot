@@ -146,7 +146,7 @@ class MagData(Data):
         qdc.align(self).plot(axes=plt.gca())
 
     def get_quiet_days(self, nquiet=5, channels=None, 
-                       cadence=np.timedelta64(5, 's').astype('m8[ns]'),
+                       cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
         '''
         nquiet: number of quiet days
@@ -171,7 +171,7 @@ class MagData(Data):
         if method is None:
             method = 'monthly_mean'
 
-        day = np.timedelta64(1, 'D').astype('m8[ns]')
+        day = np.timedelta64(1, 'D').astype('m8[us]')
         st = dt64.floor(self.start_time, day)
         et = dt64.ceil(self.end_time, day)
         s = self.space_regularly(cadence, start_time=st, end_time=et,
@@ -209,7 +209,7 @@ class MagData(Data):
             
 
         elif method == 'linear_fit':
-            x = self.get_mean_sample_time().astype('m8[ns]').astype('int64')
+            x = self.get_mean_sample_time().astype('m8[us]').astype('int64')
             fits = []
             for cn in range(len(cidx)):
                 fits.append(np.polyfit(x, self.data[cidx[cn]], 1))
@@ -218,7 +218,7 @@ class MagData(Data):
                 # Estimate daily activity based on RMS departure from
                 # linear fit to dataset
                 daily_x = daily_data[n].get_mean_sample_time() \
-                    .astype('m8[ns]').astype('int64')
+                    .astype('m8[us]').astype('int64')
                 tmp_act = np.zeros([1, len(cidx)])
                 for cn in range(len(cidx)):
                     daily_y = fits[cn][0]*daily_x + fits[cn][1]
@@ -252,14 +252,14 @@ class MagData(Data):
         
     
     def make_qdc(self, nquiet=5, channels=None, 
-                 cadence=np.timedelta64(5, 's').astype('m8[ns]'),
+                 cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  quiet_days_method=None):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
 
 
-        sam_st = np.arange(np.timedelta64(0, 's').astype('m8[ns]'),
-                           np.timedelta64(1, 'D').astype('m8[ns]'),
+        sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
+                           np.timedelta64(1, 'D').astype('m8[us]'),
                            cadence)
         sam_et = sam_st + cadence
 
@@ -338,9 +338,9 @@ class MagQDC(MagData):
              start_time=None, end_time=None, time_units=None, **kwargs):
         
         if start_time is None:
-            start_time = np.timedelta64(0, 'ns')
+            start_time = np.timedelta64(0, 'us')
         if end_time is None:
-            end_time = np.timedelta64(1, 'D').astype('m8[ns]')
+            end_time = np.timedelta64(1, 'D').astype('m8[us]')
 
         r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix=units_prefix,
@@ -352,12 +352,12 @@ class MagQDC(MagData):
     
     def align(self, md, lsq_fit=False):
         # assert isinstance(md, MagData), 'Incorrect data type'
-        day = np.timedelta64(1, 'D').astype('m8[ns]')
+        day = np.timedelta64(1, 'D').astype('m8[us]')
         r = copy.deepcopy(md)
 
         # Create array with room for additional entries at start and end
-        xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[ns]')
-        xi[1:-1] = self.get_mean_sample_time().astype('m8[ns]')
+        xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')
+        xi[1:-1] = self.get_mean_sample_time().astype('m8[us]')
         yi = np.zeros([len(self.channels), self.data.shape[1] + 2],
                       dtype=self.data.dtype)
         yi[:,1:-1] = self.data
@@ -367,7 +367,7 @@ class MagQDC(MagData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
-        xo = dt64.get_time_of_day(md.get_mean_sample_time()).astype('m8[ns]')
+        xo = dt64.get_time_of_day(md.get_mean_sample_time()).astype('m8[us]')
         r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
             (xo.astype('int64'))
 

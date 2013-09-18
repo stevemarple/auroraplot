@@ -1,12 +1,12 @@
 import numpy as np
 import dt64tools as dt64
 
-epoch64_ns = np.datetime64('1970-01-01T00:00:00Z','ns')
+epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
 
 networks = { }
 
 NaN = float('nan')
-NaT = np.timedelta64('NaT', 'ns')
+NaT = np.timedelta64('NaT', 'us')
 
 colors = ['b', 'g', 'r']
 
