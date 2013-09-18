@@ -385,9 +385,6 @@ class Datetime64Locator(Locator):
             / (self.maxticks - 1)
 
         if approx_ival_s < 1.0:
-            print(st)
-            print(et)
-            print(approx_ival_s)
             approx_ival_log10 = math.log10(approx_ival_s)
             
             # Find the best unit to work in
@@ -562,13 +559,6 @@ class Datetime64Formatter(Formatter):
         return strftime(t, fmt) 
     
 
-def strftime64_old(dt64, fstr):
-    '''
-    Convert numpy.datetime64 object to string using strftime format string.
-    '''
-    dt = (dt64 - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1,'s')
-    return datetime.datetime.utcfromtimestamp(dt).strftime(fstr)
-
 def strftime(t, fstr):
     tf = t.flatten() # Handle all array-like possibilities
     r = np.zeros_like(tf, dtype=object)
@@ -579,8 +569,6 @@ def strftime(t, fstr):
     else:
         return r.reshape(t.shape)
 
-# Alias
-strftime64 = strftime
 
 def _strftime(t, fstr, customspec=None):
     '''

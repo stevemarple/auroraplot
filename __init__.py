@@ -230,7 +230,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
                              data_type=data_type, archive=archive,
                              channels=channels)
         else:
-            file_name = dt64.strftime64(t, path)
+            file_name = dt64.strftime(t, path)
 
         if verbose:
             print('loading ' + file_name)
