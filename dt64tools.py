@@ -40,8 +40,22 @@ def get_units(t):
     #assert isinstance(t, (np.datetime64, np.timedelta64)), \
     #    'Must be of type numpy.datetime64 or numpy.timedelta64'
     match = re.search('\[(.*)\]', t.dtype.str)
-    assert match is not None, 'Failed to parse units in numpy.datetime64 type'
+    assert match is not None, \
+        'Failed to parse units in numpy.datetime64 type: ' + str(t.dtype.str)
     return match.groups()[0]
+
+def smallest_unit(a):
+    muls = []
+    for u in a:
+        muls.append(multipliers[u])
+    smallest_mul = np.min(muls)
+    for k in multipliers:
+        # Avoid equality test with FP numbers
+        ratio = multipliers[k] / smallest_mul
+        if ratio > 0.99 and ratio < 1.01:
+            return k
+    raise Exception('Failed to find smallest unit')
+
 
 def from_YMD(year, month, day):
     ya = np.array(year)
@@ -169,6 +183,9 @@ def get_start_of_month(a):
         return af[0]
     else:
         return af.reshape(a.shape)
+
+def get_start_of_previous_month(a):
+    return get_start_of_month(get_start_of_month(a) - np.timedelta64(1, 'D'))
         
 def get_start_of_next_month(a):
     return get_start_of_month(get_start_of_month(a) + np.timedelta64(32, 'D'))
@@ -196,14 +213,33 @@ def mean(*a):
             tmp += b.astype(d).astype('int')
         return (tmp / len(a)).astype(d)
 
+def _round_to_func(dt, td, func):
+    u = smallest_unit([get_units(dt), get_units(td)])
+    dti = dt64_to(dt, u)
+    tdi = dt64_to(td, u)
+    ret_type = dt.dtype.char + '8[' + u + ']'
+    return (func(dti / tdi) * tdi).astype('int64').astype(ret_type)
+
 def round(dt, td):
-    return (int(np.round((dt - epoch64_us) / td)) * td) + epoch64_us
+    # return (int(np.round((dt - epoch64_us) / td)) * td) + epoch64_us
+    return _round_to_func(dt, td, np.round)
 
 def floor(dt, td):
-    return (int(np.floor((dt - epoch64_us) / td)) * td) + epoch64_us
+    # return (int(np.floor((dt - epoch64_us) / td)) * td) + epoch64_us
+    return _round_to_func(dt, td, np.floor)
 
 def ceil(dt, td):
-    return (int(np.ceil((dt - epoch64_us) / td)) * td) + epoch64_us
+    # return (int(np.floor((dt - epoch64_us) / td)) * td) + epoch64_us
+    return _round_to_func(dt, td, np.ceil)
+
+# def ceil(dt, td):
+#     # return (int(np.ceil((dt - epoch64_us) / td)) * td) + epoch64_us
+#     u = smallest_unit([get_units(dt), get_units(td)])
+#     dti = dt64_to(dt, u)
+#     tdi = dt64_to(td, u)
+#     ret_type = dt.dtype.char + '8[' + u + ']'
+#     return (np.ceil(dti / tdi) * tdi).astype('int64').astype(ret_type)
+
 
 
 
@@ -262,7 +298,9 @@ def plot_dt64(x, y, axes=None,
             # Set some default formatting
             ### TODO: Correct locator and formatter for timedelta64
             axes.xaxis.set_major_locator(Datetime64Locator())
+            # if axis_data.type == np.datetime64:
             axes.xaxis.set_major_formatter(Datetime64Formatter())
+
             plt.xticks(rotation=-25)
 
         # Transform x to suitable units
@@ -293,9 +331,10 @@ def plot_dt64(x, y, axes=None,
             # Set some default formatting
             ### TODO: Correct locator and formatter for timedelta64
             axes.yaxis.set_major_locator(Datetime64Locator())
+            # if axis_data.type == np.datetime64:
             axes.yaxis.set_major_formatter(Datetime64Formatter())
-            plt.yticks(rotation=-25)
-            axes.tick_params(direction='out')
+
+            plt.yticks(rotation=-25)  
 
         # Transform y to suitable units
         yy = dt64_to(y, axis_data.units)
@@ -306,7 +345,8 @@ def plot_dt64(x, y, axes=None,
         r = plt.plot(xx, yy, **kwargs)
     else:
         r = plot_func(xx, yy, **kwargs)
-
+        
+    axes.tick_params(direction='out')
         
     # Set up the x and y axis details after having plotted when the
     # axis limits etc are more appropriate
@@ -356,8 +396,7 @@ class Datetime64Locator(Locator):
             last_tick = floor(limits_dt64[1], self.interval)
             num = np.floor(((last_tick - first_tick) / self.interval) + 1)
             tick_times = np.linspace(first_tick, last_tick, num)
-            tick_locs = ((tick_times - np.datetime64(0, units)) /
-                         np.timedelta64(1, units))
+            tick_locs = dt64_to(tick_times, units)
 
             # return self.raise_if_exceeds(tick_locs)
             try:
