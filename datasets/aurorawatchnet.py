@@ -2,7 +2,8 @@ import os
 import numpy as np
 import urllib2
 import auroraplot as ap
-from auroraplot.magdata import MagData as MagData
+from auroraplot.magdata import MagData
+from auroraplot.magdata import MagQDC
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
 
@@ -92,14 +93,14 @@ def convert_awn_data(file_name, archive_data,
         except Exception as e:
             if kwargs.get('verbose'):
                 print('Could not read ' + file_name)
-                print(str(e))
+                # print(str(e))
 
         finally:
             uh.close()
     except Exception as e:
         if kwargs.get('verbose'):
             print('Could not open ' + file_name)
-            print(str(e))
+            # print(str(e))
     return None
 
 
@@ -125,7 +126,8 @@ def convert_awn_qdc_data(file_name, archive_data,
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = (np.timedelta64(1, 's') * data[0])
-            sample_end_time = sample_end_time + ad['nominal_cadence']
+            sample_end_time = sample_start_time \
+                + archive_data['nominal_cadence']
             
             integration_interval = None
             data = data[col_idx] * 1e-9 # Stored as nT
@@ -180,7 +182,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'lan1/%Y/%m/lan1_%Y%m%d.txt'),
+                                         'lan1/qdc/%Y/lan1_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(1, 'D'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -241,7 +243,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'lan3/qdc/%Y/lan_%Y%m.qdc'),
+                                         'lan3/qdc/%Y/lan3_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(1, 'D'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -250,7 +252,7 @@ sites = {
                     },
                 },
             'TemperatureData': {
-                'realtime' : {
+                'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
@@ -277,6 +279,67 @@ sites = {
                 },        
             },
         'start_time': np.datetime64('2012-12-18T00:00Z'),
+        'end_time': None, # Still operational
+        'acknowledgement': {'short': 'Lancaster University.'},
+        },
+    'METOFFICE1': {
+        'location': 'Ormskirk, UK',
+        'latitude': 53.569195, 
+        'longitude': -2.887264,
+        'elevation': None,
+        'data_types': {
+            'MagData': {
+                'realtime': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir,
+                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(1, 'D'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir, 
+                                         'metoffice1/qdc/%Y/metoffice1_qdc_%Y%m.txt'),
+                    'duration': np.timedelta64(1, 'D'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature', 
+                                          'System temperature']),
+                    'path': os.path.join(data_dir,
+                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(1, 'D'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': u'\N{DEGREE SIGN}C',
+                    # 'units': 'C',
+                    },
+                },
+            'VoltageData': {
+                'realtime': {
+                    'channels': np.array(['Battery voltage']),
+                    'path': os.path.join(data_dir,
+                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(1, 'D'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'V',
+                    },
+                },        
+            },
+        'start_time': np.datetime64('2013-08-01T00:00Z'),
         'end_time': None, # Still operational
         'acknowledgement': {'short': 'Lancaster University.'},
         },
