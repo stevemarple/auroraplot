@@ -602,14 +602,21 @@ def strftime(t, fstr):
     tf = t.flatten() # Handle all array-like possibilities
     r = np.zeros_like(tf, dtype=object)
     for n in range(tf.size):
-        r[n] = _strftime(tf[n], fstr)
+        # If t.dtype is an object the exact type can change. Test at
+        # this point.
+        if isinstance(tf[n], np.datetime64):
+            r[n] = _strftime_dt64(tf[n], fstr)
+        elif isinstance(tf[n], np.timedelta64):
+            r[n] = _strftime_td64(tf[n], fstr)
+        else:
+            raise TypeError('Expecting numpy.datetime64 or numpy.timedelta64')
     if t.shape == ():
         return r[0]
     else:
         return r.reshape(t.shape)
 
 
-def _strftime(t, fstr, customspec=None):
+def _strftime_dt64(t, fstr, customspec=None):
     '''
     Private strftime function. Must be called with numpy.datetime64,
     not in an array.
@@ -682,6 +689,58 @@ def _strftime(t, fstr, customspec=None):
             # extension
             elif fstr[i] == '#': # milliseconds
                 s += '{0:03d}'.format(int(np.round(np.mod(dt64_to(t, 'ms', returnfloat=True), 1000))))
+            else:
+                warnings.warn('Unknown format specifier: ' + fstr[i])
+                replacements.pop()
+                
+        else:
+            s += fstr[i]
+        
+        i += 1
+
+    return s
+
+
+def _strftime_td64(td, fstr, customspec=None):
+    '''
+    Private strftime function. Must be called with numpy.timedelta64,
+    not in an array.
+    '''
+
+    if isnat(td):
+        return 'NaT'
+
+    td2 = td.tolist() # date.timedelta object
+    i = 0
+    s = ''
+    replacements = []
+    while i < len(fstr):
+        if fstr[i] == '%':
+            # Look to next char
+            i += 1
+            replacements.append(fstr[i])
+        
+            if customspec is not None and customspec.has_key(fstr[i]):
+                # Insert user custom specifier
+                s += customspec[fstr[i]]
+                
+            elif fstr[i] == '%': # percent
+                s += '%'
+                
+            elif fstr[i] == 'd': # number of whole days
+                s += '{0:d}'.format(td2.days)
+            elif fstr[i] == 'H': # hour [hh]
+                s += '{0:02d}'.format(td2.seconds/3600)
+            elif fstr[i] == 'M': #
+                s += '{0:02d}'.format(np.mod(td2.seconds/60, 60))
+            elif fstr[i] == 's': # total number of seconds
+                s += '{0:d}'.format(td2.total_seconds())
+            elif fstr[i] == 'S': # seconds [ss]
+                s += '{0:02d}'.format(np.mod(td2.seconds, 60))
+            # extension
+            elif fstr[i] == '#': # milliseconds
+                # Use np.round to get rounding to even number
+                s += '{0:03d}'.format(int(np.round(td2.microseconds / 1000.0)))
             else:
                 warnings.warn('Unknown format specifier: ' + fstr[i])
                 replacements.pop()
