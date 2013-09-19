@@ -60,7 +60,7 @@ class Data(object):
                 'integration intv. : ' + repr(self.integration_interval)+'\n'+
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
                 '             data : ' + repr(self.data) + '\n' + 
-                '            units : ' + units)
+                '            units : ' + str(units))
 
     def data_description(self):
         return 'Data'
@@ -271,10 +271,13 @@ class Data(object):
             else:
                 ydata = self.data[cidx] / u['mul']
 
-            r = dt64.plot_dt64(xdata, ydata, **kwargs)
-            
-            plt.xlim(xmin=dt64.dt64_to(start_time, time_units),
-                     xmax=dt64.dt64_to(end_time, time_units))
+            if kwargs.has_key('label'):
+                r = dt64.plot_dt64(xdata, ydata, **kwargs)
+            else:
+                r = dt64.plot_dt64(xdata, ydata, label=channels[n], **kwargs)
+
+            ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
+                        dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
             
             if not need_legend:
                 # Lines plotted on different axes
