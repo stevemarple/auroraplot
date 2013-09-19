@@ -11,31 +11,40 @@ from scipy.stats import nanmean
 import scipy.interpolate
 import warnings
 
-def load_qdc(network, site, start_time, end_time, verbose=None, **kwargs):
-    if not networks.has_key(network):
-        raise Exception('Unknown network')
-    elif not networks[network].has_key(site):
-        raise Exception('Unknown site')
-    elif not networks[network][site]['data_types'].has_key(data_type):
-        raise Exception('Unknown data_type')
+def load_qdc(network, site, time, **kwargs):
+    '''Load quiet-day curve. 
+    network: name of the network (upper case)
 
-    if kwargs.get('archive') is None:
-        if len(networks[network][site]['data_types'][data_type]) == 1:
-            # Only one archive, so default is implicit
-            archive = networks[network][site]['data_types'][data_type].keys()[0]
-        elif networks[network][site]['data_types'][data_type].has_key('default'):
-            # Use explicit default
-            archive = 'default'
-        else:
-            raise Exception('archive must be specified')
-    else:
-        archive = kwargs.get('archive')
+    site: site abbreviation (upper case)
 
-    if not networks[network][site]['data_types'][data_type].has_key(archive):
-        raise Exception('Unknown archive')
+    time: a time within the quiet-day curve period
+    
+    The following optional parameters are recognised: 
+    
+    archive: name of the archive. Required if more than one archive is
+        present and there is not an archive called "default".
 
-    # archive data
-    ad = networks[network][site]['data_types'][data_type][archive] 
+    channels: data channel(s) to load. All are loaded if not specified.
+
+    tries: The number of attempts to load a quiet-day curve. If >1 and
+        the first attempt is not successful then an attempt will be
+        made to load the previous QDC.
+ 
+    path: URL or file path, specified as a strftime format specifier.
+        Alternatively can be a function reference which is passed the
+        time and returns the filename. If given this overrides the
+        standard load path.
+
+    load_function: Pass responsibility for loading the data to the given
+        function reference, after validating the input parameters.
+        
+    verbose: flag to indicate if verbose messages should be
+        printed. If None then the global verbose parameter is checked.
+
+    '''
+    
+    data_type = 'MagQDC'
+    archive, ad = ap.get_archive_details(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
@@ -49,16 +58,53 @@ def load_qdc(network, site, start_time, end_time, verbose=None, **kwargs):
     else:
         channels = ad['channels']
 
-    if verbose is None:
-        verbose = ap.verbose
+    verbose = kwargs.get('verbose', ap.verbose)
+    path = kwargs.get('path', ad['path'])
+
+    load_function = kwargs.get('load_function', ad.get('load_function'))
     tries = kwargs.get('tries', 1)
 
-    t = dt64.get_start_of_month(dt64.mean(start_time, end_time))
+    kwargs2 = kwargs.copy()
+    kwargs2['archive'] = archive
+    kwargs2['channels'] = channels
+    kwargs2['load_function'] = load_function
+    kwargs2['path'] = path
+    kwargs2['verbose'] = verbose
+        
+    if load_function:
+        # Pass responsibility for loading to some other
+        # function. Parameters have already been checked and verbose
+        # is set to the value the user desires.
+        return load_function(network, site, data_type, start_time, 
+                             end_time, **kwargs2)
+
+    data = []
+    t = dt64.get_start_of_month(time)
     for n in range(tries):
         try:
-            r = load_data(network, site, 'MagQDC', t, t, verbose=verbose)
-               
+            if hasattr(path, '__call__'):
+                # Function: call it with relevant information to get the path
+                file_name = path(t, network=network, site=site, 
+                                 data_type=data_type, archive=archive,
+                                 channels=channels)
+            else:
+                file_name = dt64.strftime(t, path)
+
+            if verbose:
+                print('loading ' + file_name)
+
+            r = ad['converter'](file_name, 
+                                ad,
+                                network=network,
+                                site=site, 
+                                data_type=data_type, 
+                                start_time=np.timedelta64(0, 'D'), 
+                                end_time=np.timedelta64(1, 'D'),
+                                **kwargs2)
+              
             if r is not None:
+                r.extract(inplace=True, 
+                          channels=channels)
                 return r
         finally:
             # Go to start of previous month
@@ -102,7 +148,9 @@ class MagData(Data):
         return 'Magnetic field'
 
 
-    def savetxt(self, filename):
+    def savetxt(self, filename, verbose=None):
+        if verbose is None:
+            verbose = ap.verbose
         a = np.zeros([self.channels.size+1, self.data.shape[-1]], 
                      dtype='float')
         a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
@@ -112,6 +160,7 @@ class MagData(Data):
         else:
             warnings.warn('Unknown units')
             a[1:] = self.data 
+        print('saving to ' + filename)
         np.savetxt(filename,  a.transpose())
 
 
@@ -141,9 +190,9 @@ class MagData(Data):
                       time_units=time_units, **kwargs)
         return r
 
-    def plot_with_qdc(self, qdc, **kwargs):
+    def plot_with_qdc(self, qdc, lsq_fit=False, **kwargs):
         self.plot(**kwargs)
-        qdc.align(self).plot(axes=plt.gca())
+        qdc.align(self, lsq_fit=lsq_fit).plot(axes=plt.gca(), **kwargs)
 
     def get_quiet_days(self, nquiet=5, channels=None, 
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
@@ -253,7 +302,7 @@ class MagData(Data):
     
     def make_qdc(self, nquiet=5, channels=None, 
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 quiet_days_method=None):
+                 quiet_days_method=None, smooth=True):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
 
@@ -276,8 +325,8 @@ class MagData(Data):
         qdc = MagQDC(network=self.network,
                      site=self.site,
                      channels=qd[0].channels,
-                     start_time=self.start_time,
-                     end_time=self.end_time,
+                     start_time=np.timedelta64(0, 'D'),
+                     end_time=np.timedelta64(1, 'D'),
                      sample_start_time=sam_st,
                      sample_end_time=sam_et,
                      integration_interval=None,
@@ -286,6 +335,9 @@ class MagData(Data):
                      units=self.units,
                      sort=False)
         
+        if smooth:
+            qdc.smooth(inplace=True)
+
         return qdc
 
 class MagQDC(MagData):
@@ -338,9 +390,11 @@ class MagQDC(MagData):
              start_time=None, end_time=None, time_units=None, **kwargs):
         
         if start_time is None:
-            start_time = np.timedelta64(0, 'us')
+            #start_time = np.timedelta64(0, 'us')
+            start_time = self.start_time
         if end_time is None:
-            end_time = np.timedelta64(1, 'D').astype('m8[us]')
+            #end_time = np.timedelta64(1, 'D').astype('m8[us]')
+            end_time = self.end_time
 
         r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix=units_prefix,
