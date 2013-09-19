@@ -190,7 +190,8 @@ def get_archive_details(network, site, data_type, **kwargs):
         raise Exception('Unknown archive')
 
     # archive data
-    return networks[network][site]['data_types'][data_type][archive] 
+    return (archive, 
+            networks[network][site]['data_types'][data_type][archive])
 
 
 def load_data(network, site, data_type, start_time, end_time, **kwargs):
@@ -224,7 +225,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         printed. If None then the global verbose parameter is checked.
 
     '''
-    ad = get_archive_details(network, site, data_type, **kwargs):
+    archive, ad = get_archive_details(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
