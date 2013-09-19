@@ -84,8 +84,6 @@ class AuroraWatchActivity(Data):
             self.set_cadence(np.timedelta64(1, 'h'),
                              inplace= True, aggregate=nth_largest)
 
-            magdata.plot()
-            aligned.plot(axes=plt.gca())
 
     def data_description(self):
         return 'Geomagnetic activity'
@@ -112,6 +110,9 @@ class AuroraWatchActivity(Data):
                 time_units = dt64.get_units(self.sample_start_time)
             if not kwargs.has_key('width'):
                 kwargs['width'] = dt64.dt64_to(self.nominal_cadence, time_units)
+
+            if not kwargs.has_key('align'):
+                kwargs['align'] = 'center'
 
             if not kwargs.has_key('color'):
                 kwargs['color'] = self.get_color()
