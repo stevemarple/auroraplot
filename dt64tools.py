@@ -301,7 +301,7 @@ def plot_dt64(x, y, axes=None,
             # if axis_data.type == np.datetime64:
             axes.xaxis.set_major_formatter(Datetime64Formatter())
 
-            plt.xticks(rotation=-25)
+            # plt.xticks(rotation=-25)
 
         # Transform x to suitable units
         xx = dt64_to(x, axis_data.units)
