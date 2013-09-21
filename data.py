@@ -201,6 +201,7 @@ class Data(object):
             except TypeError:
                 channels = [channels]
         
+        new_figure = False
         if axes is not None:
             axes2 = axes
             if not hasattr(axes2, '__iter__'):
@@ -212,6 +213,7 @@ class Data(object):
                     'axes and channels must be same length'
         elif figure is None:
             figure=plt.figure()
+            new_figure = True
         else:
             plt.figure(figure)
         
@@ -288,16 +290,21 @@ class Data(object):
                 
         if need_legend:
             lh = plt.legend(self.channels[allcidx], loc='best', fancybox=True)
-            lh.get_frame().set_alpha(0.7)
+            lh.get_frame().set_alpha(0.6)
             # Label Y axis
             plt.ylabel(str(subtitle) + ' (' + cu['fmtunit'] + ')')
 
-        # Add title
-        plt.axes(first_axes)
-        tstr = self.network + ' / ' + self.site
-        if subtitle:
-            tstr += '\n' + subtitle
-        plt.title(tstr)
+        if new_figure:
+            # Add title
+            plt.axes(first_axes)
+            tstr = [self.network + ' / ' + self.site]
+            if subtitle:
+                tstr.append(subtitle)
+                plt.subplots_adjust(top=0.85)
+            tstr.append(dt64.fmt_dt64_range(start_time, end_time))
+
+            plt.title('\n'.join(tstr))
+
         return r
 
     def set_cadence(self, cadence, ignore_nan=True,
@@ -375,7 +382,8 @@ class Data(object):
                 return copy.deepcopy(self)
         
         
-    def mark_missing_data(self, cadence=None, inplace=False,
+    # TODO: fix inplace option which does not work
+    def mark_missing_data(self, cadence=None, # inplace=False
                           start_time=None, end_time=None):
         trim = False
         if cadence is None:
@@ -391,8 +399,8 @@ class Data(object):
             
         if trim:
             r = self.extract(start_time=start_time, end_time=end_time)
-        elif inplace:
-            r = self
+        # elif inplace:
+        #     r = self
         else:
             r = copy.deepcopy(self)
 
@@ -456,8 +464,8 @@ class Data(object):
                         sort=False))
         
         r = ap.concatenate(obj_list)
-        if inplace:
-            self = r
+        # if inplace:
+        #     self = r
         return r
 
     def interp(self, sample_start_time, sample_end_time, kind='linear'):
