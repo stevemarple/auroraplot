@@ -98,8 +98,8 @@ def load_qdc(network, site, time, **kwargs):
                                 network=network,
                                 site=site, 
                                 data_type=data_type, 
-                                start_time=np.timedelta64(0, 'D'), 
-                                end_time=np.timedelta64(1, 'D'),
+                                start_time=np.timedelta64(0, 'h'), 
+                                end_time=np.timedelta64(24, 'h'),
                                 **kwargs2)
               
             if r is not None:
@@ -108,7 +108,7 @@ def load_qdc(network, site, time, **kwargs):
                 return r
         finally:
             # Go to start of previous month
-            t = dt64.get_start_of_month(t - np.timedelta64(1, 'D'))
+            t = dt64.get_start_of_month(t - np.timedelta64(24, 'h'))
 
     return None
 
@@ -194,6 +194,7 @@ class MagData(Data):
         self.plot(**kwargs)
         qdc.align(self, lsq_fit=lsq_fit).plot(axes=plt.gca(), **kwargs)
 
+    
     def get_quiet_days(self, nquiet=5, channels=None, 
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
@@ -220,7 +221,7 @@ class MagData(Data):
         if method is None:
             method = 'monthly_mean'
 
-        day = np.timedelta64(1, 'D').astype('m8[us]')
+        day = np.timedelta64(24, 'h')
         st = dt64.floor(self.start_time, day)
         et = dt64.ceil(self.end_time, day)
         s = self.space_regularly(cadence, start_time=st, end_time=et,
@@ -308,7 +309,7 @@ class MagData(Data):
 
 
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
-                           np.timedelta64(1, 'D').astype('m8[us]'),
+                           np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
         sam_et = sam_st + cadence
 
@@ -325,8 +326,8 @@ class MagData(Data):
         qdc = MagQDC(network=self.network,
                      site=self.site,
                      channels=qd[0].channels,
-                     start_time=np.timedelta64(0, 'D'),
-                     end_time=np.timedelta64(1, 'D'),
+                     start_time=np.timedelta64(0, 'h'),
+                     end_time=np.timedelta64(24, 'h'),
                      sample_start_time=sam_st,
                      sample_end_time=sam_et,
                      integration_interval=None,
@@ -390,10 +391,8 @@ class MagQDC(MagData):
              start_time=None, end_time=None, time_units=None, **kwargs):
         
         if start_time is None:
-            #start_time = np.timedelta64(0, 'us')
             start_time = self.start_time
         if end_time is None:
-            #end_time = np.timedelta64(1, 'D').astype('m8[us]')
             end_time = self.end_time
 
         r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
@@ -405,8 +404,7 @@ class MagQDC(MagData):
 
     
     def align(self, md, lsq_fit=False):
-        # assert isinstance(md, MagData), 'Incorrect data type'
-        day = np.timedelta64(1, 'D').astype('m8[us]')
+        day = np.timedelta64(24, 'h').astype('m8[us]')
         r = copy.deepcopy(md)
 
         # Create array with room for additional entries at start and end
