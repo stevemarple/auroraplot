@@ -123,7 +123,7 @@ def isnat(x):
     
 def get_time_of_day(t):
     td64_units = t.dtype.str.lower() # timedelta64 equivalent units
-    d = np.timedelta64(1, 'D').astype(td64_units).astype('int64')
+    d = np.timedelta64(24, 'h').astype(td64_units).astype('int64')
     return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
 
 def _get_tt(a, attr):
@@ -185,10 +185,11 @@ def get_start_of_month(a):
         return af.reshape(a.shape)
 
 def get_start_of_previous_month(a):
-    return get_start_of_month(get_start_of_month(a) - np.timedelta64(1, 'D'))
+    return get_start_of_month(get_start_of_month(a) - np.timedelta64(24, 'h'))
         
 def get_start_of_next_month(a):
-    return get_start_of_month(get_start_of_month(a) + np.timedelta64(32, 'D'))
+    return get_start_of_month(get_start_of_month(a) 
+                              + np.timedelta64(32*24, 'h'))
 
 def mean(*a):
     if len(a) == 0:
