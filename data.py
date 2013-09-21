@@ -141,7 +141,7 @@ class Data(object):
             if end_time is None:
                 end_time = self.end_time
 
-            ### TODO: Add option to accept sample which staddle
+            ### TODO: Add option to accept sample which straddle
             ### boundary conditions.
             tidx = (self.sample_start_time >= start_time) & \
                 (self.sample_end_time <= end_time)
@@ -462,7 +462,6 @@ class Data(object):
                         data=np.ones([num_channels, 1]) * ap.NaN,
                         units=r.units,
                         sort=False))
-        
         r = ap.concatenate(obj_list)
         # if inplace:
         #     self = r
@@ -503,7 +502,8 @@ class Data(object):
         adj, = p
         err = self.data[self.get_channel_index(channel)[0]] \
             - (obj.data[obj.get_channel_index(channel)[0]] + adj)
-        return err
+        return np.nan_to_num(err)
+
 
     def least_squares_fit(self, obj, inplace=False):
         '''
@@ -537,7 +537,7 @@ class Data(object):
             channel = self.channels[0]
             p0 = [0.0]
             plsq = scipy.optimize.leastsq(err_func, p0, 
-                                      args=(obj, channel))
+                                          args=(obj, channel))
             r.data[self.get_channel_index(c)] -= plsq[0]
 
         return r
