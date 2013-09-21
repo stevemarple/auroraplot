@@ -2,13 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import auroraplot as ap
+import auroraplot.data
+import auroraplot.magdata
 from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
 import auroraplot.tools
 
 from scipy.stats import nanmean
 
-        
+    
 class AuroraWatchActivity(Data):
     '''
     Class to manipulate and display geomagnetic activity as way used
@@ -64,7 +66,10 @@ class AuroraWatchActivity(Data):
             self.integration_interval = None
             self.nominal_cadence = magdata.nominal_cadence
                         
-            aligned = magqdc.align(magdata, lsq_fit=lsq_fit)
+            if isinstance(magqdc, ap.magdata.MagQDC):
+                aligned = magqdc.align(magdata, lsq_fit=lsq_fit)
+            else:
+                aligned = magqdc                            
             self.data = np.abs(magdata.data[magdata.get_channel_index(c)] -
                                aligned.data[aligned.get_channel_index(c)])
             assert magdata.units == magqdc.units, 'Units must match'
