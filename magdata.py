@@ -420,11 +420,11 @@ class MagQDC(MagData):
                 nc = None
             r = MagData(network=self.network,
                         site=self.site,
-                        channels=self.channels,
+                        channels=copy.copy(self.channels),
                         start_time=ta[0],
                         end_time=ta[-1],
                         sample_start_time=ta,
-                        sample_end_time=ta,
+                        sample_end_time=copy.copy(ta),
                         integration_interval=None,
                         nominal_cadence=nc,
                         data=None,
