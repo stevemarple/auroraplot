@@ -513,7 +513,7 @@ class Data(object):
         return np.nan_to_num(err)
 
 
-    def least_squares_fit(self, obj, inplace=False):
+    def least_squares_fit(self, obj, inplace=False, full_output=False):
         '''
         Fit a dataset to a reference dataset by applying an offset to
         find the least-squared error. Uses scipy.optimize.leastsq()
@@ -522,8 +522,11 @@ class Data(object):
         
         inplace: if True modify self, otherwise modify a copy.
 
+        full_output: if True return optional outputs too. See
+            scipy.optimize.leastsq()
+
         Returns self (or a copy if 'inplace' is False) with an
-        adjustment applied for best fit.
+            adjustment applied for best fit.
         '''
 
         # See http://www.tau.ac.il/~kineret/amit/scipy_tutorial/ for
@@ -541,12 +544,28 @@ class Data(object):
             r = copy.deepcopy(self)
 
         # Fit each channel separately
+        errors = []
+        fit_info = []
         for c in self.channels:
             channel = self.channels[0]
             p0 = [0.0]
-            plsq = scipy.optimize.leastsq(err_func, p0, 
-                                          args=(obj, channel))
-            r.data[self.get_channel_index(c)] -= plsq[0]
+            fi = scipy.optimize.leastsq(err_func, p0, 
+                                        full_output=True,
+                                        args=(obj, channel))
+            errors.append(fi[0][0])
+            # print(fi)
+            # print('fi[0]:' + str(fi[0]))
+            fit_info.append(fi)
+            # plsq = scipy.optimize.leastsq(err_func, p0, 
+            #                               args=(obj, channel))
+            # print('---')
+            # print(plsq)
+            # print('plsq[0]: ' + str(plsq[0]))
+            # r.data[self.get_channel_index(c)] -= plsq[0]
+            r.data[self.get_channel_index(c)] -= fi[0]
 
-        return r
+        if full_output:
+            return (r, errors, fit_info)
+        else:
+            return r
 
