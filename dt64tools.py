@@ -219,7 +219,7 @@ def _round_to_func(dt, td, func):
     dti = dt64_to(dt, u)
     tdi = dt64_to(td, u)
     ret_type = dt.dtype.char + '8[' + u + ']'
-    return (func(dti / tdi) * tdi).astype('int64').astype(ret_type)
+    return (func(float(dti) / tdi) * tdi).astype('int64').astype(ret_type)
 
 def round(dt, td):
     # return (int(np.round((dt - epoch64_us) / td)) * td) + epoch64_us
