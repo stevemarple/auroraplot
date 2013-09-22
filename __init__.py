@@ -141,29 +141,30 @@ def get_archive_details(network, site, data_type, **kwargs):
     The following optional parameters are recognised: 
     
     archive: name of the archive. Required if more than one archive is
-    present and there is not an archive called "default".
+        present and there is not an archive called "default".
 
 
-    returns: 
-    Dictionary of archive details. This includes the following keys:
+    Returns: 
+        A tuple containing the archive name and a dictionary of
+        archive details. This includes the following keys:
 
-    channels: numpy array of channel names (or possibly numbers)
+        channels: numpy array of channel names (or possibly numbers)
 
-    path: strftime format path or URL to load/save data
+        path: strftime format path or URL to load/save data
 
-    converter: function reference for converting a file into a single
-        object of type data_type. Used by load_data(). Not required if
-        load_function is included.
+        converter: function reference for converting a file into a
+            single object of type data_type. Used by load_data(). Not
+            required if load_function is included.
     
-    load_function: function reference used to load data. If not None
-        then load_data() hans over the entire data loading process to
-        this function.
+        load_function: function reference used to load data. If not
+            None then load_data() hans over the entire data loading
+            process to this function.
 
-    nominal_cadence: numpy timedelta64 interval indicating maximum
-        normal interval between samples. Used to mark missing data
-        when plotting.
+        nominal_cadence: numpy timedelta64 interval indicating maximum
+            normal interval between samples. Used to mark missing data
+            when plotting.
 
-    format: name of the data file format (optional).
+        format: name of the data file format (optional).
     '''
 
     # Sanity checking
