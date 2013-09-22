@@ -250,6 +250,9 @@ def fmt_dt64_range(st, et):
         # Start and end on same date. TODO. determine resolution needed
         return strftime(st, '%Y-%m-%d %H:%M:%S - ') +  \
             strftime(et, '%H:%M:%S')
+    elif st == floor(st, day) and et == st + day:
+        # Entire day
+        return strftime(st, '%Y-%m-%d')
     else:
         return strftime(st, '%Y-%m-%d %H:%M:%S - ') + \
             strftime(et, '%Y-%m-%d %H:%M:%S')

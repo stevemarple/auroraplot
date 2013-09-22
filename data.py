@@ -185,9 +185,20 @@ class Data(object):
             t1 = t2
         return r
 
+    def make_title(self, subtitle=None, start_time=None, end_time=None):
+        s = [self.network + ' / ' + self.site]
+        if subtitle:
+            s.append(subtitle)
+        else:
+            s.append(self.data_description())
+            
+        s.append(dt64.fmt_dt64_range(start_time or self.start_time, 
+                                     end_time or self.end_time))
+        return '\n'.join(s)
+
 
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
-             units_prefix=None, subtitle=None, 
+             units_prefix=None, title=None, 
              # Our own options
              start_time=None, end_time=None, time_units=None, 
              **kwargs):
@@ -227,9 +238,6 @@ class Data(object):
             else:
                 assert len(subplot2) == len(channels), \
                     'subplot and channels must be same length'
-
-        if subtitle is None:
-            subtitle = self.data_description()
 
         if start_time is None:
             start_time = self.start_time
@@ -292,18 +300,18 @@ class Data(object):
             lh = plt.legend(self.channels[allcidx], loc='best', fancybox=True)
             lh.get_frame().set_alpha(0.6)
             # Label Y axis
-            plt.ylabel(str(subtitle) + ' (' + cu['fmtunit'] + ')')
+            plt.ylabel(str(self.data_description()) + 
+                       ' (' + cu['fmtunit'] + ')')
 
         if new_figure:
             # Add title
             plt.axes(first_axes)
-            tstr = [self.network + ' / ' + self.site]
-            if subtitle:
-                tstr.append(subtitle)
-                plt.subplots_adjust(top=0.85)
-            tstr.append(dt64.fmt_dt64_range(start_time, end_time))
-
-            plt.title('\n'.join(tstr))
+            if title is None:
+                plt.title(self.make_title(start_time=start_time, 
+                                          end_time=end_time))
+            else:
+                plt.title(title)
+            # plt.subplots_adjust(top=0.85)
 
         return r
 

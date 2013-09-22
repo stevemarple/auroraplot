@@ -105,7 +105,7 @@ class AuroraWatchActivity(Data):
         return col
             
     def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, units_prefix=None, subtitle=None, 
+             subplot=None, units_prefix=None, title=None, 
              # Our own options
              start_time=None, end_time=None, time_units=None, plot_func=plt.bar,
              **kwargs):
@@ -127,7 +127,7 @@ class AuroraWatchActivity(Data):
                 
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix=units_prefix,
-                      subtitle=subtitle, 
+                      title=title, 
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, plot_func=plot_func, **kwargs)
         return r
