@@ -403,9 +403,34 @@ class MagQDC(MagData):
         return r
 
     
-    def align(self, md, lsq_fit=False):
-        day = np.timedelta64(24, 'h').astype('m8[us]')
-        r = copy.deepcopy(md)
+    def align(self, ref, lsq_fit=False, full_output=False):
+        day = np.timedelta64(24, 'h')
+        if isinstance(ref, MagData):
+            r = copy.deepcopy(ref)
+            interp_times = ref.get_mean_sample_time()
+        else:
+            # Must be sample times
+            assert lsq_fit == False, \
+                'Cannot do least squares fit without reference data'
+            ta = np.sort(np.array(ref).flatten())
+            if len(ta) >= 2:
+                # Guess the nominal cadence
+                nc = np.median(np.diff(ta))
+            else:
+                nc = None
+            r = MagData(network=self.network,
+                        site=self.site,
+                        channels=self.channels,
+                        start_time=ta[0],
+                        end_time=ta[-1],
+                        sample_start_time=ta,
+                        sample_end_time=ta,
+                        integration_interval=None,
+                        nominal_cadence=nc,
+                        data=None,
+                        units=self.units,
+                        sort=False)
+            interp_times = ta
 
         # Create array with room for additional entries at start and end
         xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')
@@ -419,12 +444,14 @@ class MagQDC(MagData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
-        xo = dt64.get_time_of_day(md.get_mean_sample_time()).astype('m8[us]')
+        # xo = dt64.get_time_of_day(ref.get_mean_sample_time()).astype('m8[us]')
+        xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
         r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
             (xo.astype('int64'))
 
         if lsq_fit:
-            r.least_squares_fit(md, inplace=True)
+            return r.least_squares_fit(ref, inplace=True, 
+                                       full_output=full_output)
         
         return r
         
