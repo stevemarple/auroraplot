@@ -221,30 +221,67 @@ def _round_to_func(dt, td, func):
     ret_type = dt.dtype.char + '8[' + u + ']'
     return (func(float(dti) / tdi) * tdi).astype('int64').astype(ret_type)
 
+
 def round(dt, td):
-    # return (int(np.round((dt - epoch64_us) / td)) * td) + epoch64_us
+    '''
+    Round numpy.datetime64 or numpy.timedelta64 to nearest interval.
+
+    dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded.
+    
+    td: numpy.timedelta64 interval to round to.
+
+    Returns: 
+    numpy.datetime64 or numpy.timedelta64 rounded to the
+    nearest multiple of "td".
+    '''
     return _round_to_func(dt, td, np.round)
 
+
 def floor(dt, td):
-    # return (int(np.floor((dt - epoch64_us) / td)) * td) + epoch64_us
+    '''
+    Round numpy.datetime64 or numpy.timedelta64 to down to nearest
+    interval.
+
+    dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded down.
+    
+    td: numpy.timedelta64 interval to round down to.
+
+    Returns: 
+    numpy.datetime64 or numpy.timedelta64 rounded down the
+    nearest multiple of "td".
+    '''
     return _round_to_func(dt, td, np.floor)
 
+
 def ceil(dt, td):
-    # return (int(np.floor((dt - epoch64_us) / td)) * td) + epoch64_us
+    '''
+    Round numpy.datetime64 or numpy.timedelta64 to up to nearest
+    interval.
+
+    dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded up.
+    
+    td: numpy.timedelta64 interval to round up to.
+
+    Returns: numpy.datetime64 or numpy.timedelta64 rounded up the
+        nearest multiple of "td".
+    '''
     return _round_to_func(dt, td, np.ceil)
-
-# def ceil(dt, td):
-#     # return (int(np.ceil((dt - epoch64_us) / td)) * td) + epoch64_us
-#     u = smallest_unit([get_units(dt), get_units(td)])
-#     dti = dt64_to(dt, u)
-#     tdi = dt64_to(td, u)
-#     ret_type = dt.dtype.char + '8[' + u + ']'
-#     return (np.ceil(dti / tdi) * tdi).astype('int64').astype(ret_type)
-
-
 
 
 def fmt_dt64_range(st, et):
+    '''
+    Return a string representing an interval defined by two
+    numpy.datetime64 values, such as an interval of data defined by
+    start and end times.
+    
+    st: start time
+
+    et: end time
+
+    Returns: Compact string representation. Seconds are included only
+        if required.Fractional seconds not currently supported.
+    '''
+
     day = np.timedelta64(1, 'D')
     if st == floor(st, day) and et == floor(st, day):
         # Start and end on same date. Always print at least hours and
