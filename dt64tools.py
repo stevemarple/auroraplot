@@ -247,15 +247,27 @@ def ceil(dt, td):
 def fmt_dt64_range(st, et):
     day = np.timedelta64(1, 'D')
     if st == floor(st, day) and et == floor(st, day):
-        # Start and end on same date. TODO. determine resolution needed
-        return strftime(st, '%Y-%m-%d %H:%M:%S - ') +  \
-            strftime(et, '%H:%M:%S')
+        # Start and end on same date. Always print at least hours and
+        # minutes to get instantly recognisable values. Only includes
+        # seconds if necessary.
+        if get_second(st) or get_second(et):
+            strftime(st, '%Y-%m-%d %H:%M:%S - ') +  \
+                strftime(et, '%H:%M:%S')
+        else:
+            return strftime(st, '%Y-%m-%d %H:%M - ') +  \
+                strftime(et, '%H:%M')
     elif st == floor(st, day) and et == st + day:
         # Entire day
         return strftime(st, '%Y-%m-%d')
     else:
-        return strftime(st, '%Y-%m-%d %H:%M:%S - ') + \
-            strftime(et, '%Y-%m-%d %H:%M:%S')
+        # Start and end time on different dates
+        if get_second(st) or get_second(et):
+            return strftime(st, '%Y-%m-%d %H:%M:%S - ') + \
+                strftime(et, '%Y-%m-%d %H:%M:%S')
+        else:
+            return strftime(st, '%Y-%m-%d %H:%M - ') + \
+                strftime(et, '%Y-%m-%d %H:%M')
+
 
 def plot_dt64(x, y, axes=None, 
               # Our own options
