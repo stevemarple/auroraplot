@@ -119,7 +119,7 @@ def dt64_to(t, to_unit, returnfloat=False):
     
 def isnat(x):
     # Do not trust that NaT will compare equal with NaT!
-    return np.array(x).astype('int') == -(2**63)
+    return np.array(x).astype('int64') == -(2**63)
     
 def get_time_of_day(t):
     td64_units = t.dtype.str.lower() # timedelta64 equivalent units
@@ -135,7 +135,7 @@ def _get_tt(a, attr):
     if aa.shape == ():
         return int(r[0])
     else:
-        return r.reshape(aa.shape).astype('int')
+        return r.reshape(aa.shape).astype('int64')
 
 def get_year(a):
     '''Return year'''
@@ -211,7 +211,7 @@ def mean(*a):
             # cast to that unit for the calculation.
             assert isinstance(b.dtype.type(), d.type), \
                 'Arrays must hold the same data type'
-            tmp += b.astype(d).astype('int')
+            tmp += b.astype(d).astype('int64')
         return (tmp / len(a)).astype(d)
 
 def _round_to_func(dt, td, func):
