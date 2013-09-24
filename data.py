@@ -263,6 +263,7 @@ class Data(object):
                                   ascii=False, wantstr=False)
 
         first_axes = None
+        r = []
         for n in range(len(channels)):
             if axes is not None:
                 ax = plt.axes(axes2[n])
@@ -282,9 +283,10 @@ class Data(object):
                 ydata = self.data[cidx] / u['mul']
 
             if kwargs.has_key('label'):
-                r = dt64.plot_dt64(xdata, ydata, **kwargs)
+                r.append(dt64.plot_dt64(xdata, ydata, **kwargs)[0])
             else:
-                r = dt64.plot_dt64(xdata, ydata, label=channels[n], **kwargs)
+                r.append(dt64.plot_dt64(xdata, ydata, label=channels[n], 
+                                        **kwargs)[0])
 
             ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
                         dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
