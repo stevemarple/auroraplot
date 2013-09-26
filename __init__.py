@@ -88,18 +88,18 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         if unit in ('', '%'):
             logmul = 0
         elif np.isfinite(val) and val != 0:
-            print('val: ' + str(val))
-            logmul = int(np.floor((np.spacing(np.log10(val)) + 
-                                           (np.log10(val)) / 3.0) * 3))
+            log10_val = np.log10(val)
+            logmul = int(np.floor(np.abs(np.spacing(log10_val)) + 
+                                  (log10_val) / 3.0) * 3)
         else:
             logmul = 1
-        print('logmul: ' + str(logmul))
+
         # Find matching prefix
         for k in prefixes:
             if prefixes[k] == logmul:
                 d['prefix'] = k
                 break
-        assert d['prefix'] is not None
+        assert d['prefix'] is not None, 'prefix should not be None'
         d['mul'] = 10 ** logmul
 
     else:
