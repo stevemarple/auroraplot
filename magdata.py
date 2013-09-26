@@ -113,6 +113,89 @@ def load_qdc(network, site, time, **kwargs):
     return None
 
 
+def stack_plot(data_array, offset, channel=None, 
+                start_time=None, end_time=None,
+                sort=True,
+                **kwargs):
+    '''
+    Plot multiple MagData objects on a single axes. Magnetometer
+    stackplots have a distinct meaning and should not be confused with
+    the matplotlib.stackplot which implements a different ty[pe of
+    stacked plot.
+
+    The variation in each MagData object (measured from the median
+    value) is displayed. Each object displayed offset from the
+    previous. If "sort" is True then plots are ordered North (top) to
+    South (bottom).
+    
+    data_array: A sequence of MagData objects. All objects must use
+        the same data units.
+    
+    offset: The offset applied when displayed each data object. This i
+        given in the data units (usually tesla).
+       
+    channel: The data channel to use. If None given defaults to the
+        first channel in the first object of the data_array sequence.
+
+    start_time: The start time for the x axis. If None then the
+        earliest start time from all datasets.
+ 
+    end_time: The end time for the x axis. If None then the latest end
+        time from all datasets.
+
+    sort: Flag to indicate if datasets should be sorted by geographic
+    latitude before plotting.
+    '''
+
+    da = np.array(data_array).flatten()
+    
+    for n in range(1, da.size):
+        assert da[0].units == da[n].units, 'units differ'
+        
+    if channel is None:
+        channel = da[0].channels[0]
+
+    if sort:
+        latitude = np.zeros_like(da, dtype=float)
+        for n in range(da.size):
+            latitude[n] = da[n].get_site_info('latitude')
+        sort_idx = np.argsort(latitude)
+        da = da[sort_idx]
+
+    r = []
+    fig = plt.figure()
+    ax = plt.subplot(1, 1, 1)
+    ax.hold(True)
+    tick_locs = np.arange(da.size) * offset
+    tick_labels = []
+    st = da[0].start_time
+    et = da[0].end_time
+    for n in range(da.size):
+        st = np.min([st, da[n].start_time])
+        et = np.max([et, da[n].end_time])
+        cidx = da[n].get_channel_index(channel)
+        d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
+        y = (d.data[cidx] - scipy.stats.nanmedian(d.data[cidx], axis=-1) \
+                 + (n * offset))
+        lh = dt64.plot_dt64(d.get_mean_sample_time(), y.flatten())
+        r.extend(lh)
+        tick_labels.append(d.network + '\n' + d.site)
+
+
+    if start_time is None:
+        start_time = st
+    if end_time is None:
+        end_time = et
+    ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
+                dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
+    ax.yaxis.set_ticks(tick_locs)
+    ax.yaxis.set_ticklabels(tick_labels)
+    ax.set_title('\n'.join(['Magnetometer stackplot', 
+                            dt64.fmt_dt64_range(start_time, end_time)]))
+    plt.draw()
+
+    return r
+
     
 class MagData(Data):
     '''Class to manipulate and display magnetometer data.'''
@@ -190,11 +273,12 @@ class MagData(Data):
                       time_units=time_units, **kwargs)
         return r
 
+
     def plot_with_qdc(self, qdc, lsq_fit=False, **kwargs):
         self.plot(**kwargs)
         qdc.align(self, lsq_fit=lsq_fit).plot(axes=plt.gca(), **kwargs)
 
-    
+
     def get_quiet_days(self, nquiet=5, channels=None, 
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
