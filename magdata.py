@@ -120,7 +120,7 @@ def stack_plot(data_array, offset, channel=None,
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
     stackplots have a distinct meaning and should not be confused with
-    the matplotlib.stackplot which implements a different ty[pe of
+    the matplotlib.stackplot which implements a different type of
     stacked plot.
 
     The variation in each MagData object (measured from the median
