@@ -111,8 +111,19 @@ class Data(object):
             cidx.append(chan_tup.index(c))
         return cidx
 
+
+    def get_site_info(self, info=None):
+        assert ap.networks.has_key(self.network), 'Unknown network'
+        assert ap.networks[self.network].has_key(self.site), 'Unknown site'
+        if info is None:
+            return ap.networks[self.network][self.site]
+        else:
+            return ap.networks[self.network][self.site][info]
+
+
     def get_mean_sample_time(self):
         return dt64.mean(self.sample_start_time, self.sample_end_time)
+
 
     def pickle(self, filename):
         with open(filename, 'wb') as output:
