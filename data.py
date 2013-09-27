@@ -107,7 +107,7 @@ class Data(object):
         '''
         chan_tup = tuple(self.channels)
         cidx = []
-        for c in channels:
+        for c in np.array(channels).flatten():
             cidx.append(chan_tup.index(c))
         return cidx
 
@@ -211,7 +211,7 @@ class Data(object):
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
              units_prefix=None, title=None, 
              # Our own options
-             start_time=None, end_time=None, time_units=None, 
+             start_time=None, end_time=None, time_units=None, add_legend=None,
              **kwargs):
         if channels is None:
             channels=self.channels
@@ -229,7 +229,7 @@ class Data(object):
             if not hasattr(axes2, '__iter__'):
                 axes2 = [axes2]
             if len(axes2) == 1:
-                axes2 * len(channels)
+                axes2 *= len(channels)
             else:
                 assert len(axes2) == len(channels), \
                     'axes and channels must be same length'
@@ -245,7 +245,7 @@ class Data(object):
             if not hasattr(subplot2, '__iter__'):
                 subplot2 = [subplot2]
             if len(subplot2) == 1:
-                subplot2 * len(channels)
+                subplot2 *= len(channels)
             else:
                 assert len(subplot2) == len(channels), \
                     'subplot and channels must be same length'
@@ -309,7 +309,7 @@ class Data(object):
             if n == 0:
                 first_axes = ax
                 
-        if need_legend:
+        if add_legend or (add_legend is None and need_legend):
             lh = plt.legend(self.channels[allcidx], loc='best', fancybox=True)
             lh.get_frame().set_alpha(0.6)
             # Label Y axis
