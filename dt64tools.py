@@ -492,11 +492,17 @@ class Datetime64Locator(Locator):
                          10**int(np.floor(approx_ival_log10 - unit_log10))).astype('m8[' + best_unit + ']')
             approx_ival = np.timedelta64(int(approx_ival_s * 10**-unit_log10), 
                                          best_unit)
-            idx = (approx_ival >= intervals).tolist().index(False)
-            tick_interval = intervals[idx]
-            return intervals[idx]
-
-        elif approx_ival_s < 7 * 86400: # < 3 weeks
+            try:
+                idx = (approx_ival >= intervals).tolist().index(False)
+                tick_interval = intervals[idx]
+                return intervals[idx]
+            except ValueError as e:
+                # Not found, fall through and use 1s or larger interval
+                pass
+            except:
+                raise
+            
+        if approx_ival_s < 7 * 86400: # < 3 weeks
             approx_ival = np.timedelta64(int(approx_ival_s), 's')
             
             intervals = [np.timedelta64(1, 's'),
