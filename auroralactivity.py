@@ -33,6 +33,8 @@ class AuroraWatchActivity(Data):
                  sort=True,
                  magdata=None,
                  magqdc=None, 
+                 thresholds=None,
+                 colors=None,
                  lsq_fit=False):
         Data.__init__(self,
                       network=network,
@@ -48,13 +50,6 @@ class AuroraWatchActivity(Data):
                       units=units,
                       sort=sort)
         
-        self.thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
-        self.colors = np.array([[0.2, 1.0, 0.2],  # green  
-                                [1.0, 1.0, 0.0],  # yellow
-                                [1.0, 0.6, 0.0],  # amber
-                                [1.0, 0.0, 0.0]]) # red
-
-
         if magdata is not None and magqdc is not None:
             self.network = magdata.network
             self.site = magdata.site
@@ -88,6 +83,21 @@ class AuroraWatchActivity(Data):
             nth_largest = ap.tools.NthLargest(n)
             self.set_cadence(np.timedelta64(1, 'h'),
                              inplace= True, aggregate=nth_largest)
+
+        if thresholds is None:
+            # self.thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
+            self.thresholds = self.get_site_info('activity_thresholds')
+        else:
+            self.thresholds = thresholds
+        if colors is None:
+            # self.colors = np.array([[0.2, 1.0, 0.2],  # green  
+            #                         [1.0, 1.0, 0.0],  # yellow
+            #                         [1.0, 0.6, 0.0],  # amber
+            #                         [1.0, 0.0, 0.0]]) # red
+            self.colors = self.get_site_info('activity_colors')
+        else:
+            self.colors = colors
+
 
 
     def data_description(self):
