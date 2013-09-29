@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import auroraplot as ap
 from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
+import auroraplot.tools
 from scipy.stats import nanmean
 import scipy.interpolate
 import warnings
@@ -170,14 +171,22 @@ def stack_plot(data_array, offset, channel=None,
     tick_labels = []
     st = da[0].start_time
     et = da[0].end_time
+
+    # To estimate range of data, ignoring a few extreme cases.
+    ydiff = np.zeros(da.size)
+    max5 = ap.tools.NthLargest(5)
+    min5 = ap.tools.NthLargest(5, smallest=True)
+
+    # Plot each data set
     for n in range(da.size):
         st = np.min([st, da[n].start_time])
         et = np.max([et, da[n].end_time])
         cidx = da[n].get_channel_index(channel)
         d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
         y = (d.data[cidx] - scipy.stats.nanmedian(d.data[cidx], axis=-1) \
-                 + (n * offset))
-        lh = dt64.plot_dt64(d.get_mean_sample_time(), y.flatten())
+                 + (n * offset)).flatten()
+        ydiff[n] = max5(y) - min5(y)
+        lh = dt64.plot_dt64(d.get_mean_sample_time(), y)
         r.extend(lh)
         tick_labels.append(d.network + '\n' + d.site)
 
@@ -188,6 +197,20 @@ def stack_plot(data_array, offset, channel=None,
         end_time = et
     ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
                 dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
+
+    # Calculate some reasonable ylimits. Should show large activity
+    # seen by most sites but exclude cases when the one site has a
+    # major disturbance.  Use median disturbance as estimate of what
+    # to realsitically expect. Round up to multiple of offset for
+    # aesthetic reasons.
+    ydisturb = (np.ceil(scipy.stats.nanmedian(ydiff) / offset)) * offset
+    ylim = [-offset, da.size * offset]
+    if ax.yaxis.get_data_interval()[0] < ylim[0]:
+        ylim[0] = -ydisturb
+    if ax.yaxis.get_data_interval()[1] > ylim[1]:
+        ylim[1] = ((da.size - 1) * offset) + ydisturb
+    ax.set_ylim(ylim)
+    
     ax.yaxis.set_ticks(tick_locs)
     ax.yaxis.set_ticklabels(tick_labels)
     ax.set_title('\n'.join(['Magnetometer stackplot', 
@@ -341,7 +364,6 @@ class MagData(Data):
                 # and daily means
                 daily_data[n].data += (monthly_means - daily_means)
             
-
         elif method == 'linear_fit':
             x = self.get_mean_sample_time().astype('m8[us]').astype('int64')
             fits = []
