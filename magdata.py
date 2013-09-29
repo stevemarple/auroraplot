@@ -44,7 +44,7 @@ def load_qdc(network, site, time, **kwargs):
     '''
     
     data_type = 'MagQDC'
-    archive, ad = ap.get_archive_details(network, site, data_type, **kwargs)
+    archive, ad = ap.get_archive_info(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
