@@ -132,7 +132,16 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         return d
 
 
-def get_archive_details(network, site, data_type, **kwargs):
+def get_site_info(network, site):
+    # Sanity checking
+    if not networks.has_key(network):
+        raise Exception('Unknown network')
+    elif not networks[network].has_key(site):
+        raise Exception('Unknown site')
+    return networks[network][site]
+
+
+def get_archive_info(network, site, data_type, **kwargs):
     '''
     Get relevant details about a data archive
     
@@ -171,19 +180,17 @@ def get_archive_details(network, site, data_type, **kwargs):
         format: name of the data file format (optional).
     '''
 
+    site_info = get_site_info(network, site)
+
     # Sanity checking
-    if not networks.has_key(network):
-        raise Exception('Unknown network')
-    elif not networks[network].has_key(site):
-        raise Exception('Unknown site')
-    elif not networks[network][site]['data_types'].has_key(data_type):
+    if not site_info['data_types'].has_key(data_type):
         raise Exception('Unknown data_type')
     
     if kwargs.get('archive') is None:
-        if len(networks[network][site]['data_types'][data_type]) == 1:
+        if len(site_info['data_types'][data_type]) == 1:
             # Only one archive, so default is implicit
-            archive = networks[network][site]['data_types'][data_type].keys()[0]
-        elif networks[network][site]['data_types'][data_type].has_key('default'):
+            archive = site_info['data_types'][data_type].keys()[0]
+        elif site_info['data_types'][data_type].has_key('default'):
             # Use explicit default
             archive = 'default'
         else:
@@ -191,12 +198,11 @@ def get_archive_details(network, site, data_type, **kwargs):
     else:
         archive = kwargs.get('archive')
 
-    if not networks[network][site]['data_types'][data_type].has_key(archive):
+    if not site_info['data_types'][data_type].has_key(archive):
         raise Exception('Unknown archive')
 
     # archive data
-    return (archive, 
-            networks[network][site]['data_types'][data_type][archive])
+    return (archive, site_info['data_types'][data_type][archive])
 
 
 def load_data(network, site, data_type, start_time, end_time, **kwargs):
@@ -230,7 +236,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         printed. If None then the global verbose parameter is checked.
 
     '''
-    archive, ad = get_archive_details(network, site, data_type, **kwargs)
+    archive, ad = get_archive_info(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
