@@ -113,10 +113,22 @@ sites = {
         }
     }
 
+# Set default archive details
 for k in sites:
     sites[k]['data_types']['MagData']['default'] = \
         sites[k]['data_types']['MagData']['1s']
     
-    
+# Set activity color/thresholds unless already set.
+default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
+default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green  
+                                    [1.0, 1.0, 0.0],  # yellow
+                                    [1.0, 0.6, 0.0],  # amber
+                                    [1.0, 0.0, 0.0]]) # red
+for s in sites:
+    if not sites[s].has_key('activity_thresholds'):
+        sites[s]['activity_thresholds'] = default_activity_thresholds
+    if not sites[s].has_key('activity_colors'):
+        sites[s]['activity_colors'] = default_activity_colors
+
 ap.add_network('SAMNET', sites)
 
