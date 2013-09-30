@@ -201,10 +201,9 @@ def stack_plot(data_array, offset, channel=None,
     # Calculate some reasonable ylimits. Should show large activity
     # seen by most sites but exclude cases when the one site has a
     # major disturbance.  Use median disturbance as estimate of what
-    # to realsitically expect. 
+    # to realistically expect.
     if ydiff.size == 2:
-        # Median would include any disturbance!
-        ydisturb = np.nanmin(ydiff)
+        ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
     else:
         ydisturb = scipy.stats.nanmedian(ydiff)
 
