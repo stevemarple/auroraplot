@@ -35,7 +35,8 @@ class AuroraWatchActivity(Data):
                  magqdc=None, 
                  thresholds=None,
                  colors=None,
-                 lsq_fit=False):
+                 fit=False,
+                 fit_params={}):
         Data.__init__(self,
                       network=network,
                       site=site,
@@ -62,7 +63,7 @@ class AuroraWatchActivity(Data):
             self.nominal_cadence = magdata.nominal_cadence
                         
             if isinstance(magqdc, ap.magdata.MagQDC):
-                aligned = magqdc.align(magdata, lsq_fit=lsq_fit)
+                aligned = magqdc.align(magdata, fit=fit, **fit_params)
             else:
                 aligned = magqdc                            
             self.data = np.abs(magdata.data[magdata.get_channel_index(c)] -

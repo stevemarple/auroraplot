@@ -12,6 +12,29 @@ import scipy.interpolate
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 
+
+def leastsq_error(p, obj, ref, channel):
+    '''
+    Error function used with Data.fit() for least squares error fitting.
+    '''
+    adj, = p
+    err = obj.data[obj.get_channel_index(channel)[0]] \
+        - (ref.data[ref.get_channel_index(channel)[0]] + adj)
+    return np.nan_to_num(err)
+
+def sign_error(p, obj, ref, channel):
+    '''
+    Error function used with Data.fit() to for minimising the sign of
+    the errors. This attempts to balance fit the object to the
+    reference such that they are equal numbers of points above the
+    reference line as below.
+    '''
+    # Cannot simply use the sign of the error since optimize needs
+    # some idea of distance form the ideal fit. Fudge by multiping
+    # by the median of the absolute least-squares error.
+    err = leastsq_error(p, obj, ref, channel)
+    return np.sign(err) * np.median(np.abs(err))
+
 class Data(object):
     '''Base class for time-series data.'''
 
@@ -519,20 +542,17 @@ class Data(object):
         return s.interp(sam_st, sam_et, kind='linear')
 
 
-    def _leastsq_residuals(self, p, obj, channel):
-        adj, = p
-        err = self.data[self.get_channel_index(channel)[0]] \
-            - (obj.data[obj.get_channel_index(channel)[0]] + adj)
-        return np.nan_to_num(err)
-
-
-    def least_squares_fit(self, obj, inplace=False, full_output=False):
+    def fit(self, ref, err_func=leastsq_error, inplace=False, 
+            full_output=False, plot_fit=False):
         '''
         Fit a dataset to a reference dataset by applying an offset to
         find the least-squared error. Uses scipy.optimize.leastsq()
 
-        obj: reference object, of instance Data.
+        ref: reference object, of instance Data.
         
+        err_func: reference to function which computes the errors. See
+            leastsq_error() and sign_error(().
+
         inplace: if True modify self, otherwise modify a copy.
 
         full_output: if True return optional outputs too. See
@@ -547,9 +567,9 @@ class Data(object):
         import scipy.optimize
 
         for c in self.channels:
-            assert c in obj.channels, 'Channel not in reference object'
+            assert c in ref.channels, 'Channel not in reference object'
 
-        err_func = self._leastsq_residuals
+        # err_func = self._leastsq_residuals
         
         if inplace:
             r = self
@@ -564,21 +584,19 @@ class Data(object):
             p0 = [0.0]
             fi = scipy.optimize.leastsq(err_func, p0, 
                                         full_output=True,
-                                        args=(obj, channel))
+                                        args=(self, ref, channel))
             errors.append(fi[0][0])
-            # print(fi)
-            # print('fi[0]:' + str(fi[0]))
             fit_info.append(fi)
-            # plsq = scipy.optimize.leastsq(err_func, p0, 
-            #                               args=(obj, channel))
-            # print('---')
-            # print(plsq)
-            # print('plsq[0]: ' + str(plsq[0]))
-            # r.data[self.get_channel_index(c)] -= plsq[0]
             r.data[self.get_channel_index(c)] -= fi[0]
+
+        if plot_fit:
+            lh = self.plot()
+            ref.plot(axes=lh[0].axes)
+
 
         if full_output:
             return (r, errors, fit_info)
         else:
             return r
+
 

@@ -303,9 +303,10 @@ class MagData(Data):
         return r
 
 
-    def plot_with_qdc(self, qdc, lsq_fit=False, **kwargs):
+    def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
         self.plot(**kwargs)
-        qdc.align(self, lsq_fit=lsq_fit).plot(axes=plt.gca(), **kwargs)
+        qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
+                                                        **kwargs)
 
 
     def get_quiet_days(self, nquiet=5, channels=None, 
@@ -515,15 +516,14 @@ class MagQDC(MagData):
         return r
 
     
-    def align(self, ref, lsq_fit=False, full_output=False):
+    def align(self, ref, fit=False, **fit_kwargs):
         day = np.timedelta64(24, 'h')
         if isinstance(ref, MagData):
             r = copy.deepcopy(ref)
             interp_times = ref.get_mean_sample_time()
         else:
-            # Must be sample times
-            assert lsq_fit == False, \
-                'Cannot do least squares fit without reference data'
+            # ref parameter must contain sample timestamps
+            assert not fit, 'Cannot fit without reference data'
             ta = np.sort(np.array(ref).flatten())
             if len(ta) >= 2:
                 # Guess the nominal cadence
@@ -556,14 +556,12 @@ class MagQDC(MagData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
-        # xo = dt64.get_time_of_day(ref.get_mean_sample_time()).astype('m8[us]')
         xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
         r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
             (xo.astype('int64'))
 
-        if lsq_fit:
-            return r.least_squares_fit(ref, inplace=True, 
-                                       full_output=full_output)
+        if fit:
+            return r.fit(ref, inplace=True, **fit_kwargs)
         
         return r
         
