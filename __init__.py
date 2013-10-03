@@ -132,14 +132,18 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         return d
 
 
-def get_site_info(network, site):
+def get_site_info(network, site, info=None):
     # Sanity checking
     if not networks.has_key(network):
         raise Exception('Unknown network')
     elif not networks[network].has_key(site):
         raise Exception('Unknown site')
-    return networks[network][site]
-
+    if info is None:
+        return networks[network][site]
+    elif not networks[network][site].has_key(info):
+        raise Exception('Unknown info')
+    else:
+        return networks[network][site][info]
 
 def get_archive_info(network, site, data_type, **kwargs):
     '''
