@@ -159,12 +159,21 @@ def convert_awn_qdc_data(file_name, archive_data,
     return None
     
 
+
+cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
+    'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
+    'To view a copy of this license, visit ' + \
+    'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
+
 sites = {
     'LAN1': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
         'longitude': -2.78,
         'elevation': 27,
+        'license': cc3_by_nc_sa,
+        'copyright': 'Steve Marple.',
+        'attribution': 'Data provided by Steve Marple.', 
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -226,6 +235,10 @@ sites = {
         'latitude': 54.01,
         'longitude': -2.77,
         'elevation': 93,
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -287,6 +300,10 @@ sites = {
         'latitude': 53.569195, 
         'longitude': -2.887264,
         'elevation': None,
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
