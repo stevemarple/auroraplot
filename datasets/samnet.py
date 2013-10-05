@@ -7,8 +7,71 @@ from auroraplot.magdata import MagData as MagData
 
 data_dir = '/data/samnet'
 
-def load_samnet_data():
-    pass
+def convert_samnet_data(file_name, archive_data, 
+                        network, site, data_type, channels, start_time, 
+                        end_time, **kwargs):
+
+    chan_tup = tuple(archive_data['channels'])
+    col_idx = []
+    for c in channels:
+        col_idx.append(chan_tup.index(c))
+    nominal_cadence_s = (archive_data['nominal_cadence'] / 
+                         np.timedelta64(1, 's'))
+    try:
+        # if file_name.startswith('/'):
+        #     #uh = urllib2.urlopen('file:' + file_name)
+        # else:
+        #     uh = urllib2.urlopen(file_name)
+        try:
+            conv = lambda s: (s.strip().startswith('9999.9') and np.nan) \
+                or float(s.strip())
+            # data = np.loadtxt(uh,
+            data = np.loadtxt(file_name, 
+                              unpack=True, 
+                              converters={0: conv, 1: conv, 2: conv},
+                              comments=site.lower()[:2])
+            # TODO: check correct settings for sample start/end time
+            # for both 1s and 5s data. IIRC 1s is offset and 5s is
+            # centred.
+            sample_start_time = np.arange(0, 86400, nominal_cadence_s)\
+                .astype('m8[s]') + start_time
+            sample_end_time = sample_start_time + \
+                archive_data['nominal_cadence']
+                
+            data = data[col_idx] * 1e-9
+            integration_interval = np.ones_like(data) \
+                * archive_data['nominal_cadence']
+
+            r = MagData( \
+                network=network,
+                site=site,
+                channels=channels,
+                start_time=start_time,
+                end_time=end_time,
+                sample_start_time=sample_start_time, 
+                sample_end_time=sample_end_time,
+                integration_interval=integration_interval,
+                nominal_cadence=archive_data['nominal_cadence'],
+                data=data,
+                units=archive_data['units'],
+                sort=True)
+            return r
+
+        except Exception as e:
+            if kwargs.get('verbose'):
+                print('Could not read ' + file_name)
+                print(str(e))
+
+        finally:
+            # uh.close()
+            pass
+    except Exception as e:
+        if kwargs.get('verbose'):
+            print('Could not open ' + file_name)
+            # print(str(e))
+    return None
+
+
 
 def convert_rt_data(file_name, archive_data,
                     network, site, data_type, channels, start_time, 
@@ -67,19 +130,19 @@ sites = {
                 '1s': {
                     'channels': ['H', 'D', 'Z'],
                     #'path': os.path.join(data_dir, 
-                    #                     'samnet/1s_archive/%Y/%m/la%d%m%y.dgz'),
-                    'path': 'http://www.dcs.lancs.ac.uk/iono/miadata/magnetometer/samnet/5s_archive/%Y/%m/la%d%m%Y.5s.gz',
+                    #                     '1s_archive/%Y/%m/la%d%m%y.dgz'),
+                    'path': 'http://www.dcs.lancs.ac.uk/iono/miadata/magnetometer/samnet/1s_archive/%Y/%m/la%d%m%y.dgz',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': load_samnet_data,
+                    'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(1, 's'),
                     'units': 'T',
                     },
                 '5s': {
                     'channels': ['H', 'D', 'Z'],
                     'path': os.path.join(data_dir,
-                                         'samnet/1s_archive/%Y/%m/la%d%m%Y.5s.gz'),
+                                         '5s_archive/%Y/%m/la%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': load_samnet_data,
+                    'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -98,9 +161,9 @@ sites = {
                 'qdc': {
                     'channels': ['H', 'D', 'Z'],
                     'path': os.path.join(data_dir, 
-                                         'samnet/activity/quiet/%Y/la00%m%Y.5s'),
+                                         'activity/quiet/%Y/la00%m%Y.5s'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': load_samnet_data,
+                    'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
