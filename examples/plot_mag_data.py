@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 import auroraplot.magdata
-from auroraplot.humiditydata import HumidityData
+import auroraplot.datasets.aurorawatchnet
 
-import auroraplot.datasets.cloudwatch
+
 import scipy.stats
 
 plt.close('all')
