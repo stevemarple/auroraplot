@@ -35,7 +35,7 @@ class AuroraWatchActivity(Data):
                  magqdc=None, 
                  thresholds=None,
                  colors=None,
-                 fit=False,
+                 fit=None,
                  fit_params={}):
         Data.__init__(self,
                       network=network,

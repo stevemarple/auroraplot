@@ -575,7 +575,7 @@ class MagQDC(MagData):
         return r
 
     
-    def align(self, ref, fit=False, **fit_kwargs):
+    def align(self, ref, fit=None, **fit_kwargs):
         day = np.timedelta64(24, 'h')
         if isinstance(ref, MagData):
             r = copy.deepcopy(ref)
@@ -620,7 +620,8 @@ class MagQDC(MagData):
             (xo.astype('int64'))
 
         if fit:
-            return r.fit(ref, inplace=True, **fit_kwargs)
+            # return r.fit(ref, inplace=True, **fit_kwargs)
+            return fit(r, ref, inplace=True, **fit_kwargs)
         
         return r
         

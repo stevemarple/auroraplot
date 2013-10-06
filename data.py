@@ -10,6 +10,7 @@ import scipy.interpolate
 # import scipy.stats
 
 import auroraplot as ap
+import auroraplot.tools
 import auroraplot.dt64tools as dt64
 
 
@@ -22,18 +23,6 @@ def leastsq_error(p, obj, ref, channel):
         - (ref.data[ref.get_channel_index(channel)[0]] + adj)
     return np.nan_to_num(err)
 
-def sign_error(p, obj, ref, channel):
-    '''
-    Error function used with Data.fit() to for minimising the sign of
-    the errors. This attempts to balance fit the object to the
-    reference such that they are equal numbers of points above the
-    reference line as below.
-    '''
-    # Cannot simply use the sign of the error since optimize needs
-    # some idea of distance form the ideal fit. Fudge by multiping
-    # by the median of the absolute least-squares error.
-    err = leastsq_error(p, obj, ref, channel)
-    return np.sign(err) * np.median(np.abs(err))
 
 class Data(object):
     '''Base class for time-series data.'''
@@ -542,8 +531,8 @@ class Data(object):
         return s.interp(sam_st, sam_et, kind='linear')
 
 
-    def fit(self, ref, err_func=leastsq_error, inplace=False, 
-            full_output=False, plot_fit=False):
+    def least_squares_fit(self, ref, err_func=leastsq_error, 
+                          inplace=False, full_output=False, plot_fit=False):
         '''
         Fit a dataset to a reference dataset by applying an offset to
         find the least-squared error. Uses scipy.optimize.leastsq()
@@ -590,9 +579,53 @@ class Data(object):
             r.data[self.get_channel_index(c)] -= fi[0]
 
         if plot_fit:
-            lh = self.plot()
+            lh = r.plot()
             ref.plot(axes=lh[0].axes)
 
+
+        if full_output:
+            return (r, errors, fit_info)
+        else:
+            return r
+
+
+    def minimise_sign_error_fit(self, ref, inplace=False, full_output=False, 
+                                plot_fit=False, **kwargs):
+        
+        # There ought to be a way to do this with
+        # scipy.optimize. Port existing Matlab code by Steve Marple.
+        for c in self.channels:
+            assert c in ref.channels, 'Channel not in reference object'
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+
+        # Fit each channel separately
+        errors = []
+        fit_info = []
+        for c in self.channels:
+            if plot_fit:
+                # Print original data befreo fitting in case of
+                # inplace=True
+                ref.plot(label='Reference')
+                ax = plt.gca()
+                self.plot(axes=ax, label='Data')
+
+            r.data[r.get_channel_index(c)], err, fi = ap.tools.fit_data(\
+                self.data[self.get_channel_index(c)[0]],
+                ref.data[ref.get_channel_index(c)[0]],
+                err_func=ap.tools.minimise_sign_error,
+                full_output=True,
+                **kwargs)
+            errors.append(err)
+            fit_info.append(fi)
+
+            if plot_fit:
+                r.plot(axes=ax, label='Fitted data')
+                lh = plt.legend(loc='best', 
+                                fancybox=True)
+                lh.get_frame().set_alpha(0.6)
 
         if full_output:
             return (r, errors, fit_info)
