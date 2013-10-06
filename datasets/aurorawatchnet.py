@@ -171,8 +171,10 @@ sites = {
         'latitude': 54.0,
         'longitude': -2.78,
         'elevation': 27,
-        'license': cc3_by_nc_sa,
+        'start_time': np.datetime64('2012-12-12T17:29Z'),
+        'end_time': None, # Still operational
         'copyright': 'Steve Marple.',
+        'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
         'data_types': {
             'MagData': {
@@ -226,15 +228,14 @@ sites = {
                     },
                 },        
             },
-        'start_time': np.datetime64('2012-12-12T17:29Z'),
-        'end_time': None, # Still operational
-        'acknowledgement': {'short': 'Steve Marple.'},
         }, # LAN1
     'LAN3': {
         'location': 'Lancaster, UK',
         'latitude': 54.01,
         'longitude': -2.77,
         'elevation': 93,
+        'start_time': np.datetime64('2012-12-18T00:00Z'),
+        'end_time': None, # Still operational
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -291,15 +292,14 @@ sites = {
                     },
                 },        
             },
-        'start_time': np.datetime64('2012-12-18T00:00Z'),
-        'end_time': None, # Still operational
-        'acknowledgement': {'short': 'Lancaster University.'},
         }, # LAN3
     'METOFFICE1': {
         'location': 'Ormskirk, UK',
         'latitude': 53.569195, 
         'longitude': -2.887264,
         'elevation': None,
+        'start_time': np.datetime64('2013-08-01T00:00Z'),
+        'end_time': None, # Still operational
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -356,9 +356,6 @@ sites = {
                     },
                 },        
             },
-        'start_time': np.datetime64('2013-08-01T00:00Z'),
-        'end_time': None, # Still operational
-        'acknowledgement': {'short': 'Lancaster University.'},
         }, # METOFFICE1
     'BRA1': {
         'location': 'Brae, Shetland, UK',
@@ -367,7 +364,10 @@ sites = {
         'elevation': 11,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -427,7 +427,10 @@ sites = {
         'elevation': 16.366,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -487,7 +490,10 @@ sites = {
         'elevation': 43,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -547,7 +553,10 @@ sites = {
         'elevation': 132,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -607,7 +616,10 @@ sites = {
         'elevation': 68,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -667,7 +679,10 @@ sites = {
         'elevation': 122,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -727,7 +742,10 @@ sites = {
         'elevation': 157,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -787,7 +805,10 @@ sites = {
         'elevation': 143,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -847,7 +868,10 @@ sites = {
         'elevation': 121,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -907,7 +931,10 @@ sites = {
         'elevation': 48,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
-        'acknowledgement': {'short': 'AuroraWatchNet.'},
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
                 'realtime': {
