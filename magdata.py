@@ -3,6 +3,7 @@ import copy
 import numpy as np
 import numpy.fft
 import matplotlib.pyplot as plt
+import urllib2
 
 import auroraplot as ap
 from auroraplot.data import Data
