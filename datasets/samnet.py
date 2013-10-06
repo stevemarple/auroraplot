@@ -436,6 +436,8 @@ for s in sites:
                     'units': 'T',
                     },
                 },
+        sites[s]['data_types']['MagData']['default'] = \
+            sites[s]['data_types']['MagData']['5s']
         }
 
     if not sites[s].has_key('activity_thresholds'):
