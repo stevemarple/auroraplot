@@ -427,10 +427,11 @@ for s in sites:
             'MagQDC': {
                 'qdc': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, 'activity/quiet/%Y/' +
-                                         sc + '00%m%Y.5s'),
+                    'path': os.path.join(data_dir, 'qdc', sc, '%Y',
+                                         sc + '_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_samnet_data,
+                    # Use the standard converter for MagQDC
+                    'converter': ap.magdata.convert_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
