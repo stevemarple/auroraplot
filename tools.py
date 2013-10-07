@@ -70,9 +70,6 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
     iterations = 0
     while True:
         iterations += 1
-        # e1, has_sign = err_func(data1, ref_data)
-        # e2, has_sign = err_func(data2, ref_data)
-
         difference = data1[non_nan_idx] - data2[non_nan_idx]
         test_data = data1 - 0.5 * difference
         
@@ -118,10 +115,10 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
             if test_error > 0:
                 # Too high, go halfway between test_data and data2
                 data1 = test_data
-                e1 = test_error # NEW
+                e1 = test_error
             else:
                 data2 = test_data
-                e2 = test_error # NEW
+                e2 = test_error
             
         if iterations >= max_iterations:
             raise Exception('No solution after ' + str(max_iterations)
