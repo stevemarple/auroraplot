@@ -1,5 +1,5 @@
 import copy
-
+import logging
 import numpy as np
 import numpy.fft
 import matplotlib.pyplot as plt
@@ -40,9 +40,6 @@ def load_qdc(network, site, time, **kwargs):
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
         
-    verbose: flag to indicate if verbose messages should be
-        printed. If None then the global verbose parameter is checked.
-
     '''
     
     data_type = 'MagQDC'
@@ -60,7 +57,6 @@ def load_qdc(network, site, time, **kwargs):
     else:
         channels = ad['channels']
 
-    verbose = kwargs.get('verbose', ap.verbose)
     path = kwargs.get('path', ad['path'])
 
     load_function = kwargs.get('load_function', ad.get('load_function'))
@@ -71,12 +67,10 @@ def load_qdc(network, site, time, **kwargs):
     kwargs2['channels'] = channels
     kwargs2['load_function'] = load_function
     kwargs2['path'] = path
-    kwargs2['verbose'] = verbose
         
     if load_function:
         # Pass responsibility for loading to some other
-        # function. Parameters have already been checked and verbose
-        # is set to the value the user desires.
+        # function. Parameters have already been checked.
         return load_function(network, site, data_type, start_time, 
                              end_time, **kwargs2)
 
@@ -92,8 +86,7 @@ def load_qdc(network, site, time, **kwargs):
             else:
                 file_name = dt64.strftime(t, path)
 
-            if verbose:
-                print('loading ' + file_name)
+            logging.info('loading ' + file_name)
 
             r = ad['converter'](file_name, 
                                 ad,
@@ -116,8 +109,8 @@ def load_qdc(network, site, time, **kwargs):
 
 
 def convert_qdc_data(file_name, archive_data, 
-                         network, site, data_type, channels, start_time, 
-                         end_time, **kwargs):
+                     network, site, data_type, channels, start_time, 
+                     end_time, **kwargs):
     '''Convert AuroraWatchNet QDC file to match standard data type.
 
     This function can be used by datasets as the converter for MagQDC
@@ -160,16 +153,14 @@ def convert_qdc_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            if kwargs.get('verbose'):
-                print('Could not read ' + file_name)
-                print(str(e))
+            logging.info('Could not read ' + file_name)
+            logging.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        if kwargs.get('verbose'):
-            print('Could not open ' + file_name)
-            print(str(e))
+        logging.info('Could not open ' + file_name)
+        logging.debug(str(e))
     return None
 
 
@@ -319,9 +310,7 @@ class MagData(Data):
         return 'Magnetic field'
 
 
-    def savetxt(self, filename, verbose=None):
-        if verbose is None:
-            verbose = ap.verbose
+    def savetxt(self, filename):
         a = np.zeros([self.channels.size+1, self.data.shape[-1]], 
                      dtype='float')
         a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6

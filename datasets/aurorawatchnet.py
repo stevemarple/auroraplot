@@ -91,16 +91,15 @@ def convert_awn_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            if kwargs.get('verbose'):
-                print('Could not read ' + file_name)
-                # print(str(e))
+            logging.info('Could not read ' + file_name)
+            logging.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        if kwargs.get('verbose'):
-            print('Could not open ' + file_name)
-            # print(str(e))
+        logging.info('Could not open ' + file_name)
+        logging.debug(str(e))
+
     return None
 
 
@@ -146,16 +145,14 @@ def convert_awn_qdc_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            if kwargs.get('verbose'):
-                print('Could not read ' + file_name)
-                print(str(e))
+            logging.info('Could not read ' + file_name)
+            logging.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        if kwargs.get('verbose'):
-            print('Could not open ' + file_name)
-            print(str(e))
+        logging.info('Could not open ' + file_name)
+        logging.debug(str(e))
     return None
     
 

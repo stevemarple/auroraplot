@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import dt64tools as dt64
 
@@ -23,7 +24,6 @@ colors = ['b', 'g', 'r']
 #     '''Make a copy of only the `keys` from dictionary `d`.'''
 #     return {key: d[key] for key in keys}
 
-verbose = True
 def add_network(network_name, sites):
     if networks.has_key(network_name):
         networks[network_name].update(sites)
@@ -236,9 +236,6 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
         
-    verbose: flag to indicate if verbose messages should be
-        printed. If None then the global verbose parameter is checked.
-
     '''
     archive, ad = get_archive_info(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
@@ -254,7 +251,6 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     else:
         channels = ad['channels']
 
-    verbose = kwargs.get('verbose', globals()['verbose'])
     path = kwargs.get('path', ad['path'])
 
     load_function = kwargs.get('load_function', ad.get('load_function'))
@@ -265,12 +261,10 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     kwargs2['channels'] = channels
     kwargs2['load_function'] = load_function
     kwargs2['path'] = path
-    kwargs2['verbose'] = verbose
         
     if load_function:
         # Pass responsibility for loading to some other
-        # function. Parameters have already been checked and verbose
-        # is set to the value the user desires.
+        # function. Parameters have already been checked.
         return load_function(network, site, data_type, start_time, 
                              end_time, **kwargs2)
 
@@ -286,8 +280,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         else:
             file_name = dt64.strftime(t, path)
 
-        if verbose:
-            print('loading ' + file_name)
+        logging.info('loading ' + file_name)
 
         try:
             tmp = ad['converter'](file_name, 
@@ -300,8 +293,8 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
             if tmp is not None:
                 data.append(tmp)
         except Exception as e:
-            if verbose:
-                print('Could not load ' + file_name + ' ' + str(e))
+            logging.info('Could not load ' + file_name)
+            logging.debug(str(e))
 
                         
         
