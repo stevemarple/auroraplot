@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 import urllib2
 import auroraplot as ap
