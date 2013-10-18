@@ -72,7 +72,7 @@ def convert_awn_data(file_name, archive_data,
             sample_end_time = sample_start_time + np.timedelta64(1, 's')
             integration_interval = np.ones([len(channels), 
                                             len(sample_start_time)],
-                                            dtype='m8[s]')
+                                            dtype='m8[us]')
             data = data[col_idx] * data_type_info[data_type]['scaling']
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)

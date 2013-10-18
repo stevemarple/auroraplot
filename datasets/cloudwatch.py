@@ -32,7 +32,7 @@ def convert_cloud_data(file_name, archive_data,
             sample_end_time = sample_start_time + np.timedelta64(1, 's')
             integration_interval = np.ones([len(channels), 
                                             len(sample_start_time)],
-                                            dtype='m8[s]')
+                                            dtype='m8[us]')
             data = data[data_cols]
             # if data_type_info[data_type]['data_check']:
             #     data = data_type_info[data_type]['data_check'](data)
@@ -115,32 +115,58 @@ def convert_temperature_data(file_name, archive_data,
             return b
         else:
             # Join a and b
-            assert 1 or a.start_time == b.start_time and \
-                a.end_time == b.end_time and \
-                np.all(a.sample_start_time == b.sample_end_time) and \
-                np.all(a.sample_end_time == b.sample_end_time) and \
-                a.nominal_cadence == b.nominal_cadence and \
-                a.units == b.units
+            # assert 1 or a.start_time == b.start_time and \
+            #     a.end_time == b.end_time and \
+            #     np.all(a.sample_start_time == b.sample_end_time) and \
+            #     np.all(a.sample_end_time == b.sample_end_time) and \
+            #     a.nominal_cadence == b.nominal_cadence and \
+            #     a.units == b.units
             r = copy.deepcopy(a)
             cidx_a.extend(cidx_b)
             r.channels = chan_array[cidx_a]
-            ns = a.sample_start_time.size
-            r.data = np.zeros([a.channels.size + b.channels.size, ns])
-            a_idx = range(a.channels.size)
-            b_idx = range(a.channels.size, r.channels.size)
 
-            integ_units = \
-                dt64.smallest_unit([dt64.get_units(a.integration_interval),
-                                    dt64.get_units(b.integration_interval)])
-            r.data[a_idx] = a.data
-            r.data[b_idx] = b.data
+            # Bug in data recording process. Work around for now
+            assert a.sample_start_time.size == b.sample_end_time.size, \
+                'Different length data sets'
+            
+            # assert np.all(np.abs(a.sample_start_time - b.sample_start_time) \
+            #                   <= np.timedelta64(1, 's'))
+            # assert np.all(np.abs(a.sample_end_time - b.sample_end_time) \
+            #                   <= np.timedelta64(1, 's'))
+            # b.sample_start_time = a.sample_start_time
+            # b.sample_end_time = a.sample_end_time
+            # # -- end of hack --
+
+            # # Find common sample times
+            # common_sample_start_time = np.intersect1d(a.sample_start_time, 
+            #                                           b.sample_start_time)
+
+            # # Find where they are located in a and b
+            # s_a_idx = np.nonzero(np.in1d(a.sample_start_time, 
+            #                              common_sample_start_time))[0]
+            # s_b_idx = np.nonzero(np.in1d(a.sample_start_time, 
+            #                              common_sample_start_time))[0]
+            # assert np.all(a.sample_end_time[s_a_idx] \
+            #                   == b.sample_end_time[s_b_idx]), \
+            #                   'Sample end times do not match'
+
+            # ns = common_sample_start_time.size
+            ns = a.sample_start_time.size
+            
+            r.data = np.zeros([a.channels.size + b.channels.size, ns])
+            r_a_cidx = range(a.channels.size)
+            r_b_cidx = range(a.channels.size, r.channels.size)
+            integ_units = dt64.smallest_unit([dt64.get_units(a.integration_interval),
+                                              dt64.get_units(b.integration_interval)])
+
+            r.data[r_a_cidx] = a.data
+            r.data[r_b_cidx] = b.data
             r.integration_interval = \
-                np.zeros([a.channels.size + 
-                          b.channels.size, ns]).astype('m8[' + integ_units +
+                np.zeros([r.channels.size, ns]).astype('m8[' + integ_units +
                                                        ']')
-            r.integration_interval[a_idx] = \
+            r.integration_interval[r_a_cidx] = \
                 dt64.dt64_to(a.integration_interval, integ_units)
-            r.integration_interval[b_idx] = \
+            r.integration_interval[r_b_cidx] = \
                 dt64.dt64_to(b.integration_interval, integ_units)
             return r            
     else:
