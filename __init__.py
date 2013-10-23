@@ -208,7 +208,11 @@ def get_archive_info(network, site, data_type, **kwargs):
             archive = site_info['data_types'][data_type].keys()[0]
         elif site_info['data_types'][data_type].has_key('default'):
             # Use explicit default
-            archive = 'default'
+            if isinstance(site_info['data_types'][data_type]['default'],
+                          basestring):
+                archive = site_info['data_types'][data_type]['default']
+            else:
+                archive = 'default'
         else:
             raise Exception('archive must be specified')
     else:

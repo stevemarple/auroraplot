@@ -439,8 +439,7 @@ for s in sites:
                 },
         }
     # Set 5s as the default
-    sites[s]['data_types']['MagData']['default'] = \
-        sites[s]['data_types']['MagData']['5s']
+    sites[s]['data_types']['MagData']['default'] = '5s'
 
     if not sites[s].has_key('activity_thresholds'):
         sites[s]['activity_thresholds'] = default_activity_thresholds
