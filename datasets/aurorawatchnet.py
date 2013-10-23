@@ -8,7 +8,7 @@ from auroraplot.magdata import MagQDC
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
 
-data_dir = '/data/aurorawatch/net'
+data_dir = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet'
 
 def check_mag_data(data):
     data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan

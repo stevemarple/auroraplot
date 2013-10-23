@@ -24,11 +24,23 @@ colors = ['b', 'g', 'r']
 #     '''Make a copy of only the `keys` from dictionary `d`.'''
 #     return {key: d[key] for key in keys}
 
+
 def add_network(network_name, sites):
+    '''
+    Helper function for datasets to register network and site
+    information. To allow local customisation of file location a call
+    to the "add_network_hook" function in the auroraplot_custom module
+    is loaded. This function, if it exists, should modify the
+    registered site information to suit local policy.
+    '''
+
     if networks.has_key(network_name):
         networks[network_name].update(sites)
     else:
         networks[network_name] = sites
+        
+    if hasattr(auroraplot_custom, 'add_network_hook'):
+        auroraplot_custom.add_network_hook(network_name=network_name)
 
 
 def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
@@ -356,3 +368,11 @@ def concatenate(objs, sort=True):
                     data=np.concatenate(data_list, axis=1),
                     units=units,
                     sort=sort)
+
+# Initialise
+
+try:
+    import auroraplot_custom
+except:
+    auroraplot_custom = {}
+    
