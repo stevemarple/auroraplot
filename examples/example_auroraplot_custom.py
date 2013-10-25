@@ -1,3 +1,7 @@
+# An example file to customise the load paths for auroraplot. To use
+# Copy this file to somewhere on the python module patch and rename to
+# auroraplot_custom.py
+
 import auroraplot as ap
 from socket import gethostname
 
@@ -12,7 +16,6 @@ def add_network_hook(network_name):
     are mapped to local filenames, eg for use on the AuroraWatchNet
     magnetometer data loggers.
     '''
-
     if network_name == 'AURORAWATCHNET':
         try:
             awn, site_lc = gethostname().split(':')
