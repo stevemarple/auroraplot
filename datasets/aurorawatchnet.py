@@ -355,7 +355,7 @@ sites = {
                 },        
             },
         }, # METOFFICE1
-    'BRA1': {
+    'BRA': {
         'location': 'Brae, Shetland, UK',
         'latitude': 60.395869,
         'longitude': -1.351124000000027,
@@ -371,7 +371,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'bra1/%Y/%m/bra1_%Y%m%d.txt'),
+                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -383,7 +383,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'bra1/qdc/%Y/bra1_qdc_%Y%m.txt'),
+                                         'bra/qdc/%Y/bra_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -396,7 +396,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'bra1/%Y/%m/bra1_%Y%m%d.txt'),
+                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -408,7 +408,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'bra1/%Y/%m/bra1_%Y%m%d.txt'),
+                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -417,8 +417,8 @@ sites = {
                     },
                 },        
             },
-        }, # BRA1
-    'SAN1': {
+        }, # BRA
+    'SAN': {
         'location': 'Sanday, UK',
         'latitude': 59.25110830191925,
         'longitude': -2.5873320735991,
@@ -434,7 +434,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'san1/%Y/%m/san1_%Y%m%d.txt'),
+                                         'san/%Y/%m/san_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -446,7 +446,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'san1/qdc/%Y/san1_qdc_%Y%m.txt'),
+                                         'san/qdc/%Y/san_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -459,7 +459,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'san1/%Y/%m/san1_%Y%m%d.txt'),
+                                         'san/%Y/%m/san_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -471,7 +471,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'san1/%Y/%m/san1_%Y%m%d.txt'),
+                                         'san/%Y/%m/san_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -480,8 +480,8 @@ sites = {
                     },
                 },        
             },
-        }, # SAN1
-    'TOB1': {
+        }, # SAN
+    'TOB': {
         'location': 'Tobermory, Mull, UK',
         'latitude': 56.62415194965067,
         'longitude': -6.068624798208475,
@@ -497,7 +497,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'xxx1/%Y/%m/xxx1_%Y%m%d.txt'),
+                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -509,7 +509,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'xxx1/qdc/%Y/xxx1_qdc_%Y%m.txt'),
+                                         'tob/qdc/%Y/tob_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -522,7 +522,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'xxx1/%Y/%m/xxx1_%Y%m%d.txt'),
+                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -534,7 +534,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'xxx1/%Y/%m/xxx1_%Y%m%d.txt'),
+                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -543,8 +543,8 @@ sites = {
                     },
                 },        
             },
-        }, # TOB1
-     'WHI1': {
+        }, # TOB
+     'WHI': {
         'location': 'Whitehaven, Cumbria, UK',
         'latitude': 54.543384,
         'longitude': -3.5610000000000355,
@@ -560,7 +560,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'whi1/%Y/%m/whi1_%Y%m%d.txt'),
+                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -572,7 +572,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'whi1/qdc/%Y/whi1_qdc_%Y%m.txt'),
+                                         'whi/qdc/%Y/whi_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -585,7 +585,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'whi1/%Y/%m/whi1_%Y%m%d.txt'),
+                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -597,7 +597,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'whi1/%Y/%m/whi1_%Y%m%d.txt'),
+                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -606,8 +606,8 @@ sites = {
                     },
                 },        
             },
-        }, # WHI1
-    'ALT1': {
+        }, # WHI
+    'ALT': {
         'location': 'Altrincham, UK',
         'latitude': 53.381988,
         'longitude': -2.3597310000000107,
@@ -623,7 +623,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'alt1/%Y/%m/alt1_%Y%m%d.txt'),
+                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -635,7 +635,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'alt1/qdc/%Y/alt1_qdc_%Y%m.txt'),
+                                         'alt/qdc/%Y/alt_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -648,7 +648,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'alt1/%Y/%m/alt1_%Y%m%d.txt'),
+                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -660,7 +660,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'alt1/%Y/%m/alt1_%Y%m%d.txt'),
+                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -669,8 +669,8 @@ sites = {
                     },
                 },        
             },
-        }, # ALT1
-    'MAL1': {
+        }, # ALT
+    'MAL': {
         'location': 'Malpas, UK',
         'latitude': 53.029658,
         'longitude': -2.760221999999999,
@@ -686,7 +686,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'mal1/%Y/%m/mal1_%Y%m%d.txt'),
+                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -698,7 +698,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'mal1/qdc/%Y/mal1_qdc_%Y%m.txt'),
+                                         'mal/qdc/%Y/mal_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -711,7 +711,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'mal1/%Y/%m/mal1_%Y%m%d.txt'),
+                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -723,7 +723,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'mal1/%Y/%m/mal1_%Y%m%d.txt'),
+                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -732,8 +732,8 @@ sites = {
                     },
                 },        
             },
-        }, # MAL1
-    'ASH1': {
+        }, # MAL
+    'ASH': {
         'location': 'Ashbourne, UK',
         'latitude': 53.021899,
         'longitude': -1.7287959999999885,
@@ -749,7 +749,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'ash1/%Y/%m/ash1_%Y%m%d.txt'),
+                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -761,7 +761,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'ash1/qdc/%Y/ash1_qdc_%Y%m.txt'),
+                                         'ash/qdc/%Y/ash_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -774,7 +774,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'ash1/%Y/%m/ash1_%Y%m%d.txt'),
+                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -786,7 +786,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'ash1/%Y/%m/ash1_%Y%m%d.txt'),
+                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -795,8 +795,8 @@ sites = {
                     },
                 },        
             },
-        }, # ASH1
-        'PEL1': {
+        }, # ASH
+        'PEL': {
         'location': 'Pelsall, UK',
         'latitude': 52.623806,
         'longitude': -1.9490200000000186,
@@ -812,7 +812,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'pel1/%Y/%m/pel1_%Y%m%d.txt'),
+                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -824,7 +824,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'pel1/qdc/%Y/pel1_qdc_%Y%m.txt'),
+                                         'pel/qdc/%Y/pel_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -837,7 +837,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'pel1/%Y/%m/pel1_%Y%m%d.txt'),
+                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -849,7 +849,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'pel1/%Y/%m/pel1_%Y%m%d.txt'),
+                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -858,8 +858,8 @@ sites = {
                     },
                 },        
             },
-        }, # PEL1
-    'BRE1': {
+        }, # PEL
+    'BRE': {
         'location': 'Brecon, UK',
         'latitude': 52.02851,
         'longitude': -3.2026879999999665,
@@ -875,7 +875,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'bre1/%Y/%m/bre1_%Y%m%d.txt'),
+                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -887,7 +887,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'bre1/qdc/%Y/bre1_qdc_%Y%m.txt'),
+                                         'bre/qdc/%Y/bre_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -900,7 +900,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'bre1/%Y/%m/bre1_%Y%m%d.txt'),
+                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -912,7 +912,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'bre1/%Y/%m/bre1_%Y%m%d.txt'),
+                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -921,8 +921,8 @@ sites = {
                     },
                 },        
             },
-        }, # BRE1
-    'CAN1': {
+        }, # BRE
+    'CAN': {
         'location': 'Canterbury, UK',
         'latitude': 51.260914,
         'longitude': 1.084820000000036,
@@ -938,7 +938,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'can1/%Y/%m/can1_%Y%m%d.txt'),
+                                         'can/%Y/%m/can_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -950,7 +950,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'can1/qdc/%Y/can1_qdc_%Y%m.txt'),
+                                         'can/qdc/%Y/can_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -963,7 +963,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'can1/%Y/%m/can1_%Y%m%d.txt'),
+                                         'can/%Y/%m/can_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -975,7 +975,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'can1/%Y/%m/can1_%Y%m%d.txt'),
+                                         'can/%Y/%m/can_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -984,7 +984,7 @@ sites = {
                     },
                 },        
             },
-        }, # CAN1
+        }, # CAN
     }
 
 # Set activity color/thresholds unless already set.
