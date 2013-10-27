@@ -2,8 +2,18 @@
 # Copy this file to somewhere on the python module patch and rename to
 # auroraplot_custom.py
 
+import os.path
+import sys
+if sys.version_info[0] >= 3:
+    import configparser
+    from configparser import SafeConfigParser
+else:
+    import ConfigParser
+    from ConfigParser import SafeConfigParser
+
 import auroraplot as ap
-from socket import gethostname
+
+
 
 def add_network_hook(network_name):
     '''
@@ -17,20 +27,25 @@ def add_network_hook(network_name):
     magnetometer data loggers.
     '''
     if network_name == 'AURORAWATCHNET':
+        filename = '/etc/awnet.ini'
+        if not os.path.exists(filename):
+            return
         try:
-            awn, site_lc = gethostname().split(':')
-        except:
-            # Hostname incorrect format
+            config = SafeConfigParser()
+            config.read(filename)
+            site = config.get('magnetometer', 'site').upper()
+        except Exception as e:
+            print('Bad config file ' + filename + ': ' + str(e))
             return
         
         if not ap.networks[network_name].has_key(site):
             return # Unknown site
 
-        # For data which matches the local hostname convert all URLS
-        # to local paths.
-        site = site_lc
+        # For data which matches this host's site convert all URLS to
+        # local paths.
         for dtv in ap.networks[network_name][site]['data_types'].values():
             for av in dtv.values(): # archive values
                 av['path'] = av['path'].replace(
                     'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet', 
                     '/data/aurorawatchnet')
+
