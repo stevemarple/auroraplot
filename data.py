@@ -225,6 +225,13 @@ class Data(object):
              # Our own options
              start_time=None, end_time=None, time_units=None, add_legend=None,
              **kwargs):
+
+        def bracket_units(units):
+            if units is None or units == '':
+                return ''
+            else:
+                return ' (' + s + ')'
+
         if channels is None:
             channels=self.channels
         elif isinstance(channels, basestring):
@@ -316,7 +323,7 @@ class Data(object):
             
             if not need_legend:
                 # Lines plotted on different axes
-                plt.ylabel(self.channels[cidx] + ' (' + u['fmtunit'] + ')')
+                plt.ylabel(self.channels[cidx] + bracket_units(u['fmtunit']))
             
             if n == 0:
                 first_axes = ax
@@ -326,7 +333,7 @@ class Data(object):
             lh.get_frame().set_alpha(0.6)
             # Label Y axis
             plt.ylabel(str(self.data_description()) + 
-                       ' (' + cu['fmtunit'] + ')')
+                       bracket_units(cu['fmtunit']))
 
         if new_figure:
             # Add title

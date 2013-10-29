@@ -140,7 +140,9 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     else:
         d['fmt'] = fmt
         d['str'] = fmt % d
-        d['fmtunit'] = d['prefix'] + unit
+        d['fmtunit'] = d['prefix']
+        if unit is not None:
+            d['fmtunit'] += unit
         return d
 
 
