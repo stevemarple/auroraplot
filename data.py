@@ -230,7 +230,7 @@ class Data(object):
             if units is None or units == '':
                 return ''
             else:
-                return ' (' + s + ')'
+                return ' (' + units + ')'
 
         if channels is None:
             channels=self.channels
