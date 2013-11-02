@@ -171,6 +171,7 @@ sites = {
         'elevation': 27,
         'start_time': np.datetime64('2012-12-12T17:29Z'),
         'end_time': None, # Still operational
+        'k_index_scale': 650e-9, # Estimated
         'copyright': 'Steve Marple.',
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
@@ -234,6 +235,7 @@ sites = {
         'elevation': 93,
         'start_time': np.datetime64('2012-12-18T00:00Z'),
         'end_time': None, # Still operational
+        'k_index_scale': 650e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -298,6 +300,7 @@ sites = {
         'elevation': None,
         'start_time': np.datetime64('2013-08-01T00:00Z'),
         'end_time': None, # Still operational
+        'k_index_scale': 650e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -362,6 +365,7 @@ sites = {
         'elevation': 11,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 1000e-9, # Estimated, based on BGS Lerwick site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -425,6 +429,7 @@ sites = {
         'elevation': 16.366,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 950e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -488,6 +493,7 @@ sites = {
         'elevation': 43,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 850e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -551,6 +557,7 @@ sites = {
         'elevation': 132,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 680e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -614,6 +621,7 @@ sites = {
         'elevation': 68,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -677,6 +685,7 @@ sites = {
         'elevation': 122,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -740,6 +749,7 @@ sites = {
         'elevation': 157,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -803,6 +813,7 @@ sites = {
         'elevation': 143,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 580e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -866,6 +877,7 @@ sites = {
         'elevation': 121,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 550e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
@@ -929,6 +941,7 @@ sites = {
         'elevation': 48,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None, # Still operational
+        'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
