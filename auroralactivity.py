@@ -264,7 +264,7 @@ class KIndex(Data):
 
         # col[self.data[0] >= 4] = np.array([1.0, 1.0, 0.0]) # Yellow
         col[self.data[0] >= 4] = np.array([1.0, 0.6, 0.0]) # Amber
-        col[self.data[0] >= 6] = np.array([1.0, 0.0, 0.0]) # Red
+        col[self.data[0] >= 5] = np.array([1.0, 0.0, 0.0]) # Red
         return col
 
 
