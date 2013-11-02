@@ -165,7 +165,7 @@ class KIndex(Data):
                  sort=True,
                  magdata=None,
                  magqdc=None, 
-                 scale=500e-9,
+                 scale=None,
                  nth=1,
                  fit=None,
                  fit_params={}):
@@ -182,6 +182,9 @@ class KIndex(Data):
                       data=data,
                       units=units,
                       sort=sort)
+
+        if scale is None:
+            scale = self.get_site_info('k_index_scale')
 
         # K-index thresholds may be scaled but all are proportional to
         # the limits Bartels defined for Niemegk observatory.
@@ -242,9 +245,10 @@ class KIndex(Data):
                     self.range[cn, i] = nth_largest(bsub[cn, tidx]) \
                         - nth_smallest(bsub[cn, tidx])
 
-            self.data = np.zeros_like(self.range)
+            self.data = np.tile(np.nan, self.range.shape)
+            self.data[np.nonzero(np.isfinite(self.range))] = 0
             for i in range(1, len(self.thresholds)):
-                self.data[np.nonzero(self.range > self.thresholds[i])] = i
+                self.data[np.nonzero(self.range >= self.thresholds[i])] = i
 
 
     def data_description(self):
@@ -269,14 +273,18 @@ class KIndex(Data):
 
 
     def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, title=None, 
+             subplot=None, title=None, bottom=-0.2,
              # Our own options
              start_time=None, end_time=None, time_units=None, plot_func=plt.bar,
              **kwargs):
         
         if plot_func == plt.bar:
             data2 = copy.copy(self.data)
-            data2[np.nonzero(data2 == 0)] = 0.1 # Make zero values visible
+            
+            # Make zero values visible
+            data2 -= bottom
+            kwargs['bottom'] = bottom
+            
             self = copy.copy(self)
             self.data = data2
             if channels is None:
@@ -299,11 +307,12 @@ class KIndex(Data):
 
             if not kwargs.has_key('linewidth'):
                 kwargs['linewidth'] = 0.0
-                
+        else:
+            bottom = 0
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix='',
                       title=title, 
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, plot_func=plot_func, **kwargs)
-        plt.ylim(0, 9)
+        plt.ylim(bottom, 9)
         return r
