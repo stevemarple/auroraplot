@@ -417,6 +417,26 @@ def plot_dt64(x, y, axes=None,
     return r
 
 
+def xlim_dt64(xmin=None, xmax=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    if xmin is not None:
+        xmin = dt64_to(xmin, ax.xaxis.dt64tools.units)
+    if xmax is not None:
+        xmax = dt64_to(xmax, ax.xaxis.dt64tools.units)
+    return ax.set_xlim(xmin=xmin, xmax=xmax)
+
+
+def ylim_dt64(ymin=None, ymax=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    if ymin is not None:
+        ymin = dt64_to(ymin, ax.yaxis.dt64tools.units)
+    if ymax is not None:
+        ymax = dt64_to(ymax, ax.yaxis.dt64tools.units)
+    return ax.set_ylim(ymin=ymin, ymax=ymax)
+
+
 class Dt64ToolsData(object):
     def __init__(self, units, type):
         self.units = units
