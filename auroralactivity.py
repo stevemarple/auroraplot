@@ -1,6 +1,8 @@
 import copy
 
 import numpy as np
+import matplotlib as mpl
+import matplotlib.ticker
 import matplotlib.pyplot as plt
 
 import auroraplot as ap
@@ -314,5 +316,7 @@ class KIndex(Data):
                       title=title, 
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, plot_func=plot_func, **kwargs)
-        plt.ylim(bottom, 9)
+        ax = plt.gca()
+        ax.set_ylim(bottom, 9)
+        ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
         return r
