@@ -437,6 +437,10 @@ def ylim_dt64(ymin=None, ymax=None, ax=None):
     return ax.set_ylim(ymin=ymin, ymax=ymax)
 
 
+def get_plot_units(axis):
+    return axis.dt64tools.units
+
+
 class Dt64ToolsData(object):
     def __init__(self, units, type):
         self.units = units
@@ -444,9 +448,9 @@ class Dt64ToolsData(object):
 
 class Datetime64Locator(Locator):
     '''Locator class for numpy.datetime64'''
-    def __init__(self, maxticks=8):
+    def __init__(self, maxticks=8, interval=None):
         self.maxticks = maxticks
-        self.interval = None
+        self.interval = interval
         
 
     def __call__(self):
@@ -462,16 +466,17 @@ class Datetime64Locator(Locator):
 
         limits_dt64 = (limits.astype('m8[' + units + ']') + 
                        self.axis.dt64tools.type(0, units))
-        tick_interval = self.calc_interval(limits_dt64[0], limits_dt64[1])
+        if self.interval is not None:
+            tick_interval = self.interval
+        else:
+            tick_interval = self.calc_interval(limits_dt64[0], limits_dt64[1])
         if tick_interval is not None:
-            self.interval = tick_interval
-            first_tick = ceil(limits_dt64[0], self.interval)
-            last_tick = floor(limits_dt64[1], self.interval)
-            num = np.floor(((last_tick - first_tick) / self.interval) + 1)
+            first_tick = ceil(limits_dt64[0], tick_interval)
+            last_tick = floor(limits_dt64[1], tick_interval)
+            num = np.floor(((last_tick - first_tick) / tick_interval) + 1)
             tick_times = np.linspace(first_tick, last_tick, num)
             tick_locs = dt64_to(tick_times, units)
 
-            # return self.raise_if_exceeds(tick_locs)
             try:
                 return self.raise_if_exceeds(tick_locs)
             except RuntimeError as e:
