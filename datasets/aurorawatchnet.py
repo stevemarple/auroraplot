@@ -358,6 +358,71 @@ sites = {
                 },        
             },
         }, # METOFFICE1
+    'TEST1': {
+        'location': 'Lancaster, UK',
+        'latitude': 54.0,
+        'longitude': -2.78,
+        'elevation': 27,
+        'start_time': np.datetime64('2013-11-10T00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 650e-9, # Estimated
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+            'Department of Physics, Lancaster University, UK.',
+        'data_types': {
+            'MagData': {
+                'realtime': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir,
+                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir, 
+                                         'test1/qdc/%Y/test1_qdc_%Y%m.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature', 
+                                          'System temperature']),
+                    'path': os.path.join(data_dir,
+                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': u'\N{DEGREE SIGN}C',
+                    # 'units': 'C',
+                    },
+                },
+            'VoltageData': {
+                'realtime': {
+                    'channels': np.array(['Battery voltage']),
+                    'path': os.path.join(data_dir,
+                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'V',
+                    },
+                },        
+            },
+        }, # TEST1
     'BRA': {
         'location': 'Brae, Shetland, UK',
         'latitude': 60.395869,
