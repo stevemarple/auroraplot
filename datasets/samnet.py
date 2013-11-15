@@ -153,7 +153,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000'),
         'end_time': None,
-        'k_index_scale': 750e-9, # From BGS  Monthly Magnetic Bullettin
+        'k_index_scale': 750e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
@@ -190,7 +190,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000'),
         'end_time': None,
-        'k_index_scale': 500e-9, # From BGS  Monthly Magnetic Bullettin
+        'k_index_scale': 500e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
@@ -275,7 +275,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000'),
         'end_time': None,
-        'k_index_scale': 1000e-9, # From BGS  Monthly Magnetic Bullettin
+        'k_index_scale': 1000e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
