@@ -1063,6 +1063,73 @@ sites = {
                 },        
             },
         }, # CAN
+    'CWX': {
+        # Private station operated by Cumbernauld Weather
+
+        'location': 'Cumbernauld, UK',
+        'latitude': 55 + (56.1/60),
+        'longitude': -(4 + (2.2/60)),
+        'elevation': 82,
+        'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
+        'end_time': None, # Still operational
+        'url': 'http://www.cumbernauld-weather.co.uk/', # Provisional
+        'k_index_scale': 750e-9, # Estimated, based on BGS Eskdakemuir site
+        'license': cc3_by_nc_sa,
+        'copyright': 'Cumbernauld Weather.',
+        'attribution': 'Cumbernauld Weather, ' + \
+            'http://www.cumbernauld-weather.co.uk/',
+        'data_types': {
+            'MagData': {
+                'realtime': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir,
+                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H']),
+                    'path': os.path.join(data_dir, 
+                                         'can/qdc/%Y/cwx_qdc_%Y%m.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature', 
+                                          'System temperature']),
+                    'path': os.path.join(data_dir,
+                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': u'\N{DEGREE SIGN}C',
+                    },
+                },
+            'VoltageData': {
+                'realtime': {
+                    'channels': np.array(['Battery voltage']),
+                    'path': os.path.join(data_dir,
+                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'V',
+                    },
+                },        
+            },
+        }, # CWX
     }
 
 # Set activity color/thresholds unless already set.
