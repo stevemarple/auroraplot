@@ -290,11 +290,14 @@ class KIndex(Data):
             self = copy.copy(self)
             self.data = data2
             if channels is None:
-                channels = self.channels[0]
+                self.data = np.array([np.max(self.data, axis=0)])
+                self.channels = np.array([','.join(self.channels)])
+                channels = self.channels
             else:
-                assert len(channels) == 1, \
-                    'Can only plot one channel for bar graphs'
-
+                ci = self.get_channel_index(channels)
+                self.data = np.array([np.max(self.data[ci], axis=0)])
+                self.channels = ','.join(self.channels[ci])
+                
             if time_units is None:
                 time_units = dt64.get_units(self.sample_start_time)
             if not kwargs.has_key('width'):
@@ -309,6 +312,7 @@ class KIndex(Data):
 
             if not kwargs.has_key('linewidth'):
                 kwargs['linewidth'] = 0.0
+
         else:
             bottom = 0
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
@@ -317,6 +321,9 @@ class KIndex(Data):
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, plot_func=plot_func, **kwargs)
         ax = plt.gca()
+        if plot_func == plt.bar:
+            ax.set_ylabel('Local K index (' + ','.join(channels) + ')')
+
         ax.set_ylim(bottom, 9)
         ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(1))
         return r
