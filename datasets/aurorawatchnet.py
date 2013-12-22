@@ -1083,7 +1083,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1095,7 +1095,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'can/qdc/%Y/cwx_qdc_%Y%m.txt'),
+                                         'cwx/qdc/%Y/cwx_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1108,7 +1108,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1120,7 +1120,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'can/%Y/%m/cwx_%Y%m%d.txt'),
+                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
