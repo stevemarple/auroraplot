@@ -17,7 +17,7 @@ def convert_samnet_data(file_name, archive_data,
     for c in channels:
         col_idx.append(chan_tup.index(c))
     nominal_cadence_s = (archive_data['nominal_cadence'] / 
-                         np.timedelta64(1, 's'))
+                         np.timedelta64(1000000, 'us'))
     try:
         # if file_name.startswith('/'):
         #     #uh = urllib2.urlopen('file:' + file_name)
@@ -91,11 +91,12 @@ def convert_rt_data(file_name, archive_data,
 
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = start_time + (np.timedelta64(1, 's') * data[0])
-            sample_end_time = sample_start_time + np.timedelta64(1, 's')
-            integration_interval = np.ones([len(channels), 
-                                            len(sample_start_time)],
-                                            dtype='m8[s]')
+            sample_start_time = start_time \
+                + (np.timedelta64(1000000, 'us') * data[0])
+            sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
+            integration_interval = np.tile(1000000, [len(channels), 
+                                                 len(sample_start_time)],
+                                           dtype='m8[us]')
             r = MagData(network=network,
                         site=site,
                         channels=channels,
@@ -406,7 +407,7 @@ for s in sites:
                                      sc + '%d%m%y.dgz'),
                 'duration': np.timedelta64(24, 'h'),
                 'converter': convert_samnet_data,
-                'nominal_cadence': np.timedelta64(1, 's'),
+                'nominal_cadence': np.timedelta64(1000000, 'us'),
                 'units': 'T',
                 },
             '5s': {
@@ -415,7 +416,7 @@ for s in sites:
                                      sc + '%d%m%Y.5s.gz'),
                 'duration': np.timedelta64(24, 'h'),
                 'converter': convert_samnet_data,
-                'nominal_cadence': np.timedelta64(5, 's'),
+                'nominal_cadence': np.timedelta64(5000000, 'us'),
                 'units': 'T',
                 },
                 'realtime': {
@@ -424,7 +425,7 @@ for s in sites:
                         '/%Y/%m/' + s_lc + '%Y%m%d.rt',
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_rt_data,
-                    'nominal_cadence': np.timedelta64(1, 's'),
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     },
                 },
@@ -436,7 +437,7 @@ for s in sites:
                     'duration': np.timedelta64(24, 'h'),
                     # Use the standard converter for MagQDC
                     'converter': ap.magdata.convert_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'nominal_cadence': np.timedelta64(5000000, 'us'),
                     'units': 'T',
                     },
                 },

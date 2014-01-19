@@ -67,9 +67,9 @@ def convert_awn_data(file_name, archive_data,
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = ap.epoch64_us + \
-                (np.timedelta64(1, 's') * data[0])
+                (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
-            sample_end_time = sample_start_time + np.timedelta64(1, 's')
+            sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
             integration_interval = np.ones([len(channels), 
                                             len(sample_start_time)],
                                             dtype='m8[us]')
@@ -125,7 +125,7 @@ def convert_awn_qdc_data(file_name, archive_data,
             uh = urllib2.urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = (np.timedelta64(1, 's') * data[0])
+            sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
             sample_end_time = sample_start_time \
                 + archive_data['nominal_cadence']
             
