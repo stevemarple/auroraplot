@@ -4,13 +4,16 @@
 import datetime
 import re
 import math
-import warnings
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Locator
 from matplotlib.ticker import Formatter
 
 import copy
+
+logger = logging.getLogger(__name__)
+
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
 
@@ -461,7 +464,7 @@ class Datetime64Locator(Locator):
         limits = self.axis.get_view_interval()
 
         if np.diff(limits) < 1:
-            print('limit for tick labels reached')
+            logger.warn('limit for tick labels reached')
             return []
 
         limits_dt64 = (limits.astype('m8[' + units + ']') + 
@@ -480,7 +483,7 @@ class Datetime64Locator(Locator):
             try:
                 return self.raise_if_exceeds(tick_locs)
             except RuntimeError as e:
-                print('Runtime error: ' + e.message)
+                logger.exception(e)
                 return []
 
         else:
@@ -774,7 +777,7 @@ def _strftime_dt64(t, fstr, customspec=None):
             elif fstr[i] == '#': # milliseconds
                 s += '{0:03d}'.format(int(np.round(np.mod(dt64_to(t, 'ms', returnfloat=True), 1000))))
             else:
-                warnings.warn('Unknown format specifier: ' + fstr[i])
+                logger.warn('Unknown format specifier: ' + fstr[i])
                 replacements.pop()
                 
         else:
@@ -826,7 +829,7 @@ def _strftime_td64(td, fstr, customspec=None):
                 # Use np.round to get rounding to even number
                 s += '{0:03d}'.format(int(np.round(td2.microseconds / 1000.0)))
             else:
-                warnings.warn('Unknown format specifier: ' + fstr[i])
+                logger.warn('Unknown format specifier: ' + fstr[i])
                 replacements.pop()
                 
         else:

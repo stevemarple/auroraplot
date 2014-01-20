@@ -2,6 +2,8 @@ import copy
 # import pickle
 import cPickle as pickle
 
+import logging
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -13,6 +15,7 @@ import auroraplot as ap
 import auroraplot.tools
 import auroraplot.dt64tools as dt64
 
+logger = logging.getLogger(__name__)
 
 def leastsq_error(p, obj, ref, channel):
     '''

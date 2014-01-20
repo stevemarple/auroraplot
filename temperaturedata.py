@@ -1,6 +1,9 @@
+import logging
 import numpy as np
 
 from auroraplot.data import Data
+
+logger = logging.getLogger(__name__)
 
 class TemperatureData(Data):
     '''Class to manipulate and display temperature data.'''

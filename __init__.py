@@ -2,6 +2,9 @@ import logging
 import numpy as np
 import dt64tools as dt64
 
+logger = logging.getLogger(__name__)
+
+
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
 
 networks = { }
@@ -298,7 +301,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         else:
             file_name = dt64.strftime(t, path)
 
-        logging.info('loading ' + file_name)
+        logger.info('loading ' + file_name)
 
         try:
             tmp = ad['converter'](file_name, 
@@ -311,8 +314,8 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
             if tmp is not None:
                 data.append(tmp)
         except Exception as e:
-            logging.info('Could not load ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not load ' + file_name)
+            logger.debug(str(e))
 
                         
         

@@ -1,6 +1,8 @@
 import copy
+import logging
 import numpy as np
 
+logger = logging.getLogger(__name__)
 class NthLargest(object):
     '''
     Class to calculate the Nth largest value from a numpy array-like

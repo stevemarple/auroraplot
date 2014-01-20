@@ -13,6 +13,8 @@ from scipy.stats import nanmean
 import scipy.interpolate
 import warnings
 
+logger = logging.getLogger(__name__)
+
 def load_qdc(network, site, time, **kwargs):
     '''Load quiet-day curve. 
     network: name of the network (upper case)
@@ -86,7 +88,7 @@ def load_qdc(network, site, time, **kwargs):
             else:
                 file_name = dt64.strftime(t, path)
 
-            logging.info('loading ' + file_name)
+            logger.info('loading ' + file_name)
 
             r = ad['converter'](file_name, 
                                 ad,
@@ -153,14 +155,14 @@ def convert_qdc_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            logging.info('Could not read ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        logging.info('Could not open ' + file_name)
-        logging.debug(str(e))
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
     return None
 
 

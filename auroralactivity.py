@@ -1,5 +1,5 @@
 import copy
-
+import logging
 import numpy as np
 import matplotlib as mpl
 import matplotlib.ticker
@@ -13,6 +13,8 @@ import auroraplot.dt64tools as dt64
 import auroraplot.tools
 
 from scipy.stats import nanmean
+
+logger = logging.getLogger(__name__)
 
     
 class AuroraWatchActivity(Data):

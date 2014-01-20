@@ -1,6 +1,10 @@
+import logging
+
 import numpy as np
 
 from auroraplot.data import Data
+
+logger = logging.getLogger(__name__)
 
 class VoltageData(Data):
     '''Class to manipulate and display voltage data.'''

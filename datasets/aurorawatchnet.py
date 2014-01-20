@@ -8,6 +8,8 @@ from auroraplot.magdata import MagQDC
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
 
+logger = logging.getLogger(__name__)
+
 data_dir = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet'
 
 def check_mag_data(data):
@@ -92,14 +94,14 @@ def convert_awn_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            logging.info('Could not read ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        logging.info('Could not open ' + file_name)
-        logging.debug(str(e))
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
 
     return None
 
@@ -146,14 +148,14 @@ def convert_awn_qdc_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            logging.info('Could not read ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        logging.info('Could not open ' + file_name)
-        logging.debug(str(e))
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
     return None
     
 
