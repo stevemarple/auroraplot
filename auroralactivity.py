@@ -124,7 +124,8 @@ class AuroraWatchActivity(Data):
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, title=None, 
              # Our own options
-             start_time=None, end_time=None, time_units=None, plot_func=plt.bar,
+             start_time=None, end_time=None, time_units=None, 
+             plot_func=plt.bar, plot_thresholds=True,
              **kwargs):
         
         if plot_func == plt.bar:
@@ -147,6 +148,15 @@ class AuroraWatchActivity(Data):
                       title=title, 
                       start_time=start_time, end_time=end_time, 
                       time_units=time_units, plot_func=plot_func, **kwargs)
+
+        if plot_thresholds:
+            if axes is None:
+                axes = plt.gca()
+            mul = ap.str_units(0, 'T', units_prefix, wantstr=False)['mul']
+            for n in range(1, len(self.thresholds)):
+                axes.plot(axes.xaxis.get_view_interval(), 
+                          self.thresholds[[n,n]] / mul, 
+                          color=self.colors[n], linestyle='--')
         return r
 
 
