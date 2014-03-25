@@ -295,7 +295,7 @@ sites = {
                 },        
             },
         }, # LAN3
-    'METOFFICE1': {
+    'ORM': {
         'location': 'Ormskirk, UK',
         'latitude': 53.569195, 
         'longitude': -2.887264,
@@ -312,7 +312,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir,
-                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -324,7 +324,7 @@ sites = {
                 'qdc': {
                     'channels': np.array(['H']),
                     'path': os.path.join(data_dir, 
-                                         'metoffice1/qdc/%Y/metoffice1_qdc_%Y%m.txt'),
+                                         'orm/qdc/%Y/orm_qdc_%Y%m.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -337,7 +337,7 @@ sites = {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
                     'path': os.path.join(data_dir,
-                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -350,7 +350,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
                     'path': os.path.join(data_dir,
-                                         'metoffice1/%Y/%m/metoffice1_%Y%m%d.txt'),
+                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -359,7 +359,7 @@ sites = {
                     },
                 },        
             },
-        }, # METOFFICE1
+        }, # ORM
     'TEST1': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
