@@ -98,7 +98,6 @@ def load_qdc(network, site, time, **kwargs):
                                 start_time=np.timedelta64(0, 'h'), 
                                 end_time=np.timedelta64(24, 'h'),
                                 **kwargs2)
-              
             if r is not None:
                 r.extract(inplace=True, 
                           channels=channels)
@@ -238,7 +237,13 @@ def stack_plot(data_array, offset, channel=None,
         y = (d.data[cidx] - scipy.stats.nanmedian(d.data[cidx], axis=-1) \
                  + (n * offset)).flatten()
         ydiff[n] = max5(y) - min5(y)
-        lh = dt64.plot_dt64(d.get_mean_sample_time(), y)
+
+        kwargs = {}
+        try:
+            kwargs['color'] = da[n].get_site_info('line_color')
+        except KeyError as e:
+            pass
+        lh = dt64.plot_dt64(d.get_mean_sample_time(), y, **kwargs)
         r.extend(lh)
         tick_labels.append(d.network + '\n' + d.site)
 

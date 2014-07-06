@@ -770,7 +770,7 @@ def _strftime_dt64(t, fstr, customspec=None):
             elif fstr[i] == 't': # st, nd, rd or th day number suffix
                 s += num_suffix[get_day_of_month(t)]
             elif fstr[i] == 'y': # year [yy]
-                s += '{0:02d}'.format(int(get_year(t)))
+                s += '{0:02d}'.format(int((get_year(t)) % 100))
             elif fstr[i] == 'Y': # year [YYYY]
                 s += '{0:04d}'.format(int(get_year(t)))
             # extension

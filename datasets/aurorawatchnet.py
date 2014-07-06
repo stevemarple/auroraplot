@@ -177,6 +177,7 @@ sites = {
         'copyright': 'Steve Marple.',
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
+        'line_color': [0, 0.6, 0],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -242,6 +243,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'line_color': [1, 0, 0],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -307,6 +309,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'line_color': [186.0/255, 216.0/255, 10.0/255],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -629,6 +632,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'line_color': [0, 0, .8],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -949,6 +953,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'line_color': [119.0/255, 11.0/255, 0],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -1013,6 +1018,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'line_color': [0, 0, 1],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -1080,6 +1086,7 @@ sites = {
         'copyright': 'Cumbernauld Weather.',
         'attribution': 'Cumbernauld Weather, ' + \
             'http://www.cumbernauld-weather.co.uk/',
+        'line_color': [1, 0, 1],
         'data_types': {
             'MagData': {
                 'realtime': {
