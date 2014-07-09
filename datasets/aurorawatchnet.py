@@ -632,7 +632,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'line_color': [0, 0, .8],
+        'line_color': [.6, .6, .6],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -1018,7 +1018,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space Plasma Environment and Radio Science group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'line_color': [0, 0, 1],
+        'line_color': [64.0/255, 224.0/255, 208.0/255],
         'data_types': {
             'MagData': {
                 'realtime': {
@@ -1086,7 +1086,7 @@ sites = {
         'copyright': 'Cumbernauld Weather.',
         'attribution': 'Cumbernauld Weather, ' + \
             'http://www.cumbernauld-weather.co.uk/',
-        'line_color': [1, 0, 1],
+        'line_color': [0.3, 0.3, 1],
         'data_types': {
             'MagData': {
                 'realtime': {
