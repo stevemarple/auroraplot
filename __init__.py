@@ -149,6 +149,15 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         return d
 
 
+def has_site_info(network, site, info):
+    # Sanity checking
+    if not networks.has_key(network):
+        raise Exception('Unknown network')
+    elif not networks[network].has_key(site):
+        raise Exception('Unknown site')
+    return networks[network][site].has_key(info)
+
+
 def get_site_info(network, site, info=None):
     # Sanity checking
     if not networks.has_key(network):
