@@ -170,6 +170,22 @@ def k_index_filter_battery(mag_data):
     return md_filt
     
 
+def load_bad_data(network, site, data_type, start_time, end_time,
+                  archive=None, path=None, extension='.bad', **kwargs):
+    '''Load data from bad data files, usually those which end in .bad.
+
+    This function is a wrapper which calls aurorawatchnet.load_data()
+    after appending an extension to the file names. The path cannot be
+    a callable.
+    '''
+    if path is None:
+        ai = ap.get_archive_info(network, site, data_type, archive=archive)
+        path = ai[1]['path'] + extension
+
+    return ap.load_data(network, site, data_type, start_time, end_time,
+                        archive=ai[0], path=path, **kwargs)
+
+
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
     'To view a copy of this license, visit ' + \
