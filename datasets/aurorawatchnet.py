@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import urllib2
 import auroraplot as ap
+import auroraplot.tools
 from auroraplot.magdata import MagData
 from auroraplot.magdata import MagQDC
 from auroraplot.temperaturedata import TemperatureData
@@ -159,6 +160,15 @@ def convert_awn_qdc_data(file_name, archive_data,
     return None
     
 
+def k_index_filter_battery(mag_data):
+    '''Filter data for K index (battery-powered magnetometers).
+    
+    Battery-powered magnetometers have higher noise, filter to reduce.'''
+    md_filt = ap.tools.sgolay_filt(mag_data,
+                                   np.timedelta64(630,'s'), 3)
+    md_filt.set_cadence(np.timedelta64(5, 'm'), inplace=True)
+    return md_filt
+    
 
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
@@ -1152,7 +1162,10 @@ for s in sites:
         sites[s]['activity_thresholds'] = default_activity_thresholds
     if not sites[s].has_key('activity_colors'):
         sites[s]['activity_colors'] = default_activity_colors
-    
+
+    if not sites[s].has_key('k_index_filter'):
+         sites[s]['k_index_filter'] = k_index_filter_battery
+
 ap.add_network('AURORAWATCHNET', sites)
 
 
