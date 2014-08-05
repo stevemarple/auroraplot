@@ -197,14 +197,6 @@ class KIndex(Data):
                       units=units,
                       sort=sort)
 
-        if scale is None:
-            scale = self.get_site_info('k_index_scale')
-
-        # K-index thresholds may be scaled but all are proportional to
-        # the limits Bartels defined for Niemegk observatory.
-        self.thresholds = np.array([0.00, 0.01, 0.02, 0.04, 0.08, 
-                                    0.14, 0.24, 0.40, 0.66, 1.00]) * scale
-        
         if magdata is not None and magqdc is not None:
             self.network = magdata.network
             self.site = magdata.site
@@ -261,6 +253,17 @@ class KIndex(Data):
 
             self.data = np.tile(np.nan, self.range.shape)
             self.data[np.nonzero(np.isfinite(self.range))] = 0
+
+            if scale is None:
+                scale = self.get_site_info('k_index_scale')
+                
+            # K-index thresholds may be scaled but all are proportional to
+            # the limits Bartels defined for Niemegk observatory.
+            self.thresholds = np.array([0.00, 0.01, 0.02, 0.04,
+                                        0.08, 0.14, 0.24, 0.40,
+                                        0.66, 1.00]) * scale
+
+
             for i in range(1, len(self.thresholds)):
                 self.data[np.nonzero(self.range >= self.thresholds[i])] = i
 
