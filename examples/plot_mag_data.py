@@ -19,7 +19,7 @@ st = np.datetime64('2013-09-20T00:00:00+0000')
 et = np.datetime64('2013-09-21T00:00:00+0000')
 
 mdl = []
-for site in ['LAN1', 'LAN3', 'METOFFICE1']:
+for site in ['LAN1', 'LAN3', 'ORM']:
     md = ap.load_data('AURORAWATCHNET', site, 'MagData', st, et)
     if md is not None:
         mdl.append(md)
