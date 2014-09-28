@@ -649,9 +649,14 @@ class Datetime64Formatter(Formatter):
         if pos is None:
             fmt = '%Y-%m-%dT%H:%M:%SZ'
         elif fmt is None:
-            data_interval = \
-                np.timedelta64(int(np.diff(self.axis.get_data_interval())), 
-                               units)
+            xadi = self.axis.get_data_interval()
+            if np.all(np.isfinite(xadi)):
+                data_interval = np.timedelta64(int(np.diff(xadi)), units)
+            else:
+                # Nothing plotted, so use current limits for time range
+                data_interval = np.timedelta64(int(np.diff(\
+                            self.axis.get_view_interval())), units)
+                
             tick_locs = self.axis.get_ticklocs()
             if len(tick_locs) >= 2:
                 tick_interval = \
