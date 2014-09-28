@@ -530,7 +530,7 @@ class Data(object):
         if end_time is None:
             end_time = self.end_time
         if missing_cadence is None:
-            missing_cadence = self.cadence
+            missing_cadence = 1.5 * self.nominal_cadence
         s = self.mark_missing_data(start_time=start_time, end_time=end_time,
                                    cadence=missing_cadence)
         one_us = np.timedelta64(1, 'us')
@@ -538,7 +538,10 @@ class Data(object):
         sam_st = start_time + np.arange(0, (end_time - start_time) / one_us, 
                                         cadence / one_us).astype('m8[us]')
         sam_et = sam_st + cadence
-        return s.interp(sam_st, sam_et, kind='linear')
+        
+        r = s.interp(sam_st, sam_et, kind='linear')
+        r.nominal_cadence = cadence
+        return r
 
 
     def least_squares_fit(self, ref, err_func=leastsq_error, 
