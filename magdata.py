@@ -264,15 +264,16 @@ def stack_plot(data_array, offset, channel=None,
     else:
         ydisturb = scipy.stats.nanmedian(ydiff)
 
-    # Round up to multiple of offset for aesthetic reasons.
-    ydisturb = np.ceil(ydisturb / offset) * offset
+    if offset:
+        # Round up to multiple of offset for aesthetic reasons.
+        ydisturb = np.ceil(ydisturb / offset) * offset
 
-    ylim = [-offset, da.size * offset]
-    if ax.yaxis.get_data_interval()[0] < ylim[0]:
-        ylim[0] = -ydisturb
-    if ax.yaxis.get_data_interval()[1] > ylim[1]:
-        ylim[1] = ((da.size - 1) * offset) + ydisturb
-    ax.set_ylim(ylim)
+        ylim = [-offset, da.size * offset]
+        if ax.yaxis.get_data_interval()[0] < ylim[0]:
+            ylim[0] = -ydisturb
+        if ax.yaxis.get_data_interval()[1] > ylim[1]:
+            ylim[1] = ((da.size - 1) * offset) + ydisturb
+        ax.set_ylim(ylim)
     
     ax.yaxis.set_ticks(tick_locs)
     ax.yaxis.set_ticklabels(tick_labels)
