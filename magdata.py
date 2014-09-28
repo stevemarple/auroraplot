@@ -328,7 +328,7 @@ class MagData(Data):
         else:
             warnings.warn('Unknown units')
             a[1:] = self.data 
-        print('saving to ' + filename)
+        logger.info('saving to ' + filename)
         np.savetxt(filename,  a.transpose())
 
 
