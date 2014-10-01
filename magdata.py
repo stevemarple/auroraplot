@@ -15,6 +15,118 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
+
+def load_iaga_2000(file_name):
+    logger.info('loading ' + file_name)
+
+    try:
+        if file_name.startswith('/'):
+            uh = urllib2.urlopen('file:' + file_name)
+        else:
+            uh = urllib2.urlopen(file_name)
+
+        try:
+            lines = [a.rstrip('\n') for a in uh.readlines()]
+            header = {}
+            comments = []
+            
+            # Parse header
+            while lines[0][0] == ' ':
+                s = lines.pop(0)
+                if s[1] == '#':
+                    # Comment
+                    c = s[2:-1].strip()
+                    if c != '':
+                        comments.append(c)
+                else:
+                    # Header line
+                    key = s[:24].strip()
+                    value = s[24:-1].strip()
+                    header[key] = value
+            
+            # Parse data header
+            s = lines.pop(0)
+            cols = s[:-1].split()
+            col_pos = [[0, 0], ]
+            last_pos = len(s)
+            data = [[]]
+            col_number = {cols[0]: 0}
+            for n in xrange(1, len(cols)):
+                pos = s.find(cols[n])
+                col_pos.insert(n, [pos, 0])
+                col_pos[n-1][1] = pos
+                col_number[cols[n]] = n
+                data.insert(n, [])
+            col_pos[-1][1] = len(s)
+            
+            # Parse data
+            for s in lines:
+                for n in xrange(len(cols)):
+                    data[n].append(s[col_pos[n][0]:col_pos[n][1]].strip())
+
+            # Convert date and time
+            if col_number.has_key('DATE') and col_number.has_key('TIME'):
+                dn = col_number['DATE']
+                tn = col_number['TIME']
+                sample_time = []
+                for n in xrange(len(data[0])):
+                    sample_time.append(np.datetime64(data[dn][n] + 'T' +
+                                                     data[tn][n] + 'Z')\
+                                           .astype('<M8[us]'))
+                sample_time = np.array(sample_time)
+            else:
+                sample_time = None
+
+            r = { 'header': header,
+                  'comments': comments,
+                  'data': data,
+                  'columns': cols,
+                  'column_number': col_number,
+                  'sample_time': sample_time
+                  }
+            return r
+
+        except Exception as e:
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+
+        finally:
+            uh.close()
+                
+    except Exception as e:
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+    return None
+
+
+def convert_iaga_2000(file_name, archive_data, 
+                      network, site, data_type, channels, start_time, 
+                      end_time, **kwargs):
+    assert data_type == 'MagData', 'Illegal data_type'
+    iaga = load_iaga_2000(file_name)
+    data = []
+    for c in channels:
+        n = iaga['column_number'][site.upper() + c.upper()]
+        data.append(map(lambda x: 
+                        float('nan') if x == '99999.00' else float(x),   
+                        iaga['data'][n]))
+    
+    data = np.array(data) * 1e-9
+    r = MagData(network=network,
+                site=site,
+                channels=channels,
+                start_time=start_time,
+                end_time=end_time,
+                sample_start_time=iaga['sample_time'], 
+                sample_end_time=iaga['sample_time'] + \
+                    archive_data['nominal_cadence'],
+                integration_interval=None,
+                nominal_cadence=archive_data['nominal_cadence'],
+                data=data,
+                units=archive_data['units'],
+                sort=False)
+    return r
+
 def load_qdc(network, site, time, **kwargs):
     '''Load quiet-day curve. 
     network: name of the network (upper case)
