@@ -211,6 +211,7 @@ sites = {
         'start_time': np.datetime64('2012-12-12T17:29Z'),
         'end_time': None, # Still operational
         'k_index_scale': 650e-9, # Estimated
+        'k_index_filter': None,
         'copyright': 'Steve Marple.',
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
