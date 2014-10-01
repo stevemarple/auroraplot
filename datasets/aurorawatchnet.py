@@ -186,6 +186,17 @@ def load_bad_data(network, site, data_type, start_time, end_time,
                         archive=ai[0], path=path, **kwargs)
 
 
+def abbreviate_aurorawatchnet(ax, title=True, labels=True):
+    '''Abbreviate AURORAWATCHNET to AWN on plots.'''
+    if title:
+        ax.set_title(ax.get_title().replace('AURORAWATCHNET', 'AWN'))
+    if labels:
+        tll = ax.yaxis.get_ticklabels() # tick label list
+        labels = [ tl.get_text() for tl in tll]
+        labels = map(lambda x: x.replace('AURORAWATCHNET', 'AWN'), labels)
+        ax.yaxis.set_ticklabels(labels)
+
+
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
     'To view a copy of this license, visit ' + \
