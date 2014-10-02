@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+
+import copy
+import logging
+import numpy as np
+
+import auroraplot as ap
+import auroraplot.dt64tools as dt64
+import auroraplot.magdata
+
+from auroraplot.magdata import MagData
+from auroraplot.magdata import load_iaga_2000
+from auroraplot.datasets.uit import convert_iaga_2000
+
+import auroraplot.datasets.uit
+from auroraplot.datasets.uit import uit_path
+
+logger = logging.getLogger(__name__)
+uit_password = None
+
+sites = {
+    'BFE': {
+        'location': 'Brorfelde, Denmark',
+        'latitude': 62.07,
+        'longitude': 9.11,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'bfe6d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'bfe6d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # BFE
+    'ROE': {
+        'location': 'Rømø, Denmark',
+        'latitude': 62.07,
+        'longitude': 9.11,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'roe1d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'roe1d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # ROE    
+    }
+
+
+
+ap.add_network('DTU', sites)
+
+
+
