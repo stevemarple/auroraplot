@@ -99,34 +99,6 @@ def load_iaga_2000(file_name):
     return None
 
 
-def convert_iaga_2000(file_name, archive_data, 
-                      network, site, data_type, channels, start_time, 
-                      end_time, **kwargs):
-    assert data_type == 'MagData', 'Illegal data_type'
-    iaga = load_iaga_2000(file_name)
-    data = []
-    for c in channels:
-        n = iaga['column_number'][site.upper() + c.upper()]
-        data.append(map(lambda x: 
-                        float('nan') if x == '99999.00' else float(x),   
-                        iaga['data'][n]))
-    
-    data = np.array(data) * 1e-9
-    r = MagData(network=network,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=iaga['sample_time'], 
-                sample_end_time=iaga['sample_time'] + \
-                    archive_data['nominal_cadence'],
-                integration_interval=None,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=False)
-    return r
-
 def load_qdc(network, site, time, **kwargs):
     '''Load quiet-day curve. 
     network: name of the network (upper case)
