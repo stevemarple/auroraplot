@@ -85,9 +85,44 @@ sites = {
                 }
             },
         }, # ROE    
+    'TDC': {
+        'location': 'Tristan da Cunha',
+        'latitude': -37.07,
+        'longitude': -12.38,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'tdc4d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'tdc4d',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # TDC
     }
 
 
+for s in sites:
+    sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
 ap.add_network('DTU', sites)
 
