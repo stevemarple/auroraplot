@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 def load_iaga_2000(file_name):
-    logger.info('loading ' + file_name)
-
     try:
         if file_name.startswith('/'):
             uh = urllib2.urlopen('file:' + file_name)
