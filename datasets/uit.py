@@ -23,10 +23,17 @@ def convert_iaga_2000(file_name, archive_data,
     iaga = load_iaga_2000(file_name)
     data = []
     for c in channels:
+        iaga_col_name = None
         if archive_data.has_key('uit_channels'):
             iaga_col_name = archive_data['uit_iaga_column'][c]
         else:
-            iaga_col_name = site.upper() + c.upper()
+            for poss_name in [site.upper() + c.upper(),
+                              '---' + c.upper()]:
+                if iaga['column_number'].has_key(poss_name):
+                    iaga_col_name = poss_name
+                    break
+        if iaga_col_name is None:
+            raise Exception('Cannot find column for ' + c)
 
         n = iaga['column_number'][iaga_col_name]
         data.append(map(lambda x: 
@@ -65,6 +72,105 @@ def uit_path(t, network, site, data_type, archive, channels):
     return dt64.strftime(t, fstr)
 
 sites = {
+    'AMK': {
+        'location': 'Ammassalik, Greenland',
+        'latitude': 65.60,
+        'longitude': -37.63,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'amk1f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'amk1f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # AMK
+    'AND': {
+        'location': 'Andenes, Norway',
+        'latitude': 69.30,
+        'longitude': 16.03,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'and1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'and1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # AND
+    'BJN': {
+        'location': 'Bjørnøya, Svalbard',
+        'latitude': 74.50,
+        'longitude': 19.00,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'bjn1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'bjn1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # BJN
     'DOB': {
         'location': 'Dombås, Norway',
         'latitude': 62.07,
@@ -98,6 +204,105 @@ sites = {
                 }
             },
         }, # DOB
+    'DON': {
+        'location': 'Dønna, Norway',
+        'latitude': 66.11,
+        'longitude': 12.50,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'don1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'don1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # DON
+    'HOP': {
+        'location': 'Hopen, Svalbard',
+        'latitude': 76.51,
+        'longitude': 25.01,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'hop1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'hop1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # HOP
+    'JCK': {
+        'location': 'Jäckvik, Sweden',
+        'latitude': 66.40,
+        'longitude': 16.98,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'jck1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'jck1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # JCK
     'KAR': {
         'location': 'Karmøy, Norway',
         'latitude': 59.21,
@@ -131,6 +336,72 @@ sites = {
                 }
             },
         }, # KAR
+    'LYR': {
+        'location': 'Longyearbyen, Svalbard',
+        'latitude': 78.2,
+        'longitude': 15.83,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'lyr2a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'lyr2a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # LYR
+    'NAL': {
+        'location': 'Ny Ålesund, Svalbard',
+        'latitude': 78.92,
+        'longitude': 11.93,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'nal1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'nal1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # NAL
     'NOR': {
         'location': 'Nordkapp, Norway',
         'latitude': 71.09,
@@ -170,9 +441,215 @@ sites = {
                 }
             },
         }, # NOR
+    'RVK': {
+        'location': 'Rørvik, Norway',
+        'latitude': 64.95,
+        'longitude': 10.99,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'rvk1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'rvk1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # RVK
+    'SCO': {
+        'location': 'Scoresbysund, Greenland',
+        'latitude': 70.48,
+        'longitude': -21.97,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'sco8f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'sco8f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # SCO
+    'SOL': {
+        'location': 'Solund, Norway',
+        'latitude': 61.08,
+        'longitude': 4.84,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'sol1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'uit_iaga_column': {'X': '---X',
+                                        'Y': '---Y',
+                                        'Z': '---Z'},
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'sol1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'uit_iaga_column': {'X': '---X',
+                                        'Y': '---Y',
+                                        'Z': '---Z'},
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # SOL
+    'SOR': {
+        'location': 'Sørøya, Norway',
+        'latitude': 70.54,
+        'longitude': 22.22,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'sor1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'sor1a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # SOR
+    'TDC': {
+        'location': 'Tristan da Cunha',
+        'latitude': -37.07,
+        'longitude': -12.38,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'tdc4f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'tdc4f',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # TDC
+    'TRO': {
+        'location': 'Tromsø, Norway',
+        'latitude': 69.66,
+        'longitude': 18.94,
+        'data_types': {
+            'MagData': {
+                'xyz_10s': {
+                    'channels': np.array(['X', 'Y', 'Z']),
+                    'uit_site': 'tro2a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'XYZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'hz_10s': {
+                    'channels': np.array(['H', 'Z']),
+                    'uit_site': 'tro2a',
+                    'uit_res': '10sec',
+                    'uit_comp': 'DHZ',
+                    'path': uit_path,
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'iaga2000',
+                    'converter': convert_iaga_2000,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                }
+            },
+        }, # TRO
     }
 
 
+for s in sites:
+    sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
 ap.add_network('UIT', sites)
 
