@@ -24,7 +24,7 @@ def load_iaga_2000(file_name):
             uh = urllib2.urlopen(file_name)
 
         try:
-            lines = [a.rstrip('\n') for a in uh.readlines()]
+            lines = [a.rstrip() for a in uh.readlines()]
             header = {}
             comments = []
             
@@ -42,7 +42,7 @@ def load_iaga_2000(file_name):
                     value = s[24:-1].strip()
                     header[key] = value
             
-            # Parse data header
+            # Parse data header and store column positions. 
             s = lines.pop(0)
             cols = s[:-1].split()
             col_pos = [[0, 0], ]
@@ -57,10 +57,30 @@ def load_iaga_2000(file_name):
                 data.insert(n, [])
             col_pos[-1][1] = len(s)
             
-            # Parse data
+            # Parse data. The most flexible and tolerant method is to
+            # split the line into data columns using whitespace. This
+            # approach allows files to be read where the data headers
+            # don't exactly align with the data columns (as observed
+            # with University of Tromso Tristan da Cunha
+            # data). However if the columns are so wide that no
+            # whitespace occurs this approach will fail so fall back
+            # to using the data header positions to determine where
+            # each data column should start.
             for s in lines:
-                for n in xrange(len(cols)):
-                    data[n].append(s[col_pos[n][0]:col_pos[n][1]].strip())
+                # Remove any trailing '|'
+                s = s.strip('|')
+
+                # Can the line be split correctly based on whitespace?
+                data_cols = s.split()
+                if len(data_cols) == len(cols):
+                    # Yes, number of data columns matches
+                    for n in xrange(len(cols)):
+                        data[n].append(data_cols[n])
+                else:
+                    # No, number of data columns differs so use
+                    # position to determine data
+                    for n in xrange(len(cols)):
+                        data[n].append(s[col_pos[n][0]:col_pos[n][1]].strip())
 
             # Convert date and time
             if col_number.has_key('DATE') and col_number.has_key('TIME'):
