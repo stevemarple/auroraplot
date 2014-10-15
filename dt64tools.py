@@ -167,13 +167,12 @@ def get_hour(a):
     return _get_tt(a, 'tm_hour')
 
 def get_minute(a):
-    '''Return hour of day'''
+    '''Return minute of day'''
     return _get_tt(a, 'tm_min')
 
 def get_second(a):
-    '''Return hour of day'''
+    '''Return second of day'''
     return _get_tt(a, 'tm_sec')
-
 
 def get_start_of_month(a):
     a = np.array(a)
@@ -451,10 +450,11 @@ class Dt64ToolsData(object):
 
 class Datetime64Locator(Locator):
     '''Locator class for numpy.datetime64'''
-    def __init__(self, maxticks=8, interval=None):
+    def __init__(self, maxticks=8, interval=None, autolabel=False):
         self.maxticks = maxticks
         self.interval = interval
-        
+        self.autolabel = autolabel
+
 
     def __call__(self):
         '''Return the locations of the ticks'''
@@ -469,6 +469,15 @@ class Datetime64Locator(Locator):
 
         limits_dt64 = (limits.astype('m8[' + units + ']') + 
                        self.axis.dt64tools.type(0, units))
+        if self.autolabel and hasattr(self.axis.dt64tools, 'tick_fmt'):  
+            if strftime(limits_dt64[0], self.axis.dt64tools.tick_fmt) == \
+                    strftime(limits_dt64[0] + np.timedelta64(1, 'D'), 
+                             self.axis.dt64tools.tick_fmt):
+                s = 'Time'
+            else:
+                s = 'Date'
+            self.axis.get_label().set_text(s)
+
         if self.interval is not None:
             tick_interval = self.interval
         else:
@@ -637,8 +646,7 @@ class Datetime64Formatter(Formatter):
 
     
     def __call__(self, x, pos=None):
-        # This is also called in ipython to show cursor location,
-        # where pos=None
+        # This is also called to show cursor location, where pos=None
         
         if not hasattr(self.axis, 'dt64tools'):
             raise Exception('Cannot find axis time units')
@@ -647,6 +655,7 @@ class Datetime64Formatter(Formatter):
 
         fmt = self.fmt
         if pos is None:
+            # Showing cursor location
             fmt = '%Y-%m-%dT%H:%M:%SZ'
         elif fmt is None:
             xadi = self.axis.get_data_interval()
@@ -682,10 +691,14 @@ class Datetime64Formatter(Formatter):
                 f.append('%H:%M:%S.%#')
             elif tick_interval < np.timedelta64(1, 'm'):
                 f.append('%H:%M:%S')
-            elif tick_interval< np.timedelta64(1, 'D'):
+            elif tick_interval< np.timedelta64(1, 'h'):
                 f.append('%H:%M')
+            elif tick_interval< np.timedelta64(1, 'D'):
+                f.append('%H')
             fmt = '\n'.join(f)
-
+            
+        if pos == 1:
+             self.axis.dt64tools.tick_fmt = fmt
         t = np.datetime64(int(x), units)
         return strftime(t, fmt) 
     
