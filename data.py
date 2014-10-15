@@ -9,6 +9,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
+import scipy.signal
+
 # import scipy.stats
 
 import auroraplot as ap
@@ -350,6 +352,24 @@ class Data(object):
 
         return r
 
+
+    def get_cadence(self):
+        if len(self.sample_start_time) < 2:
+            return None
+        sstd = np.diff(self.sample_start_time)
+        if not np.all(sstd[0] == sstd):
+            return None
+        if len(self.sample_end_time):
+            # Check end times too if they exist
+            setd = np.diff(self.sample_end_time)
+            if not np.all(setd[0] == setd):
+                return None
+            if sstd[0] != setd[0]:
+                return None
+        
+        return sstd[0]
+
+        
     def set_cadence(self, cadence, ignore_nan=True,
                     offset_interval=np.timedelta64(0, 'us'), inplace=False,
                     aggregate=scipy.average):
