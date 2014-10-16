@@ -152,7 +152,7 @@ ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
 fig = plt.gcf()
 # Override labelling format
 for ax in fig.axes:
-    ax.xaxis.set_major_locator(\
-        dt64.Datetime64Locator(maxticks=9, autolabel=True))
+    ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
+    # ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
 plt.show()
 

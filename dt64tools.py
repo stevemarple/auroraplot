@@ -450,10 +450,9 @@ class Dt64ToolsData(object):
 
 class Datetime64Locator(Locator):
     '''Locator class for numpy.datetime64'''
-    def __init__(self, maxticks=8, interval=None, autolabel=False):
+    def __init__(self, maxticks=8, interval=None):
         self.maxticks = maxticks
         self.interval = interval
-        self.autolabel = autolabel
 
 
     def __call__(self):
@@ -469,14 +468,6 @@ class Datetime64Locator(Locator):
 
         limits_dt64 = (limits.astype('m8[' + units + ']') + 
                        self.axis.dt64tools.type(0, units))
-        if self.autolabel and hasattr(self.axis.dt64tools, 'tick_fmt'):  
-            if strftime(limits_dt64[0], self.axis.dt64tools.tick_fmt) == \
-                    strftime(limits_dt64[0] + np.timedelta64(1, 'D'), 
-                             self.axis.dt64tools.tick_fmt):
-                s = 'Time'
-            else:
-                s = 'Date'
-            self.axis.get_label().set_text(s)
 
         if self.interval is not None:
             tick_interval = self.interval
@@ -641,8 +632,22 @@ class Datetime64Locator(Locator):
 
 
 class Datetime64Formatter(Formatter):
-    def __init__(self, fmt=None):
+    def __init__(self, fmt=None, autolabel=None):
+        '''
+        Format ticks with date/time as appropriate. 
+
+        fmt: Manually set the strftime format string.
+
+        autolabel: Label the axis. 
+        If False no labeling will occur. 
+        If True a axis label will be updated when the axis ticks are
+        formatted.
+        If None the axis label will be updated only if it is an empty
+        string. This is the default.
+        '''
+
         self.fmt = fmt
+        self.autolabel = autolabel
 
     
     def __call__(self, x, pos=None):
@@ -696,11 +701,25 @@ class Datetime64Formatter(Formatter):
             elif tick_interval< np.timedelta64(1, 'D'):
                 f.append('%H')
             fmt = '\n'.join(f)
-            
-        if pos == 1:
-             self.axis.dt64tools.tick_fmt = fmt
+
         t = np.datetime64(int(x), units)
-        return strftime(t, fmt) 
+        r = strftime(t, fmt) 
+        if pos == 1:
+            self.axis.dt64tools.tick_fmt = fmt
+            if self.autolabel or (self.autolabel is None and
+                                  self.axis.get_label().get_text() == ''):
+                if r == strftime(t + np.timedelta64(1, 'D'), fmt):
+                    # No date information present in string
+                    s = 'Time' 
+                else:
+                    s = 'Date'
+
+                if isinstance(self.autolabel, basestring):
+                    s = self.autolabel % s
+
+                self.axis.get_label().set_text(s)
+
+        return r
     
 
 def strftime(t, fstr):
