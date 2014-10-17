@@ -7,14 +7,12 @@ import sys
 import time
 
 import numpy as np
-import scipy.stats
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
-import auroraplot.filter
 import auroraplot.magdata
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
@@ -22,11 +20,10 @@ import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 
 
-import scipy.stats
-
 # For each network set the archive from which data is loaded 
 archives = {
     'AURORAWATCHNET': 'realtime',
+    'SAMNET': '5s',
     'DTU': 'hz_10s',
     'UIT': 'hz_10s',
     }
@@ -72,7 +69,7 @@ logger = logging.getLogger(__name__)
 mpl.rcParams['figure.facecolor'] = 'w'
 mpl.rcParams['figure.figsize'] = [8, 6]
 mpl.rcParams['figure.subplot.bottom'] = 0.1
-mpl.rcParams['figure.subplot.left'] = 0.15
+mpl.rcParams['figure.subplot.left'] = 0.12
 mpl.rcParams['figure.subplot.right'] = 0.925
 mpl.rcParams['figure.subplot.top'] = 0.85
 mpl.rcParams['axes.grid'] = True
@@ -84,13 +81,8 @@ mpl.rcParams['legend.numpoints'] = 1
 os.environ['TZ'] = 'UTC'
 time.tzset()
 
-
-assert os.environ.get('TZ') == 'UTC', \
-    'TZ environment variable must be set to UTC'
-
-
-plt.close('all')
-
+# Parse and process start and end times. If end time not given use
+# start time plus 1 day.
 st = np.datetime64(args.start_time) + np.timedelta64(0, 'us')
 if args.end_time is None:
     et = st + np.timedelta64(86400, 's')
@@ -111,13 +103,14 @@ else:
     except:
         raise
 
+# Parse and process list of networks and sites.
 n_s_list = []
 network_list = []
 for n_s in args.network_site:
     m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
     assert m is not None, \
         'Magnetometer must have form NETWORK or NETWORK/SITE'
-    network = m.groups()[0]
+    network = m.groups()[0].upper()
     assert ap.networks.has_key(network), \
         'Network %s is not known' % network
     network_list.append(network)
@@ -127,32 +120,44 @@ for n_s in args.network_site:
         n_s_list.extend(map(lambda x: network + '/' + x, 
                         ap.networks[network].keys()))
     else:
-        site = m.groups()[2]
+        site = m.groups()[2].upper()
         assert ap.networks[network].has_key(site), \
             'Site %s/%s is not known' % (network, site)
         n_s_list.append(network + '/' + site)
 
 
+# Requesting the UIT or DTU data from the UIOT web site requires a
+# password to be set. Try reading the password from a file called
+# .uit_password from the user's home directory.
 if ('UIT' in network_list or 'DTU' in network_list) \
         and ap.datasets.uit.uit_password is None:
     raise Exception('UIT password needed but could not be set')
 
 
+# Load the data for each site. 
 mdl = []
 for n_s in n_s_list:
     network, site = n_s.split('/')
     md = ap.load_data(network, site, 'MagData', st, et,
                       archive=archives[network])
+    # Is result is None then no data available, so ignore those
+    # results.
     if md is not None:
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         mdl.append(md)
 
 
+# Create a stackplot.
 ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
+
+# Override the labelling format.
 fig = plt.gcf()
-# Override labelling format
 for ax in fig.axes:
     ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
-    # ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
+
+# Abbreviate AURORAWATCHNET
+ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax)
+
+# Make the figure visible.
 plt.show()
 
