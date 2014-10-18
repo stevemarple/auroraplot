@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Plot magnetometer data from one or more sites.
+
 import argparse
 import logging
 import os 
@@ -38,9 +41,9 @@ parser.add_argument('-s', '--start-time',
 parser.add_argument('-e', '--end-time',
                     help='End time for data transfer (exclusive)',
                     metavar='DATETIME')
-parser.add_argument('-c', '--channel',
-                    default='H',
-                    help='Magnetometer data channel (axis)')
+# parser.add_argument('-c', '--channel',
+#                     default='H',
+#                     help='Magnetometer data channel (axis)')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -126,7 +129,7 @@ for n_s in args.network_site:
         n_s_list.append(network + '/' + site)
 
 
-# Requesting the UIT or DTU data from the UIOT web site requires a
+# Requesting the UIT or DTU data from the UIT web site requires a
 # password to be set. Try reading the password from a file called
 # .uit_password from the user's home directory.
 if ('UIT' in network_list or 'DTU' in network_list) \
@@ -147,16 +150,26 @@ for n_s in n_s_list:
         mdl.append(md)
 
 
-# Create a stackplot.
-ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
+if len(mdl) == 0:
+    print('No data to plot')
+    sys.exit(0)
+elif len(mdl) == 1:
+    # No point in using a stackplot for a single site
+    mdl[0].plot()
+else:
+    # Create a stackplot.
+    ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
+
 
 # Override the labelling format.
 fig = plt.gcf()
 for ax in fig.axes:
+    # Set maxticks so that for an entire day the ticks are at 3-hourly
+    # intervals (to correspond with K index plots).
     ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
 
-# Abbreviate AURORAWATCHNET
-ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax)
+    # Abbreviate AURORAWATCHNET to AWN
+    ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
 
 # Make the figure visible.
 plt.show()
