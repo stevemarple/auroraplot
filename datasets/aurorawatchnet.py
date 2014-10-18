@@ -193,8 +193,11 @@ def abbreviate_aurorawatchnet(ax, title=True, labels=True):
     if labels:
         tll = ax.yaxis.get_ticklabels() # tick label list
         labels = [ tl.get_text() for tl in tll]
-        labels = map(lambda x: x.replace('AURORAWATCHNET', 'AWN'), labels)
-        ax.yaxis.set_ticklabels(labels)
+        # Only update the labels if one or more needs chaning as this
+        # breaks normal numerical axis laelling otherwise.
+        if True in map(lambda x: x.startswith('AURORAWATCHNET'), labels):
+            labels = map(lambda x: x.replace('AURORAWATCHNET', 'AWN'), labels)
+            ax.yaxis.set_ticklabels(labels)
 
 
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
