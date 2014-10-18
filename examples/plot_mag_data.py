@@ -168,6 +168,9 @@ for ax in fig.axes:
     # intervals (to correspond with K index plots).
     ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
 
+    # Have axis labelled with date or time, as appropriate. Indicate UT.
+    ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
+
     # Abbreviate AURORAWATCHNET to AWN
     ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
 
