@@ -391,6 +391,13 @@ def concatenate(objs, sort=True):
 
 try:
     import auroraplot_custom
-except:
+except ImportError as e:
+    # No custom module
+    logger.debug('auroraplot_custom.py not found')
     auroraplot_custom = {}
+except Exception as e:
+    # Error loading custom module
+    logger.error('Could not load custom module:' + str(e))
+    auroraplot_custom = {}
+
     
