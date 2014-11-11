@@ -1,3 +1,10 @@
+"""Analyse and plot space weather datasets."""
+
+
+__author__ = 'Steve Marple'
+__version__ = '0.1.0'
+__license__ = 'PSF'
+
 import logging
 import numpy as np
 import dt64tools as dt64
