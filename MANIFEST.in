@@ -1,1 +1,7 @@
-include *.rst LICENSE
+include *.rst LICENSE \
+	auroraplot/examples/dt64_demo.py \
+	auroraplot/examples/example_auroraplot_custom.py \
+	auroraplot/examples/load_mag_data_simple.ipynb \
+	auroraplot/examples/load_samnet_data.py \
+	auroraplot/examples/magqdc_example.py \
+	auroraplot/examples/plot_mag_data.py
