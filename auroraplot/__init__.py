@@ -103,6 +103,13 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
             d['prefix'] = '' # Do not calculate automatically
             d['mul'] = 1
             # prefix = ''
+    elif unicode(unit) == u'\N{DEGREE SIGN}C':
+        # Don't calculate prefixes with degrees C
+        if sep is None:
+            d['sep'] = ' '
+        if prefix is None:
+            d['prefix'] = '' # Do not calculate automatically
+            d['mul'] = 1   
     elif sep is None:
         d['sep'] = ' '
 
