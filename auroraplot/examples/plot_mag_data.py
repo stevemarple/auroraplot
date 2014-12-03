@@ -26,7 +26,7 @@ import auroraplot.datasets.dtu
 # For each network set the archive from which data is loaded 
 archives = {
     'AURORAWATCHNET': 'realtime',
-    'SAMNET': '5s',
+#    'SAMNET': '5s',
     'DTU': 'hz_10s',
     'UIT': 'hz_10s',
     }
@@ -141,8 +141,11 @@ if ('UIT' in network_list or 'DTU' in network_list) \
 mdl = []
 for n_s in n_s_list:
     network, site = n_s.split('/')
-    md = ap.load_data(network, site, 'MagData', st, et,
-                      archive=archives[network])
+    kwargs = {}
+    if archives.has_key(network):
+        kwargs['archive'] = archives[network]
+    md = ap.load_data(network, site, 'MagData', st, et, **kwargs)
+                      # archive=archives[network])
     # Is result is None then no data available, so ignore those
     # results.
     if md is not None:
