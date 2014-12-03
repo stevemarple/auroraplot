@@ -6,6 +6,8 @@ import urllib2
 import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
 
+logger = logging.getLogger(__name__)
+
 data_dir = '/data/samnet'
 
 def convert_samnet_data(file_name, archive_data, 
@@ -72,6 +74,79 @@ def convert_samnet_data(file_name, archive_data,
 
     return None
 
+
+def convert_new_samnet_data(file_name, archive_data, 
+                            network, site, data_type, channels, start_time, 
+                            end_time, **kwargs):
+    '''Convert new-style SAMNET data to match standard data type
+
+    data: MagData or other similar format data object
+    archive: name of archive from which data was loaded
+    archive_info: archive metadata
+    '''
+
+    def to_tesla(x):
+        if x == '9999999.999':
+            return np.nan
+        else:
+            return float(x)/1e9
+
+    try:
+        if file_name.startswith('/'):
+            uh = urllib2.urlopen('file:' + file_name)
+        else:
+            uh = urllib2.urlopen(file_name)
+        try:
+            file_data = np.loadtxt(uh, unpack=True, 
+                                   comments='%',
+                                   converters={3: to_tesla, 
+                                               4: to_tesla, 
+                                               5: to_tesla})
+            assert np.all(file_data[0] >= 0) and np.all(file_data[0] < 24)
+            assert np.all(file_data[1] >= 0) and np.all(file_data[1] < 60)
+            assert np.all(file_data[2] >= 0) and np.all(file_data[2] < 60)
+
+            data = file_data[3:]
+            sample_start_time = ap.epoch64_us + \
+                (np.timedelta64(1000000, 'us') * file_data[0])
+
+            sample_start_time = start_time + \
+                + file_data[0].astype('m8[h]') \
+                + file_data[1].astype('m8[m]') \
+                + file_data[2].astype('m8[s]') \
+                + np.timedelta64(0, 'us')
+
+            # end time and integration interval are guesstimates
+            sample_end_time = sample_start_time \
+                + archive_data['nominal_cadence']
+            integration_interval = np.tile(archive_data['nominal_cadence'],
+                                           data.shape)
+            r = MagData( \
+                network=network,
+                site=site,
+                channels=channels,
+                start_time=start_time,
+                end_time=end_time,
+                sample_start_time=sample_start_time, 
+                sample_end_time=sample_end_time,
+                integration_interval=integration_interval,
+                nominal_cadence=archive_data['nominal_cadence'],
+                data=data,
+                units=archive_data['units'],
+                sort=True)
+            return r
+
+        except Exception as e:
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+
+        finally:
+            uh.close()
+    except Exception as e:
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+
+    return None
 
 
 def convert_rt_data(file_name, archive_data,
@@ -270,6 +345,42 @@ sites = {
         'line_color': [1, 0, 0],
         'samnet_code': 'la',
         },
+    'LAN2': {
+        'location': 'Lancaster, UK',
+        'latitude': 54.01,
+        'longitude': -2.77,
+        'elevation': np.nan,
+        'start_time': np.datetime64('2014-12-02T00:00:00+0000'),
+        'end_time': None,
+        'copyright': 'Lancaster University',
+        'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
+        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
+        'line_color': [1, 0, 0],
+        'samnet_code': 'la',
+        'data_types': {
+            'MagData': {
+                'default': '1s',
+                '1s': {
+                    'channels': ['H', 'D', 'Z'],
+                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
+                                         '%Y%m%d.1st'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_data,
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
+                    'units': 'T',
+                    },
+                '1min': {
+                    'channels': ['H', 'D', 'Z'],
+                    'path': os.path.join(data_dir, 'new/LAN2/%Y/%m/' +
+                                         '%Y%m%d.MIN'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_data,
+                    'nominal_cadence': np.timedelta64(60000000, 'us'),
+                    'units': 'T',
+                    },
+                },
+            },
+        },
     'LER1': {
         'location': 'Lerwick, UK',
         'latitude': 60.13,
@@ -391,60 +502,58 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
                                     [1.0, 0.6, 0.0],  # amber
                                     [1.0, 0.0, 0.0]]) # red
 
-# Set default archive details
-#for k in sites:
-#    sites[k]['data_types']['MagData']['default'] = \
-#        sites[k]['data_types']['MagData']['1s']
     
 
 for s in sites:
-    s_lc = s.lower()
-    sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
-    sites[s]['data_types'] = {
-        'MagData': {
-            '1s': {
-                'channels': ['H', 'D', 'Z'],
-                'path': os.path.join(data_dir, '1s_archive/%Y/%m/' +
-                                     sc + '%d%m%y.dgz'),
-                'duration': np.timedelta64(24, 'h'),
-                'converter': convert_samnet_data,
-                'nominal_cadence': np.timedelta64(1000000, 'us'),
-                'units': 'T',
-                },
-            '5s': {
-                'channels': ['H', 'D', 'Z'],
-                'path': os.path.join(data_dir, '5s_archive/%Y/%m/' + 
-                                     sc + '%d%m%Y.5s.gz'),
-                'duration': np.timedelta64(24, 'h'),
-                'converter': convert_samnet_data,
-                'nominal_cadence': np.timedelta64(5000000, 'us'),
-                'units': 'T',
-                },
-                'realtime': {
+    if s not in ['LAN2']:
+        # Create old-style data archive data
+        s_lc = s.lower()
+        sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
+        sites[s]['data_types'] = {
+            'MagData': {
+                '1s': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': '/data/samnet/realtime/' + s_lc + \
-                        '/%Y/%m/' + s_lc + '%Y%m%d.rt',
+                    'path': os.path.join(data_dir, '1s_archive/%Y/%m/' +
+                                         sc + '%d%m%y.dgz'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_rt_data,
+                    'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     },
-                },
-            'MagQDC': {
-                'qdc': {
+                '5s': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, 'qdc', sc, '%Y',
-                                         sc + '_qdc_%Y%m.txt'),
+                    'path': os.path.join(data_dir, '5s_archive/%Y/%m/' + 
+                                         sc + '%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(24, 'h'),
-                    # Use the standard converter for MagQDC
-                    'converter': ap.magdata.convert_qdc_data,
+                    'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5000000, 'us'),
                     'units': 'T',
                     },
-                },
-        }
-    # Set 5s as the default
-    sites[s]['data_types']['MagData']['default'] = '5s'
+                    'realtime': {
+                        'channels': ['H', 'D', 'Z'],
+                        'path': '/data/samnet/realtime/' + s_lc + \
+                            '/%Y/%m/' + s_lc + '%Y%m%d.rt',
+                        'duration': np.timedelta64(24, 'h'),
+                        'converter': convert_rt_data,
+                        'nominal_cadence': np.timedelta64(1000000, 'us'),
+                        'units': 'T',
+                        },
+                    },
+                'MagQDC': {
+                    'qdc': {
+                        'channels': ['H', 'D', 'Z'],
+                        'path': os.path.join(data_dir, 'qdc', sc, '%Y',
+                                             sc + '_qdc_%Y%m.txt'),
+                        'duration': np.timedelta64(24, 'h'),
+                        # Use the standard converter for MagQDC
+                        'converter': ap.magdata.convert_qdc_data,
+                        'nominal_cadence': np.timedelta64(5000000, 'us'),
+                        'units': 'T',
+                        },
+                    },
+            }
+        # Set 5s as the default
+        sites[s]['data_types']['MagData']['default'] = '5s'
 
     if not sites[s].has_key('activity_thresholds'):
         sites[s]['activity_thresholds'] = default_activity_thresholds
