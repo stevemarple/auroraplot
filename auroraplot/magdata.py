@@ -467,6 +467,39 @@ class MagData(Data):
                                                         **kwargs)
 
 
+    def variometer_plot(self, channels=None, qdc=None, axes=None, **kwargs):
+        if channels is None:
+            channels = self.channels
+        
+        colors = {'H': 'b', 'X': 'b',
+                  'D': 'r', 'E': 'r', 'Y': 'r',
+                  'Z': 'g'}
+        kwargs['axes'] = axes
+        md = copy.deepcopy(self)
+        qdc2 = copy.deepcopy(qdc)
+        for chan in channels:
+            chan_num = list(md.channels).index(chan)
+            adj = -np.median(md.data[chan_num])
+            md.data[chan_num] += adj
+            if colors.has_key(chan.upper()):
+                kwargs['color'] = colors[chan.upper()]
+            kwargs['alpha'] = 1
+            kwargs['zorder'] = -chan_num
+            md.plot(channels=chan, **kwargs)
+            kwargs['axes'] = plt.gca()
+         
+
+            if qdc2 is not None:
+                qdc2.data[list(qdc2.channels).index(chan)] += adj
+                kwargs['alpha'] = 0.4
+                kwargs['zorder'] -= 0.5
+                qdc2.align(md).plot(channels=chan, label=chan + ' QDC', 
+                                    **kwargs)
+            
+        leg = plt.legend(prop={'size': 'medium'})
+        leg.get_frame().set_alpha(0.7)
+
+
     def get_quiet_days(self, nquiet=5, channels=None, 
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
