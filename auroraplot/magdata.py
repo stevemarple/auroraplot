@@ -463,8 +463,9 @@ class MagData(Data):
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
         self.plot(**kwargs)
-        qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
-                                                        **kwargs)
+        if qdc is not None:
+            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
+                                                            **kwargs)
 
 
     def variometer_plot(self, channels=None, qdc=None, axes=None, **kwargs):
