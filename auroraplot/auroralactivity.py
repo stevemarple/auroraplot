@@ -197,7 +197,7 @@ class KIndex(Data):
                       units=units,
                       sort=sort)
 
-        if magdata is not None and magqdc is not None:
+        if magdata is not None:
             self.network = magdata.network
             self.site = magdata.site
             self.channels = c = magdata.channels
@@ -211,18 +211,21 @@ class KIndex(Data):
             self.sample_end_time = self.sample_start_time + self.nominal_cadence
             self.integration_interval = None
                         
-            if isinstance(magqdc, ap.magdata.MagQDC):
-                aligned = magqdc.align(magdata, fit=fit, **fit_params)
+            if magqdc is None:
+                logger.info('Creating KIndex object without a QDC')
+                bsub = magdata.data[magdata.get_channel_index(c)]
             else:
-                aligned = magqdc                            
+                if isinstance(magqdc, ap.magdata.MagQDC):
+                    aligned = magqdc.align(magdata, fit=fit, **fit_params)
+                else:
+                    aligned = magqdc                            
 
-            # Baseline subtracted data
-            bsub = np.abs(magdata.data[magdata.get_channel_index(c)] -
-                          aligned.data[aligned.get_channel_index(c)])
-            assert magdata.units == magqdc.units, 'Units must match'
+                # Baseline subtracted data
+                bsub = np.abs(magdata.data[magdata.get_channel_index(c)] -
+                              aligned.data[aligned.get_channel_index(c)])
+                assert magdata.units == magqdc.units, 'Units must match'
+
             self.units = None
-            #if sort:
-            #    self.sort(inplace=True)
 
             if nth is None:
                 if magdata.nominal_cadence <= np.timedelta64(5, 's'):
