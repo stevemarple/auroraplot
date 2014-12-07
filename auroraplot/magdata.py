@@ -203,7 +203,14 @@ def load_qdc(network, site, time, **kwargs):
             if r is not None:
                 r.extract(inplace=True, 
                           channels=channels)
-                return r
+                if kwargs.get('full_output', False):
+                    r2 = {'magqdc': r,
+                          'tries': n + 1,
+                          'maxtries': tries}
+                    return r2
+                else:
+                    return r
+                
         finally:
             # Go to start of previous month
             t = dt64.get_start_of_month(t - np.timedelta64(24, 'h'))
