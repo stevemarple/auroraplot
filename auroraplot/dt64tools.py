@@ -781,11 +781,11 @@ def _strftime_dt64(t, fstr, customspec=None):
             elif fstr[i] == 'a': # abbreviated day name
                 s += d_name[get_week_day(t)]
             elif fstr[i] == 'A': # day name
-                s += day_name[get_month(t)]
+                s += day_name[get_week_day(t)]
             elif fstr[i] == 'b': # abbreviated month name
-                s += d_name[get_week_day(t) - 1]
+                s += m_name[get_month(t) - 1]
             elif fstr[i] == 'B': # month name
-                s += day_name[get_month(t) - 1]
+                s += month_name[get_month(t) - 1]
 
             elif fstr[i] == 'd': # day [dd]
                 s += '{0:02d}'.format(int(get_day_of_month(t)))
