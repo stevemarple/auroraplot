@@ -153,7 +153,8 @@ for n_s in n_s_list:
     # Is result is None then no data available, so ignore those
     # results.
     qdc = None
-    if md is not None:
+    if md is not None and \
+            ap.networks[network][site]['data_types'].has_key('MagQDC'):
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         qdc_info = ap.magdata.load_qdc(network, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
