@@ -5,6 +5,8 @@ import urllib2
 
 import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
+from auroraplot.temperaturedata import TemperatureData
+from auroraplot.voltagedata import VoltageData
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +82,6 @@ def convert_new_samnet_data(file_name, archive_data,
                             end_time, **kwargs):
     '''Convert new-style SAMNET data to match standard data type
 
-    data: MagData or other similar format data object
     archive: name of archive from which data was loaded
     archive_info: archive metadata
     '''
@@ -107,9 +108,6 @@ def convert_new_samnet_data(file_name, archive_data,
             assert np.all(file_data[2] >= 0) and np.all(file_data[2] < 60)
 
             data = file_data[3:]
-            sample_start_time = ap.epoch64_us + \
-                (np.timedelta64(1000000, 'us') * file_data[0])
-
             sample_start_time = start_time + \
                 + file_data[0].astype('m8[h]') \
                 + file_data[1].astype('m8[m]') \
@@ -147,6 +145,81 @@ def convert_new_samnet_data(file_name, archive_data,
         logger.debug(str(e))
 
     return None
+
+
+def convert_new_samnet_temp_volt_data(file_name, archive_data, 
+                                      network, site, data_type, 
+                                      channels, start_time, 
+                                      end_time, **kwargs):
+    '''Convert new-style SAMNET temperate/voltage data to standard type'''
+
+    def to_float(x):
+        if x == '99.9':
+            return np.nan
+        else:
+            return float(x)
+
+    try:
+        if file_name.startswith('/'):
+            uh = urllib2.urlopen('file:' + file_name)
+        else:
+            uh = urllib2.urlopen(file_name)
+        try:
+            file_data = np.loadtxt(uh, unpack=True, 
+                                   comments='%',
+                                   converters={2: to_float, 
+                                               3: to_float, 
+                                               4: to_float, 
+                                               5: to_float,
+                                               6: to_float,
+                                               7: to_float})
+            assert np.all(file_data[0] >= 0) and np.all(file_data[0] < 24)
+            assert np.all(file_data[1] >= 0) and np.all(file_data[1] < 60)
+            
+            if data_type == 'TemperatureData':
+                # Keep channel order same as for AuroraWatchNet
+                data = file_data[[3,2,4,7]]
+                class_type = TemperatureData
+            elif data_type == 'VoltageData':
+                data = file_data[[5]] # aux not used
+                class_type = VoltageData
+            sample_start_time = start_time + \
+                + file_data[0].astype('m8[h]') \
+                + file_data[1].astype('m8[m]') \
+                + np.timedelta64(0, 'us')
+
+            # end time and integration interval are guesstimates
+            sample_end_time = sample_start_time \
+                + archive_data['nominal_cadence']
+            integration_interval = np.tile(archive_data['nominal_cadence'],
+                                           data.shape)
+            r = class_type( \
+                network=network,
+                site=site,
+                channels=channels,
+                start_time=start_time,
+                end_time=end_time,
+                sample_start_time=sample_start_time, 
+                sample_end_time=sample_end_time,
+                integration_interval=integration_interval,
+                nominal_cadence=archive_data['nominal_cadence'],
+                data=data,
+                units=archive_data['units'],
+                sort=True)
+            return r
+
+        except Exception as e:
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+
+        finally:
+            uh.close()
+    except Exception as e:
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+
+    return None
+
 
 
 def convert_rt_data(file_name, archive_data,
@@ -364,7 +437,7 @@ sites = {
                 '1s': {
                     'channels': ['H', 'D', 'Z'],
                     'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
-                                         '%Y%m%d.1st'),
+                                         '%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
@@ -372,14 +445,39 @@ sites = {
                     },
                 '1min': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, 'new/LAN2/%Y/%m/' +
-                                         '%Y%m%d.MIN'),
+                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
+                                         '%Y%m%d.min'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_data,
                     'nominal_cadence': np.timedelta64(60000000, 'us'),
                     'units': 'T',
                     },
                 },
+            'TemperatureData': {
+                '1min': {
+                    'channels': np.array(['Sensor temperature',
+                                          'System temperature',
+                                          'Obsdaq temperature',
+                                          'CPU temperature']),
+                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
+                                         '%Y%m%d.sup'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_temp_volt_data,
+                    'nominal_cadence': np.timedelta64(1, 'm'),
+                    'units': u'\N{DEGREE SIGN}C',                    
+                    },
+                },
+            'VoltageData': {
+                '1min': {
+                    'channels': np.array(['Obsdaq voltage']),
+                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
+                                         '%Y%m%d.sup'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_temp_volt_data,
+                    'nominal_cadence': np.timedelta64(1, 'm'),
+                    'units': 'V',                    
+                    },
+                }
             },
         },
     'LER1': {
