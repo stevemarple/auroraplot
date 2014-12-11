@@ -7,7 +7,7 @@ import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
-
+from auroraplot.datasets.aurorawatchnet import convert_awn_qdc_data
 logger = logging.getLogger(__name__)
 
 data_dir = '/data/samnet'
@@ -450,6 +450,18 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_data,
                     'nominal_cadence': np.timedelta64(60000000, 'us'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'D', 'Z']),
+                    'path': os.path.join(data_dir, 
+                                         'new/lan2/qdc/%Y/lan2_qdc_%Y%m.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
                 },
