@@ -791,6 +791,11 @@ def _strftime_dt64(t, fstr, customspec=None):
                 s += '{0:02d}'.format(int(get_day_of_month(t)))
             elif fstr[i] == 'H': # hour [hh]
                 s += '{0:02d}'.format(int(get_hour(t)))
+            elif fstr[i] == 'I': # hour (12h format) [hh]
+                h = int(get_hour(t))
+                if h > 12:
+                    h -= 12
+                s += '{0:02d}'.format(h)
             elif fstr[i] == 'j': # day of year [jjj]
                 s += '{0:03d}'.format(int(get_day_of_year(t)))
             elif fstr[i] == 'm': #
