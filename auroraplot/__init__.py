@@ -7,7 +7,7 @@ __license__ = 'PSF'
 
 import logging
 import numpy as np
-import dt64tools as dt64
+import auroraplot.dt64tools as dt64
 
 logger = logging.getLogger(__name__)
 

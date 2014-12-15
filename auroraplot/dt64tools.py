@@ -99,11 +99,11 @@ def from_YMD(year, month, day):
 
 def dt64_to(t, to_unit, returnfloat=False):
     assert to_unit in time_units, 'Unknown unit'
-    assert multipliers.has_key(to_unit), 'Only fixed value units supported'
+    assert to_unit in multipliers, 'Only fixed value units supported'
 
     from_unit = get_units(t)
     assert from_unit in time_units, 'Unknown unit'
-    assert multipliers.has_key(from_unit), 'Only fixed value units supported'
+    assert from_unit in multipliers, 'Only fixed value units supported'
     
     from_mul = multipliers[from_unit]
     to_mul = multipliers[to_unit]
@@ -618,7 +618,7 @@ class Datetime64Locator(Locator):
                 # Round start year down to multiple of y years
                 st2_y = int(np.floor(get_year(st) / y) * y)
 
-                tick_years = range(st2_y, get_year(et) + 1, y)
+                tick_years = list(range(st2_y, get_year(et) + 1, y))
                 if from_YMD(tick_years[0], 1, 1) < st:
                     tick_years.pop(0)
                 if from_YMD(tick_years[-1], 1, 1) > et:
@@ -714,7 +714,7 @@ class Datetime64Formatter(Formatter):
                 else:
                     s = 'Date'
 
-                if isinstance(self.autolabel, basestring):
+                if isinstance(self.autolabel, str):
                     s = self.autolabel % s
 
                 self.axis.get_label().set_text(s)
@@ -771,7 +771,7 @@ def _strftime_dt64(t, fstr, customspec=None):
             i += 1
             replacements.append(fstr[i])
         
-            if customspec is not None and customspec.has_key(fstr[i]):
+            if customspec is not None and fstr[i] in customspec:
                 # Insert user custom specifier
                 s += customspec[fstr[i]]
                 
@@ -844,7 +844,7 @@ def _strftime_td64(td, fstr, customspec=None):
             i += 1
             replacements.append(fstr[i])
         
-            if customspec is not None and customspec.has_key(fstr[i]):
+            if customspec is not None and fstr[i] in customspec:
                 # Insert user custom specifier
                 s += customspec[fstr[i]]
                 
