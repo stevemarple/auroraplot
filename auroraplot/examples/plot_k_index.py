@@ -158,7 +158,8 @@ for n_s in n_s_list:
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         qdc_info = ap.magdata.load_qdc(network, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
-        qdc = qdc_info['magqdc']
+        if qdc_info:
+            qdc = qdc_info['magqdc']
         if qdc is not None and len(md.channels) != len(qdc.channels):
             qdc = None
     k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc)
