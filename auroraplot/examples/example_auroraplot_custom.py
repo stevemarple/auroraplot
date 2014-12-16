@@ -38,7 +38,7 @@ def add_network_hook(network_name):
             print('Bad config file ' + filename + ': ' + str(e))
             return
         
-        if not ap.networks[network_name].has_key(site):
+        if site not in ap.networks[network_name]:
             return # Unknown site
 
         # For data which matches this host's site convert all URLS to

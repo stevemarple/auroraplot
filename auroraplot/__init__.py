@@ -6,6 +6,7 @@ __version__ = '0.2.1'
 __license__ = 'PSF'
 
 import logging
+import six
 import numpy as np
 import auroraplot.dt64tools as dt64
 
@@ -44,7 +45,7 @@ def add_network(network_name, sites):
     registered site information to suit local policy.
     '''
 
-    if networks.has_key(network_name):
+    if network_name in networks:
         networks[network_name].update(sites)
     else:
         networks[network_name] = sites
@@ -67,14 +68,16 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     wantstr: if true return th formatted string, else return dict of info
     '''
     
-    is_degrees = unicode(unit) in (u'deg', u'degrees', u'\N{DEGREE SIGN}')
+    is_degrees = unit in (six.u('deg'), 
+                          six.u('degrees'), 
+                          six.u('\N{DEGREE SIGN}'))
     prefixes = {'y': -24, # yocto
                 'z': -21, # zepto
                 'a': -18, # atto
                 'f': -15, # femto 
                 'p': -12, # pico
                 'n': -9,  # nano
-                u'\N{MICRO SIGN}': -6, # micro
+                six.u('\N{MICRO SIGN}'): -6, # micro
                 'u': -6,  # micro
                 'm': -3,  # milli
                 'c': -2,  # centi
@@ -103,7 +106,8 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
             d['prefix'] = '' # Do not calculate automatically
             d['mul'] = 1
             # prefix = ''
-    elif unicode(unit) == u'\N{DEGREE SIGN}C':
+    # elif unicode(unit) == six.u('\N{DEGREE SIGN}C'):
+    elif unit == six.u('\N{DEGREE SIGN}C'):
         # Don't calculate prefixes with degrees C
         if sep is None:
             d['sep'] = ' '
@@ -165,22 +169,22 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 
 def has_site_info(network, site, info):
     # Sanity checking
-    if not networks.has_key(network):
+    if network not in networks:
         raise Exception('Unknown network')
-    elif not networks[network].has_key(site):
+    elif site not in networks[network]:
         raise Exception('Unknown site')
-    return networks[network][site].has_key(info)
+    return info in networks[network][site]
 
 
 def get_site_info(network, site, info=None):
     # Sanity checking
-    if not networks.has_key(network):
+    if network not in networks:
         raise Exception('Unknown network')
-    elif not networks[network].has_key(site):
+    elif site not in networks[network]:
         raise Exception('Unknown site')
     if info is None:
         return networks[network][site]
-    elif not networks[network][site].has_key(info):
+    elif info not in networks[network][site]:
         raise Exception('Unknown info')
     else:
         return networks[network][site][info]
@@ -227,17 +231,17 @@ def get_archive_info(network, site, data_type, **kwargs):
     site_info = get_site_info(network, site)
 
     # Sanity checking
-    if not site_info['data_types'].has_key(data_type):
+    if data_type not in site_info['data_types']:
         raise Exception('Unknown data_type')
     
     if kwargs.get('archive') is None:
         if len(site_info['data_types'][data_type]) == 1:
             # Only one archive, so default is implicit
-            archive = site_info['data_types'][data_type].keys()[0]
-        elif site_info['data_types'][data_type].has_key('default'):
+            archive = list(site_info['data_types'][data_type].keys())[0]
+        elif 'default' in site_info['data_types'][data_type]:
             # Use explicit default
             if isinstance(site_info['data_types'][data_type]['default'],
-                          basestring):
+                          six.string_types):
                 archive = site_info['data_types'][data_type]['default']
             else:
                 archive = 'default'
@@ -246,7 +250,7 @@ def get_archive_info(network, site, data_type, **kwargs):
     else:
         archive = kwargs.get('archive')
 
-    if not site_info['data_types'][data_type].has_key(archive):
+    if archive not in site_info['data_types'][data_type]:
         raise Exception('Unknown archive')
 
     # archive data
@@ -285,7 +289,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
-        if isinstance(channels, basestring):
+        if isinstance(channels, six.string_types):
             if channels not in ad['channels']:
                 raise Exception('Unknown channel')
         else:

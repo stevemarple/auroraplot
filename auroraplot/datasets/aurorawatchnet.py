@@ -1,7 +1,17 @@
 import os
 import logging
+
+# Python 2/3 compatibility
+import six
+try:
+    from urllib.request import urlopen
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlopen
+
 import numpy as np
-import urllib2
+
 import auroraplot as ap
 import auroraplot.tools
 from auroraplot.magdata import MagData
@@ -56,7 +66,7 @@ def convert_awn_data(file_name, archive_data,
             },
         }
     
-    assert data_type_info.has_key(data_type), 'Illegal data_type'
+    assert data_type in data_type_info, 'Illegal data_type'
     chan_tup = tuple(archive_data['channels'])
     col_idx = []
     for c in channels:
@@ -64,9 +74,9 @@ def convert_awn_data(file_name, archive_data,
                        chan_tup.index(c))
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = ap.epoch64_us + \
@@ -123,9 +133,9 @@ def convert_awn_qdc_data(file_name, archive_data,
         col_idx.append(chan_tup.index(c) + 1)
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
@@ -254,7 +264,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     #'units': 'C',
                     },
                 },
@@ -320,7 +330,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     # 'units': 'C',
                     },
                 },
@@ -386,7 +396,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     # 'units': 'C',
                     },
                 },
@@ -451,7 +461,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     # 'units': 'C',
                     },
                 },
@@ -516,7 +526,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -580,7 +590,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -644,7 +654,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -709,7 +719,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -773,7 +783,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -837,7 +847,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -901,7 +911,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -965,7 +975,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -1030,7 +1040,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -1095,7 +1105,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -1163,7 +1173,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -1189,12 +1199,12 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
                                     [1.0, 0.6, 0.0],  # amber
                                     [1.0, 0.0, 0.0]]) # red
 for s in sites:
-    if not sites[s].has_key('activity_thresholds'):
+    if 'activity_thresholds' not in sites[s]:
         sites[s]['activity_thresholds'] = default_activity_thresholds
-    if not sites[s].has_key('activity_colors'):
+    if 'activity_colors' not in sites[s]:
         sites[s]['activity_colors'] = default_activity_colors
 
-    if not sites[s].has_key('k_index_filter'):
+    if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
 ap.add_network('AURORAWATCHNET', sites)

@@ -38,21 +38,20 @@ def convert_iaga_2000(file_name, archive_data,
     data = []
     for c in channels:
         iaga_col_name = None
-        if archive_data.has_key('uit_channels'):
+        if 'uit_channels' in archive_data:
             iaga_col_name = archive_data['uit_iaga_column'][c]
         else:
             for poss_name in [site.upper() + c.upper(),
                               '---' + c.upper()]:
-                if iaga['column_number'].has_key(poss_name):
+                if poss_name in iaga['column_number']:
                     iaga_col_name = poss_name
                     break
         if iaga_col_name is None:
             raise Exception('Cannot find column for ' + c)
 
         n = iaga['column_number'][iaga_col_name]
-        data.append(map(lambda x: 
-                        float('nan') if x == '99999.00' else float(x),   
-                        iaga['data'][n]))
+        data.append([float('nan') if x == '99999.00' else float(x) 
+                     for x in iaga['data'][n]])
     
     data = np.array(data) * 1e-9
     r = MagData(network=network,

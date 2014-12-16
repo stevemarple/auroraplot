@@ -1,7 +1,6 @@
 import copy
-# import pickle
-import cPickle as pickle
-
+import pickle
+import six
 import logging
 
 import numpy as np
@@ -10,8 +9,6 @@ import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
 import scipy.signal
-
-# import scipy.stats
 
 import auroraplot as ap
 import auroraplot.tools
@@ -90,7 +87,7 @@ class Data(object):
                   'data', 'units'):
             attr = getattr(self, n)
             assert (attr is not None and 
-                    (not isinstance(attr, basestring) or attr != '')), \
+                    (not isinstance(attr, six.string_types) or attr != '')), \
                     n + ' not set'
         assert re.match('^[-A-Z0-9]+$', self.network), 'Bad value for network'
         assert re.match('^[-A-Z0-9]+$', self.site), 'Bad value for site'
@@ -130,8 +127,8 @@ class Data(object):
 
 
     def get_site_info(self, info=None):
-        assert ap.networks.has_key(self.network), 'Unknown network'
-        assert ap.networks[self.network].has_key(self.site), 'Unknown site'
+        assert self.network in ap.networks, 'Unknown network'
+        assert self.site in ap.networks[self.network], 'Unknown site'
         if info is None:
             return ap.networks[self.network][self.site]
         else:
@@ -239,7 +236,7 @@ class Data(object):
 
         if channels is None:
             channels=self.channels
-        elif isinstance(channels, basestring):
+        elif isinstance(channels, six.string_types):
             channels=[channels]
         else:
             try:
@@ -317,7 +314,7 @@ class Data(object):
             else:
                 ydata = self.data[cidx] / u['mul']
 
-            if kwargs.has_key('label'):
+            if 'label' in kwargs:
                 r.append(dt64.plot_dt64(xdata, ydata,
                                         **kwargs)[0])
             else:

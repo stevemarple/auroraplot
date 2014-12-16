@@ -1,9 +1,18 @@
 import copy
 import logging
+
+# Python 2/3 compatibility
+import six
+try:
+    from urllib.request import urlopen
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlopen
+
 import numpy as np
 import numpy.fft
 import matplotlib.pyplot as plt
-import urllib2
 
 import auroraplot as ap
 from auroraplot.data import Data
@@ -19,9 +28,9 @@ logger = logging.getLogger(__name__)
 def load_iaga_2000(file_name):
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
 
         try:
             lines = [a.rstrip() for a in uh.readlines()]
@@ -49,7 +58,7 @@ def load_iaga_2000(file_name):
             last_pos = len(s)
             data = [[]]
             col_number = {cols[0]: 0}
-            for n in xrange(1, len(cols)):
+            for n in range(1, len(cols)):
                 pos = s.find(cols[n])
                 col_pos.insert(n, [pos, 0])
                 col_pos[n-1][1] = pos
@@ -74,20 +83,20 @@ def load_iaga_2000(file_name):
                 data_cols = s.split()
                 if len(data_cols) == len(cols):
                     # Yes, number of data columns matches
-                    for n in xrange(len(cols)):
+                    for n in range(len(cols)):
                         data[n].append(data_cols[n])
                 else:
                     # No, number of data columns differs so use
                     # position to determine data
-                    for n in xrange(len(cols)):
+                    for n in range(len(cols)):
                         data[n].append(s[col_pos[n][0]:col_pos[n][1]].strip())
 
             # Convert date and time
-            if col_number.has_key('DATE') and col_number.has_key('TIME'):
+            if 'DATE' in col_number and 'TIME' in col_number:
                 dn = col_number['DATE']
                 tn = col_number['TIME']
                 sample_time = []
-                for n in xrange(len(data[0])):
+                for n in range(len(data[0])):
                     sample_time.append(np.datetime64(data[dn][n] + 'T' +
                                                      data[tn][n] + 'Z')\
                                            .astype('<M8[us]'))
@@ -151,7 +160,7 @@ def load_qdc(network, site, time, **kwargs):
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
-        if isinstance(channels, basestring):
+        if isinstance(channels, six.string_types):
             if channels not in ad['channels']:
                 raise Exception('Unknown channel')
         else:
@@ -237,9 +246,9 @@ def convert_qdc_data(file_name, archive_data,
         col_idx.append(chan_tup.index(c) + 1)
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = (np.timedelta64(1, 's') * data[0])
@@ -489,7 +498,7 @@ class MagData(Data):
             chan_num = list(md.channels).index(chan)
             adj = -np.median(md.data[chan_num])
             md.data[chan_num] += adj
-            if colors.has_key(chan.upper()):
+            if chan.upper() in colors:
                 kwargs['color'] = colors[chan.upper()]
             kwargs['alpha'] = 1
             kwargs['zorder'] = -chan_num

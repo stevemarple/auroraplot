@@ -1,7 +1,16 @@
 import logging
 import os
+
+# Python 2/3 compatibility
+import six
+try:
+    from urllib.request import urlopen
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlopen
+
 import numpy as np
-import urllib2
 
 import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
@@ -23,10 +32,6 @@ def convert_samnet_data(file_name, archive_data,
     nominal_cadence_s = (archive_data['nominal_cadence'] / 
                          np.timedelta64(1000000, 'us'))
     try:
-        # if file_name.startswith('/'):
-        #     #uh = urllib2.urlopen('file:' + file_name)
-        # else:
-        #     uh = urllib2.urlopen(file_name)
         try:
             conv = lambda s: (s.strip().startswith('9999.9') and np.nan) \
                 or float(s.strip())
@@ -94,9 +99,9 @@ def convert_new_samnet_data(file_name, archive_data,
 
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             file_data = np.loadtxt(uh, unpack=True, 
                                    comments='%',
@@ -161,9 +166,9 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
 
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             file_data = np.loadtxt(uh, unpack=True, 
                                    comments='%',
@@ -233,9 +238,9 @@ def convert_rt_data(file_name, archive_data,
             col_idx.append(1 + chan_tup.index(c))
 
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
 
         try:
             data = np.loadtxt(uh, unpack=True)
@@ -476,7 +481,7 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
-                    'units': u'\N{DEGREE SIGN}C',                    
+                    'units': six.u('\N{DEGREE SIGN}C'),
                     },
                 },
             'VoltageData': {
@@ -666,9 +671,9 @@ for s in sites:
         # Set 5s as the default
         sites[s]['data_types']['MagData']['default'] = '5s'
 
-    if not sites[s].has_key('activity_thresholds'):
+    if 'activity_thresholds' not in sites[s]:
         sites[s]['activity_thresholds'] = default_activity_thresholds
-    if not sites[s].has_key('activity_colors'):
+    if 'activity_colors' not in sites[s]:
         sites[s]['activity_colors'] = default_activity_colors
 
 ap.add_network('SAMNET', sites)

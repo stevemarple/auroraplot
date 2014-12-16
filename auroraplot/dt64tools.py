@@ -476,10 +476,11 @@ class Datetime64Locator(Locator):
         if tick_interval is not None:
             first_tick = ceil(limits_dt64[0], tick_interval)
             last_tick = floor(limits_dt64[1], tick_interval)
-            num = np.floor(((last_tick - first_tick) / tick_interval) + 1)
-            tick_times = np.linspace(first_tick, last_tick, num)
-            tick_locs = dt64_to(tick_times, units)
-
+            num = np.floor(((last_tick - first_tick) / 
+                            tick_interval) + 1).astype(int)
+            tick_locs = ((dt64_to(tick_interval, units).astype(int) 
+                          * np.arange(num))
+                         + first_tick.astype(int))
             try:
                 return self.raise_if_exceeds(tick_locs)
             except RuntimeError as e:
