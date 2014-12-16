@@ -104,7 +104,7 @@ else:
             et = st + np.timedelta64(0, 'us')
             et_words = args.end_time.split()
             assert len(et_words) % 2 == 0, 'Need even number of words'
-            for n in xrange(0, len(et_words), 2):
+            for n in range(0, len(et_words), 2):
                 et += np.timedelta64(float(et_words[n]), et_words[n+1])
         except:
             raise
@@ -119,17 +119,16 @@ for n_s in args.network_site:
     assert m is not None, \
         'Magnetometer must have form NETWORK or NETWORK/SITE'
     network = m.groups()[0].upper()
-    assert ap.networks.has_key(network), \
+    assert network in ap.networks, \
         'Network %s is not known' % network
     network_list.append(network)
 
     if m.groups()[2] is None:
         # Given just 'NETWORK'
-        n_s_list.extend(map(lambda x: network + '/' + x, 
-                        ap.networks[network].keys()))
+        n_s_list.extend([network + '/' + x for x in list(ap.networks[network].keys())])
     else:
         site = m.groups()[2].upper()
-        assert ap.networks[network].has_key(site), \
+        assert site in ap.networks[network], \
             'Site %s/%s is not known' % (network, site)
         n_s_list.append(network + '/' + site)
 
@@ -146,7 +145,7 @@ if ('UIT' in network_list or 'DTU' in network_list) \
 for n_s in n_s_list:
     network, site = n_s.split('/')
     kwargs = {}
-    if archives.has_key(network):
+    if network in archives:
         kwargs['archive'] = archives[network]
     md = ap.load_data(network, site, 'MagData', st, et, **kwargs)
                       # archive=archives[network])
@@ -154,7 +153,7 @@ for n_s in n_s_list:
     # results.
     qdc = None
     if md is not None and \
-            ap.networks[network][site]['data_types'].has_key('MagQDC'):
+            'MagQDC' in ap.networks[network][site]['data_types']:
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         qdc_info = ap.magdata.load_qdc(network, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
