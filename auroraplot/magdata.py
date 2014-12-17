@@ -33,7 +33,7 @@ def load_iaga_2000(file_name):
             uh = urlopen(file_name)
 
         try:
-            lines = [a.rstrip() for a in uh.readlines()]
+            lines = [a.rstrip().decode('ascii') for a in uh.readlines()]
             header = {}
             comments = []
             
