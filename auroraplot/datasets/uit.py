@@ -15,17 +15,18 @@ logger = logging.getLogger(__name__)
 
 # Set the UIT password if possible
 uit_password = None
-uit_password_file = os.path.join(os.getenv('HOME'), '.uit_password')
-if os.path.exists(uit_password_file):
-    try:
-        fh = open(uit_password_file, 'r')
+for f in ('.uit_password', 'uit_password.txt'):
+    uit_password_file = os.path.join(os.path.expanduser('~'), f)
+    if os.path.exists(uit_password_file):
         try:
-            uit_password = fh.readline().strip()
-        finally:
-            fh.close()
-    except:
-        logger.warn('Could not read UIT data access password')
-        raise
+            fh = open(uit_password_file, 'r')
+            try:
+                uit_password = fh.readline().strip()
+            finally:
+                fh.close()
+        except:
+            logger.warn('Could not read UIT data access password')
+            raise
 
 path_fstr = 'http://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=%%Y&month=%%m&day=%%d&res=%(uit_res)s&pwd=%(uit_password)s&format=iagaUnix&comps=%(uit_comp)s&getdata=+Get+Data+'
 
