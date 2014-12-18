@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __license__ = 'PSF'
 
 import logging
