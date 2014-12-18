@@ -82,8 +82,13 @@ mpl.rcParams['legend.numpoints'] = 1
 
 
 # Set timezone appropriately to get intended np.datetime64 behaviour.
-os.environ['TZ'] = 'UTC'
-time.tzset()
+try:
+    os.environ['TZ'] = 'UTC'
+    time.tzset()
+except Exception as e:
+    # Cannot use tzset on windows
+    logger.warn('Could not set time zone to UTC')
+
 
 # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
