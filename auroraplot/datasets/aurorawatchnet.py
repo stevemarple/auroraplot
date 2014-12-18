@@ -233,8 +233,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'lan1/%Y/%m/lan1_%Y%m%d.txt'),
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -245,8 +244,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'lan1/qdc/%Y/lan1_qdc_%Y%m.txt'),
+                    'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -258,8 +256,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'lan1/%Y/%m/lan1_%Y%m%d.txt'),
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -271,8 +268,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'lan1/%Y/%m/lan1_%Y%m%d.txt'),
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -299,8 +295,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'lan3/%Y/%m/lan3_%Y%m%d.txt'),
+                    'path': data_dir + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -311,8 +306,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'lan3/qdc/%Y/lan3_qdc_%Y%m.txt'),
+                    'path': data_dir + '/lan3/qdc/%Y/lan3_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -324,8 +318,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'lan3/%Y/%m/lan3_%Y%m%d.txt'),
+                    'path': data_dir + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -337,8 +330,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'lan3/%Y/%m/lan3_%Y%m%d.txt'),
+                    'path': data_dir + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -365,8 +357,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
+                    'path': data_dir + '/orm/%Y/%m/orm_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -377,8 +368,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'orm/qdc/%Y/orm_qdc_%Y%m.txt'),
+                    'path': data_dir + '/orm/qdc/%Y/orm_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -390,8 +380,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
+                    'path': data_dir + '/orm/%Y/%m/orm_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -403,8 +392,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'orm/%Y/%m/orm_%Y%m%d.txt'),
+                    'path': data_dir + '/orm/%Y/%m/orm_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -430,8 +418,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'path': data_dir + '/test1/%Y/%m/test1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -442,8 +429,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'test1/qdc/%Y/test1_qdc_%Y%m.txt'),
+                    'path': data_dir + '/test1/qdc/%Y/test1_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -455,8 +441,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'path': data_dir + '/test1/%Y/%m/test1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -468,8 +453,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'test1/%Y/%m/test1_%Y%m%d.txt'),
+                    'path': data_dir + '/test1/%Y/%m/test1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -495,8 +479,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
+                    'path': data_dir + '/bra/%Y/%m/bra_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -507,8 +490,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'bra/qdc/%Y/bra_qdc_%Y%m.txt'),
+                    'path': data_dir + '/bra/qdc/%Y/bra_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -520,8 +502,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
+                    'path': data_dir + '/bra/%Y/%m/bra_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -532,8 +513,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'bra/%Y/%m/bra_%Y%m%d.txt'),
+                    'path': data_dir + '/bra/%Y/%m/bra_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -559,8 +539,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'san/%Y/%m/san_%Y%m%d.txt'),
+                    'path': data_dir + '/san/%Y/%m/san_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -571,8 +550,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'san/qdc/%Y/san_qdc_%Y%m.txt'),
+                    'path': data_dir + '/san/qdc/%Y/san_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -584,8 +562,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'san/%Y/%m/san_%Y%m%d.txt'),
+                    'path': data_dir + '/san/%Y/%m/san_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -596,8 +573,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'san/%Y/%m/san_%Y%m%d.txt'),
+                    'path': data_dir + '/san/%Y/%m/san_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -623,8 +599,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
+                    'path': data_dir + '/tob/%Y/%m/tob_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -635,8 +610,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'tob/qdc/%Y/tob_qdc_%Y%m.txt'),
+                    'path': data_dir + '/tob/qdc/%Y/tob_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -648,8 +622,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
+                    'path': data_dir + '/tob/%Y/%m/tob_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -660,8 +633,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'tob/%Y/%m/tob_%Y%m%d.txt'),
+                    'path': data_dir + '/tob/%Y/%m/tob_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -688,8 +660,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
+                    'path': data_dir + '/whi/%Y/%m/whi_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -700,8 +671,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'whi/qdc/%Y/whi_qdc_%Y%m.txt'),
+                    'path': data_dir + '/whi/qdc/%Y/whi_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -713,8 +683,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
+                    'path': data_dir + '/whi/%Y/%m/whi_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -725,8 +694,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'whi/%Y/%m/whi_%Y%m%d.txt'),
+                    'path': data_dir + '/whi/%Y/%m/whi_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -752,8 +720,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
+                    'path': data_dir + '/alt/%Y/%m/alt_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -764,8 +731,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'alt/qdc/%Y/alt_qdc_%Y%m.txt'),
+                    'path': data_dir + '/alt/qdc/%Y/alt_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -777,8 +743,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
+                    'path': data_dir + '/alt/%Y/%m/alt_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -789,8 +754,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'alt/%Y/%m/alt_%Y%m%d.txt'),
+                    'path': data_dir + '/alt/%Y/%m/alt_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -816,8 +780,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
+                    'path': data_dir + '/mal/%Y/%m/mal_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -828,8 +791,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'mal/qdc/%Y/mal_qdc_%Y%m.txt'),
+                    'path': data_dir + '/mal/qdc/%Y/mal_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -841,8 +803,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
+                    'path': data_dir + '/mal/%Y/%m/mal_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -853,8 +814,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'mal/%Y/%m/mal_%Y%m%d.txt'),
+                    'path': data_dir + '/mal/%Y/%m/mal_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -880,8 +840,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
+                    'path': data_dir + '/ash/%Y/%m/ash_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -892,8 +851,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'ash/qdc/%Y/ash_qdc_%Y%m.txt'),
+                    'path': data_dir + '/ash/qdc/%Y/ash_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -905,8 +863,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
+                    'path': data_dir + '/ash/%Y/%m/ash_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -917,8 +874,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'ash/%Y/%m/ash_%Y%m%d.txt'),
+                    'path': data_dir + '/ash/%Y/%m/ash_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -944,8 +900,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
+                    'path': data_dir + '/pel/%Y/%m/pel_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -956,8 +911,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'pel/qdc/%Y/pel_qdc_%Y%m.txt'),
+                    'path': data_dir + '/pel/qdc/%Y/pel_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -969,8 +923,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
+                    'path': data_dir + '/pel/%Y/%m/pel_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -981,8 +934,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'pel/%Y/%m/pel_%Y%m%d.txt'),
+                    'path': data_dir + '/pel/%Y/%m/pel_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1009,8 +961,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
+                    'path': data_dir + '/bre/%Y/%m/bre_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1021,8 +972,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'bre/qdc/%Y/bre_qdc_%Y%m.txt'),
+                    'path': data_dir + '/bre/qdc/%Y/bre_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1034,8 +984,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
+                    'path': data_dir + '/bre/%Y/%m/bre_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1046,8 +995,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'bre/%Y/%m/bre_%Y%m%d.txt'),
+                    'path': data_dir + '/bre/%Y/%m/bre_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1074,8 +1022,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'can/%Y/%m/can_%Y%m%d.txt'),
+                    'path': data_dir + '/can/%Y/%m/can_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1086,8 +1033,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'can/qdc/%Y/can_qdc_%Y%m.txt'),
+                    'path': data_dir + '/can/qdc/%Y/can_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1099,8 +1045,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'can/%Y/%m/can_%Y%m%d.txt'),
+                    'path': data_dir + '/can/%Y/%m/can_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1111,8 +1056,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'can/%Y/%m/can_%Y%m%d.txt'),
+                    'path': data_dir + '/can/%Y/%m/can_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1142,8 +1086,7 @@ sites = {
             'MagData': {
                 'realtime': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir,
-                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
+                    'path': data_dir + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1154,8 +1097,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': os.path.join(data_dir, 
-                                         'cwx/qdc/%Y/cwx_qdc_%Y%m.txt'),
+                    'path': data_dir + '/cwx/qdc/%Y/cwx_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1167,8 +1109,7 @@ sites = {
                 'realtime': {
                     'channels': np.array(['Sensor temperature', 
                                           'System temperature']),
-                    'path': os.path.join(data_dir,
-                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
+                    'path': data_dir + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1179,8 +1120,7 @@ sites = {
             'VoltageData': {
                 'realtime': {
                     'channels': np.array(['Battery voltage']),
-                    'path': os.path.join(data_dir,
-                                         'cwx/%Y/%m/cwx_%Y%m%d.txt'),
+                    'path': data_dir + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'converter': convert_awn_data,
@@ -1190,6 +1130,71 @@ sites = {
                 },        
             },
         }, # CWX
+    'EXE': {
+        # Met Office station
+        'location': 'Exeter, UK',
+        'latitude': 50.718414, 
+        'longitude': -3.537151,
+        'elevation': np.nan,
+        'start_time': np.datetime64('2014-11-13T00:00:00+0000'),
+        'end_time': None, # Still operational
+        'url': 'http://www.metoffice.gov.uk/', # Provisional
+        'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
+        'k_index_filter': None,
+        'license': cc3_by_nc_sa,
+        'copyright': 'Met Office.',
+        'attribution': 'Met Office, ' + \
+            'http://www.metoffice.gov.uk/',
+        'line_color': [186.0/255, 216.0/255, 10.0/255],
+        'data_types': {
+            'MagData': {
+                'realtime': {
+                    'channels': np.array(['H']),
+                    'path': data_dir + '/exe/%Y/%m/exe_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H']),
+                    'path': data_dir + '/exe/qdc/%Y/exe_qdc_%Y%m.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature', 
+                                          'System temperature']),
+                    'path': data_dir + '/exe/%Y/%m/exe_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': u'\N{DEGREE SIGN}C',
+                    },
+                },
+            'VoltageData': {
+                'realtime': {
+                    'channels': np.array(['Battery voltage']),
+                    'path': data_dir + '/exe/%Y/%m/exe_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'converter': convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'V',
+                    },
+                },        
+            },
+        }, # EXE
+
     }
 
 # Set activity color/thresholds unless already set.
