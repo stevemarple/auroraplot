@@ -62,7 +62,12 @@ parser.add_argument('--log-format',
 parser.add_argument('--offset', 
                     default=100,
                     type=float,
-                    help='Offset between sites in nT')
+                    help='Offset between sites for stack plot (nT)')
+parser.add_argument('--qdc-tries', 
+                    default=2,
+                    type=int,
+                    help='Number of tries to load QDC',
+                    metavar='NUM')
 parser.add_argument('network_site',
                     nargs='+',
                     metavar="NETWORK/SITE")
@@ -200,9 +205,15 @@ else:
     # Every other plot type makes one figure per site
     for md in mdl:
         if args.plot_type == 'k_index_plot':
-            qdc = ap.magdata.load_qdc(md.network, 
-                                      md.site,
-                                      dt64.mean(md.start_time, md.end_time))
+            try:
+                qdc = ap.magdata.load_qdc(md.network, 
+                                          md.site,
+                                          dt64.mean(md.start_time, 
+                                                    md.end_time),
+                                          channels=md.channels,
+                                          tries=args.qdc_tries)
+            except Exception:
+                qdc = None
             k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc)
             k.plot()
 
