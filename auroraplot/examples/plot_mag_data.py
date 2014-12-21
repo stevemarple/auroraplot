@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
+import auroraplot.auroralactivity
 import auroraplot.magdata
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
@@ -42,6 +43,10 @@ parser.add_argument('-s', '--start-time',
 parser.add_argument('-e', '--end-time',
                     help='End time for data transfer (exclusive)',
                     metavar='DATETIME')
+parser.add_argument('--rolling',
+                    action='store_true',
+                    default=False,
+                    help='Make rolling 24 hour plot')
 # parser.add_argument('-c', '--channel',
 #                     default='H',
 #                     help='Magnetometer data channel (axis)')
@@ -61,6 +66,19 @@ parser.add_argument('--offset',
 parser.add_argument('network_site',
                     nargs='+',
                     metavar="NETWORK/SITE")
+
+plot_type = parser.add_mutually_exclusive_group(required=False)
+plot_type.add_argument('--stack-plot', 
+                       dest='plot_type',
+                       action='store_const',
+                       const='stack_plot',
+                       help='Display as a stack plot')
+plot_type.add_argument('--k-index-plot', 
+                       dest='plot_type',
+                       action='store_const',
+                       const='k_index_plot',
+                       help='Make K index plot(s)')
+
 
 args = parser.parse_args()
 if __name__ == '__main__':
@@ -92,25 +110,29 @@ except Exception as e:
 
 # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
-st = np.datetime64(args.start_time) + np.timedelta64(0, 'us')
-if args.end_time is None:
-    et = st + np.timedelta64(86400, 's')
+if args.rolling:
+    et = dt64.ceil(np.datetime64('now', 'us'), np.timedelta64(1, 'h'))
+    st = et - np.timedelta64(1, 'D')
 else:
-    try:
-        # Parse as date
-        et = np.datetime64(args.end_time) + np.timedelta64(0, 'us')
-    except ValueError as e:
+    st = np.datetime64(args.start_time) + np.timedelta64(0, 'us')
+    if args.end_time is None:
+        et = st + np.timedelta64(86400, 's')
+    else:
         try:
-            # Parse as a set of duration values
-            et = st + np.timedelta64(0, 'us')
-            et_words = args.end_time.split()
-            assert len(et_words) % 2 == 0, 'Need even number of words'
-            for n in range(0, len(et_words), 2):
-                et += np.timedelta64(float(et_words[n]), et_words[n+1])
+            # Parse as date
+            et = np.datetime64(args.end_time) + np.timedelta64(0, 'us')
+        except ValueError as e:
+            try:
+                # Parse as a set of duration values
+                et = st + np.timedelta64(0, 'us')
+                et_words = args.end_time.split()
+                assert len(et_words) % 2 == 0, 'Need even number of words'
+                for n in range(0, len(et_words), 2):
+                    et += np.timedelta64(float(et_words[n]), et_words[n+1])
+            except:
+                raise
         except:
             raise
-    except:
-        raise
 
 # Parse and process list of networks and sites.
 n_s_list = []
@@ -166,27 +188,40 @@ for n_s in n_s_list:
 if len(mdl) == 0:
     print('No data to plot')
     sys.exit(0)
-elif len(mdl) == 1:
-    # No point in using a stackplot for a single site
-    mdl[0].plot()
+
+if args.plot_type is None or args.plot_type == 'stack_plot':
+    if len(mdl) == 1:
+        # No point in using a stackplot for a single site
+        mdl[0].plot()
+    else:
+        # Create a stackplot.
+        ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
 else:
-    # Create a stackplot.
-    ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
+    # Every other plot type makes one figure per site
+    for md in mdl:
+        if args.plot_type == 'k_index_plot':
+            qdc = ap.magdata.load_qdc(md.network, 
+                                      md.site,
+                                      dt64.mean(md.start_time, md.end_time))
+            k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc)
+            k.plot()
 
 
-# Override the labelling format.
-fig = plt.gcf()
-for ax in fig.axes:
-    # Set maxticks so that for an entire day the ticks are at 3-hourly
-    # intervals (to correspond with K index plots).
-    ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
+# Override the labelling format for all figures
+for fn in plt.get_fignums():
+    fig = plt.figure(fn)
+    for ax in fig.axes:
+        # Set maxticks so that for an entire day the ticks are at 3-hourly
+        # intervals (to correspond with K index plots).
+        ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
 
-    # Have axis labelled with date or time, as appropriate. Indicate UT.
-    ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
+        # Have axis labelled with date or time, as appropriate. Indicate UT.
+        ax.xaxis.set_major_formatter( \
+            dt64.Datetime64Formatter(autolabel='%s (UT)'))
 
-    # Abbreviate AURORAWATCHNET to AWN
-    ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
+        # Abbreviate AURORAWATCHNET to AWN
+        ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
 
-# Make the figure visible.
+# Make figure(s) visible.
 plt.show()
 
