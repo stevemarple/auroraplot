@@ -182,7 +182,8 @@ class KIndex(Data):
                  scale=None,
                  nth=1,
                  fit=None,
-                 fit_params={}):
+                 fit_params={},
+                 with_qdc=None):
         Data.__init__(self,
                       network=network,
                       site=site,
@@ -214,7 +215,9 @@ class KIndex(Data):
             if magqdc is None:
                 logger.info('Creating KIndex object without a QDC')
                 bsub = magdata.data[magdata.get_channel_index(c)]
+                self.with_qdc = False
             else:
+                assert magdata.units == magqdc.units, 'Units must match'
                 if isinstance(magqdc, ap.magdata.MagQDC):
                     aligned = magqdc.align(magdata, fit=fit, **fit_params)
                 else:
@@ -223,7 +226,7 @@ class KIndex(Data):
                 # Baseline subtracted data
                 bsub = np.abs(magdata.data[magdata.get_channel_index(c)] -
                               aligned.data[aligned.get_channel_index(c)])
-                assert magdata.units == magqdc.units, 'Units must match'
+                self.with_qdc = False
 
             self.units = None
 
