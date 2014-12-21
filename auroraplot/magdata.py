@@ -158,7 +158,7 @@ def load_qdc(network, site, time, **kwargs):
     data_type = 'MagQDC'
     archive, ad = ap.get_archive_info(network, site, data_type, **kwargs)
     channels = kwargs.get('channels')
-    if channels:
+    if channels is not None:
         # Could be as single channel name or a list of channels
         if isinstance(channels, six.string_types):
             if channels not in ad['channels']:
