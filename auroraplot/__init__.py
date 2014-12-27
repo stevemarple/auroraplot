@@ -6,6 +6,7 @@ __version__ = '0.3.1'
 __license__ = 'PSF'
 
 import logging
+import re
 import six
 import numpy as np
 import auroraplot.dt64tools as dt64
@@ -405,8 +406,41 @@ def concatenate(objs, sort=True):
                     units=units,
                     sort=sort)
 
-# Initialise
 
+def parse_network_site_list(n_s_list):
+    '''Parse an array of strings to unique network/site lists'''
+    network_list = []
+    site_list = []
+    sites_found = {}
+    for n_s in n_s_list:
+        m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
+        assert m is not None, \
+            'Magnetometer must have form NETWORK or NETWORK/SITE'
+        n = m.groups()[0].upper()
+        assert n in networks, \
+            'Network %s is not known' % n
+
+
+        if m.groups()[2] is None:
+            # Given just 'NETWORK'
+            sites = networks[n].keys()
+        else:
+            sites = [m.groups()[2].upper()]
+        
+        if n not in sites_found:
+            sites_found[n] = {}
+        for s in sites:
+            if s not in sites_found[n]:
+                # Not seen this network/site before
+                assert s in networks[n], 'Site %s/%s is not known' % (n, s)
+                sites_found[n][s] = True
+                network_list.append(n)
+                site_list.append(s)
+
+    return network_list, site_list
+        
+
+# Initialise
 try:
     import auroraplot_custom
 except ImportError as e:
