@@ -259,7 +259,7 @@ def convert_qdc_data(file_name, archive_data,
             data = data[col_idx] * 1e-9 # Stored as nT
             r = MagQDC(network=network,
                        site=site,
-                       channels=channels,
+                       channels=np.array(channels),
                        start_time=start_time,
                        end_time=end_time,
                        sample_start_time=sample_start_time, 
