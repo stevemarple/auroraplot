@@ -44,7 +44,10 @@ class Data(object):
                  sort=True):
         self.network = network
         self.site = site
-        self.channels = np.array(channels)
+        if isinstance(channels, six.string_types):
+            self.channels = np.array([channels])
+        else:
+            self.channels = np.array(channels)
         self.start_time = start_time
         self.end_time = end_time
         self.sample_start_time = sample_start_time
@@ -235,7 +238,7 @@ class Data(object):
                 return ' (' + units + ')'
 
         if channels is None:
-            channels=self.channels
+            channels = self.channels
         elif isinstance(channels, six.string_types):
             channels=[channels]
         else:
@@ -637,7 +640,7 @@ class Data(object):
         fit_info = []
         for c in self.channels:
             if plot_fit:
-                # Print original data befreo fitting in case of
+                # Plot original data before fitting in case of
                 # inplace=True
                 ref.plot(label='Reference')
                 ax = plt.gca()
