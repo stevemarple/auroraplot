@@ -139,26 +139,7 @@ else:
         except:
             raise
 
-# Parse and process list of networks and sites.
-n_s_list = []
-network_list = []
-for n_s in args.network_site:
-    m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
-    assert m is not None, \
-        'Magnetometer must have form NETWORK or NETWORK/SITE'
-    network = m.groups()[0].upper()
-    assert network in ap.networks, \
-        'Network %s is not known' % network
-    network_list.append(network)
-
-    if m.groups()[2] is None:
-        # Given just 'NETWORK'
-        n_s_list.extend([network + '/' + x for x in list(ap.networks[network].keys())])
-    else:
-        site = m.groups()[2].upper()
-        assert site in ap.networks[network], \
-            'Site %s/%s is not known' % (network, site)
-        n_s_list.append(network + '/' + site)
+network_list, site_list = ap.parse_network_site_list(args.network_site)
 
 if 'AURORAWATCHNET' in network_list or 'SAMNET' in network_list:
     # AURORAWATCHNET and SAMNET are aligned with H so switch default
@@ -176,14 +157,14 @@ if ('UIT' in network_list or 'DTU' in network_list) \
 
 # Load the data for each site. 
 mdl = []
-for n_s in n_s_list:
-    network, site = n_s.split('/')
+for n in range(len(network_list)):
+    network = network_list[n]
+    site = site_list[n]
     kwargs = {}
     if network in archives:
         kwargs['archive'] = archives[network]
     md = ap.load_data(network, site, 'MagData', st, et, **kwargs)
-                      # archive=archives[network])
-    # Is result is None then no data available, so ignore those
+    # If result is None then no data available so ignore those
     # results.
     if md is not None:
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
