@@ -124,7 +124,7 @@ sites = {
 for s in sites:
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
-ap.add_network('DTU', sites)
+ap.add_project('DTU', sites)
 
 
 

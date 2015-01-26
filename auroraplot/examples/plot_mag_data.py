@@ -24,7 +24,7 @@ import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 
 
-# For each network set the archive from which data is loaded. DTU and
+# For each project set the archive from which data is loaded. DTU and
 # UIT are swich to HZ when AURORAWATCHNET and SAMNET are included.
 archives = {
     'AURORAWATCHNET': 'realtime',
@@ -68,9 +68,9 @@ parser.add_argument('--qdc-tries',
                     type=int,
                     help='Number of tries to load QDC',
                     metavar='NUM')
-parser.add_argument('network_site',
+parser.add_argument('project_site',
                     nargs='+',
-                    metavar="NETWORK/SITE")
+                    metavar="PROJECT/SITE")
 
 plot_type = parser.add_mutually_exclusive_group(required=False)
 plot_type.add_argument('--stack-plot', 
@@ -139,9 +139,9 @@ else:
         except:
             raise
 
-network_list, site_list = ap.parse_network_site_list(args.network_site)
+project_list, site_list = ap.parse_project_site_list(args.project_site)
 
-if 'AURORAWATCHNET' in network_list or 'SAMNET' in network_list:
+if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
     # AURORAWATCHNET and SAMNET are aligned with H so switch default
     # archive for DTU and UIT
     archives['DTU'] = 'hz_10s'
@@ -150,20 +150,20 @@ if 'AURORAWATCHNET' in network_list or 'SAMNET' in network_list:
 # Requesting the UIT or DTU data from the UIT web site requires a
 # password to be set. Try reading the password from a file called
 # .uit_password from the user's home directory.
-if ('UIT' in network_list or 'DTU' in network_list) \
+if ('UIT' in project_list or 'DTU' in project_list) \
         and ap.datasets.uit.uit_password is None:
     raise Exception('UIT password needed but could not be set')
 
 
 # Load the data for each site. 
 mdl = []
-for n in range(len(network_list)):
-    network = network_list[n]
+for n in range(len(project_list)):
+    project = project_list[n]
     site = site_list[n]
     kwargs = {}
-    if network in archives:
-        kwargs['archive'] = archives[network]
-    md = ap.load_data(network, site, 'MagData', st, et, **kwargs)
+    if project in archives:
+        kwargs['archive'] = archives[project]
+    md = ap.load_data(project, site, 'MagData', st, et, **kwargs)
     # If result is None then no data available so ignore those
     # results.
     if md is not None:
@@ -187,7 +187,7 @@ else:
     for md in mdl:
         if args.plot_type == 'k_index_plot':
             try:
-                qdc = ap.magdata.load_qdc(md.network, 
+                qdc = ap.magdata.load_qdc(md.project, 
                                           md.site,
                                           dt64.mean(md.start_time, 
                                                     md.end_time),

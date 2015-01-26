@@ -32,7 +32,7 @@ path_fstr = 'http://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=
 
 
 def convert_iaga_2000(file_name, archive_data, 
-                      network, site, data_type, channels, start_time, 
+                      project, site, data_type, channels, start_time, 
                       end_time, **kwargs):
     assert data_type == 'MagData', 'Illegal data_type'
     iaga = load_iaga_2000(file_name)
@@ -55,7 +55,7 @@ def convert_iaga_2000(file_name, archive_data,
                      for x in iaga['data'][n]])
     
     data = np.array(data) * 1e-9
-    r = MagData(network=network,
+    r = MagData(project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -71,7 +71,7 @@ def convert_iaga_2000(file_name, archive_data,
     return r
 
 
-def uit_path(t, network, site, data_type, archive, channels):
+def uit_path(t, project, site, data_type, archive, channels):
     if uit_password is None:
         raise Exception(__name__ + '.uit_password must be set, ' + 
                         'to obtain a password see ' + 
@@ -79,7 +79,7 @@ def uit_path(t, network, site, data_type, archive, channels):
 
     # Expand the path format string with the specific UIT variables,
     # including password.
-    a, d = copy.deepcopy(ap.get_archive_info(network, site, data_type, 
+    a, d = copy.deepcopy(ap.get_archive_info(project, site, data_type, 
                                              archive=archive))
     d['uit_password'] = uit_password
     fstr = path_fstr % d
@@ -665,7 +665,7 @@ sites = {
 for s in sites:
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
-ap.add_network('UIT', sites)
+ap.add_project('UIT', sites)
 
 
 

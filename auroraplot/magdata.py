@@ -126,9 +126,9 @@ def load_iaga_2000(file_name):
     return None
 
 
-def load_qdc(network, site, time, **kwargs):
+def load_qdc(project, site, time, **kwargs):
     '''Load quiet-day curve. 
-    network: name of the network (upper case)
+    project: name of the project (upper case)
 
     site: site abbreviation (upper case)
 
@@ -156,7 +156,7 @@ def load_qdc(network, site, time, **kwargs):
     '''
     
     data_type = 'MagQDC'
-    archive, ad = ap.get_archive_info(network, site, data_type, **kwargs)
+    archive, ad = ap.get_archive_info(project, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels is not None:
         # Could be as single channel name or a list of channels
@@ -184,7 +184,7 @@ def load_qdc(network, site, time, **kwargs):
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(network, site, data_type, start_time, 
+        return load_function(project, site, data_type, start_time, 
                              end_time, **kwargs2)
 
     data = []
@@ -193,7 +193,7 @@ def load_qdc(network, site, time, **kwargs):
         try:
             if hasattr(path, '__call__'):
                 # Function: call it with relevant information to get the path
-                file_name = path(t, network=network, site=site, 
+                file_name = path(t, project=project, site=site, 
                                  data_type=data_type, archive=archive,
                                  channels=channels)
             else:
@@ -203,7 +203,7 @@ def load_qdc(network, site, time, **kwargs):
 
             r = ad['converter'](file_name, 
                                 ad,
-                                network=network,
+                                project=project,
                                 site=site, 
                                 data_type=data_type, 
                                 start_time=np.timedelta64(0, 'h'), 
@@ -228,7 +228,7 @@ def load_qdc(network, site, time, **kwargs):
 
 
 def convert_qdc_data(file_name, archive_data, 
-                     network, site, data_type, channels, start_time, 
+                     project, site, data_type, channels, start_time, 
                      end_time, **kwargs):
     '''Convert AuroraWatchNet QDC file to match standard data type.
 
@@ -257,7 +257,7 @@ def convert_qdc_data(file_name, archive_data,
             
             integration_interval = None
             data = data[col_idx] * 1e-9 # Stored as nT
-            r = MagQDC(network=network,
+            r = MagQDC(project=project,
                        site=site,
                        channels=np.array(channels),
                        start_time=start_time,
@@ -363,7 +363,7 @@ def stack_plot(data_array, offset, channel=None,
             pass
         lh = dt64.plot_dt64(d.get_mean_sample_time(), y, **kwargs)
         r.extend(lh)
-        tick_labels.append(d.network + '\n' + d.site)
+        tick_labels.append(d.project + '\n' + d.site)
 
 
     if start_time is None:
@@ -406,7 +406,7 @@ class MagData(Data):
     '''Class to manipulate and display magnetometer data.'''
 
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -419,7 +419,7 @@ class MagData(Data):
                  units=None,
                  sort=True):
         Data.__init__(self,
-                      network=network,
+                      project=project,
                       site=site,
                       channels=channels,
                       start_time=start_time,
@@ -644,7 +644,7 @@ class MagData(Data):
             
         qdc_data /= count
             
-        qdc = MagQDC(network=self.network,
+        qdc = MagQDC(project=self.project,
                      site=self.site,
                      channels=qd[0].channels,
                      start_time=np.timedelta64(0, 'h'),
@@ -665,7 +665,7 @@ class MagData(Data):
 class MagQDC(MagData):
     '''Class to load and manipulate magnetometer quiet-day curves (QDC).'''
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -678,7 +678,7 @@ class MagQDC(MagData):
                  units=None,
                  sort=True):
         MagData.__init__(self,
-                         network=network,
+                         project=project,
                          site=site,
                          channels=channels,
                          start_time=start_time,
@@ -738,7 +738,7 @@ class MagQDC(MagData):
                 nc = np.median(np.diff(ta))
             else:
                 nc = None
-            r = MagData(network=self.network,
+            r = MagData(project=self.project,
                         site=self.site,
                         channels=copy.copy(self.channels),
                         start_time=ta[0],

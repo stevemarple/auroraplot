@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
 
-networks = { }
+projects = { }
 
 NaN = float('nan')
 NaT = np.timedelta64('NaT', 'us')
@@ -37,22 +37,22 @@ colors = ['b', 'g', 'r']
 #     return {key: d[key] for key in keys}
 
 
-def add_network(network_name, sites):
+def add_project(project_name, sites):
     '''
-    Helper function for datasets to register network and site
+    Helper function for datasets to register project and site
     information. To allow local customisation of file location a call
-    to the "add_network_hook" function in the auroraplot_custom module
+    to the "add_project_hook" function in the auroraplot_custom module
     is loaded. This function, if it exists, should modify the
     registered site information to suit local policy.
     '''
 
-    if network_name in networks:
-        networks[network_name].update(sites)
+    if project_name in projects:
+        projects[project_name].update(sites)
     else:
-        networks[network_name] = sites
+        projects[project_name] = sites
         
-    if hasattr(auroraplot_custom, 'add_network_hook'):
-        auroraplot_custom.add_network_hook(network_name=network_name)
+    if hasattr(auroraplot_custom, 'add_project_hook'):
+        auroraplot_custom.add_project_hook(project_name=project_name)
 
 
 def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
@@ -168,33 +168,33 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         return d
 
 
-def has_site_info(network, site, info):
+def has_site_info(project, site, info):
     # Sanity checking
-    if network not in networks:
-        raise Exception('Unknown network')
-    elif site not in networks[network]:
+    if project not in projects:
+        raise Exception('Unknown project')
+    elif site not in projects[project]:
         raise Exception('Unknown site')
-    return info in networks[network][site]
+    return info in projects[project][site]
 
 
-def get_site_info(network, site, info=None):
+def get_site_info(project, site, info=None):
     # Sanity checking
-    if network not in networks:
-        raise Exception('Unknown network')
-    elif site not in networks[network]:
+    if project not in projects:
+        raise Exception('Unknown project')
+    elif site not in projects[project]:
         raise Exception('Unknown site')
     if info is None:
-        return networks[network][site]
-    elif info not in networks[network][site]:
+        return projects[project][site]
+    elif info not in projects[project][site]:
         raise Exception('Unknown info')
     else:
-        return networks[network][site][info]
+        return projects[project][site][info]
 
-def get_archive_info(network, site, data_type, **kwargs):
+def get_archive_info(project, site, data_type, **kwargs):
     '''
     Get relevant details about a data archive
     
-    network: name of the network (upper case)
+    project: name of the project (upper case)
     
     site: site abbreviation (upper case)
     
@@ -229,7 +229,7 @@ def get_archive_info(network, site, data_type, **kwargs):
         format: name of the data file format (optional).
     '''
 
-    site_info = get_site_info(network, site)
+    site_info = get_site_info(project, site)
 
     # Sanity checking
     if data_type not in site_info['data_types']:
@@ -258,9 +258,9 @@ def get_archive_info(network, site, data_type, **kwargs):
     return (archive, site_info['data_types'][data_type][archive])
 
 
-def load_data(network, site, data_type, start_time, end_time, **kwargs):
+def load_data(project, site, data_type, start_time, end_time, **kwargs):
     '''Load data. 
-    network: name of the network (upper case)
+    project: name of the project (upper case)
 
     site: site abbreviation (upper case)
 
@@ -286,7 +286,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         function reference, after validating the input parameters.
         
     '''
-    archive, ad = get_archive_info(network, site, data_type, **kwargs)
+    archive, ad = get_archive_info(project, site, data_type, **kwargs)
     channels = kwargs.get('channels')
     if channels:
         # Could be as single channel name or a list of channels
@@ -314,7 +314,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(network, site, data_type, start_time, 
+        return load_function(project, site, data_type, start_time, 
                              end_time, **kwargs2)
 
     data = []
@@ -323,7 +323,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         t2 = t + ad['duration']
         if hasattr(path, '__call__'):
             # Function: call it with relevant information to get the path
-            file_name = path(t, network=network, site=site, 
+            file_name = path(t, project=project, site=site, 
                              data_type=data_type, archive=archive,
                              channels=channels)
         else:
@@ -334,7 +334,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
         try:
             tmp = ad['converter'](file_name, 
                                   ad,
-                                  network=network,
+                                  project=project,
                                   site=site, 
                                   data_type=data_type, 
                                   start_time=t, 
@@ -362,7 +362,7 @@ def load_data(network, site, data_type, start_time, end_time, **kwargs):
 
 def concatenate(objs, sort=True):
     obj_type = type(objs[0])
-    network = objs[0].network
+    project = objs[0].project
     site = objs[0].site
     channels = objs[0].channels
     start_time = []
@@ -375,7 +375,7 @@ def concatenate(objs, sort=True):
     units = objs[0].units
     for a in objs:
         assert(type(a) == obj_type)
-        assert(a.network == network)
+        assert(a.project == project)
         assert(a.site == site)
         assert(np.all(a.channels == channels))
         assert(a.units == units)
@@ -393,7 +393,7 @@ def concatenate(objs, sort=True):
 
     if integration_interval is not None:
         integration_interval=np.concatenate(integration_interval, axis=1)
-    return obj_type(network=network,
+    return obj_type(project=project,
                     site=site,
                     channels=channels,
                     start_time=np.min(start_time),
@@ -407,23 +407,23 @@ def concatenate(objs, sort=True):
                     sort=sort)
 
 
-def parse_network_site_list(n_s_list):
-    '''Parse an array of strings to unique network/site lists'''
-    network_list = []
+def parse_project_site_list(n_s_list):
+    '''Parse an array of strings to unique project/site lists'''
+    project_list = []
     site_list = []
     sites_found = {}
     for n_s in n_s_list:
         m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
         assert m is not None, \
-            'Magnetometer must have form NETWORK or NETWORK/SITE'
+            'Not in form PROJECT or PROJECT/SITE'
         n = m.groups()[0].upper()
-        assert n in networks, \
-            'Network %s is not known' % n
+        assert n in projects, \
+            'Project %s is not known' % n
 
 
         if m.groups()[2] is None:
-            # Given just 'NETWORK'
-            sites = networks[n].keys()
+            # Given just 'PROJECT'
+            sites = projects[n].keys()
         else:
             sites = [m.groups()[2].upper()]
         
@@ -431,13 +431,13 @@ def parse_network_site_list(n_s_list):
             sites_found[n] = {}
         for s in sites:
             if s not in sites_found[n]:
-                # Not seen this network/site before
-                assert s in networks[n], 'Site %s/%s is not known' % (n, s)
+                # Not seen this project/site before
+                assert s in projects[n], 'Site %s/%s is not known' % (n, s)
                 sites_found[n][s] = True
-                network_list.append(n)
+                project_list.append(n)
                 site_list.append(s)
 
-    return network_list, site_list
+    return project_list, site_list
         
 
 # Initialise

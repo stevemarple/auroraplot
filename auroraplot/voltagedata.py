@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class VoltageData(Data):
     '''Class to manipulate and display voltage data.'''
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -22,7 +22,7 @@ class VoltageData(Data):
                  units=None,
                  sort=True):
         Data.__init__(self,
-                      network=network,
+                      project=project,
                       site=site,
                       channels=channels,
                       start_time=start_time,

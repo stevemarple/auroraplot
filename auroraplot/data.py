@@ -30,7 +30,7 @@ class Data(object):
     '''Base class for time-series data.'''
 
     def __init__(self, 
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -42,7 +42,7 @@ class Data(object):
                  data=np.array([]),
                  units=None,
                  sort=True):
-        self.network = network
+        self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
             self.channels = np.array([channels])
@@ -67,7 +67,7 @@ class Data(object):
             units = 'degrees'
 
         return (type(self).__name__ + ':\n' +
-                '          network : ' + str(self.network) + '\n' +
+                '          project : ' + str(self.project) + '\n' +
                 '             site : ' + str(self.site) + '\n' +
                 '         channels : ' + str(self.channels) + '\n' +
                 '       start_time : ' + str(self.start_time) + '\n' +
@@ -84,7 +84,7 @@ class Data(object):
 
     def assert_valid(self):
         import re
-        for n in ('network', 'site', 'channels', 'start_time', 'end_time', 
+        for n in ('project', 'site', 'channels', 'start_time', 'end_time', 
                   'sample_start_time', 'sample_end_time',
                   'nominal_cadence',
                   'data', 'units'):
@@ -92,7 +92,7 @@ class Data(object):
             assert (attr is not None and 
                     (not isinstance(attr, six.string_types) or attr != '')), \
                     n + ' not set'
-        assert re.match('^[-A-Z0-9]+$', self.network), 'Bad value for network'
+        assert re.match('^[-A-Z0-9]+$', self.project), 'Bad value for project'
         assert re.match('^[-A-Z0-9]+$', self.site), 'Bad value for site'
 
         num_channels = len(self.channels)
@@ -130,12 +130,12 @@ class Data(object):
 
 
     def get_site_info(self, info=None):
-        assert self.network in ap.networks, 'Unknown network'
-        assert self.site in ap.networks[self.network], 'Unknown site'
+        assert self.project in ap.projects, 'Unknown project'
+        assert self.site in ap.projects[self.project], 'Unknown site'
         if info is None:
-            return ap.networks[self.network][self.site]
+            return ap.projects[self.project][self.site]
         else:
-            return ap.networks[self.network][self.site][info]
+            return ap.projects[self.project][self.site][info]
 
 
     def get_mean_sample_time(self):
@@ -214,7 +214,7 @@ class Data(object):
         return r
 
     def make_title(self, subtitle=None, start_time=None, end_time=None):
-        s = [self.network + ' / ' + self.site]
+        s = [self.project + ' / ' + self.site]
         if subtitle:
             s.append(subtitle)
         else:
@@ -481,7 +481,7 @@ class Data(object):
         else:
             ii = np.zeros([len(r.channels), len(idx)]).astype('m8[us]')
 
-        missing = type(self)(network=r.network,
+        missing = type(self)(project=r.project,
                              site=r.site,
                              channels=r.channels,
                              start_time=r.start_time,
@@ -498,7 +498,7 @@ class Data(object):
         # Check for missing data at start
         if r.sample_start_time[0] - start_time > cadence:
             obj_list.append(type(self)(
-                    network=r.network,
+                    project=r.project,
                     site=r.site,
                     channels=r.channels,
                     start_time=start_time,
@@ -514,7 +514,7 @@ class Data(object):
         # Check for missing data at end
         if end_time - r.sample_end_time[-1] > cadence:
             obj_list.append(type(self)(
-                        network=r.network,
+                        project=r.project,
                         site=r.site,
                         channels=r.channels,
                         start_time=r.sample_end_time[-1],

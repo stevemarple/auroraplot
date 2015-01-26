@@ -24,7 +24,7 @@ import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 
 
-# For each network set the archive from which data is loaded 
+# For each project set the archive from which data is loaded 
 archives = {
     'AURORAWATCHNET': 'realtime',
 #    'SAMNET': '5s',
@@ -62,9 +62,9 @@ parser.add_argument('--offset',
                     default=100,
                     type=float,
                     help='Offset between sites in nT')
-parser.add_argument('network_site',
+parser.add_argument('project_site',
                     nargs='+',
-                    metavar="NETWORK/SITE")
+                    metavar="PROJECT/SITE")
 
 args = parser.parse_args()
 if __name__ == '__main__':
@@ -111,51 +111,51 @@ else:
     except:
         raise
 
-# Parse and process list of networks and sites.
+# Parse and process list of projects and sites.
 n_s_list = []
-network_list = []
-for n_s in args.network_site:
+project_list = []
+for n_s in args.project_site:
     m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
     assert m is not None, \
-        'Magnetometer must have form NETWORK or NETWORK/SITE'
-    network = m.groups()[0].upper()
-    assert network in ap.networks, \
-        'Network %s is not known' % network
-    network_list.append(network)
+        'Magnetometer must have form PROJECT or PROJECT/SITE'
+    project = m.groups()[0].upper()
+    assert project in ap.projects, \
+        'Project %s is not known' % project
+    project_list.append(project)
 
     if m.groups()[2] is None:
-        # Given just 'NETWORK'
-        n_s_list.extend([network + '/' + x for x in list(ap.networks[network].keys())])
+        # Given just 'PROJECT'
+        n_s_list.extend([project + '/' + x for x in list(ap.projects[project].keys())])
     else:
         site = m.groups()[2].upper()
-        assert site in ap.networks[network], \
-            'Site %s/%s is not known' % (network, site)
-        n_s_list.append(network + '/' + site)
+        assert site in ap.projects[project], \
+            'Site %s/%s is not known' % (project, site)
+        n_s_list.append(project + '/' + site)
 
 
 # Requesting the UIT or DTU data from the UIT web site requires a
 # password to be set. Try reading the password from a file called
 # .uit_password from the user's home directory.
-if ('UIT' in network_list or 'DTU' in network_list) \
+if ('UIT' in project_list or 'DTU' in project_list) \
         and ap.datasets.uit.uit_password is None:
     raise Exception('UIT password needed but could not be set')
 
 
 # Load and plot the data for each site. 
 for n_s in n_s_list:
-    network, site = n_s.split('/')
+    project, site = n_s.split('/')
     kwargs = {}
-    if network in archives:
-        kwargs['archive'] = archives[network]
-    md = ap.load_data(network, site, 'MagData', st, et, **kwargs)
-                      # archive=archives[network])
+    if project in archives:
+        kwargs['archive'] = archives[project]
+    md = ap.load_data(project, site, 'MagData', st, et, **kwargs)
+                      # archive=archives[project])
     # Is result is None then no data available, so ignore those
     # results.
     qdc = None
     if md is not None and \
-            'MagQDC' in ap.networks[network][site]['data_types']:
+            'MagQDC' in ap.projects[project][site]['data_types']:
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
-        qdc_info = ap.magdata.load_qdc(network, site, dt64.mean(st, et),
+        qdc_info = ap.magdata.load_qdc(project, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
         if qdc_info:
             qdc = qdc_info['magqdc']

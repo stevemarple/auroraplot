@@ -10,6 +10,7 @@ except ImportError:
     from urlparse import urlparse
     from urllib import urlopen
 
+import requests
 import numpy as np
 
 import auroraplot as ap
@@ -19,10 +20,11 @@ from auroraplot.voltagedata import VoltageData
 from auroraplot.datasets.aurorawatchnet import convert_awn_qdc_data
 logger = logging.getLogger(__name__)
 
-data_dir = '/data/samnet'
+# base_url = 'http://spears.lancs.ac.uk/data/samnet/'
+base_url = '/data/samnet/'
 
 def convert_samnet_data(file_name, archive_data, 
-                        network, site, data_type, channels, start_time, 
+                        project, site, data_type, channels, start_time, 
                         end_time, **kwargs):
 
     chan_tup = tuple(archive_data['channels'])
@@ -32,12 +34,16 @@ def convert_samnet_data(file_name, archive_data,
     nominal_cadence_s = (archive_data['nominal_cadence'] / 
                          np.timedelta64(1000000, 'us'))
     try:
+        if file_name.startswith('/'):
+            uh = urlopen('file:' + file_name)
+        else:
+            uh = urlopen(file_name)
         try:
             conv = lambda s: (s.strip().startswith('9999.9') and np.nan) \
                 or float(s.strip())
             # data = np.loadtxt(uh,
-            comments = ap.get_site_info(network, site, 'samnet_code')
-            data = np.loadtxt(file_name, 
+            comments = ap.get_site_info(project, site, 'samnet_code')
+            data = np.loadtxt(uh, 
                               unpack=True, 
                               converters={0: conv, 1: conv, 2: conv},
                               comments=comments)
@@ -54,7 +60,7 @@ def convert_samnet_data(file_name, archive_data,
                 * archive_data['nominal_cadence']
 
             r = MagData( \
-                network=network,
+                project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -83,7 +89,7 @@ def convert_samnet_data(file_name, archive_data,
 
 
 def convert_new_samnet_data(file_name, archive_data, 
-                            network, site, data_type, channels, start_time, 
+                            project, site, data_type, channels, start_time, 
                             end_time, **kwargs):
     '''Convert new-style SAMNET data to match standard data type
 
@@ -99,11 +105,16 @@ def convert_new_samnet_data(file_name, archive_data,
 
     try:
         if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+            fh = urlopen('file:' + file_name)
+            # Pass the file name instead of a file handle.
+            # fh = file_name
         else:
-            uh = urlopen(file_name)
+            # fh = urlopen(file_name)
+            req = requests.get(file_name, stream=True)
+            # print(req.content[0:50])
+            fh = req.raw
         try:
-            file_data = np.loadtxt(uh, unpack=True, 
+            file_data = np.loadtxt(fh, unpack=True, 
                                    comments='%',
                                    converters={3: to_tesla, 
                                                4: to_tesla, 
@@ -125,7 +136,7 @@ def convert_new_samnet_data(file_name, archive_data,
             integration_interval = np.tile(archive_data['nominal_cadence'],
                                            data.shape)
             r = MagData( \
-                network=network,
+                project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -144,7 +155,7 @@ def convert_new_samnet_data(file_name, archive_data,
             logger.debug(str(e))
 
         finally:
-            uh.close()
+            fh.close()
     except Exception as e:
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
@@ -153,7 +164,7 @@ def convert_new_samnet_data(file_name, archive_data,
 
 
 def convert_new_samnet_temp_volt_data(file_name, archive_data, 
-                                      network, site, data_type, 
+                                      project, site, data_type, 
                                       channels, start_time, 
                                       end_time, **kwargs):
     '''Convert new-style SAMNET temperate/voltage data to standard type'''
@@ -199,7 +210,7 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
             integration_interval = np.tile(archive_data['nominal_cadence'],
                                            data.shape)
             r = class_type( \
-                network=network,
+                project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -228,7 +239,7 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
 
 
 def convert_rt_data(file_name, archive_data,
-                    network, site, data_type, channels, start_time, 
+                    project, site, data_type, channels, start_time, 
                     end_time, **kwargs):
     assert(data_type == 'MagData')
     try:
@@ -250,7 +261,7 @@ def convert_rt_data(file_name, archive_data,
             integration_interval = np.tile(1000000, [len(channels), 
                                                  len(sample_start_time)],
                                            dtype='m8[us]')
-            r = MagData(network=network,
+            r = MagData(project=project,
                         site=site,
                         channels=channels,
                         start_time=start_time,
@@ -441,8 +452,7 @@ sites = {
                 'default': '1s',
                 '1s': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
-                                         '%Y%m%d.txt'),
+                    'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
@@ -450,8 +460,7 @@ sites = {
                     },
                 '1min': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
-                                         '%Y%m%d.min'),
+                    'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_data,
                     'nominal_cadence': np.timedelta64(60000000, 'us'),
@@ -461,8 +470,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'D', 'Z']),
-                    'path': os.path.join(data_dir, 
-                                         'new/lan2/qdc/%Y/lan2_qdc_%Y%m.txt'),
+                    'path': base_url + 'new/lan2/qdc/%Y/lan2_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -476,8 +484,7 @@ sites = {
                                           'System temperature',
                                           'Obsdaq temperature',
                                           'CPU temperature']),
-                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
-                                         '%Y%m%d.sup'),
+                    'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
@@ -487,8 +494,7 @@ sites = {
             'VoltageData': {
                 '1min': {
                     'channels': np.array(['Obsdaq voltage']),
-                    'path': os.path.join(data_dir, 'new/lan2/%Y/%m/' +
-                                         '%Y%m%d.sup'),
+                    'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
@@ -629,8 +635,8 @@ for s in sites:
             'MagData': {
                 '1s': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, '1s_archive/%Y/%m/' +
-                                         sc + '%d%m%y.dgz'),
+                    'path': (base_url + '1s_archive/%Y/%m/' +
+                             sc + '%d%m%y.dgz'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
@@ -638,8 +644,8 @@ for s in sites:
                     },
                 '5s': {
                     'channels': ['H', 'D', 'Z'],
-                    'path': os.path.join(data_dir, '5s_archive/%Y/%m/' + 
-                                         sc + '%d%m%Y.5s.gz'),
+                    'path': (base_url + '5s_archive/%Y/%m/' +
+                             sc + '%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5000000, 'us'),
@@ -647,8 +653,8 @@ for s in sites:
                     },
                     'realtime': {
                         'channels': ['H', 'D', 'Z'],
-                        'path': '/data/samnet/realtime/' + s_lc + \
-                            '/%Y/%m/' + s_lc + '%Y%m%d.rt',
+                        'path': (base_url + 'realtime/' + s_lc +
+                                 '/%Y/%m/' + s_lc + '%Y%m%d.rt'),
                         'duration': np.timedelta64(24, 'h'),
                         'converter': convert_rt_data,
                         'nominal_cadence': np.timedelta64(1000000, 'us'),
@@ -658,8 +664,8 @@ for s in sites:
                 'MagQDC': {
                     'qdc': {
                         'channels': ['H', 'D', 'Z'],
-                        'path': os.path.join(data_dir, 'qdc', sc, '%Y',
-                                             sc + '_qdc_%Y%m.txt'),
+                        'path': (base_url, 'qdc/' + sc + '/%Y/' +
+                                 sc + '_qdc_%Y%m.txt'),
                         'duration': np.timedelta64(24, 'h'),
                         # Use the standard converter for MagQDC
                         'converter': ap.magdata.convert_qdc_data,
@@ -676,5 +682,5 @@ for s in sites:
     if 'activity_colors' not in sites[s]:
         sites[s]['activity_colors'] = default_activity_colors
 
-ap.add_network('SAMNET', sites)
+ap.add_project('SAMNET', sites)
 

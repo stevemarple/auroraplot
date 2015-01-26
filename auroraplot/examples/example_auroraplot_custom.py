@@ -15,18 +15,18 @@ import auroraplot as ap
 
 
 
-def add_network_hook(network_name):
+def add_project_hook(project_name):
     '''
     This function is used to customise the paths to data files when
     datasets are imported.
 
-    When network_name is "AURORAWATCHNET" and the computer's hostname
+    When project_name is "AURORAWATCHNET" and the computer's hostname
     has the form awn-<site>, where <site> is a valid sitename (case
     ignored) for AURORAWATCHNET then the URLs are for the local site
     are mapped to local filenames, eg for use on the AuroraWatchNet
     magnetometer data loggers.
     '''
-    if network_name == 'AURORAWATCHNET':
+    if project_name == 'AURORAWATCHNET':
         filename = '/etc/awnet.ini'
         if not os.path.exists(filename):
             return
@@ -38,12 +38,12 @@ def add_network_hook(network_name):
             print('Bad config file ' + filename + ': ' + str(e))
             return
         
-        if site not in ap.networks[network_name]:
+        if site not in ap.projects[project_name]:
             return # Unknown site
 
         # For data which matches this host's site convert all URLS to
         # local paths.
-        for dtv in ap.networks[network_name][site]['data_types'].values():
+        for dtv in ap.projects[project_name][site]['data_types'].values():
             for av in dtv.values(): # archive values
                 av['path'] = av['path'].replace(
                     'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet', 

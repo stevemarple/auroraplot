@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class HumidityData(Data):
     '''Class to manipulate and display humidity data.'''
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -21,7 +21,7 @@ class HumidityData(Data):
                  units=None,
                  sort=True):
         Data.__init__(self,
-                      network=network,
+                      project=project,
                       site=site,
                       channels=channels,
                       start_time=start_time,

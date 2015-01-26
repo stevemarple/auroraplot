@@ -36,7 +36,7 @@ def check_voltage(data):
     return data
 
 def convert_awn_data(file_name, archive_data, 
-                     network, site, data_type, channels, start_time, 
+                     project, site, data_type, channels, start_time, 
                      end_time, **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
 
@@ -90,7 +90,7 @@ def convert_awn_data(file_name, archive_data,
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)
             r = data_type_info[data_type]['class']( \
-                network=network,
+                project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -118,7 +118,7 @@ def convert_awn_data(file_name, archive_data,
 
 
 def convert_awn_qdc_data(file_name, archive_data, 
-                         network, site, data_type, channels, start_time, 
+                         project, site, data_type, channels, start_time, 
                          end_time, **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
 
@@ -144,7 +144,7 @@ def convert_awn_qdc_data(file_name, archive_data,
             
             integration_interval = None
             data = data[col_idx] * 1e-9 # Stored as nT
-            r = MagQDC(network=network,
+            r = MagQDC(project=project,
                        site=site,
                        channels=channels,
                        start_time=start_time,
@@ -180,7 +180,7 @@ def k_index_filter_battery(mag_data):
     return md_filt
     
 
-def load_bad_data(network, site, data_type, start_time, end_time,
+def load_bad_data(project, site, data_type, start_time, end_time,
                   archive=None, path=None, extension='.bad', **kwargs):
     '''Load data from bad data files, usually those which end in .bad.
 
@@ -189,10 +189,10 @@ def load_bad_data(network, site, data_type, start_time, end_time,
     a callable.
     '''
     if path is None:
-        ai = ap.get_archive_info(network, site, data_type, archive=archive)
+        ai = ap.get_archive_info(project, site, data_type, archive=archive)
         path = ai[1]['path'] + extension
 
-    return ap.load_data(network, site, data_type, start_time, end_time,
+    return ap.load_data(project, site, data_type, start_time, end_time,
                         archive=ai[0], path=path, **kwargs)
 
 
@@ -1212,7 +1212,7 @@ for s in sites:
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
-ap.add_network('AURORAWATCHNET', sites)
+ap.add_project('AURORAWATCHNET', sites)
 
 
 

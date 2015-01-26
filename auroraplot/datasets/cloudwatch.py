@@ -12,11 +12,11 @@ from auroraplot.humiditydata import HumidityData
 # Borrow load functions
 import auroraplot.datasets.aurorawatchnet as awn
 
-data_dir = '/data/aurorawatch/net'
+data_dir = '/data/aurorawatchnet'
 
 
 def convert_cloud_data(file_name, archive_data, 
-                       network, site, data_type, channels, start_time, 
+                       project, site, data_type, channels, start_time, 
                        end_time, data_cols, **kwargs):
     # data_type_info = { }
     try:
@@ -37,7 +37,7 @@ def convert_cloud_data(file_name, archive_data,
             # if data_type_info[data_type]['data_check']:
             #     data = data_type_info[data_type]['data_check'](data)
             r = globals()[data_type]( \
-                network=network,
+                project=project,
                 site=site,
                 channels=channels,
                 start_time=start_time,
@@ -66,15 +66,15 @@ def convert_cloud_data(file_name, archive_data,
 
 
 def convert_humidity_data(file_name, archive_data, 
-                          network, site, data_type, channels, start_time, 
+                          project, site, data_type, channels, start_time, 
                           end_time, **kwargs):
     return convert_cloud_data(file_name, archive_data, 
-                              network, site, data_type, channels, 
+                              project, site, data_type, channels, 
                               start_time, end_time, 
                               data_cols=[4], **kwargs)
 
 def convert_temperature_data(file_name, archive_data, 
-                             network, site, data_type, channels, start_time, 
+                             project, site, data_type, channels, start_time, 
                              end_time, **kwargs):
     awn_channels = np.array(['Sensor temperature', # Mag sensor
                              'System temperature'])
@@ -98,7 +98,7 @@ def convert_temperature_data(file_name, archive_data,
         awn_file_name = file_name.replace('_cloud.txt', '.txt')
         a = convert_cloud_data(awn_file_name,
                                archive_data, 
-                               network, site, data_type, 
+                               project, site, data_type, 
                                chan_array[cidx_a],
                                start_time, end_time, 
                                data_cols=[5], **kwargs)
@@ -107,7 +107,7 @@ def convert_temperature_data(file_name, archive_data,
     
     if len(cidx_b):
         b = convert_cloud_data(file_name, archive_data, 
-                               network, site, data_type, 
+                               project, site, data_type, 
                                chan_array[cidx_b],
                                start_time, end_time, 
                                data_cols=[1,2,3], **kwargs)
@@ -221,7 +221,55 @@ sites = {
         'acknowledgement': {'short': 'Steve Marple.'},
         },
     
+    'LAN4': {
+        'location': 'Lancaster, UK',
+        'latitude': 54.0,
+        'longitude': -2.78,
+        'elevation': 27,
+        'data_types': {
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['System temperature',
+                                          'Detector temperature',
+                                          'Sky temperature',
+                                          'Ambient temperature']),
+                    'path': os.path.join(data_dir,
+                                         'lan4/%Y/%m/lan4_%Y%m%d_cloud.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_temperature_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': u'\N{DEGREE SIGN}C',
+                    },
+                },
+            'VoltageData': {
+                'realtime': {
+                    'channels': np.array(['Battery voltage']),
+                    'path': os.path.join(data_dir,
+                                         'lan4/%Y/%m/lan4_%Y%m%d.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': awn.convert_awn_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': 'V',
+                    },
+                },        
+            'HumidityData': {
+                'realtime': {
+                    'channels': np.array(['Relative humidity']),
+                    'path': os.path.join(data_dir,
+                                         'lan4/%Y/%m/lan4_%Y%m%d_cloud.txt'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_humidity_data,
+                    'nominal_cadence': np.timedelta64(30, 's'),
+                    'units': '%',
+                    },
+                },
+            },
+        'start_time': np.datetime64('2013-07-13T00:00Z'),
+        'end_time': None, # Still operational
+        'acknowledgement': {'short': 'Steve Marple.'},
+        },
+    
     }
 
 
-ap.add_network('CLOUDWATCH', sites)
+ap.add_project('CLOUDWATCH', sites)

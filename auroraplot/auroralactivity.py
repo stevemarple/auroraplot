@@ -25,7 +25,7 @@ class AuroraWatchActivity(Data):
 
     
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -44,7 +44,7 @@ class AuroraWatchActivity(Data):
                  fit=None,
                  fit_params={}):
         Data.__init__(self,
-                      network=network,
+                      project=project,
                       site=site,
                       channels=channels,
                       start_time=start_time,
@@ -58,7 +58,7 @@ class AuroraWatchActivity(Data):
                       sort=sort)
         
         if magdata is not None and magqdc is not None:
-            self.network = magdata.network
+            self.project = magdata.project
             self.site = magdata.site
             self.channels = c = magdata.channels
             self.start_time = magdata.start_time
@@ -166,7 +166,7 @@ class KIndex(Data):
     '''
 
     def __init__(self,
-                 network=None,
+                 project=None,
                  site=None,
                  channels=None,
                  start_time=None,
@@ -185,7 +185,7 @@ class KIndex(Data):
                  fit_params={},
                  with_qdc=None):
         Data.__init__(self,
-                      network=network,
+                      project=project,
                       site=site,
                       channels=channels,
                       start_time=start_time,
@@ -199,7 +199,7 @@ class KIndex(Data):
                       sort=sort)
 
         if magdata is not None:
-            self.network = magdata.network
+            self.project = magdata.project
             self.site = magdata.site
             self.channels = c = magdata.channels
             self.start_time = dt64.floor(magdata.start_time, 

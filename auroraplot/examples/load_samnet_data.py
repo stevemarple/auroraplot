@@ -18,7 +18,7 @@ et2 = np.datetime64('2013-03-18T00:00:00+0000')
 
 # Load data from all SAMNET sites
 mdl = []
-for site in ap.networks['SAMNET']:
+for site in ap.projects['SAMNET']:
     tmp = ap.load_data('SAMNET', site, 
                        'MagData', st2, et2, archive='5s')
     if tmp is not None and not np.all(np.isnan(tmp.data)) \
