@@ -68,9 +68,11 @@ parser.add_argument('--qdc-tries',
                     type=int,
                     help='Number of tries to load QDC',
                     metavar='NUM')
-parser.add_argument('project_site',
-                    nargs='+',
-                    metavar="PROJECT/SITE")
+parser.add_argument('--k-index-cadence', 
+                    default=180,
+                    type=int,
+                    help='Cadence for K index plot (minutes)',
+                    metavar='MINUTES')
 
 plot_type = parser.add_mutually_exclusive_group(required=False)
 plot_type.add_argument('--stack-plot', 
@@ -83,6 +85,11 @@ plot_type.add_argument('--k-index-plot',
                        action='store_const',
                        const='k_index_plot',
                        help='Make K index plot(s)')
+
+parser.add_argument('project_site',
+                    nargs='+',
+                    metavar="PROJECT/SITE")
+
 
 
 args = parser.parse_args()
@@ -195,7 +202,9 @@ else:
                                           tries=args.qdc_tries)
             except Exception:
                 qdc = None
-            k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc)
+            k_cadence = np.timedelta64(args.k_index_cadence, 'm')
+            k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc,
+                                          nominal_cadence=k_cadence)
             k.plot()
 
 

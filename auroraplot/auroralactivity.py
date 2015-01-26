@@ -173,6 +173,7 @@ class KIndex(Data):
                  end_time=None,
                  sample_start_time=np.array([]),
                  sample_end_time=np.array([]),
+                 nominal_cadence=np.timedelta64(3, 'h'),
                  integration_interval=np.array([]),
                  data=np.array([]),
                  units=None,
@@ -193,7 +194,7 @@ class KIndex(Data):
                       sample_start_time=sample_start_time,
                       sample_end_time=sample_end_time,
                       integration_interval=integration_interval,
-                      nominal_cadence=np.timedelta64(3, 'h'),
+                      nominal_cadence=nominal_cadence,
                       data=data,
                       units=units,
                       sort=sort)

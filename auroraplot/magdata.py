@@ -397,8 +397,6 @@ def stack_plot(data_array, offset, channel=None,
     ax.yaxis.set_ticklabels(tick_labels)
     ax.set_title('\n'.join(['Magnetometer stackplot', 
                             dt64.fmt_dt64_range(start_time, end_time)]))
-    plt.draw()
-
     return r
 
     
