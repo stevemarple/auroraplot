@@ -1149,7 +1149,7 @@ sites = {
         'data_types': {
             'MagData': {
                 'realtime': {
-                    'channels': np.array(['H']),
+                    'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/exe/%Y/%m/exe_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
@@ -1160,7 +1160,7 @@ sites = {
                 },
             'MagQDC': {
                 'qdc': {
-                    'channels': np.array(['H']),
+                    'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/exe/qdc/%Y/exe_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
