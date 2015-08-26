@@ -170,7 +170,13 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
     '''Convert new-style SAMNET temperate/voltage data to standard type'''
 
     def to_float(x):
-        if x == '99.9':
+        if x == '999999.99':
+            return np.nan
+        else:
+            return float(x)
+
+    def to_cpu_temp(x):
+        if x == '999.9':
             return np.nan
         else:
             return float(x)
@@ -188,7 +194,7 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
                                                4: to_float, 
                                                5: to_float,
                                                6: to_float,
-                                               7: to_float})
+                                               7: to_cpu_temp})
             assert np.all(file_data[0] >= 0) and np.all(file_data[0] < 24)
             assert np.all(file_data[1] >= 0) and np.all(file_data[1] < 60)
             
@@ -310,6 +316,75 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
         'samnet_code': 'cr',
+        },
+    'CRK2': {
+        'location': 'Crooktree, UK',
+        'latitude': 57.09,
+        'longitude': -2.64,
+        'elevation': np.nan,
+        'start_time': np.datetime64('2015-08-18T00:00:00+0000'),
+        'end_time': None,
+        'k_index_scale': 800e-9, # Estimated
+        'copyright': 'Lancaster University',
+        'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
+        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, caster University.',
+        'line_color': [1, 0, 0],
+        'samnet_code': 'cr',
+        'data_types': {
+            'MagData': {
+                'default': '1s',
+                '1s': {
+                    'channels': ['H', 'D', 'Z'],
+                    'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_data,
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
+                    'units': 'T',
+                    },
+                '1min': {
+                    'channels': ['H', 'D', 'Z'],
+                    'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.min',
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_data,
+                    'nominal_cadence': np.timedelta64(60000000, 'us'),
+                    'units': 'T',
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'D', 'Z']),
+                    'path': base_url + 'new/crk2/qdc/%Y/crk2_qdc_%Y%m.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'converter': convert_awn_qdc_data,
+                    'nominal_cadence': np.timedelta64(5, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                '1min': {
+                    'channels': np.array(['Sensor temperature',
+                                          'System temperature',
+                                          'Obsdaq temperature',
+                                          'CPU temperature']),
+                    'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.sup',
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_temp_volt_data,
+                    'nominal_cadence': np.timedelta64(1, 'm'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            'VoltageData': {
+                '1min': {
+                    'channels': np.array(['Obsdaq voltage']),
+                    'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.sup',
+                    'duration': np.timedelta64(24, 'h'),
+                    'converter': convert_new_samnet_temp_volt_data,
+                    'nominal_cadence': np.timedelta64(1, 'm'),
+                    'units': 'V',                    
+                    },
+                }
+            },
         },
     'ESK1': {
         'location': 'Eskdalemuir, UK',
@@ -627,7 +702,7 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
     
 
 for s in sites:
-    if s not in ['LAN2']:
+    if s not in ['LAN2', 'CRK2']:
         # Create old-style data archive data
         s_lc = s.lower()
         sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
@@ -645,7 +720,7 @@ for s in sites:
                 '5s': {
                     'channels': ['H', 'D', 'Z'],
                     'path': (base_url + '5s_archive/%Y/%m/' +
-                             sc + '%d%m%Y.5s.gz'),
+                             sc + '%d%m%Y.5s'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5000000, 'us'),
