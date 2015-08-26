@@ -171,22 +171,22 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 def has_site_info(project, site, info):
     # Sanity checking
     if project not in projects:
-        raise Exception('Unknown project')
+        raise Exception('Unknown project (%s)' % project)
     elif site not in projects[project]:
-        raise Exception('Unknown site')
+        raise Exception('Unknown site (%s)' % site)
     return info in projects[project][site]
 
 
 def get_site_info(project, site, info=None):
     # Sanity checking
     if project not in projects:
-        raise Exception('Unknown project')
+        raise Exception('Unknown project (%s)' % project)
     elif site not in projects[project]:
-        raise Exception('Unknown site')
+        raise Exception('Unknown site (%s)' % site)
     if info is None:
         return projects[project][site]
     elif info not in projects[project][site]:
-        raise Exception('Unknown info')
+        raise Exception('Unknown info (%s)' % info)
     else:
         return projects[project][site][info]
 
