@@ -8,6 +8,7 @@ __license__ = 'PSF'
 import logging
 import re
 import six
+import traceback
 import numpy as np
 import auroraplot.dt64tools as dt64
 
@@ -342,10 +343,12 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             if tmp is not None:
                 data.append(tmp)
         except Exception as e:
+            if 'raise_all' in kwargs and kwargs['raise_all']:
+                raise
             logger.info('Could not load ' + file_name)
             logger.debug(str(e))
+            logger.debug(traceback.format_exc())
 
-                        
         
         t = t2
         
@@ -417,9 +420,13 @@ def parse_project_site_list(n_s_list):
         assert m is not None, \
             'Not in form PROJECT or PROJECT/SITE'
         n = m.groups()[0].upper()
-        assert n in projects, \
-            'Project %s is not known' % n
-
+        if n not in projects:
+            try:
+                print('try import auroraplot.datasets.' + n.lower())
+                __import__('auroraplot.datasets.' + n.lower())
+            finally:
+                if n not in projects:
+                    raise Exception('Project %s is not known' % n)
 
         if m.groups()[2] is None:
             # Given just 'PROJECT'
