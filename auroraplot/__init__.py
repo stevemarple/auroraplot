@@ -6,9 +6,12 @@ __version__ = '0.3.1'
 __license__ = 'PSF'
 
 import logging
+import netrc
 import re
 import six
 import traceback
+import urlparse
+import urllib
 import numpy as np
 import auroraplot.dt64tools as dt64
 
@@ -330,7 +333,29 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         else:
             file_name = dt64.strftime(t, path)
 
-        logger.info('loading ' + file_name)
+
+        # For selected schemes attempt to insert authentication
+        # data from .netrc
+        file_name_no_pw = file_name
+        url_parts = urlparse.urlparse(file_name)
+        if url_parts.scheme == 'ftp' and url_parts.netloc.find('@') == -1:
+            # No authentication so attempt to insert details from netrc
+            n = netrc.netrc()
+            auth = n.authenticators(url_parts.hostname)
+            if auth:
+                logger.debug('inserting authentication details into URL')
+                netloc = urllib.quote(auth[0]) + ':' \
+                    + urllib.quote(auth[2]) \
+                    + '@' + url_parts.hostname
+
+                if url_parts.port:
+                    netloc += ':' + url_parts.port
+                url_parts2 = [url_parts[0], netloc]
+                url_parts2.extend(url_parts[2:])
+                file_name = urlparse.urlunparse(url_parts2)
+
+
+        logger.info('loading ' + file_name_no_pw)
 
         try:
             tmp = ad['converter'](file_name, 
@@ -345,7 +370,7 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         except Exception as e:
             if 'raise_all' in kwargs and kwargs['raise_all']:
                 raise
-            logger.info('Could not load ' + file_name)
+            logger.info('Could not load ' + file_name_no_pw)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
 
