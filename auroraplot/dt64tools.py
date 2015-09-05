@@ -270,6 +270,26 @@ def ceil(dt, td):
     return _round_to_func(dt, td, np.ceil)
 
 
+def dt64_range(start, stop, step):
+    '''
+    Return a range of numpy.datetime64 values, similar to the Python
+    2.x xrange(), or Python 3.x range(), where the values are created
+    by a generator.
+
+    start: numpy.datetime64 start time.
+
+    stop: numpy.datetime64 stop time (exclusive).
+
+    step: numpy.timedelta64 interval between times.
+
+    Returns: numpy.datetime64 values.
+    '''
+    # Initial start time to have the same resolution as successive times
+    t = start + 0*step
+    while t < stop:
+        yield t
+        t += step
+
 def fmt_dt64_range(st, et):
     '''
     Return a string representing an interval defined by two
@@ -307,6 +327,30 @@ def fmt_dt64_range(st, et):
             return strftime(st, '%Y-%m-%d %H:%M - ') + \
                 strftime(et, '%Y-%m-%d %H:%M')
 
+def parse_datetime64(s, prec):
+    '''
+    Parse a numpy.datetime64() time, also accepting "yesterday",
+    "today", "now" and "tomorrow", with the result given to the
+    specified precision.
+
+    s: string to parse
+
+    prec: precision of the returned time. Must be hour ("h") or better.
+
+    Returns: numpy.datetime64 value.
+    '''
+    if s == 'yesterday':
+        t = np.datetime64('today') - np.timedelta64(1, 'D')
+    elif s == 'today':
+        t = np.datetime64('today')
+    elif s == 'now':
+        t = np.datetime64('now', prec)
+    elif s == 'tomorrow':
+        t = np.datetime64('today') + np.timedelta64(1, 'D')
+    else:
+        t = np.datetime64(s)
+    t += np.timedelta64(0, prec)
+    return t
 
 def plot_dt64(x, y, axes=None, 
               # Our own options
