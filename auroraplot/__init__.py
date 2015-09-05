@@ -5,14 +5,31 @@ __author__ = 'Steve Marple'
 __version__ = '0.3.1'
 __license__ = 'PSF'
 
+import gzip
 import logging
 import netrc
 import re
+import shutil
 import six
 import traceback
-import urlparse
-import urllib
+try:
+    # Python 3.x
+    from urllib.parse import quote
+    from urllib.parse import urlparse
+    from urllib.parse import urlunparse
+    from urllib.request import urlopen
+
+except ImportError:
+    # Python 2.x
+    from urllib import quote
+    from urllib import urlopen
+    from urlparse import urlparse
+    from urlparse import urlunparse
+
 import numpy as np
+import os
+from tempfile import NamedTemporaryFile
+
 import auroraplot.dt64tools as dt64
 
 logger = logging.getLogger(__name__)
@@ -322,8 +339,15 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
                              end_time, **kwargs2)
 
     data = []
-    t = dt64.floor(start_time, ad['duration'])
-    while t < end_time:
+    for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']), 
+                             end_time, 
+                             ad['duration']):
+        logger.debug('processing time ' + str(t))
+
+        # A local copy of the file to be loaded, possibly an
+        # uncompressed version.
+        local_file_name = None
+
         t2 = t + ad['duration']
         if hasattr(path, '__call__'):
             # Function: call it with relevant information to get the path
@@ -337,24 +361,73 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         # For selected schemes attempt to insert authentication
         # data from .netrc
         file_name_no_pw = file_name
-        url_parts = urlparse.urlparse(file_name)
+        url_parts = urlparse(file_name)
         if url_parts.scheme == 'ftp' and url_parts.netloc.find('@') == -1:
             # No authentication so attempt to insert details from netrc
             n = netrc.netrc()
             auth = n.authenticators(url_parts.hostname)
             if auth:
                 logger.debug('inserting authentication details into URL')
-                netloc = urllib.quote(auth[0]) + ':' \
-                    + urllib.quote(auth[2]) \
+                netloc = quote(auth[0]) + ':' \
+                    + quote(auth[2]) \
                     + '@' + url_parts.hostname
 
                 if url_parts.port:
                     netloc += ':' + url_parts.port
                 url_parts2 = [url_parts[0], netloc]
                 url_parts2.extend(url_parts[2:])
-                file_name = urlparse.urlunparse(url_parts2)
+                file_name = urlunparse(url_parts2)
+                # Update parsed values
+                url_parts = urlparse(file_name)
 
+        # Download remote file
+        if url_parts.scheme not in ('file', ''):
+            logger.debug('downloading ' + file_name)
+            url_file = None
+            local_file = None
+            try:
+                url_file = urlopen(file_name)
+                local_file = NamedTemporaryFile(prefix=__name__, 
+                                                     delete=False)
+                logger.debug('saving to ' + local_file.name)
+                shutil.copyfileobj(url_file, local_file)
+                local_file.close()
+                local_file_name = local_file.name
+                file_name = local_file_name
+            except:
+                logger.debug(traceback.format_exc())
+                if local_file:
+                    os.unlink(local_file.name)
+                continue
+            finally:
+                if url_file:
+                    url_file.close()
 
+        elif url_parts.scheme == 'file':
+            file_name = url_parts.path
+            
+        # Now only need to access local files
+        if os.path.splitext(url_parts.path)[1] in ('.gz', '.dgz'):
+            # Transparently uncompress
+            gunzipped_file = None
+            try:
+                gunzipped_file = NamedTemporaryFile(prefix=__name__, 
+                                                    delete=False)
+                with gzip.open(file_name, 'rb') as gzip_file:
+                    shutil.copyfileobj(gzip_file, gunzipped_file)
+                gunzipped_file.close()
+            except Exception as e:
+                if gunzipped_file:
+                    os.unlink(gunzipped_file.name)
+                continue    
+            finally:
+                if local_file_name:
+                    logger.debug('deleting temporary file ' + local_file_name)
+                    os.unlink(local_file_name)
+
+            local_file_name = gunzipped_file.name
+            file_name = local_file_name
+            
         logger.info('loading ' + file_name_no_pw)
 
         try:
@@ -375,8 +448,10 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             logger.debug(traceback.format_exc())
 
         
-        t = t2
-        
+        if local_file_name:
+            logger.debug('deleting temporary file ' + local_file_name)
+            os.unlink(local_file_name)
+
     if len(data) == 0:
         return None
 
@@ -447,7 +522,8 @@ def parse_project_site_list(n_s_list):
         n = m.groups()[0].upper()
         if n not in projects:
             try:
-                print('try import auroraplot.datasets.' + n.lower())
+                logger.info('trying to import auroraplot.datasets.' 
+                            + n.lower())
                 __import__('auroraplot.datasets.' + n.lower())
             finally:
                 if n not in projects:
