@@ -126,13 +126,13 @@ if args.rolling:
     et = dt64.ceil(np.datetime64('now', 'us'), np.timedelta64(1, 'h'))
     st = et - np.timedelta64(1, 'D')
 else:
-    st = np.datetime64(args.start_time) + np.timedelta64(0, 'us')
+    st = dt64.parse_datetime64(args.start_time, 'us')
     if args.end_time is None:
         et = st + np.timedelta64(86400, 's')
     else:
         try:
             # Parse as date
-            et = np.datetime64(args.end_time) + np.timedelta64(0, 'us')
+            et = dt64.parse_datetime64(args.end_time, 'us')
         except ValueError as e:
             try:
                 # Parse as a set of duration values
