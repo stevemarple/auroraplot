@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 
 # Python 2/3 compatibility
 import six
@@ -34,16 +35,11 @@ def convert_samnet_data(file_name, archive_data,
     nominal_cadence_s = (archive_data['nominal_cadence'] / 
                          np.timedelta64(1000000, 'us'))
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
-        else:
-            uh = urlopen(file_name)
         try:
             conv = lambda s: (s.strip().startswith('9999.9') and np.nan) \
                 or float(s.strip())
-            # data = np.loadtxt(uh,
-            comments = ap.get_site_info(project, site, 'samnet_code')
-            data = np.loadtxt(uh, 
+            comments = ap.get_site_info(project, site, 'samnet_code')[0]
+            data = np.loadtxt(file_name, 
                               unpack=True, 
                               converters={0: conv, 1: conv, 2: conv},
                               comments=comments)
@@ -75,15 +71,17 @@ def convert_samnet_data(file_name, archive_data,
             return r
 
         except Exception as e:
-            logging.info('Could not read ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+            logger.debug(traceback.format_exc())
 
         finally:
             # uh.close()
             pass
     except Exception as e:
-        logging.info('Could not open ' + file_name)
-        logging.debug(str(e))
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+        logger.debug(traceback.format_exc())
 
     return None
 
@@ -153,12 +151,15 @@ def convert_new_samnet_data(file_name, archive_data,
         except Exception as e:
             logger.info('Could not read ' + file_name)
             logger.debug(str(e))
+            logger.debug(traceback.format_exc())
+
 
         finally:
             fh.close()
     except Exception as e:
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
+        logger.debug(traceback.format_exc())
 
     return None
 
@@ -233,12 +234,14 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
         except Exception as e:
             logger.info('Could not read ' + file_name)
             logger.debug(str(e))
+            logger.debug(traceback.format_exc())
 
         finally:
             uh.close()
     except Exception as e:
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
+        logger.debug(traceback.format_exc())
 
     return None
 
@@ -281,14 +284,16 @@ def convert_rt_data(file_name, archive_data,
                         sort=True)
             return r
         except Exception as e:
-            logging.info('Could not read ' + file_name)
-            logging.debug(str(e))
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+            logger.debug(traceback.format_exc())
 
         finally:
             uh.close()
     except Exception as e:
-        logging.info('Could not open ' + file_name)
-        logging.debug(str(e))
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+        logger.debug(traceback.format_exc())
 
     return None
 
