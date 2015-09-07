@@ -213,8 +213,11 @@ class Data(object):
             t1 = t2
         return r
 
+    def format_project_site(self):
+        return self.project + ' / ' + self.site
+
     def make_title(self, subtitle=None, start_time=None, end_time=None):
-        s = [self.project + ' / ' + self.site]
+        s = [self.format_project_site()]
         if subtitle:
             s.append(subtitle)
         else:
