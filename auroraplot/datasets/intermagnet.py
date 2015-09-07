@@ -17,7 +17,6 @@ ftp_hostname = 'ftp.intermagnet.org'
 def convert_iaga_2002(file_name, archive_data, 
                       project, site, data_type, channels, start_time, 
                       end_time, **kwargs):
-    logger.debug('convert_iaga_2002')
     assert data_type == 'MagData', 'Illegal data_type'
     iaga = load_iaga_2000(file_name)
     data = []
@@ -41,7 +40,6 @@ def convert_iaga_2002(file_name, archive_data,
                 data=data,
                 units=archive_data['units'],
                 sort=False)
-    logger.debug('convert_iaga_2002 result: ' + repr(r))
     return r
 
 
