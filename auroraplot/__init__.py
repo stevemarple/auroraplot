@@ -346,7 +346,7 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
 
         # A local copy of the file to be loaded, possibly an
         # uncompressed version.
-        local_file_name = None
+        temp_file_name = None
 
         t2 = t + ad['duration']
         if hasattr(path, '__call__'):
@@ -358,51 +358,12 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             file_name = dt64.strftime(t, path)
 
 
-        # For selected schemes attempt to insert authentication
-        # data from .netrc
-        file_name_no_pw = file_name
         url_parts = urlparse(file_name)
-        if url_parts.scheme == 'ftp' and url_parts.netloc.find('@') == -1:
-            # No authentication so attempt to insert details from netrc
-            n = netrc.netrc()
-            auth = n.authenticators(url_parts.hostname)
-            if auth:
-                logger.debug('inserting authentication details into URL')
-                netloc = quote(auth[0]) + ':' \
-                    + quote(auth[2]) \
-                    + '@' + url_parts.hostname
-
-                if url_parts.port:
-                    netloc += ':' + url_parts.port
-                url_parts2 = [url_parts[0], netloc]
-                url_parts2.extend(url_parts[2:])
-                file_name = urlunparse(url_parts2)
-                # Update parsed values
-                url_parts = urlparse(file_name)
-
-        # Download remote file
-        if url_parts.scheme not in ('file', ''):
-            logger.debug('downloading ' + file_name)
-            url_file = None
-            local_file = None
-            try:
-                url_file = urlopen(file_name)
-                local_file = NamedTemporaryFile(prefix=__name__, 
-                                                     delete=False)
-                logger.debug('saving to ' + local_file.name)
-                shutil.copyfileobj(url_file, local_file)
-                local_file.close()
-                local_file_name = local_file.name
-                file_name = local_file_name
-            except:
-                logger.debug(traceback.format_exc())
-                if local_file:
-                    os.unlink(local_file.name)
+        if url_parts.scheme in ('ftp', 'http', 'https'):
+            file_name = download_url(file_name)
+            if file_name is None:
                 continue
-            finally:
-                if url_file:
-                    url_file.close()
-
+            temp_file_name = file_name
         elif url_parts.scheme == 'file':
             file_name = url_parts.path
             
@@ -421,14 +382,14 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
                     os.unlink(gunzipped_file.name)
                 continue    
             finally:
-                if local_file_name:
-                    logger.debug('deleting temporary file ' + local_file_name)
-                    os.unlink(local_file_name)
+                if temp_file_name:
+                    logger.debug('deleting temporary file ' + temp_file_name)
+                    os.unlink(temp_file_name)
 
-            local_file_name = gunzipped_file.name
-            file_name = local_file_name
+            temp_file_name = gunzipped_file.name
+            file_name = temp_file_name
             
-        logger.info('loading ' + file_name_no_pw)
+        logger.info('loading ' + file_name)
 
         try:
             tmp = ad['converter'](file_name, 
@@ -448,9 +409,9 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             logger.debug(traceback.format_exc())
 
         
-        if local_file_name:
-            logger.debug('deleting temporary file ' + local_file_name)
-            os.unlink(local_file_name)
+        if temp_file_name:
+            logger.debug('deleting temporary file ' + temp_file_name)
+            os.unlink(temp_file_name)
 
     if len(data) == 0:
         return None
@@ -546,7 +507,52 @@ def parse_project_site_list(n_s_list):
                 site_list.append(s)
 
     return project_list, site_list
-        
+
+
+def download_url(url, prefix=__name__, temporary_file=True):
+    logger.info('downloading ' + url)
+    # For selected schemes attempt to insert authentication
+    # data from .netrc
+    url_parts = urlparse(url)
+    if url_parts.scheme == 'ftp' and url_parts.netloc.find('@') == -1:
+        # No authentication so attempt to insert details from netrc
+        n = netrc.netrc()
+        auth = n.authenticators(url_parts.hostname)
+        if auth:
+            logger.debug('inserting authentication details into URL')
+            netloc = auth[0] + ':' + auth[2] + '@' + url_parts.hostname
+
+            if url_parts.port:
+                netloc += ':' + url_parts.port
+            url_parts2 = [url_parts[0], netloc]
+            url_parts2.extend(url_parts[2:])
+            url = urlunparse(url_parts2)
+            # Update parsed values
+            # url_parts = urlparse(url)
+
+    url_file = None
+    local_file = None
+    try:
+        url_file = urlopen(url)
+        if temporary_file:
+            local_file = NamedTemporaryFile(prefix=prefix, 
+                                            delete=False)
+            logger.debug('saving to ' + local_file.name)
+            shutil.copyfileobj(url_file, local_file)
+            local_file.close()
+            return local_file.name
+
+    except:
+        logger.debug(traceback.format_exc())
+        if local_file:
+            os.unlink(local_file.name)
+            raise
+    finally:
+        if url_file:
+            url_file.close()
+            
+    return None
+
 
 # Initialise
 try:
