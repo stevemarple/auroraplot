@@ -22,6 +22,7 @@ import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
+import auroraplot.datasets.intermagnet
 
 
 # For each project set the archive from which data is loaded. DTU and
@@ -31,6 +32,7 @@ archives = {
 #    'SAMNET': '5s',
     'DTU': 'xyz_10s',
     'UIT': 'xyz_10s',
+    'INTERMAGNET': 'preliminary',
     }
 
 # Define command line arguments
