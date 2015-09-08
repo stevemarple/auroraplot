@@ -284,8 +284,8 @@ def convert_qdc_data(file_name, archive_data,
 
 
 def stack_plot(data_array, offset, channel=None, 
-                start_time=None, end_time=None,
-                sort=True,
+               start_time=None, end_time=None,
+               sort=True, scale_bar=True,
                 **kwargs):
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
@@ -403,8 +403,9 @@ def stack_plot(data_array, offset, channel=None,
         st = start_time
     if end_time is not None:
         et = end_time
-    ax.set_xlim(dt64.dt64_to(st, ax.xaxis.dt64tools.units),
-                dt64.dt64_to(et, ax.xaxis.dt64tools.units))
+    xlim = (dt64.dt64_to(st, ax.xaxis.dt64tools.units),
+            dt64.dt64_to(et, ax.xaxis.dt64tools.units))
+    ax.set_xlim(xlim)
 
     # Calculate some reasonable ylimits. Should show large activity
     # seen by most sites but exclude cases when the one site has a
@@ -430,9 +431,42 @@ def stack_plot(data_array, offset, channel=None,
     ax.yaxis.set_ticklabels(tick_labels)
     ax.set_title('\n'.join(['Magnetometer stackplot', 
                             dt64.fmt_dt64_range(st, et)]))
+
+    if scale_bar:
+        if offset:
+            scale_bar = offset
+        else:
+            # Need method to compute the length of the bar
+            scale_bar = False
+            
+    if scale_bar:
+        draw_scale_marker(ax, offset/2, offset, 
+                          text=ap.str_units(offset, da[0].units, 'n'))
+
     return r
 
-    
+
+def draw_scale_marker(ax, y, length, 
+                      color='black', 
+                      linewidth=2, 
+                      text=None):
+    xrel = 0.1
+    ends_len_2 = 0.01
+    xlim = ax.get_xlim()
+    x = np.array((np.diff(xlim)* xrel + xlim[0]).repeat(2))
+    x2 = x + np.diff(xlim) * np.array([-ends_len_2, ends_len_2])
+    y2 = np.array([y-length/2, y+length/2])
+    r = []
+    ax.plot(x, y2, color=color, linewidth=linewidth) # Main line
+    ax.plot(x2, y2[[0,0]], color=color, linewidth=linewidth) # Bottom bar
+    ax.plot(x2, y2[[1,1]], color=color, linewidth=linewidth) # Top bar
+    if text:
+        ax.text(x2[1], y, text, color=color,
+                horizontalalignment='left',
+                verticalalignment='center')
+
+    return r
+
 class MagData(Data):
     '''Class to manipulate and display magnetometer data.'''
 
