@@ -3,6 +3,7 @@
 # Plot magnetometer data from one or more sites.
 
 import argparse
+import copy
 import logging
 import os 
 import re
@@ -25,19 +26,33 @@ import auroraplot.datasets.dtu
 import auroraplot.datasets.intermagnet
 
 
+def parse_archive_selection(selection, defaults={}):
+    r = copy.deepcopy(defaults)
+    for proj_site, arch in selection:
+        p_list, s_list = ap.parse_project_site_list([proj_site])
+        for n in range(len(p_list)):
+            if p_list[n] not in r:
+                r[p_list[n]] = { }
+            r[p_list[n]][s_list[n]] = arch
+    return r
+
 # For each project set the archive from which data is loaded. DTU and
-# UIT are swich to HZ when AURORAWATCHNET and SAMNET are included.
-archives = {
-    'AURORAWATCHNET': 'realtime',
-#    'SAMNET': '5s',
-    'DTU': 'xyz_10s',
-    'UIT': 'xyz_10s',
-    'INTERMAGNET': 'preliminary',
-    }
+# UIT are switched to hz_10s when AURORAWATCHNET and SAMNET are
+# included.
+default_archive_selection = [['AURORAWATCHNET', 'realtime'], 
+                             ['DTU', 'xyz_10s'],
+                             ['UIT', 'xyz_10s'],
+                             ['INTERMAGNET', 'preliminary'],
+                             ]
 
 # Define command line arguments
 parser = \
     argparse.ArgumentParser(description='Plot magnetometer data')
+parser.add_argument('-a', '--archive', 
+                    action='append',
+                    nargs=2,
+                    help='Select data archive used for project or site',
+                    metavar='PROJECT[/SITE] ARCHIVE')
 parser.add_argument('-s', '--start-time', 
                     default='today',
                     help='Start time for data transfer (inclusive)',
@@ -49,9 +64,9 @@ parser.add_argument('--rolling',
                     action='store_true',
                     default=False,
                     help='Make rolling 24 hour plot')
-# parser.add_argument('-c', '--channel',
-#                     default='H',
-#                     help='Magnetometer data channel (axis)')
+parser.add_argument('-c', '--channels',
+                    default='H X',
+                    help='Stack plot data channel(s)')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -153,8 +168,9 @@ project_list, site_list = ap.parse_project_site_list(args.project_site)
 if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
     # AURORAWATCHNET and SAMNET are aligned with H so switch default
     # archive for DTU and UIT
-    archives['DTU'] = 'hz_10s'
-    archives['UIT'] = 'hz_10s'
+    default_archive_selection.append(['DTU', 'hz_10s'])
+    default_archive_selection.append(['UIT', 'hz_10s'])
+
 
 # Requesting the UIT or DTU data from the UIT web site requires a
 # password to be set. Try reading the password from a file called
@@ -164,14 +180,21 @@ if ('UIT' in project_list or 'DTU' in project_list) \
     raise Exception('UIT password needed but could not be set')
 
 
+# Get the default archives
+archive = parse_archive_selection(default_archive_selection)
+
+# Process --archive options
+archive = parse_archive_selection(args.archive, defaults=archive)
+
+    
 # Load the data for each site. 
 mdl = []
 for n in range(len(project_list)):
     project = project_list[n]
     site = site_list[n]
     kwargs = {}
-    if project in archives:
-        kwargs['archive'] = archives[project]
+    if project in archive and site in archive[project]:
+        kwargs['archive'] = archive[project][site]
     md = ap.load_data(project, site, 'MagData', st, et, **kwargs)
     # If result is None then no data available so ignore those
     # results.
@@ -190,7 +213,9 @@ if args.plot_type is None or args.plot_type == 'stack_plot':
         mdl[0].plot()
     else:
         # Create a stackplot.
-        ap.magdata.stack_plot(mdl, offset=args.offset * 1e-9)
+        ap.magdata.stack_plot(mdl, 
+                              offset=args.offset * 1e-9,
+                              channel=args.channels.split())
 else:
     # Every other plot type makes one figure per site
     for md in mdl:
