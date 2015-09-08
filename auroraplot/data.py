@@ -119,7 +119,7 @@ class Data(object):
         
         channels: list of channels to find.
 
-        return list of integers correpsonging to location in the
+        return list of integers corresponding to location in the
         object's channels attribute.
         '''
         chan_tup = tuple(self.channels)
@@ -214,7 +214,7 @@ class Data(object):
         return r
 
     def format_project_site(self):
-        return self.project + ' / ' + self.site
+        return ap.format_project_site(self.project, self.site)
 
     def make_title(self, subtitle=None, start_time=None, end_time=None):
         s = [self.format_project_site()]
