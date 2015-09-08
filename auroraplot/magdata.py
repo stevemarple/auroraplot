@@ -301,11 +301,16 @@ def stack_plot(data_array, offset, channel=None,
     data_array: A sequence of MagData objects. All objects must use
         the same data units.
     
-    offset: The offset applied when displayed each data object. This i
-        given in the data units (usually tesla).
+    offset: The distance between each trace, given in the data units
+        (usually tesla).
        
     channel: The data channel to use. If None given defaults to the
         first channel in the first object of the data_array sequence.
+        If channel is a string then plot only the selected channel,
+        ignore MagData objects which do not contain the channel. If
+        channel is a list then the first matching channel from each
+        MagData object is plotted; if the object does not contain any
+        of the channels nothing is plotted.
 
     start_time: The start time for the x axis. If None then the
         earliest start time from all datasets.
@@ -322,8 +327,11 @@ def stack_plot(data_array, offset, channel=None,
     for n in range(1, da.size):
         assert da[0].units == da[n].units, 'units differ'
         
-    if channel is None:
+    if channel is None or len(channel) == 0:
         channel = da[0].channels[0]
+    elif not isinstance(channel, six.string_types) and len(channel) == 1:
+        # Treat lists of single item as string
+        channel = channel[0]
 
     if sort:
         latitude = np.zeros_like(da, dtype=float)
@@ -346,14 +354,34 @@ def stack_plot(data_array, offset, channel=None,
     max5 = ap.tools.NthLargest(5)
     min5 = ap.tools.NthLargest(5, smallest=True)
 
+    plot_count = 0
+
     # Plot each data set
-    for n in range(da.size):
+    for n in range(da.size):        
+        label = da[n].format_project_site()
+
+        if isinstance(channel, six.string_types):
+            cidx = da[n].get_channel_index(channel)
+        else:
+            cidx = None
+            for c in channel:
+                if c in da[n].channels:
+                   cidx = da[n].get_channel_index(c)
+                   label += ' (%s)' % c
+                   break
+            if cidx is None:
+                # None found
+                continue
+
+        
+        # Keep track of earliest latest times, but only for plotted
+        # datasets
         st = np.min([st, da[n].start_time])
         et = np.max([et, da[n].end_time])
-        cidx = da[n].get_channel_index(channel)
+
         d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
         y = (d.data[cidx] - scipy.stats.nanmedian(d.data[cidx], axis=-1) \
-                 + (n * offset)).flatten()
+                 + (plot_count * offset)).flatten()
         ydiff[n] = max5(y) - min5(y)
 
         kwargs = {}
@@ -365,16 +393,18 @@ def stack_plot(data_array, offset, channel=None,
                             y,
                             label=d.format_project_site(),
                             **kwargs)
+        plot_count += 1
         r.extend(lh)
-        tick_labels.append(d.project + '\n' + d.site)
+        # tick_labels.append(d.project + '\n' + d.site)
+        tick_labels.append(label.replace('/', '\n'))
 
 
-    if start_time is None:
-        start_time = st
-    if end_time is None:
-        end_time = et
-    ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
-                dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
+    if start_time is not None:
+        st = start_time
+    if end_time is not None:
+        et = end_time
+    ax.set_xlim(dt64.dt64_to(st, ax.xaxis.dt64tools.units),
+                dt64.dt64_to(et, ax.xaxis.dt64tools.units))
 
     # Calculate some reasonable ylimits. Should show large activity
     # seen by most sites but exclude cases when the one site has a
@@ -399,7 +429,7 @@ def stack_plot(data_array, offset, channel=None,
     ax.yaxis.set_ticks(tick_locs)
     ax.yaxis.set_ticklabels(tick_labels)
     ax.set_title('\n'.join(['Magnetometer stackplot', 
-                            dt64.fmt_dt64_range(start_time, end_time)]))
+                            dt64.fmt_dt64_range(st, et)]))
     return r
 
     
