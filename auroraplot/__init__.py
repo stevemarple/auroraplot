@@ -277,7 +277,8 @@ def get_archive_info(project, site, data_type, **kwargs):
         archive = kwargs.get('archive')
 
     if archive not in site_info['data_types'][data_type]:
-        raise Exception('Unknown archive')
+        raise Exception('Unknown archive (%s) for %s' \
+                            % (archive, format_project_site(project, site)))
 
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
