@@ -189,6 +189,10 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         return d
 
 
+def format_project_site(project, site):
+    return project + ' / ' + site
+
+
 def has_site_info(project, site, info):
     # Sanity checking
     if project not in projects:
