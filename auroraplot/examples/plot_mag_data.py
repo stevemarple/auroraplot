@@ -184,7 +184,8 @@ if ('UIT' in project_list or 'DTU' in project_list) \
 archive = parse_archive_selection(default_archive_selection)
 
 # Process --archive options
-archive = parse_archive_selection(args.archive, defaults=archive)
+if args.archive:
+    archive = parse_archive_selection(args.archive, defaults=archive)
 
     
 # Load the data for each site. 
