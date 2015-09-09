@@ -60,7 +60,7 @@ class AuroraWatchActivity(Data):
         if magdata is not None and magqdc is not None:
             self.project = magdata.project
             self.site = magdata.site
-            self.channels = c = magdata.channels
+            c = self.channels
             self.start_time = magdata.start_time
             self.end_time = magdata.end_time
             self.sample_start_time = magdata.sample_start_time
