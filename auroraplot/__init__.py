@@ -519,7 +519,8 @@ def download_url(url, prefix=__name__, temporary_file=True):
     # For selected schemes attempt to insert authentication
     # data from .netrc
     url_parts = urlparse(url)
-    if url_parts.scheme == 'ftp' and url_parts.netloc.find('@') == -1:
+    if url_parts.scheme in ('ftp', 'http', 'https') \
+            and url_parts.netloc.find('@') == -1:
         # No authentication so attempt to insert details from netrc
         n = netrc.netrc()
         auth = n.authenticators(url_parts.hostname)
