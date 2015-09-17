@@ -19,10 +19,10 @@ from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
 from auroraplot.datasets.aurorawatchnet import convert_awn_qdc_data
+
 logger = logging.getLogger(__name__)
 
-# base_url = 'http://spears.lancs.ac.uk/data/samnet/'
-base_url = '/data/samnet/'
+base_url = 'http://spears.lancs.ac.uk/data/samnet/'
 
 def convert_samnet_data(file_name, archive_data, 
                         project, site, data_type, channels, start_time, 
@@ -725,7 +725,7 @@ for s in sites:
                 '5s': {
                     'channels': ['H', 'D', 'Z'],
                     'path': (base_url + '5s_archive/%Y/%m/' +
-                             sc + '%d%m%Y.5s'),
+                             sc + '%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(24, 'h'),
                     'converter': convert_samnet_data,
                     'nominal_cadence': np.timedelta64(5000000, 'us'),
@@ -744,7 +744,7 @@ for s in sites:
                 'MagQDC': {
                     'qdc': {
                         'channels': ['H', 'D', 'Z'],
-                        'path': (base_url, 'qdc/' + sc + '/%Y/' +
+                        'path': (base_url + 'qdc/' + sc + '/%Y/' +
                                  sc + '_qdc_%Y%m.txt'),
                         'duration': np.timedelta64(24, 'h'),
                         # Use the standard converter for MagQDC
