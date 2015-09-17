@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 __license__ = 'PSF'
 
 import gzip
