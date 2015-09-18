@@ -412,7 +412,7 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         except Exception as e:
             if 'raise_all' in kwargs and kwargs['raise_all']:
                 raise
-            logger.info('Could not load ' + file_name_no_pw)
+            logger.info('Could not load ' + file_name)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
 
