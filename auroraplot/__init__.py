@@ -6,12 +6,15 @@ __version__ = '0.4.1'
 __license__ = 'PSF'
 
 import gzip
+import importlib
 import logging
 import netrc
 import re
 import shutil
 import six
 import traceback
+import warnings
+
 try:
     # Python 3.x
     from urllib.parse import quote
@@ -490,7 +493,7 @@ def parse_project_site_list(n_s_list):
             try:
                 logger.info('trying to import auroraplot.datasets.' 
                             + n.lower())
-                __import__('auroraplot.datasets.' + n.lower())
+                importlib.import_module('auroraplot.datasets.' + n.lower())
             finally:
                 if n not in projects:
                     raise Exception('Project %s is not known' % n)
@@ -572,4 +575,16 @@ except Exception as e:
     logger.error('Could not load custom module:' + str(e))
     auroraplot_custom = {}
 
-    
+# Warn if timezone not GMT/UTC. Test by comparing two identical times,
+# one with a timezone and one without. Repeat the test for a date six
+# months later since DST is in operation in July for N hemisphere and
+# January for S hemisphere.
+if (np.datetime64('2000-01-01T00:00:00') != 
+    np.datetime64('2000-01-01T00:00:00Z') or 
+    np.datetime64('2000-07-01T00:00:00') != 
+    np.datetime64('2000-07-01T00:00:00Z')):
+    # If this warning annoys you then set the timezone or use
+    # warnings.filterwarnings() to ignore it.
+    message = 'Timezone is not UTC or GMT. Times defined without ' + \
+        'timezone information will use local timezone'
+    warnings.warn(message)
