@@ -15,6 +15,13 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+try:
+    # Try to force all times to be read as UTC
+    os.environ['TZ'] = 'UTC'
+    time.tzset()
+except:
+    pass
+
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 import auroraplot.auroralactivity
