@@ -768,7 +768,7 @@ class MagQDC(MagData):
             
         coeffs = np.fft.fft(r.data)
         coeffs[:, range(fit_order+1, coeffs.shape[1]-fit_order)] = 0
-        r.data = np.abs(np.fft.ifft(coeffs))
+        r.data = np.fft.ifft(coeffs).real
         return r
 
 
