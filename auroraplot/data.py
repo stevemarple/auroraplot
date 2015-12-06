@@ -189,20 +189,21 @@ class Data(object):
     def sort(self, inplace=False):
         idx = np.argsort(self.sample_start_time)
         if inplace:
-            new = self
+            r = self
         else:
-            new = copy.deepcopy(self)
+            r = copy.deepcopy(self)
 
-        new.sample_start_time = new.sample_start_time[idx]
-        new.sample_end_time = new.sample_end_time[idx]
+        r.sample_start_time = r.sample_start_time[idx]
+        r.sample_end_time = r.sample_end_time[idx]
 
         # integration_interval may be None, or an array
-        if self.integration_interval is not None:
-            new.integration_interval = new.integration_interval[:, idx]
+        if self.integration_interval is not None \
+           and self.integration_interval.size:
+            r.integration_interval = self.integration_interval[:, idx]
 
-        new.data = new.data[:, idx]
-        return new
-            
+        r.data = r.data[:, idx]
+        return r
+
 
     def split(self, interval):
         r = []

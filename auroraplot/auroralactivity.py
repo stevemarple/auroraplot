@@ -36,7 +36,7 @@ class AuroraWatchActivity(Data):
                  nominal_cadence=None,
                  data=np.array([]),
                  units=None,
-                 sort=True,
+                 sort=False,
                  magdata=None,
                  magqdc=None, 
                  thresholds=None,
@@ -177,7 +177,7 @@ class KIndex(Data):
                  integration_interval=np.array([]),
                  data=np.array([]),
                  units=None,
-                 sort=True,
+                 sort=False,
                  magdata=None,
                  magqdc=None, 
                  scale=None,
@@ -281,7 +281,7 @@ class KIndex(Data):
 
     def get_color(self):
         assert self.data.shape[0] == 1, 'Can only get color for single channel'
-        
+        is_valid = np.isfinite(self.data[0])
         col = np.zeros([self.data.shape[-1], 3])
         col[:] = np.array([0.2, 1.0, 0.2]) # Green
 
@@ -290,9 +290,9 @@ class KIndex(Data):
             #                         [1.0, 0.6, 0.0],  # amber
             #                         [1.0, 0.0, 0.0]
 
-        # col[self.data[0] >= 4] = np.array([1.0, 1.0, 0.0]) # Yellow
-        col[self.data[0] >= 4] = np.array([1.0, 0.6, 0.0]) # Amber
-        col[self.data[0] >= 5] = np.array([1.0, 0.0, 0.0]) # Red
+        # col[self.data[0][is_valid] >= 4] = np.array([1.0, 1.0, 0.0]) # Yellow
+        col[self.data[0][is_valid] >= 4] = np.array([1.0, 0.6, 0.0]) # Amber
+        col[self.data[0][is_valid] >= 5] = np.array([1.0, 0.0, 0.0]) # Red
         return col
 
 
