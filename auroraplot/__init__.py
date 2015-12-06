@@ -525,8 +525,13 @@ def download_url(url, prefix=__name__, temporary_file=True):
     if url_parts.scheme in ('ftp', 'http', 'https') \
             and url_parts.netloc.find('@') == -1:
         # No authentication so attempt to insert details from netrc
-        n = netrc.netrc()
-        auth = n.authenticators(url_parts.hostname)
+        auth = None
+        try:
+            n = netrc.netrc()
+            auth = n.authenticators(url_parts.hostname)
+        except IOError as e:
+            pass
+
         if auth:
             logger.debug('inserting authentication details into URL')
             netloc = auth[0] + ':' + auth[2] + '@' + url_parts.hostname
