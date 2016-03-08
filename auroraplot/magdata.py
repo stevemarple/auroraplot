@@ -704,7 +704,7 @@ class MagData(Data):
         count = np.zeros_like(qdc_data)
         for n in range(nquiet):
             not_nan = np.logical_not(np.isnan(qd[n].data))
-            qdc_data[not_nan] += qd[n].data[:,not_nan]
+            qdc_data[not_nan] += qd[n].data[not_nan]
             count[not_nan] += 1
             
         qdc_data /= count
