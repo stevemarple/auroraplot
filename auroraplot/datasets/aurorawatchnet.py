@@ -244,7 +244,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/lan1/%Y/lan1_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -306,7 +306,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/lan3/qdc/%Y/lan3_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/lan3/%Y/lan3_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -368,7 +368,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/orm/qdc/%Y/orm_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/orm/%Y/orm_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -429,7 +429,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/test1/qdc/%Y/test1_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/test1/%Y/test1_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -490,7 +490,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/bra/qdc/%Y/bra_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/bra/%Y/bra_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -550,7 +550,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/san/qdc/%Y/san_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/san/%Y/san_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -610,7 +610,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/tob/qdc/%Y/tob_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/tob/%Y/tob_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -671,7 +671,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/whi/qdc/%Y/whi_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/whi/%Y/whi_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -731,7 +731,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/alt/qdc/%Y/alt_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/alt/%Y/alt_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -791,7 +791,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/mal/qdc/%Y/mal_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/mal/%Y/mal_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -851,7 +851,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/ash/qdc/%Y/ash_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/ash/%Y/ash_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -911,7 +911,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/pel/qdc/%Y/pel_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/pel/%Y/pel_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -972,7 +972,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/bre/qdc/%Y/bre_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/bre/%Y/bre_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1033,7 +1033,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/can/qdc/%Y/can_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/can/%Y/can_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1097,7 +1097,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H']),
-                    'path': data_dir + '/cwx/qdc/%Y/cwx_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/cwx/%Y/cwx_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
@@ -1161,7 +1161,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/exe/qdc/%Y/exe_qdc_%Y%m.txt',
+                    'path': data_dir + '/qdc/exe/%Y/exe_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'converter': convert_awn_qdc_data,
