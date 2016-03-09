@@ -1,5 +1,5 @@
 # An example file to customise the load paths for auroraplot. To use
-# Copy this file to somewhere on the python module patch and rename to
+# copy this file to somewhere on the python module patch and rename to
 # auroraplot_custom.py
 
 import os.path
@@ -16,15 +16,14 @@ import auroraplot as ap
 
 
 def add_project_hook(project_name):
-    '''
-    This function is used to customise the paths to data files when
+    '''This function is used to customise the paths to data files when
     datasets are imported.
 
-    When project_name is "AURORAWATCHNET" and the computer's hostname
-    has the form awn-<site>, where <site> is a valid sitename (case
-    ignored) for AURORAWATCHNET then the URLs are for the local site
-    are mapped to local filenames, eg for use on the AuroraWatchNet
-    magnetometer data loggers.
+    When project_name is "AURORAWATCHNET" /etc/awnet.ini defines the
+    magnetometer site name then remap the URLs for the site to local
+    filenames, eg for use on the AuroraWatchNet magnetometer data
+    loggers.
+
     '''
     if project_name == 'AURORAWATCHNET':
         filename = '/etc/awnet.ini'
