@@ -114,6 +114,17 @@ plot_type.add_argument('--k-index-plot',
                        action='store_const',
                        const='k_index_plot',
                        help='Make K index plot(s)')
+plot_type.add_argument('--temperature-plot', 
+                       dest='plot_type',
+                       action='store_const',
+                       const='temp_plot',
+                       help='Make temperature plot(s)')
+plot_type.add_argument('--voltage-plot', 
+                       dest='plot_type',
+                       action='store_const',
+                       const='voltage_plot',
+                       help='Make voltage plot(s)')
+
 
 parser.add_argument('project_site',
                     nargs='+',
@@ -208,6 +219,12 @@ archive = parse_archive_selection(default_archive_selection)
 if args.archive:
     archive = parse_archive_selection(args.archive, defaults=archive)
 
+if args.plot_type == 'temp_plot':
+    data_type = 'TemperatureData'
+elif args.plot_type == 'voltage_plot':
+    data_type = 'VoltageData'
+else:
+    data_type = 'MagData'
     
 # Load the data for each site. 
 mdl = []
@@ -217,7 +234,7 @@ for n in range(len(project_list)):
     kwargs = {}
     if project in archive and site in archive[project]:
         kwargs['archive'] = archive[project][site]
-    md = ap.load_data(project, site, 'MagData', st, et, **kwargs)
+    md = ap.load_data(project, site, data_type, st, et, **kwargs)
     # If result is None then no data available so ignore those
     # results.
     if md is not None and md.data.size:
@@ -255,7 +272,8 @@ else:
             k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc,
                                           nominal_cadence=k_cadence)
             k.plot()
-
+        else:
+            md.plot()
 
 # Override the labelling format for all figures
 for fn in plt.get_fignums():
