@@ -31,6 +31,7 @@ import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 import auroraplot.datasets.intermagnet
+import auroraplot.datasets.bgs_schools
 
 
 def parse_archive_selection(selection, defaults={}):
@@ -74,6 +75,10 @@ parser.add_argument('--rolling',
 parser.add_argument('-c', '--channels',
                     default='H X',
                     help='Stack plot data channel(s)')
+parser.add_argument('--dataset',
+                    nargs='*',
+                    help='Import additional datset',
+                    metavar='MODULE')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -144,6 +149,15 @@ except Exception as e:
     logger.warn('Could not set time zone to UTC')
 
 
+if args.dataset:
+    for ds in args.dataset:
+        new_module = 'auroraplot.datasets.' + ds
+        try:
+            __import__(new_module)
+        except Exception as e:
+            print('Could not import ' + new_module + ': ' + str(e))
+            sys.exit(1)
+        
 # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
 if args.rolling:
