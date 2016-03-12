@@ -288,7 +288,7 @@ sites = {
         'k_index_scale': 650e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [1, 0, 0],
         'data_types': {
@@ -350,7 +350,7 @@ sites = {
         'k_index_scale': 650e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         'data_types': {
@@ -412,7 +412,7 @@ sites = {
         'k_index_scale': 650e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -473,7 +473,7 @@ sites = {
         'k_index_scale': 1000e-9, # Estimated, based on BGS Lerwick site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -533,7 +533,7 @@ sites = {
         'k_index_scale': 950e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -593,7 +593,7 @@ sites = {
         'k_index_scale': 850e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -653,7 +653,7 @@ sites = {
         'k_index_scale': 680e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [.6, .6, .6],
         'data_types': {
@@ -714,7 +714,7 @@ sites = {
         'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -774,7 +774,7 @@ sites = {
         'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -834,7 +834,7 @@ sites = {
         'k_index_scale': 600e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -894,7 +894,7 @@ sites = {
         'k_index_scale': 580e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'data_types': {
             'MagData': {
@@ -954,7 +954,7 @@ sites = {
         'k_index_scale': 550e-9, # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [119.0/255, 11.0/255, 0],
         'data_types': {
@@ -1015,7 +1015,7 @@ sites = {
         'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space Plasma Environment and Radio Science group, ' + \
+        'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [64.0/255, 224.0/255, 208.0/255],
         'data_types': {
