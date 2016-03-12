@@ -485,7 +485,7 @@ def parse_project_site_list(n_s_list):
     site_list = []
     sites_found = {}
     for n_s in n_s_list:
-        m = re.match('^([a-z0-9]+)(/([a-z0-9]+))?$', n_s, re.IGNORECASE)
+        m = re.match('^([a-z0-9_]+)(/([a-z0-9_]+))?$', n_s, re.IGNORECASE)
         assert m is not None, \
             'Not in form PROJECT or PROJECT/SITE'
         n = m.groups()[0].upper()
