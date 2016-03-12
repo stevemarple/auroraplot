@@ -5,6 +5,7 @@ __author__ = 'Steve Marple'
 __version__ = '0.4.3'
 __license__ = 'PSF'
 
+import copy
 import gzip
 import importlib
 import logging
@@ -515,6 +516,17 @@ def parse_project_site_list(n_s_list):
                 site_list.append(s)
 
     return project_list, site_list
+
+
+def parse_archive_selection(selection, defaults={}):
+    r = copy.deepcopy(defaults)
+    for proj_site, arch in selection:
+        p_list, s_list = parse_project_site_list([proj_site])
+        for n in range(len(p_list)):
+            if p_list[n] not in r:
+                r[p_list[n]] = { }
+            r[p_list[n]][s_list[n]] = arch
+    return r
 
 
 def download_url(url, prefix=__name__, temporary_file=True):

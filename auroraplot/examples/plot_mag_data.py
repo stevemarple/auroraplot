@@ -34,15 +34,6 @@ import auroraplot.datasets.intermagnet
 import auroraplot.datasets.bgs_schools
 
 
-def parse_archive_selection(selection, defaults={}):
-    r = copy.deepcopy(defaults)
-    for proj_site, arch in selection:
-        p_list, s_list = ap.parse_project_site_list([proj_site])
-        for n in range(len(p_list)):
-            if p_list[n] not in r:
-                r[p_list[n]] = { }
-            r[p_list[n]][s_list[n]] = arch
-    return r
 
 # For each project set the archive from which data is loaded. DTU and
 # UIT are switched to hz_10s when AURORAWATCHNET and SAMNET are
@@ -209,11 +200,11 @@ if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
 # .uit_password from the user's home directory.
 if ('UIT' in project_list or 'DTU' in project_list) \
         and ap.datasets.uit.uit_password is None:
-    raise Exception('UIT password needed but could not be set')
+    raise Warning('UIT likely to be required but could not be set')
 
 
 # Get the default archives
-archive = parse_archive_selection(default_archive_selection)
+archive = ap.parse_archive_selection(default_archive_selection)
 
 # Process --archive options
 if args.archive:
