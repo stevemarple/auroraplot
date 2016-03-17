@@ -309,7 +309,7 @@ def fmt_dt64_range(st, et):
 
     day = np.timedelta64(1, 'D')
     if st == floor(st, day) and et == floor(st, day):
-        # Start and end on same date. Always print at least hours and
+        # Start and end on same date. Always return at least hours and
         # minutes to get instantly recognisable values. Only includes
         # seconds if necessary.
         if get_second(st) or get_second(et):
