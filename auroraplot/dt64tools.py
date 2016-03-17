@@ -48,17 +48,17 @@ def get_units(t):
     return match.groups()[0]
 
 def smallest_unit(a):
-    muls = []
+    i = None
     for u in a:
-        muls.append(multipliers[u])
-    smallest_mul = np.min(muls)
-    for k in multipliers:
-        # Avoid equality test with FP numbers
-        ratio = multipliers[k] / smallest_mul
-        if ratio > 0.99 and ratio < 1.01:
-            return k
-    raise Exception('Failed to find smallest unit')
-
+        idx = time_units.index(u)
+        if i is None:
+            i = idx
+        else:
+            i = min(i, idx)
+    if i is not None:
+        return time_units[i]
+    else:
+        return None
 
 def from_YMD(year, month, day):
     ya = np.array(year)
