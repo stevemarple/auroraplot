@@ -219,7 +219,31 @@ def mean(*a):
             tmp += b.astype(d).astype('int64')
         return (tmp / len(a)).astype(d)
 
-def _round_to_func(dt, td, func):
+def _round_to_func(dt, td, func, func_name):
+    td_units = get_units(td)
+    if td_units in ('M', 'Y'):
+        if func_name not in ('ceil', 'floor'):
+            # round(), and possibly other unknown functions, must
+            # evaluate the days, hours, etc to decide whether to round
+            # up or down.
+            raise Exception('Cannot use ' + func_name 
+                            + ' with units of ' + td_units)
+        # Convert the datetime to units of month or year. Discard parts
+        # smaller than this, for floor() they can be ignored
+        ret_type = dt.dtype.char + '8[' + td_units + ']'
+        dt2 = dt.astype(ret_type)
+        if func_name == 'ceil':
+            # Parts smaller than month or year matter for ceil so
+            # round up by one month or year where they were discarded
+            if len(dt2.shape):
+                dt2[dt2 - dt < 0] += np.timedelta64(1, td_units)
+            elif dt2 < dt:
+                dt2 += np.timedelta64(1, td_units)
+        dt2f = dt2.astype('float')
+        tdf = td.astype('float')
+        r = (func(dt2f / tdf) * tdf).astype('int64').astype(ret_type)
+        return r
+
     u = smallest_unit([get_units(dt), get_units(td)])
     dti = dt64_to(dt, u)
     tdi = dt64_to(td, u)
@@ -239,7 +263,7 @@ def round(dt, td):
     numpy.datetime64 or numpy.timedelta64 rounded to the
     nearest multiple of "td".
     '''
-    return _round_to_func(dt, td, np.round)
+    return _round_to_func(dt, td, np.round, 'round')
 
 
 def floor(dt, td):
@@ -255,7 +279,7 @@ def floor(dt, td):
     numpy.datetime64 or numpy.timedelta64 rounded down the
     nearest multiple of "td".
     '''
-    return _round_to_func(dt, td, np.floor)
+    return _round_to_func(dt, td, np.floor, 'floor')
 
 
 def ceil(dt, td):
@@ -270,7 +294,7 @@ def ceil(dt, td):
     Returns: numpy.datetime64 or numpy.timedelta64 rounded up the
         nearest multiple of "td".
     '''
-    return _round_to_func(dt, td, np.ceil)
+    return _round_to_func(dt, td, np.ceil, 'ceil')
 
 
 def dt64_range(start, stop, step):
