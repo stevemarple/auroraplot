@@ -330,7 +330,6 @@ def load_baseline_data(file_name, archive_data,
                 data=data,
                 units=archive_data['units'],
                 sort=True)
-            print(r)
             return r
 
         except Exception as e:

@@ -43,7 +43,9 @@ def add_project_hook(project_name):
         # For data which matches this host's site convert all URLS to
         # local paths.
         for dtv in ap.projects[project_name][site]['data_types'].values():
-            for av in dtv.values(): # archive values
+            for an,av in dtv.iteritems(): # archive name/values
+                if an == 'default':
+                    continue
                 av['path'] = av['path'].replace(
                     'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet', 
                     '/data/aurorawatchnet')
