@@ -18,7 +18,6 @@ import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
-from auroraplot.datasets.aurorawatchnet import convert_awn_qdc_data
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +35,9 @@ def check_voltage(data):
     data[np.logical_or(data < 0, data > 10)] = np.nan
     return data
 
-def convert_bgs_sch_data(file_name, archive_data, 
-                     project, site, data_type, channels, start_time, 
-                     end_time, **kwargs):
+def load_bgs_sch_data(file_name, archive_data, 
+                      project, site, data_type, channels, start_time, 
+                      end_time, **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
 
     data: MagData or other similar format data object
@@ -147,7 +146,7 @@ sites = {
                     'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'T',
                     },
@@ -158,7 +157,7 @@ sites = {
                     'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_qdc_data,
+                    'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -170,7 +169,7 @@ sites = {
                     'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
                     #'units': 'C',
@@ -182,7 +181,7 @@ sites = {
                     'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'V',
                     },
@@ -209,7 +208,7 @@ sites = {
                     'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'T',
                     },
@@ -220,7 +219,7 @@ sites = {
                     'path': data_dir + '/bgs4/qdc/%Y/bgs4_qdc_%Y%m.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_qdc_data,
+                    'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -231,7 +230,7 @@ sites = {
                     'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
                     #'units': 'C',
@@ -261,7 +260,7 @@ sites = {
                     'path': data_dir + '/bgs5/%Y/%m/bgs5_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'T',
                     },
@@ -272,7 +271,7 @@ sites = {
                     'path': data_dir + '/bgs5/qdc/%Y/bgs5_qdc_%Y%m.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_qdc_data,
+                    'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -283,7 +282,7 @@ sites = {
                     'path': data_dir + '/bgs5/%Y/%m/bgs5_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
-                    'converter': convert_bgs_sch_data,
+                    'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
                     #'units': 'C',
@@ -313,7 +312,7 @@ default_data_types = {
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
-            'converter': convert_bgs_sch_data,
+            'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             },
@@ -324,7 +323,7 @@ default_data_types = {
             'path': data_dir + '/{site_lc}/qdc/%Y/{site_lc}_qdc_%Y%m.csv',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
-            'converter': convert_awn_qdc_data,
+            'load_converter': ap.magdata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             },
@@ -335,7 +334,7 @@ default_data_types = {
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
-            'converter': convert_bgs_sch_data,
+            'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': six.u('\N{DEGREE SIGN}C'),
             },

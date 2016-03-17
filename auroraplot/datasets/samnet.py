@@ -18,13 +18,12 @@ import auroraplot as ap
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
-from auroraplot.datasets.aurorawatchnet import convert_awn_qdc_data
 
 logger = logging.getLogger(__name__)
 
 base_url = 'http://spears.lancs.ac.uk/data/samnet/'
 
-def convert_samnet_data(file_name, archive_data, 
+def load_samnet_data(file_name, archive_data, 
                         project, site, data_type, channels, start_time, 
                         end_time, **kwargs):
 
@@ -86,7 +85,7 @@ def convert_samnet_data(file_name, archive_data,
     return None
 
 
-def convert_new_samnet_data(file_name, archive_data, 
+def load_new_samnet_data(file_name, archive_data, 
                             project, site, data_type, channels, start_time, 
                             end_time, **kwargs):
     '''Convert new-style SAMNET data to match standard data type
@@ -164,7 +163,7 @@ def convert_new_samnet_data(file_name, archive_data,
     return None
 
 
-def convert_new_samnet_temp_volt_data(file_name, archive_data, 
+def load_new_samnet_temp_volt_data(file_name, archive_data, 
                                       project, site, data_type, 
                                       channels, start_time, 
                                       end_time, **kwargs):
@@ -247,7 +246,7 @@ def convert_new_samnet_temp_volt_data(file_name, archive_data,
 
 
 
-def convert_rt_data(file_name, archive_data,
+def load_rt_data(file_name, archive_data,
                     project, site, data_type, channels, start_time, 
                     end_time, **kwargs):
     assert(data_type == 'MagData')
@@ -342,7 +341,7 @@ sites = {
                     'channels': ['H', 'D', 'Z'],
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_data,
+                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     },
@@ -350,7 +349,7 @@ sites = {
                     'channels': ['H', 'D', 'Z'],
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_data,
+                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(60000000, 'us'),
                     'units': 'T',
                     },
@@ -361,7 +360,7 @@ sites = {
                     'path': base_url + 'new/crk2/qdc/%Y/crk2_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_qdc_data,
+                    'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -374,7 +373,7 @@ sites = {
                                           'CPU temperature']),
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_temp_volt_data,
+                    'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': six.u('\N{DEGREE SIGN}C'),
                     },
@@ -384,7 +383,7 @@ sites = {
                     'channels': np.array(['Obsdaq voltage']),
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_temp_volt_data,
+                    'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': 'V',                    
                     },
@@ -534,7 +533,7 @@ sites = {
                     'channels': ['H', 'D', 'Z'],
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_data,
+                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     },
@@ -542,7 +541,7 @@ sites = {
                     'channels': ['H', 'D', 'Z'],
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_data,
+                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(60000000, 'us'),
                     'units': 'T',
                     },
@@ -553,7 +552,7 @@ sites = {
                     'path': base_url + 'new/lan2/qdc/%Y/lan2_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
-                    'converter': convert_awn_qdc_data,
+                    'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
                     },
@@ -566,7 +565,7 @@ sites = {
                                           'CPU temperature']),
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_temp_volt_data,
+                    'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': six.u('\N{DEGREE SIGN}C'),
                     },
@@ -576,7 +575,7 @@ sites = {
                     'channels': np.array(['Obsdaq voltage']),
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.sup',
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_new_samnet_temp_volt_data,
+                    'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': 'V',                    
                     },
@@ -718,7 +717,7 @@ for s in sites:
                     'path': (base_url + '1s_archive/%Y/%m/' +
                              sc + '%d%m%y.dgz'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_samnet_data,
+                    'load_converter': load_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     },
@@ -727,7 +726,7 @@ for s in sites:
                     'path': (base_url + '5s_archive/%Y/%m/' +
                              sc + '%d%m%Y.5s.gz'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_samnet_data,
+                    'load_converter': load_samnet_data,
                     'nominal_cadence': np.timedelta64(5000000, 'us'),
                     'units': 'T',
                     },
@@ -736,7 +735,7 @@ for s in sites:
                         'path': (base_url + 'realtime/' + s_lc +
                                  '/%Y/%m/' + s_lc + '%Y%m%d.rt'),
                         'duration': np.timedelta64(24, 'h'),
-                        'converter': convert_rt_data,
+                        'load_converter': load_rt_data,
                         'nominal_cadence': np.timedelta64(1000000, 'us'),
                         'units': 'T',
                         },
@@ -748,7 +747,7 @@ for s in sites:
                                  sc + '_qdc_%Y%m.txt'),
                         'duration': np.timedelta64(24, 'h'),
                         # Use the standard converter for MagQDC
-                        'converter': ap.magdata.convert_qdc_data,
+                        'load_converter': ap.magdata.load_qdc_data,
                         'nominal_cadence': np.timedelta64(5000000, 'us'),
                         'units': 'T',
                         },

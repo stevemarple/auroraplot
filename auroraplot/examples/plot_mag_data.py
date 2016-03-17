@@ -43,10 +43,30 @@ default_archive_selection = [['AURORAWATCHNET', 'realtime'],
                              ['UIT', 'xyz_10s'],
                              ['INTERMAGNET', 'preliminary'],
                              ]
+epilist = ['Projects/sites available:']
+for p in sorted(ap.projects):
+    epilist.append('  ' + p + ':')
+    first = True
+    slist = []
+    for site in sorted(ap.projects[p]):
+        if first:
+            s = '      ' + site
+            first = False
+        else:
+            s += ', ' + site
+        if len(s) > 60:
+            slist.append(s)
+            s = ''
+            first = True
+    slist.append(s)
+    epilist.append(',\n'.join(slist))
 
 # Define command line arguments
 parser = \
-    argparse.ArgumentParser(description='Plot magnetometer data')
+    argparse.ArgumentParser(description='Plot magnetometer data',
+                            # formatter_class=argparse.RawTextHelpFormatter,
+                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                            epilog='\n'.join(epilist))
 parser.add_argument('-a', '--archive', 
                     action='append',
                     nargs=2,

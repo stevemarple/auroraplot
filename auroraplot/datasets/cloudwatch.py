@@ -15,7 +15,7 @@ import auroraplot.datasets.aurorawatchnet as awn
 data_dir = '/data/aurorawatchnet'
 
 
-def convert_cloud_data(file_name, archive_data, 
+def load_cloud_data(file_name, archive_data, 
                        project, site, data_type, channels, start_time, 
                        end_time, data_cols, **kwargs):
     # data_type_info = { }
@@ -65,15 +65,15 @@ def convert_cloud_data(file_name, archive_data,
     return None
 
 
-def convert_humidity_data(file_name, archive_data, 
+def load_humidity_data(file_name, archive_data, 
                           project, site, data_type, channels, start_time, 
                           end_time, **kwargs):
-    return convert_cloud_data(file_name, archive_data, 
+    return load_cloud_data(file_name, archive_data, 
                               project, site, data_type, channels, 
                               start_time, end_time, 
                               data_cols=[4], **kwargs)
 
-def convert_temperature_data(file_name, archive_data, 
+def load_temperature_data(file_name, archive_data, 
                              project, site, data_type, channels, start_time, 
                              end_time, **kwargs):
     awn_channels = np.array(['Sensor temperature', # Mag sensor
@@ -96,7 +96,7 @@ def convert_temperature_data(file_name, archive_data,
 
     if len(cidx_a):
         awn_file_name = file_name.replace('_cloud.txt', '.txt')
-        a = convert_cloud_data(awn_file_name,
+        a = load_cloud_data(awn_file_name,
                                archive_data, 
                                project, site, data_type, 
                                chan_array[cidx_a],
@@ -106,7 +106,7 @@ def convert_temperature_data(file_name, archive_data,
         a = None
     
     if len(cidx_b):
-        b = convert_cloud_data(file_name, archive_data, 
+        b = load_cloud_data(file_name, archive_data, 
                                project, site, data_type, 
                                chan_array[cidx_b],
                                start_time, end_time, 
@@ -188,7 +188,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'test2/%Y/%m/test2_%Y%m%d_cloud.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_temperature_data,
+                    'load_converter': load_temperature_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': u'\N{DEGREE SIGN}C',
                     },
@@ -199,7 +199,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'test2/%Y/%m/test2_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': awn.convert_awn_data,
+                    'load_converter': awn.load_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'V',
                     },
@@ -210,7 +210,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'test2/%Y/%m/test2_%Y%m%d_cloud.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_humidity_data,
+                    'load_converter': load_humidity_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': '%',
                     },
@@ -236,7 +236,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'lan4/%Y/%m/lan4_%Y%m%d_cloud.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_temperature_data,
+                    'load_converter': load_temperature_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': u'\N{DEGREE SIGN}C',
                     },
@@ -247,7 +247,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'lan4/%Y/%m/lan4_%Y%m%d.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': awn.convert_awn_data,
+                    'load_converter': awn.load_awn_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'V',
                     },
@@ -258,7 +258,7 @@ sites = {
                     'path': os.path.join(data_dir,
                                          'lan4/%Y/%m/lan4_%Y%m%d_cloud.txt'),
                     'duration': np.timedelta64(24, 'h'),
-                    'converter': convert_humidity_data,
+                    'load_converter': load_humidity_data,
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': '%',
                     },

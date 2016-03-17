@@ -201,14 +201,14 @@ def load_qdc(project, site, time, **kwargs):
 
             logger.info('loading ' + file_name)
 
-            r = ad['converter'](file_name, 
-                                ad,
-                                project=project,
-                                site=site, 
-                                data_type=data_type, 
-                                start_time=np.timedelta64(0, 'h'), 
-                                end_time=np.timedelta64(24, 'h'),
-                                **kwargs2)
+            r = ad['load_converter'](file_name, 
+                                     ad,
+                                     project=project,
+                                     site=site, 
+                                     data_type=data_type, 
+                                     start_time=np.timedelta64(0, 'h'), 
+                                     end_time=np.timedelta64(24, 'h'),
+                                     **kwargs2)
             if r is not None:
                 r.extract(inplace=True, 
                           channels=channels)
@@ -227,13 +227,14 @@ def load_qdc(project, site, time, **kwargs):
     return None
 
 
-def convert_qdc_data(file_name, archive_data, 
-                     project, site, data_type, channels, start_time, 
-                     end_time, **kwargs):
+def load_qdc_data(file_name, archive_data, 
+                  project, site, data_type, channels, start_time, 
+                  end_time, **kwargs):
     '''Convert AuroraWatchNet QDC file to match standard data type.
 
-    This function can be used by datasets as the converter for MagQDC
-    data.
+    This function can be used by datasets as the load_converter for
+    MagQDC data. It is not intended to be called directly by user
+    programs, use load_qdc instead.
 
     archive: name of archive from which data was loaded
     archive_info: archive metadata
@@ -251,7 +252,7 @@ def convert_qdc_data(file_name, archive_data,
             uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = (np.timedelta64(1, 's') * data[0])
+            sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
             sample_end_time = sample_start_time \
                 + archive_data['nominal_cadence']
             

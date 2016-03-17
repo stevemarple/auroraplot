@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 ftp_hostname = 'ftp.intermagnet.org'
 
-def convert_iaga_2002(file_name, archive_data, 
+def load_iaga_2002(file_name, archive_data, 
                       project, site, data_type, channels, start_time, 
                       end_time, **kwargs):
     assert data_type == 'MagData', 'Illegal data_type'
@@ -658,7 +658,7 @@ for sa in sites:
                 + '/preliminary/%Y/%m/IAGA2002/' \
                 + sa.lower() + '%Y%m%dvmin.min',
             'duration': np.timedelta64(24, 'h'),
-            'converter': convert_iaga_2002,
+            'load_converter': load_iaga_2002,
             'nominal_cadence': np.timedelta64(60000000, 'us'),
             'units': 'T',
            }

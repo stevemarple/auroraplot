@@ -248,10 +248,10 @@ def get_archive_info(project, site, data_type, **kwargs):
             required if load_function is included.
     
         load_function: function reference used to load data. If not
-            None then load_data() hans over the entire data loading
+            None then load_data() hands over the entire data loading
             process to this function.
 
-        nominal_cadence: numpy timedelta64 interval indicating maximum
+        nominal_cadence: numpy.timedelta64 interval indicating maximum
             normal interval between samples. Used to mark missing data
             when plotting.
 
@@ -401,13 +401,13 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         logger.info('loading ' + file_name)
 
         try:
-            tmp = ad['converter'](file_name, 
-                                  ad,
-                                  project=project,
-                                  site=site, 
-                                  data_type=data_type, 
-                                  start_time=t, 
-                                  end_time=t2, **kwargs2)
+            tmp = ad['load_converter'](file_name, 
+                                       ad,
+                                       project=project,
+                                       site=site, 
+                                       data_type=data_type, 
+                                       start_time=t, 
+                                       end_time=t2, **kwargs2)
             if tmp is not None:
                 data.append(tmp)
         except Exception as e:

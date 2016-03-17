@@ -10,7 +10,7 @@ import auroraplot.magdata
 
 from auroraplot.magdata import MagData
 from auroraplot.magdata import load_iaga_2000
-from auroraplot.datasets.uit import convert_iaga_2000
+from auroraplot.datasets.uit import load_iaga_2000
 
 import auroraplot.datasets.uit
 from auroraplot.datasets.uit import uit_path
@@ -33,7 +33,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
@@ -45,7 +45,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
@@ -66,7 +66,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
@@ -78,7 +78,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
@@ -99,7 +99,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
@@ -111,7 +111,7 @@ sites = {
                     'path': uit_path,
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'iaga2000',
-                    'converter': convert_iaga_2000,
+                    'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     },
