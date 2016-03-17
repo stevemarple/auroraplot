@@ -228,7 +228,7 @@ archive = ap.parse_archive_selection(default_archive_selection)
 
 # Process --archive options
 if args.archive:
-    archive = parse_archive_selection(args.archive, defaults=archive)
+    archive = ap.parse_archive_selection(args.archive, defaults=archive)
 
 if args.plot_type == 'temp_plot':
     data_type = 'TemperatureData'
