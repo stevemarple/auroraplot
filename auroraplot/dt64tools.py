@@ -124,6 +124,9 @@ def isnat(x):
     # Do not trust that NaT will compare equal with NaT!
     return np.array(x).astype('int64') == -(2**63)
     
+def get_date(t):
+    return t.astype('<M8[D]')
+
 def get_time_of_day(t):
     td64_units = t.dtype.str.lower() # timedelta64 equivalent units
     d = np.timedelta64(24, 'h').astype(td64_units).astype('int64')
