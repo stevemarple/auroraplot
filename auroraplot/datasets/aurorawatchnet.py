@@ -37,8 +37,8 @@ def check_voltage(data):
     return data
 
 def load_awn_data(file_name, archive_data, 
-                     project, site, data_type, channels, start_time, 
-                     end_time, **kwargs):
+                  project, site, data_type, channels, start_time, 
+                  end_time, **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
 
     data: MagData or other similar format data object
@@ -1152,6 +1152,24 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
                                     [1.0, 0.6, 0.0],  # amber
                                     [1.0, 0.0, 0.0]]) # red
 for s in sites:
+    s_lc = s.lower()
+    if 'realtime' in sites[s]['data_types']['MagData']:
+        # Add a realtime baseline archive
+        ad = sites[s]['data_types']['MagData']['realtime']
+        if not 'default' in sites[s]['data_types']['MagData']:
+            # Set default archive
+            sites[s]['data_types']['MagData']['default'] = 'realtime'
+            sites[s]['data_types']['MagData']['realtime_baseline'] = {
+                'channels': ad['channels'].copy(),
+                'path': data_dir + '/baseline/realtime/' + s_lc + \
+                    '/%Y/' + s_lc + '_%Y%m.txt',
+                'duration': np.timedelta64(1, 'M'),
+                'format': 'baseline',
+                'load_converter': ap.magdata.load_baseline_data,
+                'nominal_cadence': np.timedelta64(1, 'D'),
+                'units': 'T',
+                }
+
     if 'activity_thresholds' not in sites[s]:
         sites[s]['activity_thresholds'] = default_activity_thresholds
     if 'activity_colors' not in sites[s]:
