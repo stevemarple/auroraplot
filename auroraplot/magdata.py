@@ -308,10 +308,10 @@ def load_baseline_data(file_name, archive_data,
             uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = archive_data['nominal_cadence'] * data[0] \
+            sample_end_time = archive_data['nominal_cadence'] * data[0] \
                 + start_time + zero_us
             # end time and integration interval are guesstimates
-            sample_end_time = sample_start_time + \
+            sample_start_time = sample_end_time - \
                 archive_data['nominal_cadence']
             integration_interval = np.tile(archive_data['nominal_cadence'],
                                            [len(channels), 
