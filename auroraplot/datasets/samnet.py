@@ -524,7 +524,7 @@ sites = {
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
-        'line_color': [1, 0, 0],
+        'line_color': [181/255., 18/255., 27/255.],
         'samnet_code': 'la',
         'data_types': {
             'MagData': {
