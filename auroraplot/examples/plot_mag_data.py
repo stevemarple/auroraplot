@@ -113,6 +113,13 @@ parser.add_argument('--k-index-cadence',
                     type=int,
                     help='Cadence for K index plot (minutes)',
                     metavar='MINUTES')
+parser.add_argument('--save-filename',
+                    help='Save plot',
+                    metavar='FILE')
+parser.add_argument('--dpi',
+                    type=float,
+                    default=80,
+                    help='DPI when saving plot')
 
 plot_type = parser.add_mutually_exclusive_group(required=False)
 plot_type.add_argument('--stack-plot', 
@@ -300,6 +307,9 @@ for fn in plt.get_fignums():
 
         # Abbreviate AURORAWATCHNET to AWN
         ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
+
+if args.save_filename:
+    fig.savefig(args.save_filename, dpi=args.dpi)
 
 # Make figure(s) visible.
 plt.show()
