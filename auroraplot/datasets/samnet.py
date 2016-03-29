@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import traceback
@@ -22,6 +23,8 @@ from auroraplot.voltagedata import VoltageData
 logger = logging.getLogger(__name__)
 
 base_url = 'http://spears.lancs.ac.uk/data/samnet/'
+
+sam_channels = ['H', 'D', 'Z']
 
 def load_samnet_data(file_name, archive_data, 
                         project, site, data_type, channels, start_time, 
@@ -108,7 +111,6 @@ def load_new_samnet_data(file_name, archive_data,
         else:
             # fh = urlopen(file_name)
             req = requests.get(file_name, stream=True)
-            # print(req.content[0:50])
             fh = req.raw
         try:
             file_data = np.loadtxt(fh, unpack=True, 
@@ -338,7 +340,7 @@ sites = {
             'MagData': {
                 'default': '1s',
                 '1s': {
-                    'channels': ['H', 'D', 'Z'],
+                    'channels': sam_channels,
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_data,
@@ -346,7 +348,7 @@ sites = {
                     'units': 'T',
                     },
                 '1min': {
-                    'channels': ['H', 'D', 'Z'],
+                    'channels': sam_channels,
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_data,
@@ -356,7 +358,7 @@ sites = {
                 },
             'MagQDC': {
                 'qdc': {
-                    'channels': np.array(['H', 'D', 'Z']),
+                    'channels': np.array(sam_channels),
                     'path': base_url + 'new/crk2/qdc/%Y/crk2_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
@@ -530,7 +532,7 @@ sites = {
             'MagData': {
                 'default': '1s',
                 '1s': {
-                    'channels': ['H', 'D', 'Z'],
+                    'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_data,
@@ -538,7 +540,7 @@ sites = {
                     'units': 'T',
                     },
                 '1min': {
-                    'channels': ['H', 'D', 'Z'],
+                    'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_data,
@@ -548,7 +550,7 @@ sites = {
                 },
             'MagQDC': {
                 'qdc': {
-                    'channels': np.array(['H', 'D', 'Z']),
+                    'channels': np.array(sam_channels),
                     'path': base_url + 'new/lan2/qdc/%Y/lan2_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
@@ -596,7 +598,7 @@ sites = {
         'samnet_code': 'le',
         },
     'LNC2': {
-        'location': 'LNCcaster, UK',
+        'location': 'Lancaster, UK',
         'latitude': 54.01,
         'longitude': -2.77,
         'elevation': np.nan,
@@ -705,56 +707,82 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
 
     
 
+default_data_types = {
+    'MagData': {
+        'default': '5s',
+        '1s': {
+            'channels': sam_channels,
+            'path': (base_url + '1s_archive/%Y/%m/{sc}%d%m%y.dgz'),
+            'duration': np.timedelta64(24, 'h'),
+            'load_converter': load_samnet_data,
+            'nominal_cadence': np.timedelta64(1000000, 'us'),
+            'units': 'T',
+        },
+        '5s': {
+            'channels': sam_channels,
+            'path': (base_url + '5s_archive/%Y/%m/{sc}%d%m%Y.5s.gz'),
+            'duration': np.timedelta64(24, 'h'),
+            'load_converter': load_samnet_data,
+            'nominal_cadence': np.timedelta64(5000000, 'us'),
+            'units': 'T',
+        },
+        'realtime': {
+            'channels': sam_channels,
+            'path': (base_url +
+                     'realtime/{site_lc}/%Y/%m/{site_lc}%Y%m%d.rt'),
+            'duration': np.timedelta64(24, 'h'),
+            'load_converter': load_rt_data,
+            'nominal_cadence': np.timedelta64(1000000, 'us'),
+            'units': 'T',
+        },
+        'realtime_baseline': {
+            'channels': sam_channels,
+            'path': (base_url +
+                     'baseline/realtime/{site_lc}/%Y/{site_lc}%Y%m.rt'),
+            'duration': np.timedelta64(1, 'M'),
+            'load_converter': ap.magdata.load_baseline_data,
+            'nominal_cadence': np.timedelta64(1, 'D'),
+            'units': 'T',
+        },
+    },
+    'MagQDC': {
+        'qdc': {
+            'channels': sam_channels,
+            'path': (base_url + 'qdc/{sc}/%Y/{sc}_qdc_%Y%m.txt'),
+            'duration': np.timedelta64(24, 'h'),
+            # Use the standard converter for MagQDC
+            'load_converter': ap.magdata.load_qdc_data,
+            'nominal_cadence': np.timedelta64(5000000, 'us'),
+            'units': 'T',
+            },
+        },
+    }
+
 for s in sites:
-    if s not in ['LAN2', 'CRK2']:
-        # Create old-style data archive data
-        s_lc = s.lower()
-        sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
-        sites[s]['data_types'] = {
-            'MagData': {
-                '1s': {
-                    'channels': ['H', 'D', 'Z'],
-                    'path': (base_url + '1s_archive/%Y/%m/' +
-                             sc + '%d%m%y.dgz'),
-                    'duration': np.timedelta64(24, 'h'),
-                    'load_converter': load_samnet_data,
-                    'nominal_cadence': np.timedelta64(1000000, 'us'),
-                    'units': 'T',
-                    },
-                '5s': {
-                    'channels': ['H', 'D', 'Z'],
-                    'path': (base_url + '5s_archive/%Y/%m/' +
-                             sc + '%d%m%Y.5s.gz'),
-                    'duration': np.timedelta64(24, 'h'),
-                    'load_converter': load_samnet_data,
-                    'nominal_cadence': np.timedelta64(5000000, 'us'),
-                    'units': 'T',
-                    },
-                    'realtime': {
-                        'channels': ['H', 'D', 'Z'],
-                        'path': (base_url + 'realtime/' + s_lc +
-                                 '/%Y/%m/' + s_lc + '%Y%m%d.rt'),
-                        'duration': np.timedelta64(24, 'h'),
-                        'load_converter': load_rt_data,
-                        'nominal_cadence': np.timedelta64(1000000, 'us'),
-                        'units': 'T',
-                        },
-                    },
-                'MagQDC': {
-                    'qdc': {
-                        'channels': ['H', 'D', 'Z'],
-                        'path': (base_url + 'qdc/' + sc + '/%Y/' +
-                                 sc + '_qdc_%Y%m.txt'),
-                        'duration': np.timedelta64(24, 'h'),
-                        # Use the standard converter for MagQDC
-                        'load_converter': ap.magdata.load_qdc_data,
-                        'nominal_cadence': np.timedelta64(5000000, 'us'),
-                        'units': 'T',
-                        },
-                    },
-            }
-        # Set 5s as the default
-        sites[s]['data_types']['MagData']['default'] = '5s'
+    site_lc = s.lower()
+    sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
+
+    # Populate the data types
+    if 'data_types' not in sites[s]:
+        sites[s]['data_types'] = {}
+
+    sdt = sites[s]['data_types']
+
+    for dt in default_data_types:
+        if dt not in sdt:
+            sdt[dt] = {}
+        for an,av in default_data_types[dt].iteritems():
+            if an not in sdt[dt]:
+                sdt[dt][an] = \
+                    copy.deepcopy(av)
+                if an != 'default':
+                    sdt[dt][an]['path'] = \
+                        sdt[dt][an]['path'].format(site_lc=site_lc, sc=sc)
+            elif sdt[dt] is None:
+                # None used as a placeholder to prevent automatic
+                # population, now clean up
+                del(sdt[dt])
+                    
 
     if 'activity_thresholds' not in sites[s]:
         sites[s]['activity_thresholds'] = default_activity_thresholds
