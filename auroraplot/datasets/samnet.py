@@ -404,7 +404,19 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
         'samnet_code': 'es',
+        'data_types': {
+            'MagData': {
+                'incoming': {
+                    'channels': sam_channels,
+                    'path': (base_url + 'incoming/esk/es%d%m%y.day.gz'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'load_converter': load_samnet_data,
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
+                    'units': 'T',
+                },
+            },
         },
+    },
     'FAR1': {
         'location': ', Faroes',
         'latitude': 62.05,
@@ -441,7 +453,19 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
         'samnet_code': 'hd',
+        'data_types': {
+            'MagData': {
+                'incoming': {
+                    'channels': sam_channels,
+                    'path': (base_url + 'incoming/had/hd%d%m%y.day.gz'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'load_converter': load_samnet_data,
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
+                    'units': 'T',
+                },
+            },
         },
+    },
     'HAN1': {
         'location': 'Hankasalmi, Finland',
         'latitude': 62.3,
@@ -596,7 +620,19 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commerical use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space Plasma Environment and Radio Science (SPEARS) group, Department of Physics, Lancaster University.',
         'samnet_code': 'le',
+        'data_types': {
+            'MagData': {
+                'incoming': {
+                    'channels': sam_channels,
+                    'path': (base_url + 'incoming/ler/le%d%m%y.day.gz'),
+                    'duration': np.timedelta64(24, 'h'),
+                    'load_converter': load_samnet_data,
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
+                    'units': 'T',
+                },
+            },
         },
+    },
     'LNC2': {
         'location': 'Lancaster, UK',
         'latitude': 54.01,
