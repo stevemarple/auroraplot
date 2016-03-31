@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 import six
 import logging
@@ -699,3 +700,57 @@ class Data(object):
             return r
 
 
+    def save(self,
+             archive=None,
+             path=None,
+             merge=None,
+             save_converter=None):
+        assert ((archive is not None and path is None) or 
+                (archive is None and path is not None)), \
+            'archive or path must be defined (and not both)'
+        if merge is None:
+            merge = path is None
+
+        if path is None:
+            # Save to a default location
+            an, ai = ap.get_archive_info(self.project,
+                                         self.site,
+                                         self.__class__.__name__,
+                                         archive=archive)
+            assert save_converter is None, \
+                'Cannot set save_converter when saving to default location'
+            save_converter = ai['save_converter']
+            path = ai['path']
+            duration = ai['duration']
+            t = dt64.dt64_range(dt64.floor(self.start_time, duration),
+                                dt64.ceil(self.end_time, duration),
+                                duration)
+        else:
+            # Save to single file
+            t = [self.start_time]
+            duration = self.end_time - self.start_time
+
+        if save_converter is None:
+            raise Exception('Cannot save, save_converter not defined')
+
+        for t1 in t:
+            t2 = t1 + duration
+            file_name = dt64.strftime(t1, path)
+            d = self.extract(t1, t2)
+            if merge:
+                # Load existing data and merge before saving
+                tmp = ap.load_data(self.project,
+                                   self.site,
+                                   self.__class__.__name__,
+                                   t1,
+                                   t2,
+                                   archive=archive)
+                if tmp is not None:
+                    d = ap.concatenate([tmp, d], sort=True)
+                
+            dir_name = os.path.dirname(file_name)
+            if not os.path.exists(dir_name):
+                logger.debug('making directory %s', dir_name)
+                os.makedirs(dir_name)
+            logger.info('saving to %s', file_name)
+            save_converter(d, file_name)
