@@ -195,8 +195,27 @@ class Data(object):
         #     r.data = r.data.copy()
         return r
 
-    def sort(self, inplace=False):
-        idx = np.argsort(self.sample_start_time)
+    def sort(self, inplace=False, keep='last'):
+        idx = np.unique(self.sample_start_time, return_index=True)[1]
+        if np.size(idx) != np.size(self.sample_start_time):
+            if keep is None:
+                pass
+            elif keep in ('first', 'last'):
+                # unique does not specify which repeated entry is kept
+                # and it seems to vary according to input
+                d = {}
+                i = 0
+                for s in self.sample_start_time:
+                    if s not in d or keep == 'last':
+                        d[s] = i
+                    i += 1
+
+                idx = []
+                for s in sorted(d.keys()):
+                    idx.append(d[s])
+            else:
+                raise ValueError('Unknown value for keep')
+
         if inplace:
             r = self
         else:
