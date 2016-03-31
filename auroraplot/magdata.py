@@ -545,7 +545,7 @@ class MagData(Data):
                  nominal_cadence=None,
                  data=np.array([]),
                  units=None,
-                 sort=True):
+                 sort=None):
         Data.__init__(self,
                       project=project,
                       site=site,
@@ -804,7 +804,7 @@ class MagQDC(MagData):
                  nominal_cadence=None,
                  data=np.array([]),
                  units=None,
-                 sort=True):
+                 sort=None):
         MagData.__init__(self,
                          project=project,
                          site=site,

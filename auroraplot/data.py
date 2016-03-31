@@ -41,7 +41,7 @@ class Data(object):
                  nominal_cadence=None,
                  data=np.array([]),
                  units=None,
-                 sort=True):
+                 sort=None):
         self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
@@ -56,6 +56,8 @@ class Data(object):
         self.nominal_cadence = nominal_cadence
         self.data = data
         self.units = units
+        if sort is None:
+            sort = np.size(data) != 0
         if sort:
             self.sort(inplace=True)
 
