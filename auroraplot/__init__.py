@@ -287,7 +287,6 @@ def get_archive_info(project, site, data_type, **kwargs):
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
 
-
 def load_data(project, site, data_type, start_time, end_time, **kwargs):
     '''Load data. 
     project: name of the project (upper case)
@@ -340,6 +339,8 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
     kwargs2['channels'] = channels
     kwargs2['load_function'] = load_function
     kwargs2['path'] = path
+    if 'raise_all' in kwargs:
+        kwargs2['raise_all'] = kwargs['raise_all']
         
     if load_function:
         # Pass responsibility for loading to some other
