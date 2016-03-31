@@ -43,30 +43,12 @@ default_archive_selection = [['AURORAWATCHNET', 'realtime'],
                              ['UIT', 'xyz_10s'],
                              ['INTERMAGNET', 'preliminary'],
                              ]
-epilist = ['Projects/sites available:']
-for p in sorted(ap.projects):
-    epilist.append('  ' + p + ':')
-    first = True
-    slist = []
-    for site in sorted(ap.projects[p]):
-        if first:
-            s = '      ' + site
-            first = False
-        else:
-            s += ', ' + site
-        if len(s) > 60:
-            slist.append(s)
-            s = ''
-            first = True
-    slist.append(s)
-    epilist.append(',\n'.join(slist))
 
 # Define command line arguments
 parser = \
     argparse.ArgumentParser(description='Plot magnetometer data',
                             # formatter_class=argparse.RawTextHelpFormatter,
-                            formatter_class=argparse.RawDescriptionHelpFormatter,
-                            epilog='\n'.join(epilist))
+                            formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('-a', '--archive', 
                     action='append',
                     nargs=2,
@@ -90,6 +72,9 @@ parser.add_argument('--dataset',
                     nargs='*',
                     help='Import additional datset',
                     metavar='MODULE')
+parser.add_argument('--list-sites',
+                    action='store_true',
+                    help='List available sites and exit')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -145,7 +130,7 @@ plot_type.add_argument('--voltage-plot',
 
 
 parser.add_argument('project_site',
-                    nargs='+',
+                    nargs='*',
                     metavar="PROJECT/SITE")
 
 
@@ -168,6 +153,27 @@ mpl.rcParams['axes.grid'] = True
 mpl.rcParams['legend.fontsize'] = 'medium'
 mpl.rcParams['legend.numpoints'] = 1
 
+
+if args.list_sites:
+    ps_list = ['Projects/sites available:']
+    for p in sorted(ap.projects):
+        ps_list.append('  ' + p + ':')
+        first = True
+        slist = []
+        for site in sorted(ap.projects[p]):
+            if first:
+                s = '      ' + site
+                first = False
+            else:
+                s += ', ' + site
+            if len(s) > 60:
+                slist.append(s)
+                s = ''
+                first = True
+        slist.append(s)
+        ps_list.append(',\n'.join(slist))
+    print('\n'.join(ps_list))
+    sys.exit(0)
 
 # Set timezone appropriately to get intended np.datetime64 behaviour.
 try:
@@ -214,6 +220,10 @@ else:
             raise
 
 project_list, site_list = ap.parse_project_site_list(args.project_site)
+
+if len(site_list) == 0:
+    sys.stderr.write('No sites specified\n')
+    sys.exit(1)
 
 if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
     # AURORAWATCHNET and SAMNET are aligned with H so switch default
