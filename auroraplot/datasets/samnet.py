@@ -738,9 +738,10 @@ default_data_types = {
         'realtime_baseline': {
             'channels': sam_channels,
             'path': (base_url +
-                     'baseline/realtime/{site_lc}/%Y/{site_lc}%Y%m.txt'),
+                     'baseline/realtime/{site_lc}/%Y/{site_lc}_%Y%m.txt'),
             'duration': np.timedelta64(1, 'M'),
             'load_converter': ap.magdata._load_baseline_data,
+            'save_converter': ap.magdata._save_baseline_data,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
         },

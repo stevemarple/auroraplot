@@ -1166,6 +1166,7 @@ for s in sites:
                 'duration': np.timedelta64(1, 'M'),
                 'format': 'baseline',
                 'load_converter': ap.magdata._load_baseline_data,
+                'save_converter': ap.magdata._save_baseline_data,
                 'nominal_cadence': np.timedelta64(1, 'D'),
                 'units': 'T',
                 }
