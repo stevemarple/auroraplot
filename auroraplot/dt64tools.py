@@ -331,6 +331,11 @@ def fmt_dt64_range(st, et):
         if required.Fractional seconds not currently supported.
     '''
 
+    # If st or et have units of months or years then convert to dates,
+    # has no effects if smaller date units in use
+    st += np.timedelta64(0, 'D')
+    et += np.timedelta64(0, 'D')
+    
     day = np.timedelta64(1, 'D')
     if st == floor(st, day) and et == floor(st, day):
         # Start and end on same date. Always return at least hours and
