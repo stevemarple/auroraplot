@@ -333,12 +333,16 @@ def _load_baseline_data(file_name, archive_data,
             return r
 
         except Exception as e:
+            if 'raise_all' in kwargs and kwargs['raise_all']:
+                raise
             logger.info('Could not read ' + file_name)
             logger.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
+        if 'raise_all' in kwargs and kwargs['raise_all']:
+            raise
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
 
