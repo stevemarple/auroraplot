@@ -314,9 +314,10 @@ def _load_baseline_data(file_name, archive_data,
             sample_start_time = sample_end_time - \
                 archive_data['nominal_cadence']
             integration_interval = np.tile(archive_data['nominal_cadence'],
-                                           [len(channels), 
-                                            len(sample_start_time)])
-            data = data[col_idx] * 1e-9
+                                           [np.size(channels), 
+                                            np.size(sample_start_time)])
+            data = np.reshape(data[col_idx] * 1e-9,
+                              [len(col_idx), np.size(sample_start_time)])
             r = MagData( \
                 project=project,
                 site=site,
