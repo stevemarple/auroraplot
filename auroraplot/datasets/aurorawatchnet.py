@@ -1165,7 +1165,7 @@ for s in sites:
                     '/%Y/' + s_lc + '_%Y%m.txt',
                 'duration': np.timedelta64(1, 'M'),
                 'format': 'baseline',
-                'load_converter': ap.magdata.load_baseline_data,
+                'load_converter': ap.magdata._load_baseline_data,
                 'nominal_cadence': np.timedelta64(1, 'D'),
                 'units': 'T',
                 }

@@ -284,7 +284,7 @@ def load_qdc_data(file_name, archive_data,
     return None
 
 
-def load_baseline_data(file_name, archive_data, 
+def _load_baseline_data(file_name, archive_data, 
                        project, site, data_type, channels, start_time, 
                        end_time, **kwargs):
     '''Convert standard format baseline data to standard data type

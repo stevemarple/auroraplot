@@ -740,7 +740,7 @@ default_data_types = {
             'path': (base_url +
                      'baseline/realtime/{site_lc}/%Y/{site_lc}%Y%m.rt'),
             'duration': np.timedelta64(1, 'M'),
-            'load_converter': ap.magdata.load_baseline_data,
+            'load_converter': ap.magdata._load_baseline_data,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
         },
