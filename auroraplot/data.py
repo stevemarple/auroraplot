@@ -35,11 +35,11 @@ class Data(object):
                  channels=None,
                  start_time=None,
                  end_time=None,
-                 sample_start_time=np.array([]), 
-                 sample_end_time=np.array([]), 
+                 sample_start_time=np.array([], dtype='datetime64[s]'), 
+                 sample_end_time=np.array([], dtype='datetime64[s]'), 
                  integration_interval=None, 
                  nominal_cadence=None,
-                 data=np.array([]),
+                 data=None,
                  units=None,
                  sort=None):
         self.project = project
@@ -50,11 +50,18 @@ class Data(object):
             self.channels = np.array(channels)
         self.start_time = start_time
         self.end_time = end_time
-        self.sample_start_time = sample_start_time
-        self.sample_end_time = sample_end_time
+        self.sample_start_time = np.reshape(sample_start_time,
+                                            [np.size(sample_start_time)])
+        self.sample_end_time = np.reshape(sample_end_time,
+                                          [np.size(sample_end_time)])
         self.integration_interval=integration_interval
         self.nominal_cadence = nominal_cadence
-        self.data = data
+        if data is None:
+            self.data = np.tile(np.nan, [np.size(self.channels),
+                                         np.size(self.sample_start_time)])
+        else:
+            self.data = data
+            
         self.units = units
         if sort is None:
             sort = np.size(data) != 0
