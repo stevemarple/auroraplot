@@ -348,6 +348,19 @@ def _load_baseline_data(file_name, archive_data,
 
     return None
 
+def _save_baseline_data(md, file_name):
+    assert isinstance(md, MagData), 'Data is wrong type'
+    assert md.units == 'T', 'Data units incorrect'
+    assert md.data.shape[0] == np.size(md.channels), \
+        'data shape incorrect for number of channels'
+    assert md.data.shape[1] == np.size(md.sample_start_time), \
+        'data shape incorrect for number of samples'
+    data = np.empty([1 + np.size(md.channels), np.size(md.sample_start_time)])
+    data[0] = (md.sample_end_time - md.start_time) / md.nominal_cadence
+    data[1:] = md.data * 1e9
+    fmt = ['%d']
+    fmt.extend(['%.2f'] * np.size(md.channels))
+    np.savetxt(file_name, data.T, delimiter='\t', fmt=fmt)
 
 
 def stack_plot(data_array, offset, channel=None, 
