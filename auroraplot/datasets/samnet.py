@@ -785,7 +785,7 @@ default_data_types = {
     'MagQDC': {
         'qdc': {
             'channels': sam_channels,
-            'path': (base_url + 'qdc/{sc}/%Y/{sc}_qdc_%Y%m.txt'),
+            'path': base_url + 'qdc/new/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             # Use the standard converter for MagQDC
             'load_converter': ap.magdata.load_qdc_data,
