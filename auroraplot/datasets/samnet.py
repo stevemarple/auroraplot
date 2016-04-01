@@ -16,6 +16,7 @@ import requests
 import numpy as np
 
 import auroraplot as ap
+import auroraplot.data
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData
@@ -776,10 +777,12 @@ default_data_types = {
             'path': (base_url +
                      'baseline/realtime/{site_lc}/%Y/{site_lc}_%Y%m.txt'),
             'duration': np.timedelta64(1, 'M'),
-            'load_converter': ap.magdata._load_baseline_data,
+            'load_converter': ap.data._generic_load_converter,
             'save_converter': ap.magdata._save_baseline_data,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
+            'constructor': ap.magdata.MagData,
+            'timestamp_method': 'offset1',
         },
     },
     'MagQDC': {

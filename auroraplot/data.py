@@ -1,8 +1,16 @@
 import copy
+import logging
 import os
 import pickle
 import six
-import logging
+
+# Python 2/3 compatibility
+try:
+    from urllib.request import urlopen
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlopen
 
 import numpy as np
 import matplotlib as mpl
@@ -25,6 +33,106 @@ def leastsq_error(p, obj, ref, channel):
     err = obj.data[obj.get_channel_index(channel)[0]] \
         - (ref.data[ref.get_channel_index(channel)[0]] + adj)
     return np.nan_to_num(err)
+
+
+def _generic_load_converter(file_name, archive_data, 
+                            project, site, data_type, channels, start_time, 
+                            end_time, **kwargs):
+    '''A generic load converter.
+
+    Expects the archive information to contain:
+
+    constructor: Function reference to the class constructor
+
+    timestamp_method: one of 'unixtime', 'offset0', 'offset1'
+    
+'''
+    
+    assert 'constructor' in archive_data, \
+        'archive data must indicate constructor to use'
+    assert archive_data['constructor'].__name__ == data_type, \
+        'data type does not match'
+    assert 'timestamp_method' in archive_data, \
+        'archive data must indicate the timestamp method used'
+    zero_us = np.timedelta64(0, 'us')
+    
+    chan_tup = tuple(archive_data['channels'])
+    col_idx = []
+    for c in channels:
+        col_idx.append(1 + chan_tup.index(c))
+
+    try:
+        if file_name.startswith('/'):
+            uh = urlopen('file:' + file_name)
+        else:
+            uh = urlopen(file_name)
+        try:
+            data = np.loadtxt(uh, unpack=True)
+
+            sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
+            if archive_data['timestamp_method'] == 'unixtime':
+                sst = np.round(data[0] / dt64.multipliers[sample_time_units])
+                sample_start_time = \
+                    sst.astype('datetime64[' + sample_time_units + ']')
+                
+            elif archive_data['timestamp_method'] == 'offset0':
+                sample_start_time = \
+                    ((data[0].astype('int64') 
+                      * archive_data['nominal_cadence'])
+                     + start_time)
+
+            elif archive_data['timestamp_method'] == 'offset1':
+                sample_start_time = \
+                    (((data[0].astype('int64') - 1)
+                      * archive_data['nominal_cadence'])
+                     + start_time)
+            else:
+                raise ValueError('unknown value for timestamp_method')
+
+           
+            sample_end_time = \
+                sample_start_time + archive_data['nominal_cadence']
+            integration_interval = np.tile(archive_data['nominal_cadence'],
+                                           [np.size(channels), 
+                                            np.size(sample_start_time)])
+
+            data = np.reshape(data[col_idx],
+                              [len(col_idx), np.size(sample_start_time)])
+            
+            if archive_data['units'] == 'T':
+                # Stored as nT in files
+                data *= 1e-9
+
+            r = archive_data['constructor']( \
+                project=project,
+                site=site,
+                channels=channels,
+                start_time=start_time + zero_us,
+                end_time=end_time + zero_us,
+                sample_start_time=sample_start_time, 
+                sample_end_time=sample_end_time,
+                integration_interval=integration_interval,
+                nominal_cadence=archive_data['nominal_cadence'] + zero_us,
+                data=data,
+                units=archive_data['units'],
+                sort=True)
+            return r
+
+        except Exception as e:
+            if 'raise_all' in kwargs and kwargs['raise_all']:
+                raise
+            logger.info('Could not read ' + file_name)
+            logger.debug(str(e))
+
+        finally:
+            uh.close()
+    except Exception as e:
+        if 'raise_all' in kwargs and kwargs['raise_all']:
+            raise
+        logger.info('Could not open ' + file_name)
+        logger.debug(str(e))
+
+    return None
 
 
 class Data(object):

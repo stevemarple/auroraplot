@@ -13,6 +13,7 @@ except ImportError:
 import numpy as np
 
 import auroraplot as ap
+import auroraplot.data
 import auroraplot.magdata
 import auroraplot.tools
 from auroraplot.magdata import MagData
@@ -1165,10 +1166,13 @@ for s in sites:
                     '/%Y/' + s_lc + '_%Y%m.txt',
                 'duration': np.timedelta64(1, 'M'),
                 'format': 'baseline',
-                'load_converter': ap.magdata._load_baseline_data,
+                'load_converter': ap.data._generic_load_converter,
                 'save_converter': ap.magdata._save_baseline_data,
-                'nominal_cadence': np.timedelta64(1, 'D'),
+                'nominal_cadence': np.timedelta64(24, 'h'),
                 'units': 'T',
+                # information for _generic_load_converter
+                'constructor': ap.magdata.MagData,
+                'timestamp_method': 'offset1',
                 }
 
     if 'activity_thresholds' not in sites[s]:
