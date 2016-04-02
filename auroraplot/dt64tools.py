@@ -60,6 +60,26 @@ def smallest_unit(a):
     else:
         return None
 
+
+def match_units(a, inplace=False):
+    units = []
+    for t in a:
+        units.append(get_units(t))
+        
+    u = smallest_unit(units)
+    zero = np.timedelta64(0, u)
+    if inplace:
+        for t in a:
+            if get_units(t) != u:
+                t += zero
+        return a 
+    else:
+        r = []
+        for t in a:
+            r.append(t + zero)
+    return r
+
+
 def from_YMD(year, month, day):
     ya = np.array(year)
     ma = np.array(month)
