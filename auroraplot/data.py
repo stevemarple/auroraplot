@@ -579,8 +579,7 @@ class Data(object):
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
         else:
-            # raise Warning('Cadence already at ' + str(cadence))
-            warnings.warn('Cadence already at ' + str(cadence))
+            logger.debug('cadence already at %s' % str(cadence))
             if inplace:
                 return self
             else:
