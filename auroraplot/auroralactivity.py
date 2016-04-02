@@ -42,7 +42,9 @@ class AuroraWatchActivity(Data):
                  thresholds=None,
                  colors=None,
                  fit=None,
-                 fit_params={}):
+                 fit_params={},
+                 input_channels=None,
+                 range_=False):
         Data.__init__(self,
                       project=project,
                       site=site,
@@ -58,23 +60,77 @@ class AuroraWatchActivity(Data):
                       sort=sort)
         
         if magdata is not None and magqdc is not None:
-            self.project = magdata.project
-            self.site = magdata.site
-            c = self.channels
-            self.start_time = magdata.start_time
-            self.end_time = magdata.end_time
-            self.sample_start_time = magdata.sample_start_time
-            self.sample_end_time = magdata.sample_end_time
-            self.integration_interval = None
-            self.nominal_cadence = magdata.nominal_cadence
-                        
+            assert magdata.units == magqdc.units, 'Units must match'
+            cadence = np.timedelta64(1, 'h')
             if isinstance(magqdc, ap.magdata.MagQDC):
                 aligned = magqdc.align(magdata, fit=fit, **fit_params)
             else:
-                aligned = magqdc                            
-            self.data = np.abs(magdata.data[magdata.get_channel_index(c)] -
-                               aligned.data[aligned.get_channel_index(c)])
-            assert magdata.units == magqdc.units, 'Units must match'
+                aligned = magqdc
+            
+            if input_channels is None:
+                input_channels = []
+                if 'H' in magdata.channels:
+                    input_channels.append('H')
+                elif 'X' in magdata.channels:
+                    input_channels.append('X')
+                if 'D' in magdata.channels:
+                    input_channels.append('D')
+                elif 'E' in magdata.channels:
+                    input_channels.append('E') # IAGA notation for D when in nT
+                elif 'Y' in magdata.channels:
+                    input_channels.append('Y')
+            
+            input_channels = np.array(input_channels).flatten()
+            cidx = magdata.get_channel_index(input_channels)
+            if magdata.nominal_cadence <= np.timedelta64(5, 's'):
+                # Throw away ~30 seconds
+                n = int(np.timedelta64(30, 's') / magdata.nominal_cadence)
+            else:
+                # Throw away up to 2.5 minutes
+                n = int(np.timedelta64(150, 's') / magdata.nominal_cadence)
+
+            nth_largest = ap.tools.NthLargest(n)
+
+            disturbance = magdata.extract(channels=input_channels)
+            disturbance.data = np.abs(magdata.data[cidx] -
+                                      aligned.data[cidx])
+            disturbance.set_cadence(cadence,
+                                    inplace= True, 
+                                    aggregate=nth_largest)
+
+            data = disturbance.data.copy()
+
+            if range_:
+                range_high = magdata.extract(channels=input_channels)
+                range_high.set_cadence(cadence,
+                                       inplace= True, 
+                                       aggregate=nth_largest)
+                nth_smallest = ap.tools.NthLargest(n, smallest=True)
+                range_low = magdata.extract(channels=input_channels)
+                range_low.set_cadence(cadence,
+                                      inplace= True, 
+                                      aggregate=nth_smallest)
+                hourly_range = copy.deepcopy(range_high)
+                hourly_range.data = range_high.data - range_low.data
+                assert np.all(hourly_range.sample_start_time ==
+                              disturbance.sample_start_time), \
+                              'sample start times differ'
+                data = np.vstack([data, hourly_range.data])              
+                
+            self.project = magdata.project
+            self.site = magdata.site
+            if range_:
+                self.channels = np.array(['Activity'])
+            else:
+                self.channels = np.array(['Disturbance'])
+            self.start_time = disturbance.start_time
+            self.end_time = disturbance.end_time
+            self.sample_start_time = disturbance.sample_start_time
+            self.sample_end_time = disturbance.sample_end_time
+            self.integration_interval = None
+            self.nominal_cadence = cadence
+            # Take the maximum value for all 
+            self.data = np.max(data, axis=0).reshape([1, data.shape[1]])
             self.units = magdata.units
             if sort:
                 self.sort(inplace=True)
@@ -92,15 +148,10 @@ class AuroraWatchActivity(Data):
                              inplace= True, aggregate=nth_largest)
 
         if thresholds is None:
-            # self.thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
             self.thresholds = self.get_site_info('activity_thresholds')
         else:
             self.thresholds = thresholds
         if colors is None:
-            # self.colors = np.array([[0.2, 1.0, 0.2],  # green  
-            #                         [1.0, 1.0, 0.0],  # yellow
-            #                         [1.0, 0.6, 0.0],  # amber
-            #                         [1.0, 0.0, 0.0]]) # red
             self.colors = self.get_site_info('activity_colors')
         else:
             self.colors = colors
