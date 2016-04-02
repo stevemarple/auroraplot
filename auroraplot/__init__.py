@@ -352,8 +352,6 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
     for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']), 
                              end_time, 
                              ad['duration']):
-        logger.debug('processing time ' + str(t))
-
         # A local copy of the file to be loaded, possibly an
         # uncompressed version.
         temp_file_name = None
@@ -367,7 +365,6 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         else:
             file_name = dt64.strftime(t, path)
 
-
         url_parts = urlparse(file_name)
         if url_parts.scheme in ('ftp', 'http', 'https'):
             file_name = download_url(file_name)
@@ -377,6 +374,10 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         elif url_parts.scheme == 'file':
             file_name = url_parts.path
             
+        if not os.path.exists(file_name):
+            logger.info('missing file %s', file_name)
+            continue
+
         # Now only need to access local files
         if os.path.splitext(url_parts.path)[1] in ('.gz', '.dgz'):
             # Transparently uncompress
