@@ -317,7 +317,7 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
     '''
     archive, ad = get_archive_info(project, site, data_type, **kwargs)
     channels = kwargs.get('channels')
-    if channels:
+    if channels is not None:
         # Could be as single channel name or a list of channels
         if isinstance(channels, six.string_types):
             if channels not in ad['channels']:
