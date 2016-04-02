@@ -467,14 +467,18 @@ def concatenate(objs, sort=True):
         data_list.append(a.data)
 
     if integration_interval is not None:
-        integration_interval=np.concatenate(integration_interval, axis=1)
+        integration_interval = \
+            np.concatenate(dt64.match_units(integration_interval), axis=1)
+    
+    sample_start_time = np.concatenate(dt64.match_units(sam_st_list))
+    sample_end_time = np.concatenate(dt64.match_units(sam_et_list))
     return obj_type(project=project,
                     site=site,
                     channels=channels,
                     start_time=np.min(start_time),
                     end_time=np.max(end_time),
-                    sample_start_time=np.concatenate(sam_st_list),
-                    sample_end_time=np.concatenate(sam_et_list),
+                    sample_start_time=sample_start_time,
+                    sample_end_time=sample_end_time,
                     integration_interval=integration_interval,
                     nominal_cadence=np.max(cadence_list),
                     data=np.concatenate(data_list, axis=1),
