@@ -850,8 +850,21 @@ class MagQDC(MagData):
             (xo.astype('int64'))
 
         if fit:
-            # return r.fit(ref, inplace=True, **fit_kwargs)
-            return fit(r, ref, inplace=True, **fit_kwargs)
-        
+            if hasattr(fit, '__call__'):
+                return fit(r, ref, inplace=True, **fit_kwargs)
+            elif fit in ('baseline', 'realtime_baseline'):
+                # QDC must be zero-mean for baseline adjustment,
+                # correct any offset
+                for n in range(r.data.shape[0]):
+                    r.data[n] -= nanmean(self.data[n])
+                for d in np.unique(dt64.get_date(r.sample_start_time)):
+                    bl = ap.load_data(r.project, r.site, 'MagData',
+                                      d, d + np.timedelta64(1, 'D'),
+                                      channels=r.channels,
+                                      archive=fit)
+                    r.data[:, d == dt64.get_date(r.sample_start_time)] \
+                        += bl.data
+            else:
+                raise ValueError('Unknown fit method %s' % repr(fit))
         return r
         
