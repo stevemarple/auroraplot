@@ -2,6 +2,8 @@ import copy
 import logging
 import numpy as np
 
+import auroraplot as ap
+
 logger = logging.getLogger(__name__)
 class NthLargest(object):
     '''
@@ -238,3 +240,32 @@ def sgolay_filt(data, window_size, order):
     for n in range(len(data.channels)):
         r.data[n] = savitzky_golay(data.data[n], window_size, order)
     return r
+
+
+def change_load_data_paths(project, 
+                           replace, 
+                           site_list=None, 
+                           data_type_list=None):
+    '''Helper function for changing paths used when loading data
+
+    change_load_data_paths is intended to be called from within
+    auroraplot_custom.py to alter the paths used when loading data,
+    for instance to modify the URLs to local file paths
+    '''
+
+    if site_list is None:
+        site_list = ap.projects[project].keys()
+
+    for site in site_list:
+        if data_type_list is None:
+            data_type_list = ap.projects[project][site]['data_types'].keys()
+            
+        for data_type in data_type_list:
+            dtv = ap.projects[project][site]['data_types'][data_type]
+            for archive,av in dtv.iteritems(): # archive name/values
+                if archive == 'default':
+                    continue
+                if not hasattr(av['path'], '__call__'):
+                    av['path'] = replace(av['path'], project, site,
+                                         data_type, archive)
+
