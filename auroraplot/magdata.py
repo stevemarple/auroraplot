@@ -1,5 +1,6 @@
 import copy
 import logging
+import re
 
 # Python 2/3 compatibility
 import six
@@ -282,6 +283,32 @@ def load_qdc_data(file_name, archive_data,
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
     return None
+
+def _calc_realtime_qdc_path(t, project, site, data_type, archive, channels):
+    an, ai = ap.get_archive_info(project, site, data_type, archive=archive)
+
+    # Find the archive from which to obtain the path
+    if 'target_archive' in ai:
+        target_archive = ai['target_archive']
+    else:
+        target_archive, subs = re.subn('^realtime_', '', archive)
+        if subs == 0:
+            raise Exception('Cannot identify archive from which to obtain path')
+
+    # Find qdc rollover day, times on or after this day use the
+    # previous month, otherwise the month before the previous is used.
+    qdc_rollover_day = ai.get('qdc_rollover_day', 4)
+    qdc_t = dt64.get_start_of_previous_month(t)
+    if dt64.get_day_of_month(t) < qdc_rollover_day:
+        qdc_t = dt64.get_start_of_previous_month(qdc_t)
+
+    # Expand the appropriate path with the corrected date. Refuse to
+    # accept a function for the path defintion
+    tan, tai = ap.get_archive_info(project, site, data_type, 
+                                   archive=target_archive)
+    assert not hasattr(tai['path'], '__call__'), \
+        'target archive path parameter cannot be a function'
+    return dt64.strftime(qdc_t, tai['path'])
 
 
 def _save_baseline_data(md, file_name):
