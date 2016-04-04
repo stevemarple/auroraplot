@@ -24,7 +24,7 @@ from auroraplot.voltagedata import VoltageData
 
 logger = logging.getLogger(__name__)
 
-base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet'
+base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
 
 def check_mag_data(data):
     data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
@@ -417,7 +417,7 @@ default_data_types = {
         'default': 'realtime',
         'realtime': {
             'channels': np.array(['H']),
-            'path': base_url + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_awn_data,
@@ -440,7 +440,7 @@ default_data_types = {
     'MagQDC': {
         'qdc': {
             'channels': np.array(['H']),
-            'path': base_url + '/qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
+            'path': base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
             'load_converter': ap.magdata.load_qdc_data,
@@ -452,7 +452,7 @@ default_data_types = {
         'realtime': {
             'channels': np.array(['Sensor temperature', 
                                   'System temperature']),
-            'path': base_url + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_awn_data,
@@ -463,7 +463,7 @@ default_data_types = {
     'VoltageData': {
         'realtime': {
             'channels': np.array(['Battery voltage']),
-            'path': base_url + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_awn_data,
