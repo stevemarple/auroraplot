@@ -127,7 +127,16 @@ def load_iaga_2000(file_name):
     return None
 
 
-def load_qdc(project, site, time, **kwargs):
+def load_qdc(project, 
+             site, 
+             time, 
+             archive=None, 
+             channels=None,
+             path=None,
+             tries=1,
+             realtime=False,
+             load_function=None,
+             full_output=False):
     '''Load quiet-day curve. 
     project: name of the project (upper case)
 
@@ -155,41 +164,56 @@ def load_qdc(project, site, time, **kwargs):
         function reference, after validating the input parameters.
         
     '''
-    
+
     data_type = 'MagQDC'
-    archive, ad = ap.get_archive_info(project, site, data_type, **kwargs)
-    channels = kwargs.get('channels')
+    archive, ad = ap.get_archive_info(project, site, data_type, 
+                                      archive=archive)
     if channels is not None:
-        # Could be as single channel name or a list of channels
-        if isinstance(channels, six.string_types):
-            if channels not in ad['channels']:
-                raise Exception('Unknown channel')
-        else:
-            for c in channels:
-                if c not in ad['channels']:
-                    raise Exception('Unknown channel')
+        # Ensure it is a 1D numpy array
+        channels = np.array(channels).flatten()
+        for c in channels:
+            if c not in ad['channels']:
+                raise ValueError('Unknown channel (%s)' % str(c))
     else:
         channels = ad['channels']
 
-    path = kwargs.get('path', ad['path'])
+    if path is None:
+        path = ad['path']
 
-    load_function = kwargs.get('load_function', ad.get('load_function'))
-    tries = kwargs.get('tries', 1)
+    if load_function is None:
+        load_function = ad.get('load_function', None)
 
-    kwargs2 = kwargs.copy()
-    kwargs2['archive'] = archive
-    kwargs2['channels'] = channels
-    kwargs2['load_function'] = load_function
-    kwargs2['path'] = path
-        
+    if tries is None:
+        tries = 1
+       
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project, site, data_type, start_time, 
-                             end_time, **kwargs2)
-
+        return load_function(project, 
+                             site, 
+                             data_type, 
+                             time, 
+                             archive=archive,
+                             channels=channels,
+                             path=path,
+                             tries=tries,
+                             realtime=realtime,
+                             full_output=full_output)
     data = []
+
     t = dt64.get_start_of_month(time)
+
+    if realtime:
+        # For realtime use the QDC for the month is (was) not
+        # available, so use the previous month's QDC
+        t = dt64.get_start_of_previous_month(t)
+        
+        # Early in the month the previous motnh's QDC was probably not
+        # computed, so use the month before that
+        qdc_rollover_day = ad.get('qdc_rollover_day', 4)
+        if dt64.get_day_of_month(time) < qdc_rollover_day:
+            t = dt64.get_start_of_previous_month(t)
+
     for n in range(tries):
         try:
             if hasattr(path, '__call__'):
@@ -209,11 +233,13 @@ def load_qdc(project, site, time, **kwargs):
                                      data_type=data_type, 
                                      start_time=np.timedelta64(0, 'h'), 
                                      end_time=np.timedelta64(24, 'h'),
-                                     **kwargs2)
+                                     archive=archive,
+                                     channels=channels,
+                                     path=path)
             if r is not None:
                 r.extract(inplace=True, 
                           channels=channels)
-                if kwargs.get('full_output', False):
+                if full_output:
                     r2 = {'magqdc': r,
                           'tries': n + 1,
                           'maxtries': tries}
@@ -283,32 +309,6 @@ def load_qdc_data(file_name, archive_data,
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
     return None
-
-def _calc_realtime_qdc_path(t, project, site, data_type, archive, channels):
-    an, ai = ap.get_archive_info(project, site, data_type, archive=archive)
-
-    # Find the archive from which to obtain the path
-    if 'target_archive' in ai:
-        target_archive = ai['target_archive']
-    else:
-        target_archive, subs = re.subn('^realtime_', '', archive)
-        if subs == 0:
-            raise Exception('Cannot identify archive from which to obtain path')
-
-    # Find qdc rollover day, times on or after this day use the
-    # previous month, otherwise the month before the previous is used.
-    qdc_rollover_day = ai.get('qdc_rollover_day', 4)
-    qdc_t = dt64.get_start_of_previous_month(t)
-    if dt64.get_day_of_month(t) < qdc_rollover_day:
-        qdc_t = dt64.get_start_of_previous_month(qdc_t)
-
-    # Expand the appropriate path with the corrected date. Refuse to
-    # accept a function for the path defintion
-    tan, tai = ap.get_archive_info(project, site, data_type, 
-                                   archive=target_archive)
-    assert not hasattr(tai['path'], '__call__'), \
-        'target archive path parameter cannot be a function'
-    return dt64.strftime(qdc_t, tai['path'])
 
 
 def _save_baseline_data(md, file_name):

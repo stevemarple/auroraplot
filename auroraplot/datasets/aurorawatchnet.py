@@ -1180,23 +1180,12 @@ default_data_types = {
             },
         },
     'MagQDC': {
-        'default': 'realtime_qdc',
         'qdc': {
             'channels': np.array(['H']),
             'path': base_url + '/qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
             'load_converter': ap.magdata.load_qdc_data,
-            'nominal_cadence': np.timedelta64(5, 's'),
-            'units': 'T',
-            },
-        'realtime_qdc': {
-            'channels': np.array(['H']),
-            'path': ap.magdata._calc_realtime_qdc_path,
-            'duration': np.timedelta64(24, 'h'),
-            'format': 'aurorawatchnet_qdc',
-            'load_converter': ap.magdata.load_qdc_data,
-            'save_converter': None, # Create as standard QDC
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             },
