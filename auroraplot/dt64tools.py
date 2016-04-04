@@ -210,11 +210,11 @@ def get_start_of_month(a):
         return af.reshape(a.shape)
 
 def get_start_of_previous_month(a):
-    return get_start_of_month(get_start_of_month(a) - np.timedelta64(24, 'h'))
+    return get_start_of_month(get_start_of_month(a) - np.timedelta64(1, 'D'))
         
 def get_start_of_next_month(a):
     return get_start_of_month(get_start_of_month(a) 
-                              + np.timedelta64(32*24, 'h'))
+                              + np.timedelta64(32, 'D'))
 
 def mean(*a):
     if len(a) == 0:
