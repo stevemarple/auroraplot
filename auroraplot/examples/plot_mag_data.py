@@ -237,7 +237,7 @@ if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
 # .uit_password from the user's home directory.
 if ('UIT' in project_list or 'DTU' in project_list) \
         and ap.datasets.uit.uit_password is None:
-    raise Warning('UIT likely to be required but could not be set')
+    logger.warn('UIT password likely to be required but is not set')
 
 
 # Get the default archives
