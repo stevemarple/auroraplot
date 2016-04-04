@@ -258,9 +258,11 @@ def change_load_data_paths(project,
 
     for site in site_list:
         if data_type_list is None:
-            data_type_list = ap.projects[project][site]['data_types'].keys()
-            
-        for data_type in data_type_list:
+            dt_list = ap.projects[project][site]['data_types'].keys()
+        else:
+            dt_list = data_type_list
+
+        for data_type in dt_list:
             dtv = ap.projects[project][site]['data_types'][data_type]
             for archive,av in dtv.iteritems(): # archive name/values
                 if archive == 'default':
