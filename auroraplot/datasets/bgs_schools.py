@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import traceback
@@ -126,9 +127,9 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
-    'TEST3': {
+    'BGS3': {
         'location': 'Lancaster, UK',
-        'latitude': 54.0,
+        'latitude': 54.01,
         'longitude': -2.78,
         'elevation': 27,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
@@ -137,57 +138,11 @@ sites = {
         'k_index_filter': None,
         'copyright': 'Steve Marple.',
         'license': cc3_by_nc_sa,
-        'attribution': 'Data provided by Steve Marple.', 
-        'line_color': [0, 0.6, 0],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    #'units': 'C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
-        }, # TEST3
+        'attribution':  'Space and Plasma Physics group, ' + \
+            'Department of Physics, Lancaster University, UK.',
+        'line_color': [1, 0, 0],
+        }, # BGS3
+
     'BGS4': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
@@ -201,42 +156,6 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
         'line_color': [0, 0.6, 0],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/bgs4/qdc/%Y/bgs4_qdc_%Y%m.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature']),
-                    'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    #'units': 'C',
-                    },
-                },
-            },
         }, # BGS4
 
     'BGS5': {
@@ -252,43 +171,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution':  'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'line_color': [64.0/255, 224.0/255, 208.0/255],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/bgs5/%Y/%m/bgs5_%Y%m%d.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H', 'D', 'Z']),
-                    'path': data_dir + '/bgs5/qdc/%Y/bgs5_qdc_%Y%m.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature']),
-                    'path': data_dir + '/bgs5/%Y/%m/bgs5_%Y%m%d.csv',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_bgs_sch_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    #'units': 'C',
-                    },
-                },
-            },
+        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
         }, # BGS5
 
     }
@@ -352,9 +235,14 @@ for s in sites:
         sd['data_types'] = {}
     for dt in default_data_types:
         if dt not in sd['data_types']:
-            sd['data_types'][dt] = default_data_types[dt]
-            sd['data_types'][dt]['path'] = \
-                sd['data_types'][dt]['path'].format(site_lc=s.lower())
-        
+            sd['data_types'][dt] = copy.deepcopy(default_data_types[dt])
+            for archive in sd['data_types'][dt]:
+                if archive == 'default':
+                    continue
+                sd['data_types'][dt][archive]['path'] = \
+                    sd['data_types'][dt][archive]['path'].format(site_lc=s.lower())
+        elif sd['data_types'][dt] is None:
+            del sd['data_types'][dt]
+
 ap.add_project('BGS_SCH', sites)
 

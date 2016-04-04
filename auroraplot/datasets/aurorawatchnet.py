@@ -179,55 +179,8 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
         'line_color': [0, 0.6, 0],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/lan1/%Y/lan1_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    #'units': 'C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/lan1/%Y/%m/lan1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # LAN1
+
     'LAN3': {
         'location': 'Lancaster, UK',
         'latitude': 54.01,
@@ -241,55 +194,8 @@ sites = {
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [1, 0, 0],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/lan3/%Y/lan3_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    # 'units': 'C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/lan3/%Y/%m/lan3_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # LAN3
+
     'ORM': {
         'location': 'Ormskirk, UK',
         'latitude': 53.569195, 
@@ -303,55 +209,8 @@ sites = {
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/orm/%Y/%m/orm_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/orm/%Y/orm_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/orm/%Y/%m/orm_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    # 'units': 'C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/orm/%Y/%m/orm_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # ORM
+    
     'TEST1': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
@@ -364,55 +223,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/test1/%Y/%m/test1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/test1/%Y/test1_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/test1/%Y/%m/test1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    # 'units': 'C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/test1/%Y/%m/test1_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # TEST1
+
     'BRA': {
         'location': 'Brae, Shetland, UK',
         'latitude': 60.395869,
@@ -425,54 +237,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/bra/%Y/%m/bra_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/bra/%Y/bra_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/bra/%Y/%m/bra_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/bra/%Y/%m/bra_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # BRA
+
     'SAN': {
         'location': 'Sanday, UK',
         'latitude': 59.25110830191925,
@@ -485,54 +251,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/san/%Y/%m/san_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/san/%Y/san_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/san/%Y/%m/san_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/san/%Y/%m/san_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # SAN
+
     'TOB': {
         'location': 'Tobermory, Mull, UK',
         'latitude': 56.62415194965067,
@@ -545,54 +265,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/tob/%Y/%m/tob_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/tob/%Y/tob_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/tob/%Y/%m/tob_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/tob/%Y/%m/tob_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # TOB
+
      'WHI': {
         'location': 'Whitehaven, Cumbria, UK',
         'latitude': 54.543384,
@@ -606,54 +280,8 @@ sites = {
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [.6, .6, .6],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/whi/%Y/%m/whi_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/whi/%Y/whi_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/whi/%Y/%m/whi_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/whi/%Y/%m/whi_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # WHI
+
     'ALT': {
         'location': 'Altrincham, UK',
         'latitude': 53.381988,
@@ -666,54 +294,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/alt/%Y/%m/alt_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/alt/%Y/alt_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/alt/%Y/%m/alt_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/alt/%Y/%m/alt_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # ALT
+
     'MAL': {
         'location': 'Malpas, UK',
         'latitude': 53.029658,
@@ -726,54 +308,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/mal/%Y/%m/mal_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/mal/%Y/mal_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/mal/%Y/%m/mal_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/mal/%Y/%m/mal_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # MAL
+
     'ASH': {
         'location': 'Ashbourne, UK',
         'latitude': 53.021899,
@@ -786,54 +322,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/ash/%Y/%m/ash_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/ash/%Y/ash_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/ash/%Y/%m/ash_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/ash/%Y/%m/ash_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # ASH
+
         'PEL': {
         'location': 'Pelsall, UK',
         'latitude': 52.623806,
@@ -846,54 +336,8 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/pel/%Y/%m/pel_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/pel/%Y/pel_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/pel/%Y/%m/pel_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/pel/%Y/%m/pel_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # PEL
+
     'BRE': {
         'location': 'Brecon, UK',
         'latitude': 52.02851,
@@ -907,54 +351,8 @@ sites = {
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [119.0/255, 11.0/255, 0],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/bre/%Y/%m/bre_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/bre/%Y/bre_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/bre/%Y/%m/bre_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/bre/%Y/%m/bre_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # BRE
+
     'CAN': {
         'location': 'Canterbury, UK',
         'latitude': 51.260914,
@@ -968,57 +366,10 @@ sites = {
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [64.0/255, 224.0/255, 208.0/255],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/can/%Y/%m/can_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/can/%Y/can_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/can/%Y/%m/can_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/can/%Y/%m/can_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # CAN
+
     'CWX': {
         # Private station operated by Cumbernauld Weather
-
         'location': 'Cumbernauld, UK',
         'latitude': 55 + (56.1/60),
         'longitude': -(4 + (2.2/60)),
@@ -1032,54 +383,8 @@ sites = {
         'attribution': 'Cumbernauld Weather, ' + \
             'http://www.cumbernauld-weather.co.uk/',
         'line_color': [0.3, 0.3, 1],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H']),
-                    'path': base_url + '/qdc/cwx/%Y/cwx_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/cwx/%Y/%m/cwx_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # CWX
+
     'EXE': {
         # Met Office station
         'location': 'Exeter, UK',
@@ -1096,53 +401,6 @@ sites = {
         'attribution': 'Met Office, ' + \
             'http://www.metoffice.gov.uk/',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
-        'data_types': {
-            'MagData': {
-                'realtime': {
-                    'channels': np.array(['H', 'E', 'Z']),
-                    'path': base_url + '/exe/%Y/%m/exe_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'T',
-                    },
-                },
-            'MagQDC': {
-                'qdc': {
-                    'channels': np.array(['H', 'E', 'Z']),
-                    'path': base_url + '/qdc/exe/%Y/exe_qdc_%Y%m.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet_qdc',
-                    'load_converter': ap.magdata.load_qdc_data,
-                    'nominal_cadence': np.timedelta64(5, 's'),
-                    'units': 'T',
-                    },
-                },
-            'TemperatureData': {
-                'realtime': {
-                    'channels': np.array(['Sensor temperature', 
-                                          'System temperature']),
-                    'path': base_url + '/exe/%Y/%m/exe_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': u'\N{DEGREE SIGN}C',
-                    },
-                },
-            'VoltageData': {
-                'realtime': {
-                    'channels': np.array(['Battery voltage']),
-                    'path': base_url + '/exe/%Y/%m/exe_%Y%m%d.txt',
-                    'duration': np.timedelta64(24, 'h'),
-                    'format': 'aurorawatchnet',
-                    'load_converter': load_awn_data,
-                    'nominal_cadence': np.timedelta64(30, 's'),
-                    'units': 'V',
-                    },
-                },        
-            },
         }, # EXE
 
     }
