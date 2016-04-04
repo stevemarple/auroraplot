@@ -383,6 +383,7 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             # Transparently uncompress
             gunzipped_file = None
             try:
+                logger.debug('unzipping %s', file_name)
                 gunzipped_file = NamedTemporaryFile(prefix=__name__, 
                                                     delete=False)
                 with gzip.open(file_name, 'rb') as gzip_file:
