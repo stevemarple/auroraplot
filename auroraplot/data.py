@@ -57,9 +57,6 @@ def _generic_load_converter(file_name, archive_data,
     zero_us = np.timedelta64(0, 'us')
     
     chan_tup = tuple(archive_data['channels'])
-    col_idx = []
-    for c in channels:
-        col_idx.append(1 + chan_tup.index(c))
 
     try:
         if file_name.startswith('/'):
@@ -74,18 +71,46 @@ def _generic_load_converter(file_name, archive_data,
                 sst = np.round(data[0] / dt64.multipliers[sample_time_units])
                 sample_start_time = \
                     sst.astype('datetime64[' + sample_time_units + ']')
-                
+                col_offset = 1                
             elif archive_data['timestamp_method'] == 'offset0':
                 sample_start_time = \
                     ((data[0].astype('int64') 
                       * archive_data['nominal_cadence'])
                      + start_time)
-
+                col_offset = 1
             elif archive_data['timestamp_method'] == 'offset1':
                 sample_start_time = \
                     (((data[0].astype('int64') - 1)
                       * archive_data['nominal_cadence'])
                      + start_time)
+                col_offset = 1
+            elif archive_data['timestamp_method'] == 'iso_date':
+                sample_start_time = \
+                    (d[0]-1970).astype('datetime64[Y]') + \
+                    (d[1]-1).astype('timedelta64[M]') + \
+                    (d[2]-1).astype('timedelta64[D]')
+                col_offset = 3
+            elif archive_data['timestamp_method'] == 'iso_datetime':
+                sample_start_time = \
+                    (d[0]-1970).astype('datetime64[Y]') + \
+                    (d[1]-1).astype('timedelta64[M]') + \
+                    (d[2]-1).astype('timedelta64[D]') + \
+                    d[3].astype('datetime64[h]') + \
+                    d[4].astype('timedelta64[m]') + \
+                    d[5].astype('timedelta64[s]')
+                col_offset = 6
+            elif archive_data['timestamp_method'].startswith('iso_datetime_'):
+                tu = archive_data['timestamp_method'] \
+                    .replace('iso_datetime_', '')
+                sample_start_time = \
+                    (d[0]-1970).astype('datetime64[Y]') + \
+                    (d[1]-1).astype('timedelta64[M]') + \
+                    (d[2]-1).astype('timedelta64[D]') + \
+                    d[3].astype('datetime64[h]') + \
+                    d[4].astype('timedelta64[m]') + \
+                    np.round(d[5]/dt64.multipliers[tu]) \
+                    .astype('timedelta64[%s]' % tu)
+                col_offset = 6              
             else:
                 raise ValueError('unknown value for timestamp_method')
 
@@ -95,6 +120,11 @@ def _generic_load_converter(file_name, archive_data,
             integration_interval = np.tile(archive_data['nominal_cadence'],
                                            [np.size(channels), 
                                             np.size(sample_start_time)])
+
+            col_idx = []
+            for c in channels:
+                col_idx.append(col_offset + chan_tup.index(c))
+
 
             data = np.reshape(data[col_idx],
                               [len(col_idx), np.size(sample_start_time)])
@@ -133,6 +163,78 @@ def _generic_load_converter(file_name, archive_data,
         logger.debug(str(e))
 
     return None
+
+
+def _generic_save_converter(d, file_name):
+    if d.data.shape[0] != np.size(md.channels):
+        raise ValueError('data shape incorrect for number of channels')      
+    if d.data.shape[1] != np.size(md.sample_start_time):
+        raise ValueError('data shape incorrect for number of samples')
+
+    data = np.empty([1 + np.size(d.channels), np.size(d.sample_start_time)])
+
+    # Force sample start time to be units of nominal_cadence (or better)
+    sst = d.sample_start_time \
+        + np.timedelta64(0, dt64.get_units(d.nominal_cadence))
+    
+    if archive_data['timestamp_method'] == 'unixtime':
+        # Force to day or better resolution
+        sst += np.timedelta64(0, 'D')
+        data[0] = sst.astype('float') * dt64.multipliers[dt64.get_units(sst)]
+        col_offset = 1
+
+    elif archive_data['timestamp_method'] == 'offset0':
+        data[0] = (sst - d.start_time) / d.nominal_cadence
+        col_offset = 1
+
+    elif archive_data['timestamp_method'] == 'offset1':
+        data[0] = (sst - d.start_time) / d.nominal_cadence
+        data[0] += 1
+        col_offset = 1
+
+    elif archive_data['timestamp_method'] == 'iso_date':
+        # Force to day or better resolution
+        sst += np.timedelta64(0, 'D')
+        data[0] = dt64.get_year(sst)
+        data[1] = dt64.get_month(sst)
+        data[2] = dt64.get_day(sst)
+        col_offset = 3
+
+    elif archive_data['timestamp_method'] == 'iso_datetime':
+        # Force to second or better resolution
+        sst += np.timedelta64(0, 's')
+        data[0] = dt64.get_year(sst)
+        data[1] = dt64.get_month(sst)
+        data[2] = dt64.get_day(sst)
+        data[3] = dt64.get_hour(sst)
+        data[4] = dt64.get_minute(sst)
+        data[5] = dt64.get_second(sst)
+        col_offset = 6
+
+    elif archive_data['timestamp_method'].startswith('iso_datetime_'):
+        tu = archive_data['timestamp_method'].replace('iso_datetime_', '')
+        mul = dt64.multipliers[tu]
+        if mul > 1:
+            raise ValueError('illegal time unit (%s)' % tu)
+        sst += np.timedelta64(0, 'tu')
+        data[0] = dt64.get_year(sst)
+        data[1] = dt64.get_month(sst)
+        data[2] = dt64.get_day(sst)
+        data[3] = dt64.get_hour(sst)
+        data[4] = dt64.get_minute(sst)
+        # Get just seconds and the fractional seconds
+        data[5] = np.mod(sst.astype('int'), int(np.round(60 / mul))) * mul
+        col_offset = 6
+    else:
+        raise ValueError('unknown value for timestamp_method')
+
+    data[col_offset:] = d.data
+
+    if archive_data['units'] == 'T':
+        # Stored as nT in files
+        data *= 1e9
+
+    np.savetxt(file_name, data.T, delimiter='\t', fmt=archive_data['fmt'])
 
 
 class Data(object):
