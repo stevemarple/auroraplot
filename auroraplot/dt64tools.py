@@ -399,6 +399,8 @@ def parse_datetime64(s, prec):
         t = np.datetime64('now', prec)
     elif s == 'tomorrow':
         t = np.datetime64('today') + np.timedelta64(1, 'D')
+    elif s == 'overmorrow':
+        t = np.datetime64('today') + np.timedelta64(2, 'D')
     else:
         t = np.datetime64(s)
     t += np.timedelta64(0, prec)
