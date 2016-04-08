@@ -311,7 +311,7 @@ def load_qdc_data(file_name, archive_data,
     return None
 
 
-def _save_baseline_data(md, file_name):
+def _save_baseline_data(md, file_name, archive_data):
     assert isinstance(md, MagData), 'Data is wrong type'
     assert md.units == 'T', 'Data units incorrect'
     assert md.data.shape[0] == np.size(md.channels), \
