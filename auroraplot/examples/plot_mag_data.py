@@ -4,6 +4,7 @@
 
 import argparse
 import copy
+from importlib import import_module
 import logging
 import os 
 import re
@@ -49,11 +50,20 @@ parser = \
     argparse.ArgumentParser(description='Plot magnetometer data',
                             # formatter_class=argparse.RawTextHelpFormatter,
                             formatter_class=argparse.RawDescriptionHelpFormatter)
+
+parser.add_argument('--aggregate', 
+                    default='scipy.average',
+                    help='Aggregate function used for setting cadence',
+                    metavar='MODULE.NAME')
 parser.add_argument('-a', '--archive', 
                     action='append',
                     nargs=2,
                     help='Select data archive used for project or site',
-                    metavar='PROJECT[/SITE] ARCHIVE')
+                    metavar=('PROJECT[/SITE]', 'ARCHIVE'))
+parser.add_argument('--cadence', 
+                    nargs=2,
+                    help='Set cadence',
+                    metavar=('VALUE', 'UNIT'))
 parser.add_argument('-s', '--start-time', 
                     default='today',
                     help='Start time for data transfer (inclusive)',
@@ -188,7 +198,7 @@ if args.dataset:
     for ds in args.dataset:
         new_module = 'auroraplot.datasets.' + ds
         try:
-            __import__(new_module)
+            import_module(new_module)
         except Exception as e:
             print('Could not import ' + new_module + ': ' + str(e))
             sys.exit(1)
@@ -262,6 +272,13 @@ for n in range(len(project_list)):
     kwargs = {}
     if project in archive and site in archive[project]:
         kwargs['archive'] = archive[project][site]
+    if args.cadence:
+        kwargs['cadence'] = np.timedelta64(int(args.cadence[0]), 
+                                           args.cadence[1])
+        agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
+        agg_module = import_module(agg_mname)
+        agg_func = getattr(agg_module, agg_fname)
+        kwargs['aggregate'] = agg_func
     md = ap.load_data(project, site, data_type, st, et, **kwargs)
     # If result is None then no data available so ignore those
     # results.
