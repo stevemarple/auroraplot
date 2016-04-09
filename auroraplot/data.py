@@ -17,7 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
-import scipy.signal
+import scipy.stats
 
 import auroraplot as ap
 import auroraplot.tools
@@ -627,8 +627,14 @@ class Data(object):
 
         
     def set_cadence(self, cadence, ignore_nan=True,
-                    offset_interval=np.timedelta64(0, 'us'), inplace=False,
-                    aggregate=scipy.average):
+                    offset_interval=None, inplace=False,
+                    aggregate=None):
+        if offset_interval is None:
+            offset_interval = \
+                np.timedelta64(0, dt64.get_units(self.sample_start_time))
+        if aggregate is None:
+            aggregate=scipy.average
+
         if cadence > self.nominal_cadence:
             sam_st = np.arange(dt64.ceil(self.start_time, cadence) 
                                + offset_interval, self.end_time, cadence)
@@ -648,6 +654,7 @@ class Data(object):
             for sn in range(len(sam_st)):
                 tidx = np.where(np.logical_and(sample_time >= sam_st[sn],
                                                sample_time <= sam_et[sn]))[0]
+                keep_integ_intv = True
                 for cn in range(len(self.channels)):
                     if ignore_nan:
                         notnanidx = np.where(np.logical_not(np.isnan(self.data[cn, tidx])))[0]
@@ -662,17 +669,24 @@ class Data(object):
                                 np.sum(self.integration_interval[cn, tidx2])
                         
                     if len(tidx2) != 0:
-                        # Update data. Weight the mean according to
-                        # integration_interval if possible.
+                        # Update data. 
                         if self.integration_interval is None:
-                            weights = None
-                        else:
-                            weights = self.integration_interval[cn, tidx2]
-                            weights[dt64.isnat(weights)] = 0
-
-                        d[cn,sn] = aggregate(self.data[cn, tidx2], 
+                            d[cn,sn] = aggregate(self.data[cn, tidx2], 
                                              weights=weights)
 
+                        else:
+                            # Weight the mean according to
+                            # integration_interval if possible.
+                            weights = self.integration_interval[cn, tidx2]
+                            weights[dt64.isnat(weights)] = 0
+                            try:
+                                d[cn,sn] = aggregate(self.data[cn, tidx2], 
+                                                     weights=weights)
+                            except TypeError as e:
+                                keep_integ_intv = False
+                                d[cn,sn] = aggregate(self.data[cn, tidx2])
+
+                                
             if inplace:
                 r = self
             else:
@@ -685,7 +699,10 @@ class Data(object):
 
             r.sample_start_time = sam_st
             r.sample_end_time = sam_et
-            r.integration_interval = integ_intv
+            if keep_integ_intv:
+                r.integration_interval = integ_intv
+            else:
+                r.integration_interval = None
             r.nominal_cadence = copy.copy(cadence)
             r.data = d
             return r
