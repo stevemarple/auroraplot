@@ -326,8 +326,11 @@ def load_data(project,
         function reference, after validating the input parameters.
         
     '''
-    _, ad = get_archive_info(project, site, data_type, 
-                             archive=archive)
+    archive, ad = get_archive_info(project, site, data_type, 
+                                   archive=archive)
+    cad_units = dt64.get_units(ad['nominal_cadence'])
+    start_time = start_time.astype('datetime64[%s]' % cad_units)
+    end_time = end_time.astype('datetime64[%s]' % cad_units)
 
     if channels is None:
         channels = ad['channels']
