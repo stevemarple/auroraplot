@@ -64,7 +64,12 @@ def _generic_load_converter(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            data = np.loadtxt(uh, unpack=True)
+            kwargs = {}
+            for s in ('comments', 'delimiter', 'converters', 'skiprows'):
+                if s in archive_data:
+                    kwargs[s] = archive_data[s]
+                      
+            data = np.loadtxt(uh, unpack=True, **kwargs)
 
             sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
             if archive_data['timestamp_method'] == 'unixtime':
@@ -84,13 +89,13 @@ def _generic_load_converter(file_name, archive_data,
                       * archive_data['nominal_cadence'])
                      + start_time)
                 col_offset = 1
-            elif archive_data['timestamp_method'] == 'iso_date':
+            elif archive_data['timestamp_method'] == 'YMD':
                 sample_start_time = \
                     (data[0]-1970).astype('datetime64[Y]') + \
                     (data[1]-1).astype('timedelta64[M]') + \
                     (data[2]-1).astype('timedelta64[D]')
                 col_offset = 3
-            elif archive_data['timestamp_method'] == 'iso_datetime':
+            elif archive_data['timestamp_method'] == 'YMDhms':
                 sample_start_time = \
                     (data[0]-1970).astype('datetime64[Y]') + \
                     (data[1]-1).astype('timedelta64[M]') + \
@@ -99,18 +104,26 @@ def _generic_load_converter(file_name, archive_data,
                     data[4].astype('timedelta64[m]') + \
                     data[5].astype('timedelta64[s]')
                 col_offset = 6
-            elif archive_data['timestamp_method'].startswith('iso_datetime_'):
+            elif archive_data['timestamp_method'].startswith('YMDhms.'):
                 tu = archive_data['timestamp_method'] \
-                    .replace('iso_datetime_', '')
+                    .replace('YMDhms.', '')
                 sample_start_time = \
                     (data[0]-1970).astype('datetime64[Y]') + \
                     (data[1]-1).astype('timedelta64[M]') + \
                     (data[2]-1).astype('timedelta64[D]') + \
-                    data[3].astype('datetime64[h]') + \
+                    data[3].astype('timedelta64[h]') + \
                     data[4].astype('timedelta64[m]') + \
                     np.round(data[5]/dt64.multipliers[tu]) \
                     .astype('timedelta64[%s]' % tu)
                 col_offset = 6              
+            elif archive_data['timestamp_method'] in ('h', 'hm', 'hms'):
+                col_offset = len(archive_data['timestamp_method'])
+                sample_start_time = start_time
+                for n in range(col_offset):
+                    sample_start_time += \
+                        data[n].astype('timedelta64[%s]' % 
+                                       archive_data['timestamp_method'][n])
+
             else:
                 raise ValueError('unknown value for timestamp_method')
 
@@ -129,9 +142,13 @@ def _generic_load_converter(file_name, archive_data,
             data = np.reshape(data[col_idx],
                               [len(col_idx), np.size(sample_start_time)])
             
-            if archive_data['units'] == 'T':
-                # Stored as nT in files
-                data *= 1e-9
+            if archive_data['data_multiplier']:
+                data /= archive_data['data_multiplier']
+
+            if 'valid_range' in archive_data:
+                data[np.logical_or(data < archive_data['valid_range'][0],
+                                   data > archive_data['valid_range'][1])] \
+                                   = np.nan
 
             r = archive_data['constructor']( \
                 project=project,
@@ -194,31 +211,43 @@ def _generic_save_converter(d, file_name, archive_data):
         data[0] = (sst - d.start_time) / d.nominal_cadence
         data[0] += 1
 
-    elif archive_data['timestamp_method'] == 'iso_date':
-        col_offset = 3
+    # elif archive_data['timestamp_method'] == 'YMD':
+    #     col_offset = 3
+    #     data = np.empty([col_offset + np.size(d.channels),
+    #                      np.size(d.sample_start_time)])
+    #     # Force to day or better resolution
+    #     sst += np.timedelta64(0, 'D')
+    #     data[0] = dt64.get_year(sst)
+    #     data[1] = dt64.get_month(sst)
+    #     data[2] = dt64.get_day(sst)
+
+    # elif archive_data['timestamp_method'] == 'YMDhms':
+    #     col_offset = 6
+    #     data = np.empty([col_offset + np.size(d.channels),
+    #                      np.size(d.sample_start_time)])
+    #     # Force to second or better resolution
+    #     sst += np.timedelta64(0, 's')
+    #     data[0] = dt64.get_year(sst)
+    #     data[1] = dt64.get_month(sst)
+    #     data[2] = dt64.get_day(sst)
+    #     data[3] = dt64.get_hour(sst)
+    #     data[4] = dt64.get_minute(sst)
+    #     data[5] = dt64.get_second(sst)
+
+    elif archive_data['timestamp_method'] in (\
+        'Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
+        col_offset = len(archive_data['timestamp_method'])
         data = np.empty([col_offset + np.size(d.channels),
                          np.size(d.sample_start_time)])
-        # Force to day or better resolution
-        sst += np.timedelta64(0, 'D')
-        data[0] = dt64.get_year(sst)
-        data[1] = dt64.get_month(sst)
-        data[2] = dt64.get_day(sst)
+        # Force to sst to appropriate resolution
+        sst += np.timedelta64(0, archive_data['timestamp_method'][-1])
+        get_part = [dt64.get_year, dt64.get_month, dt64.get_day,
+                    dt64.get_hour, dt64.get_minute, dt64.get_second]
+        for n in range(col_offset):
+            data[n] = get_part[n](sst)
 
-    elif archive_data['timestamp_method'] == 'iso_datetime':
-        col_offset = 6
-        data = np.empty([col_offset + np.size(d.channels),
-                         np.size(d.sample_start_time)])
-        # Force to second or better resolution
-        sst += np.timedelta64(0, 's')
-        data[0] = dt64.get_year(sst)
-        data[1] = dt64.get_month(sst)
-        data[2] = dt64.get_day(sst)
-        data[3] = dt64.get_hour(sst)
-        data[4] = dt64.get_minute(sst)
-        data[5] = dt64.get_second(sst)
-
-    elif archive_data['timestamp_method'].startswith('iso_datetime_'):
-        tu = archive_data['timestamp_method'].replace('iso_datetime_', '')
+    elif archive_data['timestamp_method'].startswith('YMDhms.'):
+        tu = archive_data['timestamp_method'].replace('YMDhms.', '')
         mul = dt64.multipliers[tu]
         if mul > 1:
             raise ValueError('illegal time unit (%s)' % tu)
@@ -240,9 +269,8 @@ def _generic_save_converter(d, file_name, archive_data):
 
     data[col_offset:] = d.data
 
-    if archive_data['units'] == 'T':
-        # Stored as nT in files
-        data[col_offset:] = d.data * 1e9
+    if archive_data['data_multiplier']:
+        data[col_offset:] = d.data * archive_data['data_multiplier']
     else:
         data[col_offset:] = d.data
 

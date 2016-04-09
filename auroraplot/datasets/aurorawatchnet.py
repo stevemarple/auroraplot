@@ -427,14 +427,19 @@ default_data_types = {
         'realtime_baseline': {
             'channels': np.array(['H']),
             'path': (base_url +
-                     'baseline/realtime/{site_lc}/%Y/{site_lc}_%Y%m.txt'),
-            'duration': np.timedelta64(1, 'M'),
+                     'baseline/realtime/{site_lc}/{site_lc}_%Y.txt'),
+            'duration': np.timedelta64(1, 'Y'),
             'load_converter': ap.data._generic_load_converter,
-            'save_converter': ap.magdata._save_baseline_data,
+            'save_converter': ap.data._generic_save_converter,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
+            # Information for generic load/save 
             'constructor': ap.magdata.MagData,
-            'timestamp_method': 'offset1',
+            'timestamp_method': 'YMD',
+            'fmt': ['%04d', '%02d', '%02d', '%.2f'],
+            'data_multiplier': 1000000000, # Store as nT values
+            # Information for making the data files
+            'qdc_fit_duration': np.timedelta64(10, 'D'),
             },
         },
     'MagQDC': {
