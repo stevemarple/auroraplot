@@ -650,11 +650,11 @@ class Data(object):
                                       dtype=self.integration_interval.dtype)
             else:
                 integ_intv = None
-
+                
+            keep_integ_intv = True
             for sn in range(len(sam_st)):
                 tidx = np.where(np.logical_and(sample_time >= sam_st[sn],
                                                sample_time <= sam_et[sn]))[0]
-                keep_integ_intv = True
                 for cn in range(len(self.channels)):
                     if ignore_nan:
                         notnanidx = np.where(np.logical_not(np.isnan(self.data[cn, tidx])))[0]
