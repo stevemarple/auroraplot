@@ -271,3 +271,9 @@ def change_load_data_paths(project,
                     av['path'] = replace(av['path'], project, site,
                                          data_type, archive)
 
+
+def lookup_module_name(s):
+    last_dot = s.rindex('.')
+    module = s[:last_dot]
+    name = s[(last_dot+1):]
+    return (module, name)
