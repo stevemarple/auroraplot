@@ -219,7 +219,8 @@ def get_site_info(project, site, info=None):
     else:
         return projects[project][site][info]
 
-def get_archive_info(project, site, data_type, **kwargs):
+
+def get_archive_info(project, site, data_type, archive=None):
     '''
     Get relevant details about a data archive
     
@@ -264,7 +265,7 @@ def get_archive_info(project, site, data_type, **kwargs):
     if data_type not in site_info['data_types']:
         raise Exception('Unknown data_type')
     
-    if kwargs.get('archive') is None:
+    if archive is None:
         if len(site_info['data_types'][data_type]) == 1:
             # Only one archive, so default is implicit
             archive = list(site_info['data_types'][data_type].keys())[0]
@@ -277,8 +278,6 @@ def get_archive_info(project, site, data_type, **kwargs):
                 archive = 'default'
         else:
             raise Exception('archive must be specified')
-    else:
-        archive = kwargs.get('archive')
 
     if archive not in site_info['data_types'][data_type]:
         raise Exception('Unknown archive (%s) for %s' \
@@ -287,7 +286,19 @@ def get_archive_info(project, site, data_type, **kwargs):
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
 
-def load_data(project, site, data_type, start_time, end_time, **kwargs):
+
+def load_data(project, 
+              site, 
+              data_type, 
+              start_time, 
+              end_time, 
+              archive=None,
+              channels=None,
+              path=None,
+              load_function=None,
+              raise_all=False,
+              cadence=None,
+              aggregate=None):
     '''Load data. 
     project: name of the project (upper case)
 
@@ -315,9 +326,12 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
         function reference, after validating the input parameters.
         
     '''
-    archive, ad = get_archive_info(project, site, data_type, **kwargs)
-    channels = kwargs.get('channels')
-    if channels is not None:
+    _, ad = get_archive_info(project, site, data_type, 
+                             archive=archive)
+
+    if channels is None:
+        channels = ad['channels']
+    else:
         # Could be as single channel name or a list of channels
         if isinstance(channels, six.string_types):
             if channels not in ad['channels']:
@@ -326,27 +340,28 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
             for c in channels:
                 if c not in ad['channels']:
                     raise Exception('Unknown channel')
-    else:
-        channels = ad['channels']
 
-    path = kwargs.get('path', ad['path'])
+    if path is None:
+        path = ad['path']
 
-    load_function = kwargs.get('load_function', ad.get('load_function'))
-
-
-    kwargs2 = kwargs.copy()
-    kwargs2['archive'] = archive
-    kwargs2['channels'] = channels
-    kwargs2['load_function'] = load_function
-    kwargs2['path'] = path
-    if 'raise_all' in kwargs:
-        kwargs2['raise_all'] = kwargs['raise_all']
+    if load_function is None:
+        load_function = ad.get('load_function')
         
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project, site, data_type, start_time, 
-                             end_time, **kwargs2)
+        return load_function(project, 
+                             site, 
+                             data_type, 
+                             start_time, 
+                             end_time,
+                             archive=archive,
+                             channels=channels,
+                             path=path,
+                             raise_all=raise_all,
+                             cadence=cadence,
+                             aggregate=aggregate)
+
 
     data = []
     for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']), 
@@ -410,20 +425,28 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
                                        site=site, 
                                        data_type=data_type, 
                                        start_time=t, 
-                                       end_time=t2, **kwargs2)
+                                       end_time=t2, 
+                                       archive=archive,
+                                       channels=channels,
+                                       path=path,
+                                       raise_all=raise_all)
             if tmp is not None:
+                if cadence is not None and cadence <= ad['duration']:
+                    tmp.set_cadence(cadence, 
+                                    aggregate=aggregate,
+                                    inplace=True)
                 data.append(tmp)
         except Exception as e:
-            if 'raise_all' in kwargs and kwargs['raise_all']:
+            if raise_all:
                 raise
             logger.info('Could not load ' + file_name)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
 
-        
-        if temp_file_name:
-            logger.debug('deleting temporary file ' + temp_file_name)
-            os.unlink(temp_file_name)
+        finally:
+            if temp_file_name:
+                logger.debug('deleting temporary file ' + temp_file_name)
+                os.unlink(temp_file_name)
 
     if len(data) == 0:
         return None
@@ -433,6 +456,14 @@ def load_data(project, site, data_type, start_time, end_time, **kwargs):
               start_time=start_time, 
               end_time=end_time, 
               channels=channels)
+
+    if cadence is not None and cadence > ad['duration']:
+        # cadence too large to apply on results of loading each file, 
+        # apply to combined object
+        r.set_cadence(cadence, 
+                      aggregate=aggregate,
+                      inplace=True)
+
     return r
 
 
