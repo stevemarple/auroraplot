@@ -206,20 +206,20 @@ if args.dataset:
 # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
 if args.rolling:
-    et = dt64.ceil(np.datetime64('now', 'us'), np.timedelta64(1, 'h'))
+    et = dt64.ceil(np.datetime64('now', 's'), np.timedelta64(1, 'h'))
     st = et - np.timedelta64(1, 'D')
 else:
-    st = dt64.parse_datetime64(args.start_time, 'us')
+    st = dt64.parse_datetime64(args.start_time, 's')
     if args.end_time is None:
         et = st + np.timedelta64(86400, 's')
     else:
         try:
             # Parse as date
-            et = dt64.parse_datetime64(args.end_time, 'us')
+            et = dt64.parse_datetime64(args.end_time, 's')
         except ValueError as e:
             try:
                 # Parse as a set of duration values
-                et = st + np.timedelta64(0, 'us')
+                et = st + np.timedelta64(0, 's')
                 et_words = args.end_time.split()
                 assert len(et_words) % 2 == 0, 'Need even number of words'
                 for n in range(0, len(et_words), 2):
