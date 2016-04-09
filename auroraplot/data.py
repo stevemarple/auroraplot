@@ -766,32 +766,38 @@ class Data(object):
         else:
             r = copy.deepcopy(self)
 
-
+        num_channels = len(r.channels)
         sample_time = dt64.mean(r.sample_start_time, 
                                 r.sample_end_time)
         idx = np.where(np.diff(sample_time) > cadence)[0]
         
-        
-        num_channels = len(r.channels)
-        data = np.ones([num_channels, len(idx)]) * ap.NaN
+        obj_list = [r]
+        if len(idx):
+            data = np.ones([num_channels, len(idx)]) * ap.NaN
+            if r.integration_interval is None:
+                ii = None
+            else:
+                ii = np.zeros([num_channels, len(idx)]).astype(r.integration_interval.dtype)
+                
+            missing = type(self)(project=r.project,
+                                 site=r.site,
+                                 channels=r.channels,
+                                 start_time=r.start_time,
+                                 end_time=r.end_time,
+                                 sample_start_time=r.sample_end_time[idx],
+                                 sample_end_time=r.sample_start_time[idx+1],
+                                 integration_interval=ii,
+                                 nominal_cadence=r.nominal_cadence,
+                                 data=data,
+                                 units=r.units,
+                                 sort=False)
+            obj_list.append(missing)
+
         if r.integration_interval is None:
             ii = None
         else:
-            ii = np.zeros([len(r.channels), len(idx)]).astype('m8[us]')
+            ii = np.zeros([num_channels, 1]).astype(r.integration_interval.dtype)
 
-        missing = type(self)(project=r.project,
-                             site=r.site,
-                             channels=r.channels,
-                             start_time=r.start_time,
-                             end_time=r.end_time,
-                             sample_start_time=r.sample_end_time[idx],
-                             sample_end_time=r.sample_start_time[idx+1],
-                             integration_interval=ii,
-                             nominal_cadence=r.nominal_cadence,
-                             data=data,
-                             units=r.units,
-                             sort=False)
-        obj_list = [r, missing]
 
         # Check for missing data at start
         if r.sample_start_time[0] - start_time > cadence:
@@ -803,7 +809,7 @@ class Data(object):
                     end_time=r.sample_start_time[0],
                     sample_start_time=np.array([start_time]),
                     sample_end_time=r.sample_start_time[:1],
-                    integration_interval=np.zeros([num_channels, 1]).astype('m8[us]'),
+                    integration_interval=ii,
                     nominal_cadence=r.nominal_cadence,
                     data=np.ones([num_channels, 1]) * ap.NaN,
                     units=r.units,
@@ -819,7 +825,7 @@ class Data(object):
                         end_time=end_time,
                         sample_start_time=r.sample_end_time[-1:],
                         sample_end_time=np.array([end_time]),
-                        integration_interval=np.zeros([num_channels, 1]).astype('m8[us]'),
+                        integration_interval=ii,
                         nominal_cadence=r.nominal_cadence,
                         data=np.ones([num_channels, 1]) * ap.NaN,
                         units=r.units,
