@@ -39,6 +39,10 @@ log10_to_unit = {-18: 'as',
                   -3: 'ms',
                   0: 's'}
 
+def get_time_type(t):
+    s = t.dtype.name
+    return s[:s.rindex('[')]
+
 def get_units(t):
     #assert isinstance(t, (np.datetime64, np.timedelta64)), \
     #    'Must be of type numpy.datetime64 or numpy.timedelta64'
