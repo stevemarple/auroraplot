@@ -73,6 +73,17 @@ def smallest_unit(a):
     else:
         return None
 
+def astype(t, units=None, time_type=None):
+    if units is None:
+        units = get_units(t)
+    elif not isinstance(units, six.string_types):
+        units = get_units(units)
+    if time_type is None:
+        time_type = get_time_type(t)
+    elif not isinstance(time_type, six.string_types):
+        time_type = get_time_type(time_type)
+    return t.astype(time_type + '[' + units + ']')
+
 
 def match_units(a, inplace=False):
     units = []
@@ -232,10 +243,7 @@ def get_start_of_next_month(a):
 def mean(*a):
     if len(a) == 0:
         raise Exception('Require at least one argument')
-    units = []
-    for b in a:
-        units.append(get_units(b))
-    tu = smallest_unit(units)
+    tu = smallest_unit(a)
 
     a0 = np.array(a[0])
     d = get_time_type(a0) + '[' + tu + ']'
