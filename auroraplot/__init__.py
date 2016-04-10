@@ -263,7 +263,7 @@ def get_archive_info(project, site, data_type, archive=None):
 
     # Sanity checking
     if data_type not in site_info['data_types']:
-        raise Exception('Unknown data_type')
+        raise ValueError('Unknown data_type (%s)' % data_type)
     
     if archive is None:
         if len(site_info['data_types'][data_type]) == 1:
@@ -277,11 +277,11 @@ def get_archive_info(project, site, data_type, archive=None):
             else:
                 archive = 'default'
         else:
-            raise Exception('archive must be specified')
+            raise TypeError('archive must be specified (multiple choices and no default)')
 
     if archive not in site_info['data_types'][data_type]:
-        raise Exception('Unknown archive (%s) for %s' \
-                            % (archive, format_project_site(project, site)))
+        raise ValueError('Unknown archive (%s) for %s' \
+                             % (archive, format_project_site(project, site)))
 
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
