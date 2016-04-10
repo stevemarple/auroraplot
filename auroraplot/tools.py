@@ -136,6 +136,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
         stats = {'iterations': iterations,
                  'error': data[non_nan_idx] - test_data[non_nan_idx],
                  'tolerance': tolerance,
+                 'difference': difference,
                  }
         
         return test_data, data[non_nan_idx] - test_data[non_nan_idx], \
