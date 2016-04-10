@@ -62,6 +62,7 @@ class AuroraWatchActivity(Data):
         if magdata is not None and magqdc is not None:
             assert magdata.units == magqdc.units, 'Units must match'
             cadence = np.timedelta64(1, 'h')
+            cad_units = dt64.get_units(cadence)
             if isinstance(magqdc, ap.magdata.MagQDC):
                 aligned = magqdc.align(magdata, fit=fit, **fit_params)
             else:
@@ -97,7 +98,6 @@ class AuroraWatchActivity(Data):
             disturbance.set_cadence(cadence,
                                     inplace= True, 
                                     aggregate=nth_largest)
-
             data = disturbance.data.copy()
 
             if range_:
@@ -123,8 +123,8 @@ class AuroraWatchActivity(Data):
                 self.channels = np.array(['Activity'])
             else:
                 self.channels = np.array(['Disturbance'])
-            self.start_time = disturbance.start_time
-            self.end_time = disturbance.end_time
+            self.start_time = disturbance.start_time.astype('datetime64[%s]' % cad_units)
+            self.end_time = disturbance.end_time.astype(self.start_time.dtype)
             self.sample_start_time = disturbance.sample_start_time
             self.sample_end_time = disturbance.sample_end_time
             self.integration_interval = None

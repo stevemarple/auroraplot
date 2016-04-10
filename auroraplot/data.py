@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import six
+import traceback
 
 # Python 2/3 compatibility
 try:
@@ -54,7 +55,6 @@ def _generic_load_converter(file_name, archive_data,
         'data type does not match'
     assert 'timestamp_method' in archive_data, \
         'archive data must indicate the timestamp method used'
-    zero_us = np.timedelta64(0, 'us')
     
     chan_tup = tuple(archive_data['channels'])
 
@@ -89,21 +89,22 @@ def _generic_load_converter(file_name, archive_data,
                       * archive_data['nominal_cadence'])
                      + start_time)
                 col_offset = 1
-            elif archive_data['timestamp_method'] == 'YMD':
+
+            elif archive_data['timestamp_method'] in (\
+                'Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
+                col_offset = len(archive_data['timestamp_method'])
                 sample_start_time = \
-                    (data[0]-1970).astype('datetime64[Y]') + \
-                    (data[1]-1).astype('timedelta64[M]') + \
-                    (data[2]-1).astype('timedelta64[D]')
-                col_offset = 3
-            elif archive_data['timestamp_method'] == 'YMDhms':
-                sample_start_time = \
-                    (data[0]-1970).astype('datetime64[Y]') + \
-                    (data[1]-1).astype('timedelta64[M]') + \
-                    (data[2]-1).astype('timedelta64[D]') + \
-                    data[3].astype('datetime64[h]') + \
-                    data[4].astype('timedelta64[m]') + \
-                    data[5].astype('timedelta64[s]')
-                col_offset = 6
+                    (data[0]-1970).astype('datetime64[Y]')
+                for n in range(1, col_offset):
+                    tu = archive_data['timestamp_method'][n]
+                    if tu in ('M', 'D'):
+                        # Cannot use add-assign here
+                        sample_start_time = sample_start_time + \
+                            (data[n]-1).astype('timedelta64[%s]' % tu)
+                    else:
+                        # Cannot use add-assign here
+                        sample_start_time = sample_start_time + \
+                            data[n].astype('timedelta64[%s]' % tu)
             elif archive_data['timestamp_method'].startswith('YMDhms.'):
                 tu = archive_data['timestamp_method'] \
                     .replace('YMDhms.', '')
@@ -120,7 +121,8 @@ def _generic_load_converter(file_name, archive_data,
                 col_offset = len(archive_data['timestamp_method'])
                 sample_start_time = start_time
                 for n in range(col_offset):
-                    sample_start_time += \
+                    # Cannot use add-assign here
+                    sample_start_time = sample_start_time + \
                         data[n].astype('timedelta64[%s]' % 
                                        archive_data['timestamp_method'][n])
 
@@ -150,14 +152,15 @@ def _generic_load_converter(file_name, archive_data,
                                    data > archive_data['valid_range'][1])] \
                                    = np.nan
 
+            tu = dt64.get_units(archive_data['nominal_cadence'])
             r = archive_data['constructor']( \
                 project=project,
                 site=site,
                 channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
+                start_time=dt64.astype(start_time, tu),
+                end_time=dt64.astype(end_time, tu),
+                sample_start_time=dt64.astype(sample_start_time, tu),
+                sample_end_time=dt64.astype(sample_end_time, tu),
                 integration_interval=integration_interval,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
@@ -170,6 +173,7 @@ def _generic_load_converter(file_name, archive_data,
                 raise
             logger.info('Could not read ' + file_name)
             logger.debug(str(e))
+            logger.debug(traceback.format_exc())
 
         finally:
             uh.close()
@@ -210,29 +214,6 @@ def _generic_save_converter(d, file_name, archive_data):
                          np.size(d.sample_start_time)])
         data[0] = (sst - d.start_time) / d.nominal_cadence
         data[0] += 1
-
-    # elif archive_data['timestamp_method'] == 'YMD':
-    #     col_offset = 3
-    #     data = np.empty([col_offset + np.size(d.channels),
-    #                      np.size(d.sample_start_time)])
-    #     # Force to day or better resolution
-    #     sst += np.timedelta64(0, 'D')
-    #     data[0] = dt64.get_year(sst)
-    #     data[1] = dt64.get_month(sst)
-    #     data[2] = dt64.get_day(sst)
-
-    # elif archive_data['timestamp_method'] == 'YMDhms':
-    #     col_offset = 6
-    #     data = np.empty([col_offset + np.size(d.channels),
-    #                      np.size(d.sample_start_time)])
-    #     # Force to second or better resolution
-    #     sst += np.timedelta64(0, 's')
-    #     data[0] = dt64.get_year(sst)
-    #     data[1] = dt64.get_month(sst)
-    #     data[2] = dt64.get_day(sst)
-    #     data[3] = dt64.get_hour(sst)
-    #     data[4] = dt64.get_minute(sst)
-    #     data[5] = dt64.get_second(sst)
 
     elif archive_data['timestamp_method'] in (\
         'Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
@@ -423,6 +404,11 @@ class Data(object):
 
     def extract(self, start_time=None, end_time=None, channels=None, 
                 inplace=False):
+        if start_time is not None:
+            start_time = dt64.astype(start_time, units=self.nominal_cadence)
+        if end_time is not None:
+            end_time = dt64.astype(end_time, units=self.nominal_cadence)
+
         if inplace:
             r = self
         else:
@@ -671,15 +657,21 @@ class Data(object):
     def set_cadence(self, cadence, ignore_nan=True,
                     offset_interval=None, inplace=False,
                     aggregate=None):
+        tu = dt64.get_units(cadence)
+
         if offset_interval is None:
             offset_interval = \
-                np.timedelta64(0, dt64.get_units(self.sample_start_time))
+                np.timedelta64(0, tu)
         if aggregate is None:
             aggregate=scipy.average
 
         if cadence > self.nominal_cadence:
-            sam_st = np.arange(dt64.ceil(self.start_time, cadence) 
-                               + offset_interval, self.end_time, cadence)
+            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
+                                           + offset_interval, 
+                                           self.end_time, 
+                                           cadence),
+                                 time_type=self.start_time,
+                                 units=tu)
             sam_et = sam_st + cadence
 
             sample_time = dt64.mean(self.sample_start_time, 
@@ -739,24 +731,35 @@ class Data(object):
                                  'data'])):
                     setattr(r, k, copy.deepcopy(getattr(self, k)))
 
+            r.start_time = dt64.astype(r.start_time, units=tu)
+            r.end_time = dt64.astype(r.end_time, units=tu)
             r.sample_start_time = sam_st
             r.sample_end_time = sam_et
             if keep_integ_intv:
                 r.integration_interval = integ_intv
             else:
                 r.integration_interval = None
-            r.nominal_cadence = copy.copy(cadence)
+            r.nominal_cadence = cadence.copy()
             r.data = d
-            return r
 
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
         else:
+            if offset_interval != 0:
+                raise ValueError('cannot set offset_interval for same cadence')
             if inplace:
-                return self
+                r = self
             else:
-                return copy.deepcopy(self)
+                r = copy.deepcopy(self)
+
+            for k in ('start_time', 'end_time', 
+                      'sample_start_time', 'sample_end_time',
+                      'nominal_cadence'):
+                setattr(r, k, dt64.astype(getattr(r, k), units=tu))
         
+        r.assert_valid()
+        return r
+
         
     # TODO: fix inplace option which does not work
     def mark_missing_data(self, cadence=None, # inplace=False
@@ -1028,7 +1031,6 @@ class Data(object):
 
         if save_converter is None:
             raise Exception('Cannot save, save_converter not defined')
-
         for t1 in t:
             t2 = t1 + duration
             file_name = dt64.strftime(t1, path)
