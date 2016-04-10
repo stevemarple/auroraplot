@@ -5,6 +5,8 @@ import datetime
 import re
 import math
 import logging
+import six
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import Locator
@@ -54,6 +56,13 @@ def get_units(t):
 def smallest_unit(a):
     i = None
     for u in a:
+        if u is None:
+            continue
+        elif isinstance(u, six.string_types):
+            pass
+        else:
+            u = get_units(u)
+
         idx = time_units.index(u)
         if i is None:
             i = idx
