@@ -836,13 +836,18 @@ class Data(object):
         return r
 
     def interp(self, sample_start_time, sample_end_time, kind='linear'):
-        one_us = np.timedelta64(1, 'us')
-        r = copy.deepcopy(self)
-        xi = dt64.mean(self.sample_start_time, self.sample_end_time).astype('m8[us]') / one_us
+        # Find the time class to promote to
+        tu = dt64.smallest_unit([dt64.get_units(self.sample_start_time),
+                                 dt64.get_units(self.sample_end_time),
+                                 dt64.get_units(sample_start_time),
+                                 dt64.get_units(sample_end_time)])
+        tc = dt64.get_time_type(sample_start_time) + '[' + tu + ']'
 
+        r = copy.deepcopy(self)
+        xi = dt64.mean(self.sample_start_time, self.sample_end_time).astype(tc).astype('int')
         r.sample_start_time = sample_start_time
         r.sample_end_time = sample_end_time
-        xo = dt64.mean(sample_start_time, sample_end_time).astype('m8[us]') / one_us
+        xo = dt64.mean(sample_start_time, sample_end_time).astype(tc).astype('int')
         r.data = scipy.interpolate.interp1d(xi, r.data, kind=kind,
                                             bounds_error=False)(xo)
         r.integration_interval = None
@@ -856,14 +861,19 @@ class Data(object):
             end_time = self.end_time
         if missing_cadence is None:
             missing_cadence = 1.5 * self.nominal_cadence
+
+        # Ensure start/end time units match with cadence. Remember
+        # some datasets use timedelta64 not datetime64 (eg quiet day
+        # curves)
+        cad_units = dt64.get_units(cadence)
+        tc = dt64.get_time_type(start_time)
+        start_time = start_time.astype(tc + '[' + cad_units + ']')
+        end_time = end_time.astype(tc + '[' + cad_units + ']')
+
         s = self.mark_missing_data(start_time=start_time, end_time=end_time,
                                    cadence=missing_cadence)
-        one_us = np.timedelta64(1, 'us')
-        
-        sam_st = start_time + np.arange(0, (end_time - start_time) / one_us, 
-                                        cadence / one_us).astype('m8[us]')
+        sam_st = np.arange(start_time, end_time, cadence)
         sam_et = sam_st + cadence
-        
         r = s.interp(sam_st, sam_et, kind='linear')
         r.nominal_cadence = cadence
         return r
