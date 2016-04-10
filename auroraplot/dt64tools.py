@@ -223,22 +223,26 @@ def get_start_of_next_month(a):
 def mean(*a):
     if len(a) == 0:
         raise Exception('Require at least one argument')
+    units = []
+    for b in a:
+        units.append(get_units(b))
+    tu = smallest_unit(units)
 
     a0 = np.array(a[0])
-    d = a0.dtype
+    d = get_time_type(a0) + '[' + tu + ']'
     if len(a) == 1:
         if a0.size:
             return np.mean(a0.astype('int64')).astype(d)
         else:
             return np.datetime64('nat').astype(d)
     else:
-        tmp = a[0].astype('int64')
+        tmp = a[0].astype(d).astype('int64')
         for b in a[1:]:
             # Check that the elements of 'b are the same type as
             # elements of a[0]. They do not have to use the same units
             # (days, seconds, ns etc) but a temporary copy will be
             # cast to that unit for the calculation.
-            assert isinstance(b.dtype.type(), d.type), \
+            assert isinstance(b.dtype.type(), a0.dtype.type), \
                 'Arrays must hold the same data type'
             tmp += b.astype(d).astype('int64')
         return (tmp / len(a)).astype(d)
