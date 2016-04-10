@@ -544,8 +544,8 @@ class MagData(Data):
         return 'Magnetic field'
 
 
-    def savetxt(self, filename):
-        a = np.zeros([self.channels.size+1, self.data.shape[-1]], 
+    def savetxt(self, filename, fmt=None):
+        a = np.zeros([self.channels.size+1, self.data.shape[-1]],
                      dtype='float')
         a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
         if self.units == 'T':
@@ -555,7 +555,10 @@ class MagData(Data):
             warnings.warn('Unknown units')
             a[1:] = self.data 
         logger.info('saving to ' + filename)
-        np.savetxt(filename,  a.transpose())
+        kwargs = {}
+        if fmt is not None:
+            kwargs['fmt'] = fmt
+        np.savetxt(filename,  a.transpose(), **kwargs)
 
 
     def plot(self, channels=None, figure=None, axes=None,
@@ -736,7 +739,6 @@ class MagData(Data):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
 
-
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
@@ -749,7 +751,7 @@ class MagData(Data):
             not_nan = np.logical_not(np.isnan(qd[n].data))
             qdc_data[not_nan] += qd[n].data[not_nan]
             count[not_nan] += 1
-            
+
         qdc_data /= count
             
         qdc = MagQDC(project=self.project,
