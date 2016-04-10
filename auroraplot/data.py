@@ -370,6 +370,20 @@ class Data(object):
         assert self.data.shape == (num_channels, num_samples), \
             'data incorrect shape'
 
+        assert (dt64.get_units(self.start_time) == 
+                dt64.get_units(self.nominal_cadence)), \
+                'start_time units do not match cadence'
+        assert (dt64.get_units(self.end_time) == 
+                dt64.get_units(self.nominal_cadence)), \
+                'end_time units do not match cadence'
+        assert (dt64.get_units(self.sample_start_time) == 
+                dt64.get_units(self.nominal_cadence)), \
+                'sample_start_time units do not match cadence'
+        assert (dt64.get_units(self.sample_end_time) == 
+                dt64.get_units(self.nominal_cadence)), \
+                'sample_end_time units do not match cadence'
+                
+        
         return True
 
 
