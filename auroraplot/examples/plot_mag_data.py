@@ -60,6 +60,11 @@ parser.add_argument('-a', '--archive',
                     nargs=2,
                     help='Select data archive used for project or site',
                     metavar=('PROJECT[/SITE]', 'ARCHIVE'))
+parser.add_argument('--aurorawatch-activity', 
+                    dest='plot_type',
+                    action='store_const',
+                    const='aurorawatch_activity',
+                    help='Make AuroraWatch activity plot(s)')
 parser.add_argument('--cadence', 
                     nargs=2,
                     help='Set cadence',
@@ -261,6 +266,8 @@ if args.plot_type == 'temp_plot':
     data_type = 'TemperatureData'
 elif args.plot_type == 'voltage_plot':
     data_type = 'VoltageData'
+elif args.plot_type == 'aurorawatch_activity':
+    data_type = 'AuroraWatchActivity'
 else:
     data_type = 'MagData'
     
