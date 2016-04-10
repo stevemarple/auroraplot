@@ -68,10 +68,10 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
 
     non_nan_idx = np.where(np.isfinite(data)[0])[0][0]
     if tolerance is None:
-        # Compute tolerance whihc will be solved in less than max iterations.
+        # Compute tolerance which will be solved in less than max iterations.
         tolerance = (data1[non_nan_idx] - data2[non_nan_idx]) \
-            / 2**(max_iterations-1)
-        
+            / 2**(max_iterations-3)
+
     iterations = 0
     while True:
         iterations += 1
@@ -126,8 +126,10 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                 e2 = test_error
             
         if iterations >= max_iterations:
-            raise Exception('No solution after ' + str(max_iterations)
-                            + ' iterations.')
+            mesg = ('No solution after %(max_iterations)d iterations, ' +
+                    'tolerance: %(tolerance)g, ' + 
+                    'difference: %(difference)g, ') % locals()
+            raise Exception(mesg)
         
         
     if full_output:
