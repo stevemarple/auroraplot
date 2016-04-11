@@ -175,6 +175,22 @@ class AuroraWatchActivity(Data):
             col[data_no_nans[0] >= self.thresholds[n]] = self.colors[n]
         return col
             
+    def get_level(self):
+        '''Return numerical level
+
+        Values return the indices in the thresholds, with -1 indicating
+        missing data.
+        '''
+
+        r = np.zeros(self.data.shape, dtype=int)
+        data = self.data.copy()
+        isnan = np.logical_not(np.isfinite(self.data))
+        r[isnan] = -1
+        data[isnan] = -1
+        for n in range(1, len(self.thresholds)):
+            r[data >= self.thresholds[n]] = n
+        return r
+
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, title=None, 
              # Our own options
