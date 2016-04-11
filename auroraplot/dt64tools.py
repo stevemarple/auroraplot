@@ -241,6 +241,13 @@ def get_start_of_next_month(a):
                               + np.timedelta64(32, 'D'))
 
 def mean(*a):
+    return _aggregate(*a, func=np.mean)
+
+def median(*a):
+    return _aggregate(*a, func=np.median)
+
+def _aggregate(*a, **kwargs):
+    func = kwargs.get('func', np.mean)
     if len(a) == 0:
         raise Exception('Require at least one argument')
     tu = smallest_unit(a)
@@ -249,7 +256,7 @@ def mean(*a):
     d = get_time_type(a0) + '[' + tu + ']'
     if len(a) == 1:
         if a0.size:
-            return np.mean(a0.astype('int64')).astype(d)
+            return func(a0.astype('int64')).astype(d)
         else:
             return np.datetime64('nat').astype(d)
     else:
