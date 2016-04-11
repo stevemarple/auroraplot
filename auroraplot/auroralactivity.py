@@ -168,8 +168,11 @@ class AuroraWatchActivity(Data):
         
         col = np.zeros([self.data.shape[-1], 3])
         col[:] = self.colors[0]
+
+        data_no_nans = self.data.copy()
+        data_no_nans[np.logical_not(np.isfinite(self.data))] = -1
         for n in range(1, len(self.thresholds)):
-            col[self.data[0] >= self.thresholds[n]] = self.colors[n]
+            col[data_no_nans[0] >= self.thresholds[n]] = self.colors[n]
         return col
             
     def plot(self, channels=None, figure=None, axes=None,
