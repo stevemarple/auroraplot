@@ -325,45 +325,49 @@ class Data(object):
 
     def assert_valid(self):
         import re
-        for n in ('project', 'site', 'channels', 'start_time', 'end_time', 
-                  'sample_start_time', 'sample_end_time',
-                  'nominal_cadence',
-                  'data', 'units'):
-            attr = getattr(self, n)
-            assert (attr is not None and 
-                    (not isinstance(attr, six.string_types) or attr != '')), \
+        try:
+            for n in ('project', 'site', 'channels', 'start_time', 'end_time', 
+                      'sample_start_time', 'sample_end_time',
+                      'nominal_cadence',
+                      'data', 'units'):
+                attr = getattr(self, n)
+                assert (attr is not None and 
+                        (not isinstance(attr, six.string_types) or attr != '')), \
                     n + ' not set'
-        assert re.match('^[-A-Z0-9]+$', self.project), 'Bad value for project'
-        assert re.match('^[-A-Z0-9]+$', self.site), 'Bad value for site'
+                assert re.match('^[-A-Z0-9]+$', self.project), 'Bad value for project'
+                assert re.match('^[-A-Z0-9]+$', self.site), 'Bad value for site'
 
-        num_channels = len(self.channels)
-        num_samples = len(self.sample_start_time)
+            num_channels = len(self.channels)
+            num_samples = len(self.sample_start_time)
 
-        assert self.start_time <= self.end_time, \
-            'start_time must not be after end_time'
-        assert len(self.sample_end_time) == num_samples, \
-            'lengths of sample_start_time and sample_end_time differ'
-       
-        if self.integration_interval is not None:
-            assert self.integration_interval.shape == \
-                (num_channels, num_samples), \
-                'integration_interval incorrect shape'
-        assert self.data.shape == (num_channels, num_samples), \
-            'data incorrect shape'
+            assert self.start_time <= self.end_time, \
+                'start_time must not be after end_time'
+            assert len(self.sample_end_time) == num_samples, \
+                'lengths of sample_start_time and sample_end_time differ'
 
-        assert (dt64.get_units(self.start_time) == 
-                dt64.get_units(self.nominal_cadence)), \
+            if self.integration_interval is not None:
+                assert self.integration_interval.shape == \
+                    (num_channels, num_samples), \
+                    'integration_interval incorrect shape'
+                assert self.data.shape == (num_channels, num_samples), \
+                    'data incorrect shape'
+
+            assert (dt64.get_units(self.start_time) == 
+                    dt64.get_units(self.nominal_cadence)), \
                 'start_time units do not match cadence'
-        assert (dt64.get_units(self.end_time) == 
-                dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.end_time) == 
+                    dt64.get_units(self.nominal_cadence)), \
                 'end_time units do not match cadence'
-        assert (dt64.get_units(self.sample_start_time) == 
-                dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.sample_start_time) == 
+                    dt64.get_units(self.nominal_cadence)), \
                 'sample_start_time units do not match cadence'
-        assert (dt64.get_units(self.sample_end_time) == 
-                dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.sample_end_time) == 
+                    dt64.get_units(self.nominal_cadence)), \
                 'sample_end_time units do not match cadence'
-                
+        except AssertionError as e:
+            logger.debug(str(self))
+            logger.debug(traceback.format_exc())
+            raise
         
         return True
 
@@ -602,9 +606,11 @@ class Data(object):
 
             if 'label' in kwargs:
                 r.append(dt64.plot_dt64(xdata, ydata,
+                                        x_time_units=time_units,
                                         **kwargs)[0])
             else:
-                r.append(dt64.plot_dt64(xdata, ydata, 
+                r.append(dt64.plot_dt64(xdata, ydata,
+                                        x_time_units=time_units,
                                         label=channels[n], **kwargs)[0])
 
             ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
