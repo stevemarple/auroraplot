@@ -191,7 +191,7 @@ defaults = {
 default_data_types = {
     'MagData': {
         'realtime': {
-            'channels': np.array(['H', 'D', 'Z']),
+            'channels': np.array(['H', 'E', 'Z']),
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -202,7 +202,7 @@ default_data_types = {
         },
     'MagQDC': {
         'qdc': {
-            'channels': np.array(['H', 'D', 'Z']),
+            'channels': np.array(['H', 'E', 'Z']),
             'path': data_dir + '/{site_lc}/qdc/%Y/{site_lc}_qdc_%Y%m.csv',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
