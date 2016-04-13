@@ -61,7 +61,7 @@ class AuroraWatchActivity(Data):
         
         if magdata is not None and magqdc is not None:
             assert magdata.units == magqdc.units, 'Units must match'
-            cadence = np.timedelta64(1, 'h')
+            cadence = np.timedelta64(60, 'm')
             cad_units = dt64.get_units(cadence)
             if isinstance(magqdc, ap.magdata.MagQDC):
                 aligned = magqdc.align(magdata, fit=fit, **fit_params)
@@ -144,7 +144,7 @@ class AuroraWatchActivity(Data):
                 n = int(np.timedelta64(150, 's') / self.nominal_cadence)
 
             nth_largest = ap.tools.NthLargest(n)
-            self.set_cadence(np.timedelta64(1, 'h'),
+            self.set_cadence(np.timedelta64(60, 'm'),
                              inplace= True, aggregate=nth_largest)
 
         if thresholds is None:
