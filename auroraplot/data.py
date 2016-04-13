@@ -1041,6 +1041,7 @@ class Data(object):
             t2 = t1 + duration
             file_name = dt64.strftime(t1, path)
             d = self.extract(t1, t2)
+            d.set_time_units(ai['nominal_cadence'], inplace=True)
             if merge:
                 # Load existing data and merge before saving
                 tmp = ap.load_data(self.project,
@@ -1051,10 +1052,34 @@ class Data(object):
                                    archive=archive)
                 if tmp is not None:
                     d = ap.concatenate([tmp, d], sort=True)
-                
             dir_name = os.path.dirname(file_name)
             if not os.path.exists(dir_name):
                 logger.debug('making directory %s', dir_name)
                 os.makedirs(dir_name)
             logger.info('saving to %s', file_name)
             save_converter(d, file_name, ai)
+
+
+    def set_time_units(self, units, inplace=False):
+        '''Set time units of start/end times and cadence.
+
+        The units cannot be larger than any units in use'''
+
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+            
+        attr_list = ['start_time', 'end_time', 'nominal_cadence',
+                     'sample_start_time', 'sample_end_time']
+        if r.integration_interval is not None:
+            attr_list.append('integration_interval')
+        for a in attr_list:
+            t1 = getattr(r, a)
+            t2 = dt64.astype(t1, units)
+            if (t1 != t2).any():
+                raise ValueError('cannot set units to %s, precision lost in %s',
+                                 units, a)
+            setattr(r, a, t2)
+        return r
+        
