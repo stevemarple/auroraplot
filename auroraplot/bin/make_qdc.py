@@ -55,6 +55,10 @@ parser.add_argument('--log-format',
                     default='%(levelname)s:%(message)s',
                     help='Set format of log messages',
                     metavar='FORMAT')
+parser.add_argument('--only-missing',
+                    default=False,
+                    action='store_true',
+                    help='Create only if QDC file is missing')
 parser.add_argument('--qdc-archive', 
                     action='append',
                     nargs=2,
@@ -158,23 +162,44 @@ for n in range(len(project_list)):
             pass
     
     ax = None
-    t1 = dt64.get_start_of_month(st)
 
-    while t1 < et:
+    archive, ad = ap.get_archive_info(project, site, 'MagData', \
+                                      archive=archive)
+    qdc_archive, qdc_ad = ap.get_archive_info(project, site, 'MagQDC', \
+                                              archive=qdc_archive)
+
+    # Tune start/end times to avoid requesting data outside of
+    # operational period
+    site_st = ap.projects[project][site].get('start_time')
+    if site_st is None or site_st < st:
+        site_st = st
+    else:
+        site_st = dt64.floor(site_st, day)
+        
+    site_et = ap.projects[project][site].get('end_time')
+    if site_et is None or site_et > et:
+        site_et = et
+    else:
+        site_et = dt64.ceil(site_et, day)
+    
+    t1 = dt64.get_start_of_month(site_st)
+    while t1 < site_et:
         t2 = dt64.get_start_of_next_month(t1)
         try:
-            archive, ad = ap.get_archive_info(project, site, 
-                                              'MagData', 
-                                              archive=archive)
+            if args.only_missing:
+                # To do: this ought to use a function which handles
+                # cases when path is a function
+                qdc_file_name = dt64.strftime(t1, qdc_ad['path'])
+                if os.path.exists(qdc_file_name):
+                    logger.info('skipping QDC generation file exists: %s',
+                                qdc_file_name)
+                    continue
 
             mag_data = ap.load_data(project, site, 'MagData', t1, t2,
                                     archive=archive,
                                     raise_all=args.raise_all)
             if mag_data is not None:
                 mag_qdc = mag_data.make_qdc(smooth=args.smooth)
-                qdc_archive, qdc_ad \
-                    = ap.get_archive_info(project, site, 'MagQDC',
-                                          archive=qdc_archive)
 
                 filename = dt64.strftime(t1, qdc_ad['path'])
                 p = os.path.dirname(filename)
