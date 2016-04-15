@@ -437,6 +437,16 @@ def parse_datetime64(s, prec):
         t = np.datetime64(s)
     t += np.timedelta64(0, prec)
     return t
+def parse_timedelta64(s, prec):
+    r = np.timedelta64(0, prec)
+    for w in s.split():
+        m = re.match('^([0-9]+)(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)$', w)
+        if m is None:
+            raise ValueError('unknown value/unit (%s)' % w)
+        v, u = m.groups()
+        r += np.timedelta64(int(v), u)
+    return astype(r, units=prec)
+
 
 def plot_dt64(x, y, axes=None, 
               # Our own options
