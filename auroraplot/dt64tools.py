@@ -411,7 +411,7 @@ def fmt_dt64_range(st, et):
             return strftime(st, '%Y-%m-%d %H:%M - ') + \
                 strftime(et, '%Y-%m-%d %H:%M')
 
-def parse_datetime64(s, prec):
+def parse_datetime64(s, prec, now=None):
     '''
     Parse a numpy.datetime64() time, also accepting "yesterday",
     "today", "now" and "tomorrow", with the result given to the
@@ -423,20 +423,28 @@ def parse_datetime64(s, prec):
 
     Returns: numpy.datetime64 value.
     '''
+
+    if now is None:
+        now = np.datetime64('now', 's')
+    else:
+        now = now.astype('datetime64[s]')
+
+    day = np.timedelta64(1, 'D')
     if s == 'yesterday':
-        t = np.datetime64('today') - np.timedelta64(1, 'D')
+        t = floor(now, day) - day
     elif s == 'today':
-        t = np.datetime64('today')
+        t = floor(now, day)
     elif s == 'now':
-        t = np.datetime64('now', prec)
+        t = now
     elif s == 'tomorrow':
-        t = np.datetime64('today') + np.timedelta64(1, 'D')
+        t = floor(now, day) + day
     elif s == 'overmorrow':
-        t = np.datetime64('today') + np.timedelta64(2, 'D')
+        t = floor(now, day) + 2 * day
     else:
         t = np.datetime64(s)
-    t += np.timedelta64(0, prec)
-    return t
+    
+    return astype(t, prec)
+
 def parse_timedelta64(s, prec):
     r = np.timedelta64(0, prec)
     for w in s.split():
