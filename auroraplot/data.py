@@ -278,6 +278,8 @@ class Data(object):
         self.site = site
         if isinstance(channels, six.string_types):
             self.channels = np.array([channels])
+        elif channels is None:
+            self.channels = np.array([]).reshape([0,0])
         else:
             self.channels = np.array(channels)
         self.start_time = start_time
@@ -296,7 +298,7 @@ class Data(object):
             
         self.units = units
         if sort is None:
-            sort = np.size(data) != 0
+            sort = np.size(self.data) != 0
         if sort:
             self.sort(inplace=True)
 
