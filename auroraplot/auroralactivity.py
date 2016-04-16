@@ -197,6 +197,10 @@ class AuroraWatchActivity(Data):
              start_time=None, end_time=None, time_units=None, 
              plot_func=plt.bar, plot_thresholds=True,
              **kwargs):
+
+        if units_prefix is None and self.units == 'T':
+            # Use nT for plotting
+            units_prefix = 'n'
         
         if plot_func == plt.bar:
             if time_units is None:
@@ -210,8 +214,15 @@ class AuroraWatchActivity(Data):
             if not kwargs.has_key('color'):
                 kwargs['color'] = self.get_color()
 
+            if not kwargs.has_key('edgecolor'):
+                kwargs['edgecolor'] = self.get_color() * .9
+
             if not kwargs.has_key('linewidth'):
-                kwargs['linewidth'] = 0.0
+                kwargs['linewidth'] = 0.5
+
+            if not kwargs.has_key('zorder'):
+                kwargs['zorder'] = 4
+
                 
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix=units_prefix,
@@ -223,10 +234,20 @@ class AuroraWatchActivity(Data):
             if axes is None:
                 axes = plt.gca()
             mul = ap.str_units(0, 'T', units_prefix, wantstr=False)['mul']
-            for n in range(1, len(self.thresholds)):
+            ylim = axes.get_ylim()
+            new_ylim_top = ylim[1]
+
+            for n in range(len(self.thresholds)-1, 0, -1):
+                y = self.thresholds[n] / mul
+                if y >= ylim[1]:
+                    new_ylim_top = y*1.05
                 axes.plot(axes.xaxis.get_view_interval(), 
                           self.thresholds[[n,n]] / mul, 
-                          color=self.colors[n], linestyle='--')
+                          color=self.colors[n], 
+                          linestyle='-',
+                          linewidth=2,
+                          zorder=3)
+            axes.set_ylim(top=new_ylim_top)
         return r
 
 
