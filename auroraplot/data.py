@@ -322,6 +322,21 @@ class Data(object):
                 '             data : ' + repr(self.data) + '\n' + 
                 '            units : ' + str(units))
 
+    def __format__(self, fmt):
+        if fmt == '':
+            return repr(self)
+        elif fmt in ('project', 'site', 'units'):
+            a = getattr(self, fmt)
+            return 'None' if a is None else a
+        elif fmt in ('project_lc', 'site_lc'):
+            a = getattr(self, fmt.split('_')[0])
+            return 'none' if a is None else a.lower()
+        elif self.start_time is None:
+            raise ValueError('start time is not set')
+        else:
+            return dt64.strftime(self.start_time, fmt)
+
+
     def data_description(self):
         return 'Data'
 
