@@ -265,7 +265,7 @@ def get_archive_info(project, site, data_type, archive=None):
     if data_type not in site_info['data_types']:
         raise ValueError('Unknown data_type (%s)' % data_type)
     
-    if archive is None:
+    if archive is None or archive == 'default':
         if len(site_info['data_types'][data_type]) == 1:
             # Only one archive, so default is implicit
             archive = list(site_info['data_types'][data_type].keys())[0]
