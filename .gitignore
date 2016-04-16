@@ -37,3 +37,4 @@ nosetests.xml
 # ipython(notebook)
 .ipynb_checkpoints
 
+!auroraplot/bin
