@@ -565,7 +565,10 @@ class Data(object):
             figure=plt.figure()
             new_figure = True
         else:
-            plt.figure(figure)
+            if isinstance(figure, mpl.figure.Figure):
+                plt.figure(figure.number)
+            else:
+                plt.figure(figure)
         
 
         if subplot is not None:
