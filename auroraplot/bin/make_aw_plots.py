@@ -13,6 +13,13 @@ import traceback
 import numpy as np
 
 import matplotlib as mpl
+
+from numpy.f2py.auxfuncs import throw_error
+from logging import exception
+if os.environ.get('DISPLAY', '') == '':
+        mpl.use('Agg')
+        
+
 import matplotlib.ticker
 import matplotlib.pyplot as plt
 
