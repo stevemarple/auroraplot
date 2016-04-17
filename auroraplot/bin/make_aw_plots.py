@@ -76,7 +76,7 @@ def read_config_files():
     r['master'].set('stackplot', 'image_types', 'png')
 
     r['master'].set('stackplot', 'rolling_path', 
-                    os.path.join('stackplot',
+                    os.path.join('stackplots',
                                  'rolling'))
     r['master'].set('stackplot', 'rolling_image_types', 'png svg')
 
