@@ -165,7 +165,7 @@ def _generic_load_converter(file_name, archive_data,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
                 units=archive_data['units'],
-                sort=True)
+                sort=archive_data.get('sort', False))
             return r
 
         except Exception as e:
@@ -273,7 +273,7 @@ class Data(object):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=None):
+                 sort=False):
         self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
@@ -811,8 +811,11 @@ class Data(object):
                                 r.sample_end_time)
         idx = np.where(np.diff(sample_time) > cadence)[0]
         
+        sort = False
         obj_list = [r]
+
         if len(idx):
+            sort = True
             data = np.ones([num_channels, len(idx)]) * ap.NaN
             if r.integration_interval is None:
                 ii = None
@@ -841,7 +844,9 @@ class Data(object):
 
         # Check for missing data at start
         if r.sample_start_time[0] - start_time > cadence:
-            obj_list.append(type(self)(
+            # Insert at start of list to avoid requiring a sort
+            obj_list.insert(0, 
+                            type(self)(
                     project=r.project,
                     site=r.site,
                     channels=r.channels,
@@ -870,7 +875,12 @@ class Data(object):
                         data=np.ones([num_channels, 1]) * ap.NaN,
                         units=r.units,
                         sort=False))
-        r = ap.concatenate(obj_list)
+        if len(obj_list) == 1:
+            r = obj_list[0]
+            if sort:
+                r.sort(inplace=True)
+        else:
+            r = ap.concatenate(obj_list, sort=sort)
         # if inplace:
         #     self = r
         return r

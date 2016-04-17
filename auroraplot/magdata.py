@@ -296,7 +296,7 @@ def load_qdc_data(file_name, archive_data,
                        nominal_cadence=archive_data['nominal_cadence'],
                        data=data,
                        units=archive_data['units'],
-                       sort=True)
+                       sort=False)
             return r
 
         except Exception as e:

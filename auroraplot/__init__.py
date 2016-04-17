@@ -454,7 +454,7 @@ def load_data(project,
     if len(data) == 0:
         return None
 
-    r = concatenate(data).sort(inplace=True)
+    r = concatenate(data, sort=False)
     r.extract(inplace=True, 
               start_time=start_time, 
               end_time=end_time, 
@@ -470,7 +470,7 @@ def load_data(project,
     return r
 
 
-def concatenate(objs, sort=True):
+def concatenate(objs, sort=False):
     obj_type = type(objs[0])
     project = objs[0].project
     site = objs[0].site
