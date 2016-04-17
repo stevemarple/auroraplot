@@ -91,7 +91,7 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     degrees_dir: direction indicator for degrees, length 2 iterable eg, ['N', 'S']
     fmt: format specifier
     ascii: if true use u as prefix for micro
-    wantstr: if true return th formatted string, else return dict of info
+    wantstr: if true return the formatted string, else return dict of info
     '''
     
     is_degrees = unit in (six.u('deg'), 
