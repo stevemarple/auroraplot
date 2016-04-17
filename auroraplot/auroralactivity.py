@@ -234,12 +234,18 @@ class AuroraWatchActivity(Data):
             if axes is None:
                 axes = plt.gca()
             mul = ap.str_units(0, 'T', units_prefix, wantstr=False)['mul']
+            tmp = self.extract(start_time, end_time, channels=channels)
+            ymax = np.nan
             ylim = axes.get_ylim()
+            if np.size(tmp.data):
+                ymax = np.nanmax(tmp.data) / mul
+            if np.isnan(ymax):
+                ymax = axes.get_ylim()[1]
             new_ylim_top = ylim[1]
 
             for n in range(len(self.thresholds)-1, 0, -1):
                 y = self.thresholds[n] / mul
-                if y >= ylim[1]:
+                if y >= ymax:
                     new_ylim_top = y*1.05
                 axes.plot(axes.xaxis.get_view_interval(), 
                           self.thresholds[[n,n]] / mul, 
