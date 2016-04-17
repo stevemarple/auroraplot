@@ -423,6 +423,7 @@ default_data_types = {
             'load_converter': load_awn_data,
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': 'T',
+            'sort': True,
             },
         'realtime_baseline': {
             'channels': np.array(['H']),
@@ -435,6 +436,7 @@ default_data_types = {
             'units': 'T',
             # Information for generic load/save 
             'constructor': ap.magdata.MagData,
+            'sort': False,
             'timestamp_method': 'YMD',
             'fmt': ['%04d', '%02d', '%02d', '%.2f'],
             'data_multiplier': 1000000000, # Store as nT values
@@ -451,6 +453,7 @@ default_data_types = {
             'load_converter': ap.magdata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
+            'sort': False,
             },
         },
     'TemperatureData': {
@@ -463,6 +466,7 @@ default_data_types = {
             'load_converter': load_awn_data,
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': six.u('\N{DEGREE SIGN}C'),
+            'sort': True,
             },
         },
     'VoltageData': {
@@ -474,6 +478,7 @@ default_data_types = {
             'load_converter': load_awn_data,
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': 'V',
+            'sort': True,
             },
         },
     }
