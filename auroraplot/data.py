@@ -846,38 +846,55 @@ class Data(object):
 
 
         # Check for missing data at start
-        if r.sample_start_time[0] - start_time > cadence:
-            # Insert at start of list to avoid requiring a sort
-            obj_list.insert(0, 
-                            type(self)(
-                    project=r.project,
-                    site=r.site,
-                    channels=r.channels,
-                    start_time=start_time,
-                    end_time=r.sample_start_time[0],
-                    sample_start_time=np.array([start_time]),
-                    sample_end_time=r.sample_start_time[:1],
-                    integration_interval=ii,
-                    nominal_cadence=r.nominal_cadence,
-                    data=np.ones([num_channels, 1]) * ap.NaN,
-                    units=r.units,
-                    sort=False))
-
-        # Check for missing data at end
-        if end_time - r.sample_end_time[-1] > cadence:
-            obj_list.append(type(self)(
+        if np.size(r.sample_start_time):
+            if r.sample_start_time[0] - start_time > cadence:
+                # Insert at start of list to avoid requiring a sort
+                obj_list.insert(0, 
+                                type(self)(
                         project=r.project,
                         site=r.site,
                         channels=r.channels,
-                        start_time=r.sample_end_time[-1],
-                        end_time=end_time,
-                        sample_start_time=r.sample_end_time[-1:],
-                        sample_end_time=np.array([end_time]),
+                        start_time=start_time,
+                        end_time=r.sample_start_time[0],
+                        sample_start_time=np.array([start_time]),
+                        sample_end_time=r.sample_start_time[:1],
                         integration_interval=ii,
                         nominal_cadence=r.nominal_cadence,
                         data=np.ones([num_channels, 1]) * ap.NaN,
                         units=r.units,
                         sort=False))
+
+            # Check for missing data at end
+            if end_time - r.sample_end_time[-1] > cadence:
+                obj_list.append(type(self)(
+                            project=r.project,
+                            site=r.site,
+                            channels=r.channels,
+                            start_time=r.sample_end_time[-1],
+                            end_time=end_time,
+                            sample_start_time=r.sample_end_time[-1:],
+                            sample_end_time=np.array([end_time]),
+                            integration_interval=ii,
+                            nominal_cadence=r.nominal_cadence,
+                            data=np.ones([num_channels, 1]) * ap.NaN,
+                            units=r.units,
+                            sort=False))
+        else:
+            # No data at all
+            obj_list.append(type(self)(
+                            project=r.project,
+                            site=r.site,
+                            channels=r.channels,
+                            start_time=start_time,
+                            end_time=end_time,
+                            sample_start_time=np.array([start_time]),
+                            sample_end_time=np.array([end_time]),
+                            integration_interval=ii,
+                            nominal_cadence=r.nominal_cadence,
+                            data=np.ones([num_channels, 1]) * ap.NaN,
+                            units=r.units,
+                            sort=False))
+    
         if len(obj_list) == 1:
             r = obj_list[0]
             if sort:
