@@ -428,18 +428,23 @@ def parse_datetime64(s, prec, now=None):
         now = np.datetime64('now', 's')
     else:
         now = now.astype('datetime64[s]')
-
     day = np.timedelta64(1, 'D')
-    if s == 'yesterday':
-        t = floor(now, day) - day
-    elif s == 'today':
-        t = floor(now, day)
-    elif s == 'now':
-        t = now
-    elif s == 'tomorrow':
-        t = floor(now, day) + day
-    elif s == 'overmorrow':
-        t = floor(now, day) + 2 * day
+
+    s = s.strip()
+    if s.startswith('yesterday'):
+        t = floor(now, day) - day \
+            + parse_timedelta64(' '.join(s.split()[1:]), prec)
+    elif s.startswith('today'):
+        t = floor(now, day) \
+            + parse_timedelta64(' '.join(s.split()[1:]), prec)
+    elif s.startswith('now'):
+        t = now + parse_timedelta64(' '.join(s.split()[1:]), prec)
+    elif s.startswith('tomorrow'):
+        t = floor(now, day) + day \
+            + parse_timedelta64(' '.join(s.split()[1:]), prec)
+    elif s.startswith('overmorrow'):
+        t = floor(now, day) + 2 * day \
+            + parse_timedelta64(' '.join(s.split()[1:]), prec)
     else:
         t = np.datetime64(s)
     
