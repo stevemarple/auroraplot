@@ -448,7 +448,7 @@ def parse_datetime64(s, prec, now=None):
 def parse_timedelta64(s, prec):
     r = np.timedelta64(0, prec)
     for w in s.split():
-        m = re.match('^([0-9]+)(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)$', w)
+        m = re.match('^(-?[0-9]+)(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)$', w)
         if m is None:
             raise ValueError('unknown value/unit (%s)' % w)
         v, u = m.groups()
