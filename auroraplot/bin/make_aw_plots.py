@@ -389,7 +389,7 @@ def get_image_types(data_type, rolling):
         return conf['master'].get(data_type, 'image_types').split()
         
 
-def my_save_fig(fig, filename, ext_list, abbreviate=False):
+def my_save_fig(fig, filename, ext_list, abbreviate=False, close=None):
     # Apply some standard format changes
     axes = fig.get_axes()
     if len(axes) > 1:
@@ -416,7 +416,7 @@ def my_save_fig(fig, filename, ext_list, abbreviate=False):
             ax.xaxis.set_major_locator(\
                 dt64.Datetime64Locator(interval=np.timedelta64(3, 'h'),
                                        maxticks=10))
-
+            
     # Create directory and save to the designated list of extensions
     dirname = os.path.dirname(filename)
     if not os.path.exists(dirname):
@@ -426,7 +426,11 @@ def my_save_fig(fig, filename, ext_list, abbreviate=False):
         f = filename + '.' + ext
         logger.info('saving to %s', f)
         fig.savefig(f, dpi=80)
-    return None
+
+    if close or (close is None and not args.show):
+        plt.close(fig)
+        
+    return
         
 
 # Define command line arguments
