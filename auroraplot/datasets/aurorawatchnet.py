@@ -442,6 +442,7 @@ default_data_types = {
             'data_multiplier': 1000000000, # Store as nT values
             # Information for making the data files
             'qdc_fit_duration': np.timedelta64(10, 'D'),
+            'realtime_qdc': True,
             },
         },
     'MagQDC': {
