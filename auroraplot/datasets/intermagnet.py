@@ -101,6 +101,15 @@ sites = {
         'reported': 'HDZF',
         'copyright': 'Institute of Geophysics, Russia',
         },
+    'ASC': {
+        'location': 'Ascension Island',
+        'latitude': -07.950,
+        'longitude': 345.617,
+        'elevation': 177,
+        'reported': 'XYZF',
+        'sensor_orientation': 'HDZF',
+        'copyright': 'British Geological Survey',        
+    },
     'BDV': {
         'location': 'Budkov, Czech Republic',
         'latitude': 49.100,
@@ -335,6 +344,15 @@ sites = {
         'reported': 'XYZF',
         'sensor_orientation': 'HDZF',
         'copyright': 'Instituto Geografico Nacional (Spain)',
+        },
+    'HER': {
+        'location': 'Hermanus, South Africa',
+        'latitude': -34.425,
+        'longitude': 19.225,
+        'elevation': 26,
+        'reported': 'XYZG',
+        'sensor_orientation': 'HDZF',
+        'copyright': 'National Research Foundation',
         },
     'HLP': {
         'location': 'Hel Observatory, Poland',
