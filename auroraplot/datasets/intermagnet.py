@@ -680,5 +680,17 @@ for sa in sites:
             'nominal_cadence': np.timedelta64(60000000, 'us'),
             'units': 'T',
            }
+
+    if 'definitive_minute' not in s['data_types']['MagData']:
+        s['data_types']['MagData']['definitive_minute'] = {
+            'channels': ['X', 'Y', 'Z', 'F'],
+            'path': 'ftp://' + ftp_hostname \
+                + '/minute/definitive/IAGA2002/%Y/%m/' \
+                + sa.lower() + '%Y%m%ddmin.min.gz',
+            'duration': np.timedelta64(24, 'h'),
+            'load_converter': load_iaga_2002,
+            'nominal_cadence': np.timedelta64(60, 's'),
+            'units': 'T',
+           }
         
 ap.add_project('INTERMAGNET', sites)
