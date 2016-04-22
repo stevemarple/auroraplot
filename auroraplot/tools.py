@@ -267,10 +267,14 @@ def change_load_data_paths(project,
 
         for data_type in dt_list:
             dtv = ap.projects[project][site]['data_types'][data_type]
-            for archive,av in dtv.iteritems(): # archive name/values
+            for archive,av in list(dtv.iteritems()): # archive name/values
                 if archive == 'default':
                     continue
                 if not hasattr(av['path'], '__call__'):
+                    orig_archive = 'original_' + archive
+                    if orig_archive not in dtv:
+                        # Keep a copy of the original
+                        dtv[orig_archive] = copy.deepcopy(av)
                     av['path'] = replace(av['path'], project, site,
                                          data_type, archive)
 
