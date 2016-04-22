@@ -248,7 +248,8 @@ def sgolay_filt(data, window_size, order):
 def change_load_data_paths(project, 
                            replace, 
                            site_list=None, 
-                           data_type_list=None):
+                           data_type_list=None,
+                           archive_list=None):
     '''Helper function for changing paths used when loading data
 
     change_load_data_paths is intended to be called from within
@@ -267,7 +268,14 @@ def change_load_data_paths(project,
 
         for data_type in dt_list:
             dtv = ap.projects[project][site]['data_types'][data_type]
-            for archive,av in list(dtv.iteritems()): # archive name/values
+            if archive_list is None:
+                a_list = ap.projects[project][site]['data_types'][data_type]\
+                           .keys()
+            else:
+                a_list = archive_list
+
+            for archive in list(dtv):
+                av = dtv[archive]
                 if archive == 'default':
                     continue
                 if not hasattr(av['path'], '__call__'):
