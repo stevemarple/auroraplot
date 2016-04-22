@@ -66,9 +66,7 @@ parser.add_argument('--aurorawatch-activity',
                     const='aurorawatch_activity',
                     help='Make AuroraWatch activity plot(s)')
 parser.add_argument('--cadence', 
-                    nargs=2,
-                    help='Set cadence',
-                    metavar=('VALUE', 'UNIT'))
+                    help='Set cadence')
 parser.add_argument('-s', '--start-time', 
                     default='today',
                     help='Start time for data transfer (inclusive)',
@@ -109,10 +107,9 @@ parser.add_argument('--qdc-tries',
                     help='Number of tries to load QDC',
                     metavar='NUM')
 parser.add_argument('--k-index-cadence', 
-                    default=180,
-                    type=int,
-                    help='Cadence for K index plot (minutes)',
-                    metavar='MINUTES')
+                    default='3h',
+                    help='Cadence for K index plot',
+                    metavar='CADENCE')
 parser.add_argument('--save-filename',
                     help='Save plot',
                     metavar='FILE')
@@ -280,8 +277,7 @@ for n in range(len(project_list)):
     if project in archive and site in archive[project]:
         kwargs['archive'] = archive[project][site]
     if args.cadence:
-        kwargs['cadence'] = np.timedelta64(int(args.cadence[0]), 
-                                           args.cadence[1])
+        kwargs['cadence'] = dt64.parse_timedelta64(args.cadence, 's')
         agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
         agg_module = import_module(agg_mname)
         agg_func = getattr(agg_module, agg_fname)
@@ -320,7 +316,7 @@ else:
                                           tries=args.qdc_tries)
             except Exception:
                 qdc = None
-            k_cadence = np.timedelta64(args.k_index_cadence, 'm')
+            k_cadence = dt64.parse_timedelta64(args.k_index_cadence, 's')
             k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc,
                                           nominal_cadence=k_cadence)
             k.plot()
