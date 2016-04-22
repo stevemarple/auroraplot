@@ -731,8 +731,7 @@ class Data(object):
                     if len(tidx2) != 0:
                         # Update data. 
                         if self.integration_interval is None:
-                            d[cn,sn] = aggregate(self.data[cn, tidx2], 
-                                             weights=weights)
+                            d[cn,sn] = aggregate(self.data[cn, tidx2])
 
                         else:
                             # Weight the mean according to
