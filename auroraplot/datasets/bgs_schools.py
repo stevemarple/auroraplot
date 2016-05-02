@@ -174,6 +174,37 @@ sites = {
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
         }, # BGS5
 
+    'BGS9': {
+        'location': 'Edinburgh, UK',
+        'latitude': 55.952,
+        'longitude': -3.190,
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-01-01T00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 750e-9, # Estimated
+        'k_index_filter': None,
+        'copyright': 'Lancaster University.',
+        'license': cc3_by_nc_sa,
+        'attribution':  'British Geological Survey.',
+        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        }, # BGS9
+
+    'BGS10': {
+        'location': 'Edinburgh, UK',
+        'latitude': 55.952,
+        'longitude': -3.190,
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-01-01T00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 750e-9, # Estimated
+        'k_index_filter': None,
+        'copyright': 'Lancaster University.',
+        'license': cc3_by_nc_sa,
+        'attribution':  'British Geological Survey.',
+        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        }, # BGS10
+
+
     }
 
 
