@@ -268,13 +268,18 @@ def change_load_data_paths(project,
 
         for data_type in dt_list:
             dtv = ap.projects[project][site]['data_types'][data_type]
+            # If only one archive and default not set then make it the
+            # default before adding copies
+            dtv_keys = list(dtv.keys())
+            if len(dtv_keys) == 1 and dtv_keys[0] != 'default':
+                dtv['default'] = dtv_keys[0]
+                
             if archive_list is None:
-                a_list = ap.projects[project][site]['data_types'][data_type]\
-                           .keys()
+                a_list = dtv_keys
             else:
                 a_list = archive_list
 
-            for archive in list(dtv):
+            for archive in a_list:
                 av = dtv[archive]
                 if archive == 'default':
                     continue
@@ -285,7 +290,7 @@ def change_load_data_paths(project,
                         dtv[orig_archive] = copy.deepcopy(av)
                     av['path'] = replace(av['path'], project, site,
                                          data_type, archive)
-
+        
 
 def lookup_module_name(s):
     last_dot = s.rindex('.')
