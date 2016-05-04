@@ -221,6 +221,7 @@ defaults = {
 
 default_data_types = {
     'MagData': {
+        'default': 'realtime',
         'realtime': {
             'channels': np.array(['H', 'E', 'Z']),
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
