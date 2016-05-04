@@ -351,8 +351,9 @@ class Data(object):
                 assert (attr is not None and 
                         (not isinstance(attr, six.string_types) or attr != '')), \
                     n + ' not set'
-                assert re.match('^[-A-Z0-9]+$', self.project), 'Bad value for project'
-                assert re.match('^[-A-Z0-9]+$', self.site), 'Bad value for site'
+
+            assert re.match('^[-A-Z0-9_]+$', self.project), 'Bad value for project'
+            assert re.match('^[-A-Z0-9_]+$', self.site), 'Bad value for site'
 
             num_channels = len(self.channels)
             num_samples = len(self.sample_start_time)
