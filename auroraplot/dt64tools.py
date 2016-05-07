@@ -197,7 +197,7 @@ def get_month(a):
 
 def get_day_of_year(a):
     '''Return day of year in range 1 to 366'''
-    return _get_tt(a, 'tm_mday')
+    return _get_tt(a, 'tm_yday')
 
 def get_day_of_month(a):
     '''Return day of month'''
