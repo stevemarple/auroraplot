@@ -409,7 +409,9 @@ def load_data(project,
                 gunzipped_file.close()
             except Exception as e:
                 if gunzipped_file:
+                    gunzipped_file.close()
                     os.unlink(gunzipped_file.name)
+                    gunzipped_file = None
                 continue    
             finally:
                 if temp_file_name:
