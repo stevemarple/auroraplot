@@ -411,7 +411,20 @@ def fmt_dt64_range(st, et):
             return strftime(st, '%Y-%m-%d %H:%M - ') + \
                 strftime(et, '%Y-%m-%d %H:%M')
 
-def parse_datetime64(s, prec, now=None):
+def _add_timezone(s, timezone='+0000'):
+    '''
+    Add timezone if one is not present.
+
+    The default timezone used is +0000 (UTC)
+    '''
+    if s.endswith('Z') or re.search('[+-]\d{2}(:?\d{2})?$', s):
+        # Already has timezone indicator (+00, +0000, +00:00)
+        return s
+    else:
+        # Default to UTC
+        return s + '+0000'
+
+def parse_datetime64(s, prec, now=None, timezone='+0000'):
     '''
     Parse a numpy.datetime64() time, also accepting "yesterday",
     "today", "now" and "tomorrow", with the result given to the
@@ -446,7 +459,7 @@ def parse_datetime64(s, prec, now=None):
         t = floor(now, day) + 2 * day \
             + parse_timedelta64(' '.join(s.split()[1:]), prec)
     else:
-        t = np.datetime64(s)
+        t = np.datetime64(_add_timezone(s, timezone))
     
     return astype(t, prec)
 
