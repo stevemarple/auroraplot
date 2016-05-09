@@ -559,7 +559,7 @@ for st, et, rolling in get_start_end_times():
         plot_st_et = [(st, et, True), 
                       (dt64.ceil(st, day), dt64.ceil(et, day), False)]
     else:
-        plot_st_et = [(st, et, st, False)]
+        plot_st_et = [(st, et, False)]
 
     cached_data = {} 
 
