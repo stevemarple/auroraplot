@@ -523,7 +523,7 @@ def concatenate(objs, sort=False):
                     sort=sort)
 
 
-def parse_project_site_list(n_s_list):
+def parse_project_site_list(n_s_list, sort=False, wantdict=False):
     '''Parse an array of strings to unique project/site lists'''
     project_list = []
     site_list = []
@@ -558,7 +558,18 @@ def parse_project_site_list(n_s_list):
                 project_list.append(n)
                 site_list.append(s)
 
-    return project_list, site_list
+    if wantdict:
+        return sites_found
+    elif sort:
+        p_list = []
+        s_list = []
+        for p in sorted(sites_found):
+            for s in sorted(sites_found[p]):
+                p_list.append(p)
+                s_list.append(s)
+        return p_list, s_list
+    else:
+        return project_list, site_list
 
 
 def parse_archive_selection(selection, defaults={}):
