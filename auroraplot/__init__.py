@@ -196,6 +196,9 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 def format_project_site(project, site):
     return project + ' / ' + site
 
+def get_project_info(project):
+    return projects[project]
+
 def get_sites(project):
     if project not in projects:
         raise Exception('Unknown project (%s)' % project)
