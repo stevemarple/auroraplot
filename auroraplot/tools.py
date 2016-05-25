@@ -258,16 +258,16 @@ def change_load_data_paths(project,
     '''
 
     if site_list is None:
-        site_list = ap.projects[project].keys()
+        site_list = ap.get_sites(project)
 
     for site in site_list:
         if data_type_list is None:
-            dt_list = ap.projects[project][site]['data_types'].keys()
+            dt_list = ap.projects[project]['sites'][site]['data_types'].keys()
         else:
             dt_list = data_type_list
 
         for data_type in dt_list:
-            dtv = ap.projects[project][site]['data_types'][data_type]
+            dtv = ap.projects[project]['sites'][site]['data_types'][data_type]
             # If only one archive and default not set then make it the
             # default before adding copies
             dtv_keys = list(dtv.keys())

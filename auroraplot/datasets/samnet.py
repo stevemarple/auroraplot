@@ -863,5 +863,12 @@ for s in sites:
     if 'activity_colors' not in sites[s]:
         sites[s]['activity_colors'] = default_activity_colors
 
-ap.add_project('SAMNET', sites)
+project = {
+    'name': 'Sub-Auroral Magnetometer Network',
+    'abbreviation': 'SAMNET',
+    'url': 'http://aurorawatch.lancs.ac.uk/project-info/samnet/',
+    'sites': sites,
+}
+
+ap.add_project('SAMNET', project)
 

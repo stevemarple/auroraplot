@@ -276,5 +276,12 @@ for s in sites:
         elif sd['data_types'][dt] is None:
             del sd['data_types'][dt]
 
-ap.add_project('BGS_SCH', sites)
+project = {
+    'name': 'BGS Schools Magnetometer Network',
+    'abbreviation': 'BGS_SCH',
+    'url': 'http://aurorawatch.lancs.ac.uk/project-info/bgs-sch/',
+    'sites': sites,
+}
+
+ap.add_project('BGS_SCH', project)
 

@@ -665,7 +665,14 @@ sites = {
 for s in sites:
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
-ap.add_project('UIT', sites)
+project = {
+    'name': 'Tromsø Geophysical Observatory Magnetometer Network',
+    'abbreviation': 'UIT',
+    'url': 'http://geo.phys.uit.no/',
+    'sites': sites,
+}
+
+ap.add_project('UIT', project)
 
 
 

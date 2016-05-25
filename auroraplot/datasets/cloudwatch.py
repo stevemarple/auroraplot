@@ -271,5 +271,11 @@ sites = {
     
     }
 
+project = {
+    'name': 'UK cloud detection network',
+    'abbreviation': 'CLOUDWATCH',
+    'url': 'http://blog.stevemarple.co.uk/search/label/cloud%20detector',
+    'sites': sites,
+}
 
-ap.add_project('CLOUDWATCH', sites)
+ap.add_project('CLOUDWATCH', project)

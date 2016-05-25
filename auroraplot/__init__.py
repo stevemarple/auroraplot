@@ -62,7 +62,7 @@ colors = ['b', 'g', 'r']
 #     return {key: d[key] for key in keys}
 
 
-def add_project(project_name, sites):
+def add_project(project_name, project_info):
     '''
     Helper function for datasets to register project and site
     information. To allow local customisation of file location a call
@@ -72,9 +72,9 @@ def add_project(project_name, sites):
     '''
 
     if project_name in projects:
-        projects[project_name].update(sites)
+        projects[project_name].update(project_info)
     else:
-        projects[project_name] = sites
+        projects[project_name] = project_info
         
     if hasattr(auroraplot_custom, 'add_project_hook'):
         auroraplot_custom.add_project_hook(project_name=project_name)
@@ -196,28 +196,32 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 def format_project_site(project, site):
     return project + ' / ' + site
 
+def get_sites(project):
+    if project not in projects:
+        raise Exception('Unknown project (%s)' % project)
+    return projects[project]['sites'].keys()
 
 def has_site_info(project, site, info):
     # Sanity checking
     if project not in projects:
         raise Exception('Unknown project (%s)' % project)
-    elif site not in projects[project]:
+    elif site not in projects[project]['sites']:
         raise Exception('Unknown site (%s)' % site)
-    return info in projects[project][site]
+    return info in projects[project]['sites'][site]
 
 
 def get_site_info(project, site, info=None):
     # Sanity checking
     if project not in projects:
         raise Exception('Unknown project (%s)' % project)
-    elif site not in projects[project]:
+    elif site not in projects[project]['sites']:
         raise Exception('Unknown site (%s)' % site)
     if info is None:
-        return projects[project][site]
-    elif info not in projects[project][site]:
+        return projects[project]['sites'][site]
+    elif info not in projects[project]['sites'][site]:
         raise Exception('Unknown info (%s)' % info)
     else:
-        return projects[project][site][info]
+        return projects[project]['sites'][site][info]
 
 
 def get_archive_info(project, site, data_type, archive=None):
@@ -523,39 +527,40 @@ def concatenate(objs, sort=False):
                     sort=sort)
 
 
-def parse_project_site_list(n_s_list, sort=False, wantdict=False):
+def parse_project_site_list(p_s_list, sort=False, wantdict=False):
     '''Parse an array of strings to unique project/site lists'''
     project_list = []
     site_list = []
     sites_found = {}
-    for n_s in n_s_list:
-        m = re.match('^([a-z0-9_]+)(/([a-z0-9_]+))?$', n_s, re.IGNORECASE)
+    for p_s in p_s_list:
+        m = re.match('^([a-z0-9_]+)(/([a-z0-9_]+))?$', p_s, re.IGNORECASE)
         assert m is not None, \
             'Not in form PROJECT or PROJECT/SITE'
-        n = m.groups()[0].upper()
-        if n not in projects:
+        p = m.groups()[0].upper()
+        if p not in projects:
             try:
                 logger.info('trying to import auroraplot.datasets.' 
-                            + n.lower())
-                importlib.import_module('auroraplot.datasets.' + n.lower())
+                            + p.lower())
+                importlib.import_module('auroraplot.datasets.' + p.lower())
             finally:
                 if n not in projects:
-                    raise Exception('Project %s is not known' % n)
+                    raise Exception('Project %s is not known' % p)
 
         if m.groups()[2] is None:
             # Given just 'PROJECT'
-            sites = projects[n].keys()
+            sites = get_sites(p)
         else:
             sites = [m.groups()[2].upper()]
         
-        if n not in sites_found:
-            sites_found[n] = {}
+        if p not in sites_found:
+            sites_found[p] = {}
         for s in sites:
-            if s not in sites_found[n]:
+            if s not in sites_found[p]:
                 # Not seen this project/site before
-                assert s in projects[n], 'Site %s/%s is not known' % (n, s)
-                sites_found[n][s] = True
-                project_list.append(n)
+                assert s in get_sites(p), \
+                    'Site %s/%s is not known' % (p, s)
+                sites_found[p][s] = True
+                project_list.append(p)
                 site_list.append(s)
 
     if wantdict:

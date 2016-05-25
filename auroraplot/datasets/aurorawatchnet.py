@@ -166,7 +166,7 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
-    'LAN1': {
+'LAN1': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
         'longitude': -2.78,
@@ -210,7 +210,7 @@ sites = {
             'Department of Physics, Lancaster University, UK.',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # ORM
-    
+
     'TEST1': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
@@ -402,8 +402,8 @@ sites = {
             'http://www.metoffice.gov.uk/',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # EXE
-
     }
+
 
 # Set activity color/thresholds unless already set.
 default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
@@ -518,7 +518,14 @@ for s in sites:
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
-ap.add_project('AURORAWATCHNET', sites)
+project = {
+    'name': 'AuroraWatchNet',
+    'abbreviation': 'AURORAWATCHNET',
+    'url': 'http://aurorawatch.lancs.ac.uk/project-info/aurorawatchnet/',
+    'sites': sites,
+}
+
+ap.add_project('AURORAWATCHNET', project)
 
 
 

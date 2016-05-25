@@ -692,5 +692,12 @@ for sa in sites:
             'nominal_cadence': np.timedelta64(60, 's'),
             'units': 'T',
            }
+
+project = {
+    'name': 'International Real-time Magnetic Observatory Network',
+    'abbreviation': 'INTERMAGNET',
+    'url': 'http://www.intermagnet.org/',
+    'sites': sites,
+}
         
-ap.add_project('INTERMAGNET', sites)
+ap.add_project('INTERMAGNET', project)

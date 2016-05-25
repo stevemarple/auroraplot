@@ -124,7 +124,14 @@ sites = {
 for s in sites:
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
-ap.add_project('DTU', sites)
+project = {
+    'name': 'DTU Space Ground Magnetometer Network',
+    'abbreviation': 'DTU',
+    'url': 'http://www.space.dtu.dk/english/Research/Scientific_data_and_models/Magnetic_Ground_Stations',
+    'sites': sites,
+}
+
+ap.add_project('DTU', project)
 
 
 
