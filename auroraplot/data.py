@@ -407,12 +407,7 @@ class Data(object):
 
 
     def get_site_info(self, info=None):
-        assert self.project in ap.projects, 'Unknown project'
-        assert self.site in ap.projects[self.project], 'Unknown site'
-        if info is None:
-            return ap.projects[self.project][self.site]
-        else:
-            return ap.projects[self.project][self.site][info]
+        return ap.get_site_info(self.project, self.site, info)
 
 
     def get_mean_sample_time(self):
