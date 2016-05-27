@@ -558,7 +558,7 @@ sites = {
         'latitude': 54.01,
         'longitude': -2.77,
         'elevation': np.nan,
-        'start_time': np.datetime64('2014-12-02T00:00:00+0000', 's'),
+        'start_time': np.datetime64('2016-03-21T18:31:00+0000', 's'),
         'end_time': None,
         'k_index_scale': 650e-9, # Estimated
         'copyright': 'Lancaster University',
