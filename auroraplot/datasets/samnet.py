@@ -432,7 +432,7 @@ sites = {
         },
     },
     'FAR1': {
-        'location': ', Faroes',
+        'location': 'Faroe Islands',
         'latitude': 62.05,
         'longitude': -7.02,
         'elevation': np.nan,
