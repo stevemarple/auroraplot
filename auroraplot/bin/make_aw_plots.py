@@ -36,8 +36,7 @@ if sys.version_info[0] >= 3:
 else:
     import ConfigParser
     from ConfigParser import RawConfigParser
-
-
+    
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 import auroraplot.auroralactivity
@@ -57,7 +56,7 @@ def read_config_files():
         '.' + os.path.splitext(os.path.basename(__file__))[0])
     if args.test_mode:
         config_dir = os.path.join(config_dir, 'test')
-
+	
 
     filename = os.path.join(config_dir, 'master.ini')
     if not os.path.exists(filename):
@@ -277,6 +276,10 @@ def my_load_data(project, site,  data_type, st, et):
         kwargs['archive'] = archive[project][site]
         
     try:
+        site_info = ap.get_site_info(project, site)
+	if data_type not in site_info['data_types']:
+            return None
+
         md = ap.load_data(project, site, data_type, st, et, **kwargs)
         if md is None or md.data.size == 0:
             return None
@@ -363,6 +366,15 @@ def make_aw_act_data(md, save=False):
         r.save(merge=True)
     return r
 
+def make_k_index(mag_data, aligned_qdc):
+    try:
+        return ap.auroralactivity.KIndex(magdata=mag_data, 
+					 magqdc=aligned_qdc)
+
+    except Exception as e:
+        logger.debug(traceback.format_exc())
+        logger.error(str(e))
+	return None
 
 def make_filename(data, rolling, stackplot=False):
     if rolling:
@@ -583,9 +595,12 @@ for st, et, rolling in get_start_end_times():
             
             if data_type == 'AuroraWatchActivity':
                 data = make_aw_act_data(mag_data)
+	    elif data_type == 'KIndex':
+                if data and aligned_qdc:
+		    data = make_k_index(mag_data, aligned_qdc)
             else:
                 data = my_load_data(project, site, data_type, st, et)
-                
+
             if data_type == 'MagData':
                 mag_data = data
                 if mag_data is not None:
