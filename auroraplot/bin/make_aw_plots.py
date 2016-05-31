@@ -617,6 +617,13 @@ for st, et, rolling in get_start_end_times():
             if data is not None:
                 for plot_st, plot_et, roll in plot_st_et:
                     d = data.extract(plot_st, plot_et)
+                    if d.data.size == 0 or np.all(np.isnan(d.data)):
+                        logger.info('No %s data for %s/%s' %
+                                    (d.data_description(),
+                                     d.project,
+                                     d.site))
+                        continue
+                    
                     d.plot(zorder=4)
 
                     if data_type == 'MagData':
