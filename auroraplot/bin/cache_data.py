@@ -159,14 +159,14 @@ for n in range(len(project_list)):
     
     # Tune start/end times to avoid requesting data outside of
     # operational period
-    site_st = ap.projects[project][site].get('start_time')
+    site_st = ap.get_site_info(project, site, 'start_time')
     if site_st is None or site_st < st:
         site_st = st
     else:
         site_st = dt64.floor(site_st, day)
     site_st = dt64.floor(site_st, src_ai['duration'])
         
-    site_et = ap.projects[project][site].get('end_time')
+    site_et = ap.get_site_info(project, site, 'end_time')
     if site_et is None or site_et > et:
         site_et = et
     else:

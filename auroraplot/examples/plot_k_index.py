@@ -152,8 +152,8 @@ for n_s in n_s_list:
     # Is result is None then no data available, so ignore those
     # results.
     qdc = None
-    if md is not None and \
-            'MagQDC' in ap.projects[project][site]['data_types']:
+    if (md is not None and
+        'MagQDC' in ap.get_site_info(project, site, 'data_types')):
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         qdc_info = ap.magdata.load_qdc(project, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
