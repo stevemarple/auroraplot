@@ -4,6 +4,7 @@ import logging
 
 # Python 2/3 compatibility
 import six
+from six import iteritems
 try:
     from urllib.request import urlopen
     from urllib.parse import urlparse
@@ -496,7 +497,7 @@ for s in sites:
     for dt in default_data_types:
         if dt not in sdt:
             sdt[dt] = {}
-        for an,av in default_data_types[dt].iteritems():
+        for an,av in iteritems(default_data_types[dt]):
             if an not in sdt[dt]:
                 sdt[dt][an] = \
                     copy.deepcopy(av)
