@@ -843,7 +843,7 @@ for s in sites:
     for dt in default_data_types:
         if dt not in sdt:
             sdt[dt] = {}
-        for an,av in default_data_types[dt].iteritems():
+        for an,av in default_data_types[dt].items():
             if an not in sdt[dt]:
                 sdt[dt][an] = \
                     copy.deepcopy(av)
