@@ -78,7 +78,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                   optionText="Draw Quiet Day Curve",
                                                   checked = False)
 
-
+        # Set up logging
+        self.log = Log(self.logTextEdit)
+        self.logClearButton.clicked.connect(self.log.clear)
+        self.logSaveButton.clicked.connect(self.log.save)
+        
         # Define actions
         self.actionAbout.triggered.connect(self.showAbout)
         self.goButton.clicked.connect(self.goClicked)
@@ -101,9 +105,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             elif durationUnits == "minutes":
                 dt_unit = 'm'
             else:
-                dt_unit = 's'   
+                dt_unit = 's'
             st = Qdate_Qtime_to_dt64(Qdate,Qtime)
             et = st + np.timedelta64(self.durationBox.value(),dt_unit)
+            self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
+                                     np.datetime_as_string(et)]))
             # Want to complete the widget drawing processes before starting locking process
             QApplication.flush()
             md = ap.load_data('AURORAWATCHNET', 'LAN1', 'MagData', st, et)
@@ -111,10 +117,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.datafig.clear()
             md.plot(figure=self.datafig.number,color='k')
             self.datacanvas.draw()
+            self.log.append("Plotting completed successfully.")
             self.statusBar().showMessage("Ready.")
         except Exception as e:
-            raise e
-            print("Error {}".format(e.args[0]))
+            self.log.append("Plotting failed.")
+            self.log.append("Error {}".format(e.args[0]))
         finally:
             QApplication.restoreOverrideCursor()
             QApplication.flush()
@@ -123,6 +130,42 @@ class AboutWindow(QDialog,Ui_AboutWindow):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
         self.setupUi(self)
+
+class Log:
+    def __init__(self,textEditWidget):
+        self.saveDir = QDir.home() # folder for save dialog on first run
+        self.textEditWidget = textEditWidget
+        self.textEditWidget.appendPlainText("".join(["Log started at  ",
+            "{:%X %Z %a %d %B %Y}".format(datetime.datetime.now())]))
+    def append(self,logText):
+        self.textEditWidget.appendPlainText("".join([
+            "{:%X %Z} ".format(datetime.datetime.now()),logText]))
+    def clear(self):
+        msgBox = QMessageBox()
+        msgBox.setText("Really clear the log?")
+        msgBox.setWindowTitle(" ")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msgBox.setDefaultButton(QMessageBox.No)
+        ret = msgBox.exec()
+        if ret == QMessageBox.Yes:
+            self.textEditWidget.clear()
+            self.textEditWidget.appendPlainText("".join(["Log started at  ",
+                    "{:%X %Z %a %d %B %Y}".format(datetime.datetime.now())]))
+    def save(self):
+        fileBox = QFileDialog()
+        fileBox.setAcceptMode(QFileDialog.AcceptSave)
+        fileBox.setDirectory(self.saveDir)
+        ret = fileBox.exec()
+        self.saveDir = fileBox.directory()
+        if ret == QFileDialog.Accepted:
+            try:
+                fileName = fileBox.selectedFiles()[0]
+                with open(fileName,"wt") as file:
+                    file.write(self.textEditWidget.document().toPlainText())
+                self.append("".join(["Log written to ",fileName]))
+            except Exception as e:
+                self.append("Failed to write log to file")
+                self.append("Error {}".format(e.args[0]))
 
 class CheckOption:
     def __init__(self,listWidget,optionText="Check option",checked=True):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>947</width>
-    <height>641</height>
+    <height>675</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -78,7 +78,7 @@
            <x>0</x>
            <y>0</y>
            <width>300</width>
-           <height>372</height>
+           <height>374</height>
           </rect>
          </property>
          <attribute name="label">
@@ -100,9 +100,6 @@
              </size>
             </property>
             <property name="mouseTracking">
-             <bool>false</bool>
-            </property>
-            <property name="autoFillBackground">
              <bool>false</bool>
             </property>
             <property name="selectedDate">
@@ -216,7 +213,7 @@
            <x>0</x>
            <y>0</y>
            <width>300</width>
-           <height>372</height>
+           <height>374</height>
           </rect>
          </property>
          <attribute name="label">
@@ -264,7 +261,7 @@
            <x>0</x>
            <y>0</y>
            <width>300</width>
-           <height>372</height>
+           <height>374</height>
           </rect>
          </property>
          <attribute name="label">
@@ -289,6 +286,34 @@
              <enum>QAbstractItemView::NoSelection</enum>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_4">
+         <attribute name="label">
+          <string>Log</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QPlainTextEdit" name="logTextEdit"/>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="logClearButton">
+              <property name="text">
+               <string>Clear log</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="logSaveButton">
+              <property name="text">
+               <string>Save log</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -330,7 +355,7 @@
           <string>Draw</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="autoUpdateCheckBox">
          <property name="geometry">
           <rect>
            <x>140</x>
@@ -343,9 +368,6 @@
           <string>Auto-update</string>
          </property>
         </widget>
-        <zorder>goButton</zorder>
-        <zorder>checkBox</zorder>
-        <zorder>optionsListWidget</zorder>
        </widget>
       </item>
      </layout>
