@@ -111,7 +111,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
                                      np.datetime_as_string(et)]))
             QApplication.flush()
-            md = ap.load_data('AURORAWATCHNET', 'LAN1', 'MagData', st, et,
+            md = ap.load_data('AWN', 'LAN1', 'MagData', st, et,
                               cadence=np.timedelta64(40,'s'))
             if md is not None and md.data.size:
                 md.mark_missing_data(cadence=2*md.nominal_cadence)
