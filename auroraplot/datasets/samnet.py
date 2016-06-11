@@ -320,6 +320,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2002-05-17T00:00:00+0000', 's'),
         'end_time': np.datetime64('2013-02-26T00:00:00+0000', 's'),
+        'k_index_scale': 800e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -548,6 +549,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2003-02-20T17:00:00+0000', 's'),
         'end_time': np.datetime64('2013-10-24T00:00:00+0000', 's'),
+        'k_index_scale': 650e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -834,6 +836,9 @@ default_data_types = {
 for s in sites:
     site_lc = s.lower()
     sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
+
+    if 'line_color' not in sites[s]:
+        sites[s]['line_color'] = [1, 0, 0]
 
     # Populate the data types
     if 'data_types' not in sites[s]:
