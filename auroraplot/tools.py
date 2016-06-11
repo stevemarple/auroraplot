@@ -1,5 +1,6 @@
 import copy
 import logging
+import os
 import numpy as np
 
 import auroraplot as ap
@@ -36,6 +37,60 @@ class NthLargest(object):
             return np.nan
         return np.mean(af[idx[self.n]])
     
+
+class smart_open:
+    """Smarter way to open files for writing.
+
+    This class mimics the behaviour of 'with open(file) as handle:'
+    but with two additional benefits:
+
+    1. When opening a file for write access (including appending) the
+    parent directory will be created automatically if it does not
+    already exist.
+
+    2. When opening a file for write access it is created with a
+    temporary name ('.tmp' appended) and renamed automatically when
+    closed. This behaviour is automatically disabled when the mode
+    includes 'r', 'x', 'a', or '+'. It can be prevented manually by
+    setting temp_ext to an empty string.
+
+    Example use
+
+        with smart_open('/tmp/somedir/somefile.txt', 'w') as f:
+            f.write('some text')
+
+    """
+
+    def __init__(self, filename, mode='r', temp_ext='.tmp'):
+        self.filename = filename
+        self.mode = mode
+        # Modes which rely on an existing file should not change the name
+        if (temp_ext is None or 'r' in self.mode or 'x' in self.mode
+            or 'a' in self.mode or '+' in self.mode):
+            self.temp_ext = ''
+        else:
+            self.temp_ext = temp_ext
+        self.file = None
+
+    def __enter__(self):
+        d = os.path.dirname(self.filename)
+        if (not os.path.exists(d) and 
+            ('w' in self.mode or 'x' in self.mode 
+             or 'a' in self.mode or '+' in self.mode)):
+            logger.debug('creating directory %s', d)
+            os.makedirs(d)
+        self.file = open(self.filename + self.temp_ext, self.mode)
+        return self.file
+    
+    def __exit__(self, type, value, traceback):
+        if self.file is not None:
+            if not self.file.closed:
+                self.file.close()
+            if self.file.name != self.filename:
+                logger.debug('renaming %s to %s', 
+                             self.file.name, self.filename)
+                os.rename(self.file.name, self.filename)
+
 
 def least_squares_error(a, b):
     e = np.power(a - b, 2)
