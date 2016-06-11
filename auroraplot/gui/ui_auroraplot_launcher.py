@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_launcher.ui'
 #
-# Created: Sat Jun 11 14:46:03 2016
+# Created: Sat Jun 11 15:32:48 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(290, 115)
+        MainWindow.resize(226, 114)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/images/icons/auroraplot_32.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.centralLayout.setObjectName("centralLayout")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 290, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 226, 30))
         self.menubar.setObjectName("menubar")
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
