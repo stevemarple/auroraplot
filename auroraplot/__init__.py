@@ -553,7 +553,7 @@ def parse_project_site_list(p_s_list, sort=False, wantdict=False):
                             + p.lower())
                 importlib.import_module('auroraplot.datasets.' + p.lower())
             finally:
-                if n not in projects:
+                if p not in projects:
                     raise Exception('Project %s is not known' % p)
 
         if m.groups()[2] is None:

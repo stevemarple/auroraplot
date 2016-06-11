@@ -110,15 +110,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             et = st + np.timedelta64(self.durationBox.value(),dt_unit)
             self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
                                      np.datetime_as_string(et)]))
-            # Want to complete the widget drawing processes before starting locking process
             QApplication.flush()
-            md = ap.load_data('AURORAWATCHNET', 'LAN1', 'MagData', st, et)
-            self.statusBar().showMessage("Plotting data...")
-            self.datafig.clear()
-            md.plot(figure=self.datafig.number,color='k')
-            self.datacanvas.draw()
-            self.log.append("Plotting completed successfully.")
-            self.statusBar().showMessage("Ready.")
+            md = ap.load_data('AURORAWATCHNET', 'LAN1', 'MagData', st, et),
+                              cadence=np.timedelta64(40,'s'))
+            if md is not None and md.data.size:
+                md.mark_missing_data(cadence=2*md.nominal_cadence)
+                self.statusBar().showMessage("Plotting data...")
+                self.datafig.clear()
+                md.plot(figure=self.datafig.number,color='k')
+                self.datacanvas.draw()
+                self.log.append("Plotting completed successfully.")
+                self.statusBar().showMessage("Ready.")
+            else:
+                self.log.append("No data.")
+                self.statusBar().showMessage("No data.")
         except Exception as e:
             self.log.append("Plotting failed.")
             self.log.append("Error {}".format(e.args[0]))
