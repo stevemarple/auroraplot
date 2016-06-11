@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Sat Jun 11 14:47:20 2016
+# Created: Sat Jun 11 19:59:36 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -116,7 +116,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.durationUnitsBox, 4, 2, 1, 1)
         self.toolBox.addItem(self.page_1, "")
         self.page_2 = QtGui.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 183, 166))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 300, 374))
         self.page_2.setObjectName("page_2")
         self.gridLayout = QtGui.QGridLayout(self.page_2)
         self.gridLayout.setObjectName("gridLayout")
@@ -140,7 +140,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.pushButton_2, 2, 1, 1, 1)
         self.toolBox.addItem(self.page_2, "")
         self.page_3 = QtGui.QWidget()
-        self.page_3.setGeometry(QtCore.QRect(0, 0, 112, 112))
+        self.page_3.setGeometry(QtCore.QRect(0, 0, 300, 374))
         self.page_3.setObjectName("page_3")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.page_3)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -156,7 +156,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.optionsListWidget)
         self.toolBox.addItem(self.page_3, "")
         self.page_4 = QtGui.QWidget()
-        self.page_4.setGeometry(QtCore.QRect(0, 0, 188, 128))
+        self.page_4.setGeometry(QtCore.QRect(0, 0, 300, 374))
         self.page_4.setObjectName("page_4")
         self.gridLayout_3 = QtGui.QGridLayout(self.page_4)
         self.gridLayout_3.setObjectName("gridLayout_3")

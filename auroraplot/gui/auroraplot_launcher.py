@@ -22,12 +22,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().hide()
         self.viewerIcon = ClickLabel(":/images/icons/dataviewer_128.png")
         self.centralLayout.addWidget(self.viewerIcon)
-        self.editorIcon = ClickLabel(":/images/icons/qdceditor_128.png")
-        self.centralLayout.addWidget(self.editorIcon)
+        self.creatorIcon = ClickLabel(":/images/icons/qdccreator_128.png")
+        self.centralLayout.addWidget(self.creatorIcon)
         # Define actions
         self.actionAbout.triggered.connect(self.showAbout)
         self.viewerIcon.clicked.connect(self.viewerClicked)
-        self.editorIcon.clicked.connect(self.editorClicked)
+        self.creatorIcon.clicked.connect(self.creatorClicked)
                 
     def showAbout(self):
         aboutbox = AboutWindow()
@@ -44,11 +44,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         finally:
             QApplication.restoreOverrideCursor()
             
-    def editorClicked(self):
+    def creatorClicked(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            self.editorframe = auroraplot_dataviewer.MainWindow(self)
-            self.editorframe.show()
+            pass
+            #self.creatorframe = auroraplot_qdccreator.MainWindow(self)
+            #self.creatorframe.show()
         except Exception as e:
             raise e
             print("Error {}".format(e.args[0]))

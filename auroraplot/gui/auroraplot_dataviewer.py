@@ -45,7 +45,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         
         # Set up data canvas and ancillary data canvas
-        self.splitter.setSizes([3,1])
+        self.splitter.setSizes([2,1])
         self.datafig = plt.figure()
         self.datafig.patch.set_facecolor('w')
         self.datacanvas = FigureCanvas(self.datafig)
@@ -111,13 +111,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
                                      np.datetime_as_string(et)]))
             QApplication.flush()
+            td = ap.load_data('AWN', 'LAN1', 'TemperatureData', st, et,
+                              cadence=np.timedelta64(40,'s'))
+            if td is not None and td.data.size:
+                td.mark_missing_data(cadence=2*td.nominal_cadence)
+                self.ancifig.clear()
+                td.plot(figure=self.ancifig.number)
+                self.ancicanvas.draw()
+
             md = ap.load_data('AWN', 'LAN1', 'MagData', st, et,
                               cadence=np.timedelta64(40,'s'))
             if md is not None and md.data.size:
                 md.mark_missing_data(cadence=2*md.nominal_cadence)
                 self.statusBar().showMessage("Plotting data...")
                 self.datafig.clear()
-                md.plot(figure=self.datafig.number,color='k')
+                md.plot(figure=self.datafig.number)
                 self.datacanvas.draw()
                 self.log.append("Plotting completed successfully.")
                 self.statusBar().showMessage("Ready.")

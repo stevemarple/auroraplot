@@ -9,8 +9,8 @@
     <file>icons/dataviewer_128.png</file>
     <file>icons/dataviewer_256.png</file>
     <file>icons/dataviewer_32.png</file>
-    <file>icons/qdceditor_128.png</file>
-    <file>icons/qdceditor_256.png</file>
-    <file>icons/qdceditor_32.png</file>
+    <file>icons/qdccreator_32.png</file>
+    <file>icons/qdccreator_128.png</file>
+    <file>icons/qdccreator_256.png</file>
   </qresource>
 </RCC>
