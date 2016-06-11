@@ -49,8 +49,12 @@ class smart_open:
     already exist.
 
     2. When opening a file for write access it is created with a
-    temporary name ('.tmp' appended) and renamed automatically when
-    closed. This behaviour is automatically disabled when the mode
+    temporary name ('.tmp' appended) and if there are no errors it is
+    renamed automatically when closed. In the case of errors the
+    default is to delete the temporary file (set delete_temp_on_error
+    to True to keep the temporary file).
+
+    The use of a temporary file is automatically disabled when the mode
     includes 'r', 'x', 'a', or '+'. It can be prevented manually by
     setting temp_ext to an empty string.
 
@@ -61,7 +65,11 @@ class smart_open:
 
     """
 
-    def __init__(self, filename, mode='r', temp_ext='.tmp'):
+    def __init__(self, 
+                 filename, 
+                 mode='r', 
+                 temp_ext='.tmp', 
+                 delete_temp_on_error=True):
         self.filename = filename
         self.mode = mode
         # Modes which rely on an existing file should not change the name
@@ -70,6 +78,7 @@ class smart_open:
             self.temp_ext = ''
         else:
             self.temp_ext = temp_ext
+        self.delete_temp_on_error = delete_temp_on_error
         self.file = None
 
     def __enter__(self):
@@ -82,15 +91,18 @@ class smart_open:
         self.file = open(self.filename + self.temp_ext, self.mode)
         return self.file
     
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         if self.file is not None:
             if not self.file.closed:
                 self.file.close()
             if self.file.name != self.filename:
-                logger.debug('renaming %s to %s', 
-                             self.file.name, self.filename)
-                os.rename(self.file.name, self.filename)
-
+                if exc_type is None:
+                    logger.debug('renaming %s to %s', 
+                                 self.file.name, self.filename)
+                    os.rename(self.file.name, self.filename)
+                elif self.delete_temp_on_error:
+                    os.remove(self.file.name)
+                    
 
 def least_squares_error(a, b):
     e = np.power(a - b, 2)
