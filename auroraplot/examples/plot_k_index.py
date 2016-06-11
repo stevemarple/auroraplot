@@ -26,7 +26,7 @@ import auroraplot.datasets.dtu
 
 # For each project set the archive from which data is loaded 
 archives = {
-    'AURORAWATCHNET': 'realtime',
+    'AWN': 'realtime',
 #    'SAMNET': '5s',
     'DTU': 'hz_10s',
     'UIT': 'hz_10s',
@@ -175,10 +175,6 @@ for n_s in n_s_list:
         # appropriate. Indicate UT.
         ax.xaxis.set_major_formatter( \
             dt64.Datetime64Formatter(autolabel='%s (UT)'))
-
-        # Abbreviate AURORAWATCHNET to AWN
-        ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, 
-                                                             title=False)
 
         if qdc is None:
             ax.text(np.mean(ax.get_xlim()), np.mean(ax.get_ylim()), 

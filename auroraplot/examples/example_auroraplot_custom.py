@@ -19,13 +19,13 @@ def add_project_hook(project_name):
     '''This function is used to customise the paths to data files when
     datasets are imported.
 
-    When project_name is "AURORAWATCHNET" /etc/awnet.ini defines the
+    When project_name is "AWN" /etc/awnet.ini defines the
     magnetometer site name then remap the URLs for the site to local
     filenames, eg for use on the AuroraWatchNet magnetometer data
     loggers.
 
     '''
-    if project_name == 'AURORAWATCHNET':
+    if project_name == 'AWN':
         filename = '/etc/awnet.ini'
         if not os.path.exists(filename):
             return

@@ -37,9 +37,9 @@ import auroraplot.datasets.bgs_schools
 
 
 # For each project set the archive from which data is loaded. DTU and
-# UIT are switched to hz_10s when AURORAWATCHNET and SAMNET are
+# UIT are switched to hz_10s when AWN and SAMNET are
 # included.
-default_archive_selection = [['AURORAWATCHNET', 'realtime'], 
+default_archive_selection = [['AWN', 'realtime'], 
                              ['DTU', 'xyz_10s'],
                              ['UIT', 'xyz_10s'],
                              ['INTERMAGNET', 'preliminary'],
@@ -237,8 +237,8 @@ if len(site_list) == 0:
     sys.stderr.write('No sites specified\n')
     sys.exit(1)
 
-if 'AURORAWATCHNET' in project_list or 'SAMNET' in project_list:
-    # AURORAWATCHNET and SAMNET are aligned with H so switch default
+if 'AWN' in project_list or 'SAMNET' in project_list:
+    # AWN and SAMNET are aligned with H so switch default
     # archive for DTU and UIT
     default_archive_selection.append(['DTU', 'hz_10s'])
     default_archive_selection.append(['UIT', 'hz_10s'])
@@ -334,9 +334,6 @@ for fn in plt.get_fignums():
         # Have axis labelled with date or time, as appropriate. Indicate UT.
         ax.xaxis.set_major_formatter( \
             dt64.Datetime64Formatter(autolabel='%s (UT)'))
-
-        # Abbreviate AURORAWATCHNET to AWN
-        ap.datasets.aurorawatchnet.abbreviate_aurorawatchnet(ax, title=False)
 
 if args.save_filename:
     fig.savefig(args.save_filename, dpi=args.dpi)

@@ -401,7 +401,7 @@ def get_image_types(data_type, rolling):
         return conf['master'].get(data_type, 'image_types').split()
         
 
-def my_save_fig(fig, filename, ext_list, abbreviate=False, close=None):
+def my_save_fig(fig, filename, ext_list, close=None):
     # Apply some standard format changes
     axes = fig.get_axes()
     if len(axes) > 1:
@@ -411,13 +411,6 @@ def my_save_fig(fig, filename, ext_list, abbreviate=False, close=None):
 
     for ax in axes:
         ax.grid(True)
-
-        if abbreviate:
-            # Shorten AURORAWATCHNET to AWN
-            tll = ax.yaxis.get_ticklabels() # tick label list
-            labels = [ tl.get_text() for tl in tll]
-            labels = map(lambda x: x.replace('AURORAWATCHNET', 'AWN'), labels)
-            ax.yaxis.set_ticklabels(labels)
 
         # Label axis by hour, set tick marks on 3h intervals
         if dt64.astype(np.diff(ax.get_xlim()), 
@@ -672,8 +665,7 @@ for st, et, rolling in get_start_end_times():
                                   end_time=plot_et)
             my_save_fig(plt.gcf(), 
                         make_filename(tmp_sp_data[0], roll, stackplot=True),
-                        get_image_types(data_type, roll),
-                        abbreviate=True)
+                        get_image_types(data_type, roll))
 
 
 
