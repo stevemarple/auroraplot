@@ -196,6 +196,17 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 def format_project_site(project, site):
     return project + ' / ' + site
 
+def get_projects():
+    """Return list of known projects.
+
+    Only projects imported at the time are listed.  The project key
+    must match its abbreviation, any aliased entries are ignored."""
+    r = []
+    for p in projects:
+        if projects[p]['abbreviation'] == p:
+            r.append(p)
+    return r
+
 def get_project_info(project, info=None):
     if project not in projects:
         raise Exception('Unknown project (%s)' % project)
