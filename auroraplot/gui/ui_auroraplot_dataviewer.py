@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'auroraplot.ui'
+# Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Sat Jun 11 09:27:22 2016
+# Created: Sat Jun 11 11:15:51 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -215,7 +215,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Aurora Plot", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Aurora Plot - Data Viewer", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Start Time:", None, QtGui.QApplication.UnicodeUTF8))
         self.starttimeWidget.setDisplayFormat(QtGui.QApplication.translate("MainWindow", "HH:mm:ss", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Duration:", None, QtGui.QApplication.UnicodeUTF8))

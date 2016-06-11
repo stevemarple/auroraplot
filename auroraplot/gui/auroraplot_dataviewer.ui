@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Aurora Plot</string>
+   <string>Aurora Plot - Data Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
