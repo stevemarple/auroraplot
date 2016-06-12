@@ -323,19 +323,79 @@ class Data(object):
                 '            units : ' + str(units))
 
     def __format__(self, fmt):
-        if fmt == '':
-            return repr(self)
-        elif fmt in ('project', 'site', 'units'):
-            a = getattr(self, fmt)
-            return 'None' if a is None else a
-        elif fmt in ('project_lc', 'site_lc'):
-            a = getattr(self, fmt.split('_')[0])
-            return 'none' if a is None else a.lower()
-        elif self.start_time is None:
-            raise ValueError('start time is not set')
-        else:
-            return dt64.strftime(self.start_time, fmt)
+        """Custom format for Data auroraplot.data.Data objects.
 
+        Time formatting:
+
+            '+': Format the start_time. The characters after '+' are
+                passed to auroraplot.dt64tools.strftime().
+ 
+            'start_time', 'end_time': Output the start or end time
+                conforming to ISO8601 standard
+                ('%Y-%m-%dT%H:%M:%S+0000'). A custom format specifier
+                may be specified similar to the string format
+                function(), append a colon and then the format string
+                to 'start_time' or 'end_time' (e.g.,
+                'start_time:%H:%M:%S %d %B %Y').
+
+        String or numerical formatting:
+
+            'project_lc': Output the project abbreviation in lower
+                case.
+
+            'site_lc': Output the site abbreviation in lower case.
+
+            'project:info': Output project information, info should be
+                replaced with the name of the project information to
+                be inserted, e.g., 'project:url'.
+
+            'site:info': Output site information, info should be
+                replaced with the name of the site information to be
+                inserted, e.g., 'site:location'.
+                
+            Field names which return string or numerical values can be
+            appended by an optional format specifier which is passed
+            to the str.format() function, e.g., 'site:elevation:.1f'.
+            If an optional format specifier is not provided the value
+            is converted to a string by calling str().
+        """
+
+        if fmt.startswith('+'):
+            # Unix date command uses + to mark the format specifier
+            return dt64.strftime(self.start_time, fmt[1:])
+
+        # Cases below are of form 'field' or 'field:fmt2'
+        # Use str.format() to do any additional format conversion
+        f, _, fmt2 = fmt.partition(':') 
+
+        if f in ('start_time', 'end_time'):
+            # Custom formatting by strftime, so return immediately
+            if fmt2:
+                return dt64.strftime(getattr(self, f), fmt2)
+            else:
+                return dt64.strftime(getattr(self, f), 
+                                     '%Y-%m-%dT%H:%M:%S+0000')
+
+        elif f in ('project_lc', 'site_lc'):
+            r = getattr(self, f.split('_')[0])
+            r = 'none' if r is None else r.lower()
+        elif f == 'site':
+            # Takes form 'site:info' or site:info:fmt2'
+            info, _, fmt2 = fmt2.partition(':')
+            r = self.get_site_info(info)
+        elif f == 'project':
+            # Takes form 'project:info' or project:info:fmt2'
+            info, _, fmt2 = fmt2.partition(':')
+            r = self.get_project_info(info)
+        else:
+            raise ValueError("Invalid format ('%s') for type '%s'" % 
+                             (fmt, self.__class__.__name__))
+
+        if fmt2:
+            return ('{0:%s}' % fmt2).format(r)
+        else:
+            return str(r)
+        
 
     def data_description(self):
         return 'Data'
@@ -409,6 +469,8 @@ class Data(object):
     def get_site_info(self, info=None):
         return ap.get_site_info(self.project, self.site, info)
 
+    def get_project_info(self, info=None):
+        return ap.get_project_info(self.project, info)
 
     def get_mean_sample_time(self):
         return dt64.mean(self.sample_start_time, self.sample_end_time)
