@@ -366,7 +366,7 @@ class Data(object):
 
         # Cases below are of form 'field' or 'field:fmt2'
         # Use str.format() to do any additional format conversion
-        f, _, fmt2 = fmt.partition(':') 
+        f, sep, fmt2 = fmt.partition(':') 
 
         if f in ('start_time', 'end_time'):
             # Custom formatting by strftime, so return immediately
@@ -379,14 +379,25 @@ class Data(object):
         elif f in ('project_lc', 'site_lc'):
             r = getattr(self, f.split('_')[0])
             r = 'none' if r is None else r.lower()
+        elif f == 'description':
+            r = self.data_description()
+        elif f == 'date_range':
+            r = dt64.fmt_dt64_range(self.start_time, self.end_time)
         elif f == 'site':
-            # Takes form 'site:info' or site:info:fmt2'
-            info, _, fmt2 = fmt2.partition(':')
-            r = self.get_site_info(info)
+            if sep:
+                # Takes form 'site:info' or site:info:fmt2'
+                info, _, fmt2 = fmt2.partition(':')
+                r = self.get_site_info(info)
+            else:
+                # Just site
+                r = self.site
         elif f == 'project':
-            # Takes form 'project:info' or project:info:fmt2'
-            info, _, fmt2 = fmt2.partition(':')
-            r = self.get_project_info(info)
+            if sep:
+                # Takes form 'project:info' or project:info:fmt2'
+                info, _, fmt2 = fmt2.partition(':')
+                r = self.get_project_info(info)
+            else:
+                r = self.project
         else:
             raise ValueError("Invalid format ('%s') for type '%s'" % 
                              (fmt, self.__class__.__name__))
