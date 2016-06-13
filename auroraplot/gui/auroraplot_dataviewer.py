@@ -27,17 +27,21 @@ import matplotlib.pyplot as plt
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 import auroraplot.magdata
+
+from ui_auroraplot_dataviewer import Ui_MainWindow
+from ui_about import Ui_AboutWindow
+
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 
-from ui_auroraplot_dataviewer import Ui_MainWindow
-from ui_about import Ui_AboutWindow
-
+metasets = [auroraplot.datasets.aurorawatchnet,
+            auroraplot.datasets.samnet,
+            auroraplot.datasets.uit,
+            auroraplot.datasets.dtu]
 
 __version__ = '2016.0.1'
-
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -55,6 +59,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ancicanvas = FigureCanvas(self.ancifig)
         self.anciLayout.addWidget(self.ancicanvas)
         
+        # Set up top level of dataset selection
+        self.datasets = Datasets(self.datasetsListWidget)
+        for n in range(len(metasets)):
+            self.projectBox.addItem("".join([metasets[n].project['abbreviation'],
+                                             ', ',
+                                             metasets[n].project['name']]))
+        self.projectBox.currentIndexChanged.connect(self.projectIsChanged)
+        self.projectBox.setCurrentIndex(0)
+        self.projectIsChanged()
+        self.addDatasetButton.clicked.connect(self.addDatasetIsClicked)
+        self.removeDatasetButton.clicked.connect(self.removeDatasetIsClicked)
+
         # Set up time selection
         self.durationUnitsBox.addItem("days")
         self.durationUnitsBox.addItem("hours")
@@ -83,10 +99,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logClearButton.clicked.connect(self.log.clear)
         self.logSaveButton.clicked.connect(self.log.save)
         
-        # Define actions
+        # Define other actions
         self.actionAbout.triggered.connect(self.showAbout)
         self.goButton.clicked.connect(self.goClicked)
-                
+
+    def projectIsChanged(self):
+        self.projectIndex = self.projectBox.currentIndex()
+        self.siteKeysList = list(metasets[self.projectIndex].project['sites'].keys())
+        self.siteBox.clear()
+        for s in self.siteKeysList:
+            self.siteBox.addItem("".join([s,', ',
+                    metasets[self.projectIndex].project['sites'][s]['location']]))
+
+    def addDatasetIsClicked(self):
+        siteIndex = self.siteBox.currentIndex()
+        site = self.siteKeysList[siteIndex]
+        projectIndex = self.projectIndex
+        projectText = metasets[projectIndex].project['abbreviation']
+        channelsText = self.channelsLineEdit.text()
+        channels = int(channelsText) # Needs proper parsing
+        ### addDataset(self,projectIndex,projectText,site,siteText,channels,channelsText)
+        self.datasets.addDataset(projectIndex,projectText,site,site,channels,channelsText)
+
+    def removeDatasetIsClicked(self):
+        self.datasets.removeDataset(self.datasetsListWidget.currentItem())
+
     def showAbout(self):
         aboutbox = AboutWindow()
         aboutbox.exec()
@@ -180,6 +217,37 @@ class Log:
                 self.append("Failed to write log to file")
                 self.append("Error {}".format(e.args[0]))
 
+class Datasets:
+    def __init__(self,listWidget):
+        self.listWidget = listWidget
+        self.itemWidgetList = []
+        self.projectIndexList = []
+        self.siteList = []
+        self.channelsList = []
+
+    def addDataset(self,projectIndex,projectText,site,siteText,channels,channelsText):
+        self.projectIndexList.append(projectIndex)
+        self.siteList.append(site)
+        self.channelsList.append(channels)
+        newItem = QListWidgetItem()
+        newItem.setText("".join([projectText,' / ',siteText,' / ',channelsText]))
+        self.itemWidgetList.append(newItem)
+        self.listWidget.addItem(newItem)
+
+    def removeDataset(self,itemToRemove):
+        # removes correct item from the list widget, even if order has changed
+        # Seems the listWidget does not take ownership of item, so should delete
+        # it in python to save memory (not the case when using clear())
+        self.listWidget.takeItem(self.listWidget.row(itemToRemove))
+        # also need to remove the dataset from other lists
+        for n in range(len(self.itemWidgetList)):
+            if self.itemWidgetList[n] is itemToRemove:
+                self.projectIndexList.pop(n)
+                self.siteList.pop(n)
+                self.channelsList.pop(n)
+                self.itemWidgetList.pop(n)
+                break
+        
 class CheckOption:
     def __init__(self,listWidget,optionText="Check option",checked=True):
         self.listItem = QListWidgetItem(optionText,listWidget)
