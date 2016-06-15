@@ -174,6 +174,21 @@ sites = {
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
         }, # BGS5
 
+    'BGS8': {
+        'location': 'Eskdalemuir, UK',
+        'latitude': 55.32,
+        'longitude': -3.2,
+        'elevation': 245,
+        'start_time': np.datetime64('2016-06-02T00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 750e-9, # Estimated
+        'k_index_filter': None,
+        'copyright': 'British Geological Survey.',
+        'license': cc3_by_nc_sa,
+        'attribution':  'British Geological Survey.',
+        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        }, # BGS8
+
     'BGS9': {
         'location': 'Edinburgh, UK',
         'latitude': 55.952,
