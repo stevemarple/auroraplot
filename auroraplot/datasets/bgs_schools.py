@@ -79,11 +79,11 @@ def load_bgs_sch_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            ltkwa = {}
+            kw = {}
             if file_name.endswith('.csv'):
-                ltkwa['delimiter'] = ','
+                kw['delimiter'] = ','
 
-            data = np.loadtxt(uh, unpack=True, **ltkwa)
+            data = np.genfromtxt(uh, unpack=True, **kw)
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
