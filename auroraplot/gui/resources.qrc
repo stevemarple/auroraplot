@@ -3,6 +3,7 @@
     <file>About</file>
   </qresource>
   <qresource prefix="images">
+    <file>icons/plot_22.png</file>
     <file>icons/auroraplot_128.png</file>
     <file>icons/auroraplot_256.png</file>
     <file>icons/auroraplot_32.png</file>

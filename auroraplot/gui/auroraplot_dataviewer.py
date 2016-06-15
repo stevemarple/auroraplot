@@ -43,6 +43,11 @@ class Datasets:
                             auroraplot.datasets.uit,
                             auroraplot.datasets.dtu]
         self.dataTypes = {'Magnetic field, nT':['MagData','MagQDC'],
+                          'Magnetometer Stack, nT':['MagData'],
+                          'Riometer power, dB':['RioPower','RioQDC'],
+                          'Riometer raw power':['RioRawPower'],
+                          'Riometer absorption, dB':['RioAbs'],
+                          'Riometer keogram, latitude/dB':['RioKeo'],
                           'Temperature, Celcius':['TemperatureData'],
                           'Voltage, V':['VoltageData']}
 
@@ -138,12 +143,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.currentDataType = None
         self.datasets = Datasets()
         self.plotsTreeWidget.setColumnCount(4)
-        self.plotsTreeWidget.setHeaderLabels(["Plot type","Project","Site","Channels"])
+        self.plotsTreeWidget.setHeaderLabels(["Plot type","Project",
+                                              "Site","Channels"])
+        self.plotsTreeWidget.header().resizeSection(0,150)
+        self.plotsTreeWidget.header().resizeSection(1,60)
+        self.plotsTreeWidget.header().resizeSection(2,60)
         for u in self.datasets.listAllTypes():
             self.plotTypeBox.addItem(u)
         self.plotTypeBox.setCurrentIndex(0)
         self.addPlotButton.clicked.connect(self.addPlotIsClicked)
-        self.plotsTreeWidget.itemClicked.connect(self.plotsTreeIsClicked)
+        self.plotsTreeWidget.itemClicked.connect(self.dataTypeIsChanged)
         self.addDatasetButton.clicked.connect(self.addDatasetIsClicked)
         self.projectBox.currentIndexChanged.connect(self.projectIsChanged)
         self.projectBox.setCurrentIndex(0)
@@ -186,30 +195,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def addPlotIsClicked(self):
         self.currentDataType = self.plotTypeBox.currentText()
         newItem = QTreeWidgetItem()
+        pixmap = QPixmap()
+        pixmap.load(':/images/icons/plot_22.png')
+        icon = QIcon(pixmap)
+        newItem.setIcon(0,icon)
         newItem.setText(0,self.currentDataType)
         self.plotsTreeWidget.addTopLevelItem(newItem)
         self.plotsTreeWidget.setCurrentItem(newItem)
         self.plotsTreeWidget.expandItem(newItem)
         self.dataTypeIsChanged()
 
-    def plotsTreeIsClicked(self):
+    def dataTypeIsChanged(self):
         itemClicked = self.plotsTreeWidget.currentItem()
         # Find top level item, there are only 2 levels. Top level has no parent
-        if itemClicked.parent() is None:
+        if itemClicked is None:
+            dataType = None
+        elif itemClicked.parent() is None:
             dataType = itemClicked.text(0)
         elif itemClicked.parent().parent() is None:
             dataType = itemClicked.parent().text(0)
-        else:
-            return
         self.currentDataType = dataType
-        self.dataTypeIsChanged()
-
-    def dataTypeIsChanged(self):
         self.projectBox.clear()
         self.siteBox.clear()
-        projectAbbrs, projectNames = self.datasets.getProjects(dataType=self.currentDataType)
+        self.methodBox.clear()
+        if self.currentDataType is None:
+            return
+        projectAbbrs, projectNames = self.datasets.getProjects(
+                                              dataType=self.currentDataType)
         for n in range(len(projectNames)):
-            self.projectBox.addItem("".join([projectAbbrs[n],", ",projectNames[n]]))
+            self.projectBox.addItem("".join([projectAbbrs[n],", ",
+                                             projectNames[n]]))
         self.projectIsChanged()
         
     def projectIsChanged(self):
@@ -252,7 +267,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if currentTreeItem.parent() is None:
             self.plotsTreeWidget.takeTopLevelItem(
                 self.plotsTreeWidget.indexOfTopLevelItem(currentTreeItem))
-            self.plotsTreeIsClicked() # Need to update currentDataType
+            self.dataTypeIsChanged() # Need to update currentDataType
         elif currentTreeItem.parent().parent() is None:
             parent = currentTreeItem.parent()
             parent.takeChild(parent.indexOfChild(currentTreeItem))

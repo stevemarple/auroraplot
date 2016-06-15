@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_launcher.ui'
 #
-# Created: Wed Jun 15 08:33:58 2016
+# Created: Wed Jun 15 14:56:25 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
