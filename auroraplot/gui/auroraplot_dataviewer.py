@@ -252,11 +252,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if currentTreeItem.parent() is None:
             self.plotsTreeWidget.takeTopLevelItem(
                 self.plotsTreeWidget.indexOfTopLevelItem(currentTreeItem))
+            self.plotsTreeIsClicked() # Need to update currentDataType
         elif currentTreeItem.parent().parent() is None:
             parent = currentTreeItem.parent()
-            parent.removeChild(currentTreeItem)
-            #parent.takeChild(parent.indexOfChild(currentTreeItem))
-
+            parent.takeChild(parent.indexOfChild(currentTreeItem))
+        
     def showAbout(self):
         aboutbox = AboutWindow()
         aboutbox.exec()
