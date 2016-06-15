@@ -42,15 +42,11 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="verticalLayoutWidget_3">
-       <layout class="QVBoxLayout" name="dataLayout">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
-        </property>
-       </layout>
-      </widget>
       <widget class="QWidget" name="verticalLayoutWidget">
-       <layout class="QVBoxLayout" name="anciLayout"/>
+       <layout class="QVBoxLayout" name="dataLayout"/>
+      </widget>
+      <widget class="QWidget" name="verticalLayoutWidget_2">
+       <layout class="QVBoxLayout" name="verticalLayout_4"/>
       </widget>
      </widget>
     </item>
@@ -69,13 +65,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>420</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>300</width>
+          <width>420</width>
           <height>16777215</height>
          </size>
         </property>
@@ -87,7 +83,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>300</width>
+           <width>420</width>
            <height>374</height>
           </rect>
          </property>
@@ -95,7 +91,27 @@
           <string>Data sets</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="3" column="1" colspan="2">
+          <item row="4" column="1" colspan="2">
+           <widget class="QComboBox" name="projectBox"/>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QComboBox" name="methodBox"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Data:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="2">
+           <widget class="QPushButton" name="addDatasetButton">
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
            <widget class="QComboBox" name="siteBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -105,51 +121,64 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="2">
-           <widget class="QPushButton" name="addDatasetButton">
+          <item row="2" column="2">
+           <widget class="QPushButton" name="addPlotButton">
             <property name="text">
-             <string>Add</string>
+             <string>Add New Plot</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="7" column="1">
            <widget class="QLineEdit" name="channelsLineEdit">
             <property name="placeholderText">
              <string>eg 0-3,5,7,10-12</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>Project:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1" colspan="2">
-           <widget class="QComboBox" name="projectBox"/>
+          <item row="1" column="0" colspan="3">
+           <widget class="QPushButton" name="removeDatasetButton">
+            <property name="text">
+             <string>Remove</string>
+            </property>
+           </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="0" colspan="2">
+           <widget class="QComboBox" name="plotTypeBox"/>
+          </item>
+          <item row="0" column="0" colspan="3">
+           <widget class="QTreeWidget" name="plotsTreeWidget">
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="5" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>Site:</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Channels</string>
+             <string>Channels:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QListWidget" name="datasetsListWidget"/>
-          </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="QPushButton" name="removeDatasetButton">
-            <property name="text">
-             <string>Remove</string>
+          <item row="3" column="1">
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -160,7 +189,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>300</width>
+           <width>420</width>
            <height>374</height>
           </rect>
          </property>
@@ -168,17 +197,33 @@
           <string>Date and time</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="0" colspan="3">
+          <item row="2" column="1">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Start Time:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="buddy">
+             <cstring>starttimeWidget</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QComboBox" name="durationUnitsBox"/>
+          </item>
+          <item row="1" column="1" colspan="3">
            <widget class="QCalendarWidget" name="calendarWidget">
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>280</width>
               <height>250</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
+              <width>280</width>
               <height>280</height>
              </size>
             </property>
@@ -212,20 +257,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Start Time:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-            <property name="buddy">
-             <cstring>starttimeWidget</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="2" column="2">
            <widget class="QTimeEdit" name="starttimeWidget">
             <property name="displayFormat">
              <string>HH:mm:ss</string>
@@ -235,7 +267,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="4" column="1">
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Duration:</string>
@@ -245,7 +277,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
+          <item row="2" column="3">
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>UTC</string>
@@ -255,10 +287,10 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="4" column="2">
            <widget class="QSpinBox" name="durationBox"/>
           </item>
-          <item row="6" column="1">
+          <item row="6" column="2">
            <widget class="QWidget" name="widget" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -268,7 +300,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
+          <item row="0" column="1">
            <widget class="QWidget" name="widget_2" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -278,8 +310,31 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="2">
-           <widget class="QComboBox" name="durationUnitsBox"/>
+          <item row="1" column="0">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="4">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -288,7 +343,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>300</width>
+           <width>420</width>
            <height>374</height>
           </rect>
          </property>
@@ -322,7 +377,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>300</width>
+           <width>420</width>
            <height>374</height>
           </rect>
          </property>
@@ -365,13 +420,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>300</width>
+          <width>420</width>
           <height>100</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>320</width>
+          <width>420</width>
           <height>100</height>
          </size>
         </property>
@@ -404,6 +459,11 @@
           <string>Auto-update</string>
          </property>
         </widget>
+        <zorder>goButton</zorder>
+        <zorder>autoUpdateCheckBox</zorder>
+        <zorder>splitter</zorder>
+        <zorder>splitter</zorder>
+        <zorder>splitter</zorder>
        </widget>
       </item>
      </layout>
@@ -416,7 +476,7 @@
      <x>0</x>
      <y>0</y>
      <width>947</width>
-     <height>24</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

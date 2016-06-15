@@ -36,12 +36,91 @@ import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 
-metasets = [auroraplot.datasets.aurorawatchnet,
-            auroraplot.datasets.samnet,
-            auroraplot.datasets.uit,
-            auroraplot.datasets.dtu]
+class Datasets:
+    def __init__(self):
+        self.datasetList = [auroraplot.datasets.aurorawatchnet,
+                            auroraplot.datasets.samnet,
+                            auroraplot.datasets.uit,
+                            auroraplot.datasets.dtu]
+        self.dataTypes = {'Magnetic field, nT':['MagData','MagQDC'],
+                          'Temperature, Celcius':['TemperatureData'],
+                          'Voltage, V':['VoltageData']}
 
-__version__ = '2016.0.1'
+    def listAllTypes(self):
+        return list(sorted(self.dataTypes.keys()))
+
+    def getDataMethods(self,project=None,dataType=None):
+        # project is a string beginning with abbreviation
+        # Used to check which methods associated
+        # with each datatype are available to project
+        # Returns subset of methods as from self.dataTypes
+        # as a list
+        if dataType is None:
+            return [None]
+        allMethods = self.dataTypes[dataType]
+        if project is None:
+            return allMethods
+        for i_d in range(len(self.datasetList)):
+            abbr = self.datasetList[i_d].project['abbreviation']
+            if len(project)<len(abbr):
+                continue
+            if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+                continue
+            # If we get here, we found match for project
+            availableMethods = dir(self.datasetList[i_d])
+            return [t for t in allMethods if t in availableMethods]
+        # Didn't find a match for project
+        return [None]
+    
+    def getProjects(self,dataType=None,project=None):
+        # dataType is a key from the self.dataTypes dict
+        # project is None, or text that begins with project abbreviation
+        # returns lists of project abbreviations and names 
+        projectAbbrs = []
+        projectNames = []
+        for i_d in range(len(self.datasetList)):
+            if not dataType is None:
+                allMethods = self.dataTypes[dataType]
+                availableMethods = dir(self.datasetList[i_d])
+                if all([not t in availableMethods for t in allMethods]):
+                    continue
+            if not project is None:
+                abbr = self.datasetList[i_d].project['abbreviation']
+                if len(project)<len(abbr):
+                    continue
+                if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+                    continue
+            projectAbbrs.append(self.datasetList[i_d].project['abbreviation'])
+            projectNames.append(self.datasetList[i_d].project['name'])
+        return projectAbbrs,projectNames
+    
+    def getSites(self,project=None,dataType=None,site=None):
+        # project is None, or text that begins with project abbreviation
+        # dataType is a key from the self.dataTypes dict
+        siteKeys = []
+        siteLocs = []
+        for i_d in range(len(self.datasetList)):
+            if not project is None:
+                abbr = self.datasetList[i_d].project['abbreviation']
+                if len(project)<len(abbr):
+                    continue
+                if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+                    continue
+            if not dataType is None:
+                wantedTypes = self.dataTypes[dataType]
+                currentTypes = dir(self.datasetList[i_d])
+                if all([t not in currentTypes for t in wantedTypes]):
+                    continue
+            allSiteKeys = list(sorted(self.datasetList[i_d].project['sites'].keys()))
+            for k in allSiteKeys:
+                if site is None: 
+                    siteKeys.append(k)
+                    siteLocs.append(self.datasetList[i_d].project['sites'][k]['location'])
+                elif all([site[n] is k[n] for n in range(len(k))]):
+                    siteKeys.append(k)
+                    siteLocs.append(self.datasetList[i_d].project['sites'][k]['location'])
+        return siteKeys,siteLocs
+            
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -50,27 +129,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Set up data canvas and ancillary data canvas
         self.splitter.setSizes([2,1])
-        self.datafig = plt.figure()
-        self.datafig.patch.set_facecolor('w')
-        self.datacanvas = FigureCanvas(self.datafig)
-        self.dataLayout.addWidget(self.datacanvas)
-        self.ancifig = plt.figure()
-        self.ancifig.patch.set_facecolor('w')
-        self.ancicanvas = FigureCanvas(self.ancifig)
-        self.anciLayout.addWidget(self.ancicanvas)
+        self.dataFig = plt.figure()
+        self.dataFig.patch.set_facecolor('w')
+        self.dataCanvas = FigureCanvas(self.dataFig)
+        self.dataLayout.addWidget(self.dataCanvas)
         
-        # Set up top level of dataset selection
-        self.datasets = Datasets(self.datasetsListWidget)
-        for n in range(len(metasets)):
-            self.projectBox.addItem("".join([metasets[n].project['abbreviation'],
-                                             ', ',
-                                             metasets[n].project['name']]))
+        # Set up data types
+        self.currentDataType = None
+        self.datasets = Datasets()
+        self.plotsTreeWidget.setColumnCount(4)
+        self.plotsTreeWidget.setHeaderLabels(["Plot type","Project","Site","Channels"])
+        print(self.datasets.listAllTypes())
+        print(self.datasets.listAllTypes())
+        for u in self.datasets.listAllTypes():
+            self.plotTypeBox.addItem(u)
+        self.plotTypeBox.setCurrentIndex(0)
+        self.addPlotButton.clicked.connect(self.addPlotIsClicked)
+        self.plotsTreeWidget.itemClicked.connect(self.plotsTreeIsClicked)
+        self.addDatasetButton.clicked.connect(self.addDatasetIsClicked)
         self.projectBox.currentIndexChanged.connect(self.projectIsChanged)
         self.projectBox.setCurrentIndex(0)
         self.projectIsChanged()
-        self.addDatasetButton.clicked.connect(self.addDatasetIsClicked)
         self.removeDatasetButton.clicked.connect(self.removeDatasetIsClicked)
 
+        
         # Set up time selection
         self.durationUnitsBox.addItem("days")
         self.durationUnitsBox.addItem("hours")
@@ -103,26 +185,79 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionAbout.triggered.connect(self.showAbout)
         self.goButton.clicked.connect(self.goClicked)
 
-    def projectIsChanged(self):
-        self.projectIndex = self.projectBox.currentIndex()
-        self.siteKeysList = list(metasets[self.projectIndex].project['sites'].keys())
+    def addPlotIsClicked(self):
+        self.currentDataType = self.plotTypeBox.currentText()
+        newItem = QTreeWidgetItem()
+        newItem.setText(0,self.currentDataType)
+        self.plotsTreeWidget.addTopLevelItem(newItem)
+        self.plotsTreeWidget.setCurrentItem(newItem)
+        self.plotsTreeWidget.expandItem(newItem)
+        self.dataTypeIsChanged()
+
+    def plotsTreeIsClicked(self):
+        itemClicked = self.plotsTreeWidget.currentItem()
+        # Find top level item, there are only 2 levels. Top level has no parent
+        if itemClicked.parent() is None:
+            dataType = itemClicked.text(0)
+        elif itemClicked.parent().parent() is None:
+            dataType = itemClicked.parent().text(0)
+        else:
+            return
+        self.currentDataType = dataType
+        self.dataTypeIsChanged()
+
+    def dataTypeIsChanged(self):
+        self.projectBox.clear()
         self.siteBox.clear()
-        for s in self.siteKeysList:
-            self.siteBox.addItem("".join([s,', ',
-                    metasets[self.projectIndex].project['sites'][s]['location']]))
-
+        projectAbbrs, projectNames = self.datasets.getProjects(dataType=self.currentDataType)
+        for n in range(len(projectNames)):
+            self.projectBox.addItem("".join([projectAbbrs[n],", ",projectNames[n]]))
+        self.projectIsChanged()
+        
+    def projectIsChanged(self):
+        project = self.projectBox.currentText()
+        self.methodBox.clear()
+        self.siteBox.clear()
+        methods = self.datasets.getDataMethods(project=project,
+                                               dataType=self.currentDataType)
+        siteKeys, siteLocs = self.datasets.getSites(project=project,
+                                                    dataType=self.currentDataType)
+        for n in range(len(siteKeys)):
+            self.siteBox.addItem("".join([siteKeys[n],", ",siteLocs[n]]))
+        for n in range(len(methods)):
+            self.methodBox.addItem(methods[n])
+            
     def addDatasetIsClicked(self):
-        siteIndex = self.siteBox.currentIndex()
-        site = self.siteKeysList[siteIndex]
-        projectIndex = self.projectIndex
-        projectText = metasets[projectIndex].project['abbreviation']
+        currentTreeItem = self.plotsTreeWidget.currentItem()
+        project = self.projectBox.currentText()
+        site = self.siteBox.currentText()
+        dataMethod = self.methodBox.currentText()
         channelsText = self.channelsLineEdit.text()
-        channels = int(channelsText) # Needs proper parsing
-        ### addDataset(self,projectIndex,projectText,site,siteText,channels,channelsText)
-        self.datasets.addDataset(projectIndex,projectText,site,site,channels,channelsText)
-
+        # Find top level item, there are only 2 levels. Top level has no parent
+        if currentTreeItem is None:
+            return
+        if currentTreeItem.parent() is None:
+            topLevelItem = currentTreeItem
+        elif currentTreeItem.parent().parent() is None:
+            topLevelItem = currentTreeItem.parent()
+        newItem = QTreeWidgetItem()
+        newItem.setText(0,dataMethod)
+        newItem.setText(1,project)
+        newItem.setText(2,site)
+        newItem.setText(3,channelsText)
+        topLevelItem.addChild(newItem)
+            
     def removeDatasetIsClicked(self):
-        self.datasets.removeDataset(self.datasetsListWidget.currentItem())
+        currentTreeItem = self.plotsTreeWidget.currentItem()
+        if currentTreeItem is None:
+            return
+        if currentTreeItem.parent() is None:
+            self.plotsTreeWidget.takeTopLevelItem(
+                self.plotsTreeWidget.indexOfTopLevelItem(currentTreeItem))
+        elif currentTreeItem.parent().parent() is None:
+            parent = currentTreeItem.parent()
+            parent.removeChild(currentTreeItem)
+            #parent.takeChild(parent.indexOfChild(currentTreeItem))
 
     def showAbout(self):
         aboutbox = AboutWindow()
@@ -131,6 +266,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def goClicked(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
+            numberOfPlots = self.plotsTreeWidget.topLevelItemCount()
             self.statusBar().showMessage("Loading data...")
             Qdate = self.calendarWidget.selectedDate()
             Qtime = self.starttimeWidget.time()
@@ -148,27 +284,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
                                      np.datetime_as_string(et)]))
             QApplication.flush()
-            td = ap.load_data('AWN', 'LAN1', 'TemperatureData', st, et,
-                              cadence=np.timedelta64(40,'s'))
-            if td is not None and td.data.size:
-                td.mark_missing_data(cadence=2*td.nominal_cadence)
-                self.ancifig.clear()
-                td.plot(figure=self.ancifig.number)
-                self.ancicanvas.draw()
-
-            md = ap.load_data('AWN', 'LAN1', 'MagData', st, et,
-                              cadence=np.timedelta64(40,'s'))
-            if md is not None and md.data.size:
-                md.mark_missing_data(cadence=2*md.nominal_cadence)
-                self.statusBar().showMessage("Plotting data...")
-                self.datafig.clear()
-                md.plot(figure=self.datafig.number)
-                self.datacanvas.draw()
-                self.log.append("Plotting completed successfully.")
-                self.statusBar().showMessage("Ready.")
-            else:
-                self.log.append("No data.")
-                self.statusBar().showMessage("No data.")
+            self.dataFig.clear()
+            for sp in range(numberOfPlots):
+                ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)                
+                topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
+                numberOfData = topLevelItem.childCount()
+                for p in range(numberOfData):
+                    child = topLevelItem.child(p)
+                    method = child.text(0)
+                    project = child.text(1)
+                    site = child.text(2)
+                    channels = child.text(3)
+                    pabbr,pnames = self.datasets.getProjects(project=project)
+                    sabbr,snames = self.datasets.getSites(project=project,site=site)
+                    try:
+                        md = ap.load_data(pabbr[0], sabbr[0], method, st, et,
+                                          cadence=np.timedelta64(40,'s'))
+                        if md is not None and md.data.size:
+                            md.mark_missing_data(cadence=2*md.nominal_cadence)
+                            self.statusBar().showMessage("Plotting data...")
+                            #self.datafig.clear()
+                            md.plot(axes = ax)
+                            self.dataCanvas.draw()
+                            self.log.append("Plotting completed successfully.")
+                            self.statusBar().showMessage("Ready.")
+                        else:
+                            self.log.append("No data.")
+                            self.statusBar().showMessage("No data.")
+                    except Exception as e:
+                        self.log.append("Loading data failed.")
+                        #self.log.append("Error {}".format(e.args[0]))
         except Exception as e:
             self.log.append("Plotting failed.")
             self.log.append("Error {}".format(e.args[0]))
@@ -216,37 +361,6 @@ class Log:
             except Exception as e:
                 self.append("Failed to write log to file")
                 self.append("Error {}".format(e.args[0]))
-
-class Datasets:
-    def __init__(self,listWidget):
-        self.listWidget = listWidget
-        self.itemWidgetList = []
-        self.projectIndexList = []
-        self.siteList = []
-        self.channelsList = []
-
-    def addDataset(self,projectIndex,projectText,site,siteText,channels,channelsText):
-        self.projectIndexList.append(projectIndex)
-        self.siteList.append(site)
-        self.channelsList.append(channels)
-        newItem = QListWidgetItem()
-        newItem.setText("".join([projectText,' / ',siteText,' / ',channelsText]))
-        self.itemWidgetList.append(newItem)
-        self.listWidget.addItem(newItem)
-
-    def removeDataset(self,itemToRemove):
-        # removes correct item from the list widget, even if order has changed
-        # Seems the listWidget does not take ownership of item, so should delete
-        # it in python to save memory (not the case when using clear())
-        self.listWidget.takeItem(self.listWidget.row(itemToRemove))
-        # also need to remove the dataset from other lists
-        for n in range(len(self.itemWidgetList)):
-            if self.itemWidgetList[n] is itemToRemove:
-                self.projectIndexList.pop(n)
-                self.siteList.pop(n)
-                self.channelsList.pop(n)
-                self.itemWidgetList.pop(n)
-                break
         
 class CheckOption:
     def __init__(self,listWidget,optionText="Check option",checked=True):
