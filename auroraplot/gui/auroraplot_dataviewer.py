@@ -128,7 +128,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         
         # Set up data canvas and ancillary data canvas
-        self.splitter.setSizes([2,1])
+        self.splitter.setSizes([1,0])
         self.dataFig = plt.figure()
         self.dataFig.patch.set_facecolor('w')
         self.dataCanvas = FigureCanvas(self.dataFig)
@@ -139,8 +139,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.datasets = Datasets()
         self.plotsTreeWidget.setColumnCount(4)
         self.plotsTreeWidget.setHeaderLabels(["Plot type","Project","Site","Channels"])
-        print(self.datasets.listAllTypes())
-        print(self.datasets.listAllTypes())
         for u in self.datasets.listAllTypes():
             self.plotTypeBox.addItem(u)
         self.plotTypeBox.setCurrentIndex(0)
