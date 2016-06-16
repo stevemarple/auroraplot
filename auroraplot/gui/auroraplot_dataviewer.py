@@ -35,13 +35,15 @@ import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
+import auroraplot.datasets.bgs_schools
 
 class Datasets:
     def __init__(self):
         self.datasetList = [auroraplot.datasets.aurorawatchnet,
                             auroraplot.datasets.samnet,
                             auroraplot.datasets.uit,
-                            auroraplot.datasets.dtu]
+                            auroraplot.datasets.dtu,
+                            auroraplot.datasets.bgs_schools]
         self.dataTypes = {'Magnetic field, nT':['MagData','MagQDC'],
                           'Magnetometer Stack, nT':['MagData'],
                           'Riometer power, dB':['RioPower','RioQDC'],
@@ -69,7 +71,7 @@ class Datasets:
             abbr = self.datasetList[i_d].project['abbreviation']
             if len(project)<len(abbr):
                 continue
-            if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+            if any([project[n] != abbr[n] for n in range(len(abbr))]):
                 continue
             # If we get here, we found match for project
             availableDataTypes = dir(self.datasetList[i_d])
@@ -93,7 +95,7 @@ class Datasets:
                 abbr = self.datasetList[i_d].project['abbreviation']
                 if len(project)<len(abbr):
                     continue
-                if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+                if any([project[n] != abbr[n] for n in range(len(abbr))]):
                     continue
             projectAbbrs.append(self.datasetList[i_d].project['abbreviation'])
             projectNames.append(self.datasetList[i_d].project['name'])
@@ -110,7 +112,7 @@ class Datasets:
                 abbr = self.datasetList[i_d].project['abbreviation']
                 if len(project)<len(abbr):
                     continue
-                if any([not project[n] is abbr[n] for n in range(len(abbr))]):
+                if any([project[n] != abbr[n] for n in range(len(abbr))]):
                     continue
             if not plotType is None:
                 wantedTypes = self.dataTypes[plotType]
@@ -122,7 +124,7 @@ class Datasets:
                 if site is None: 
                     siteKeys.append(k)
                     siteLocs.append(self.datasetList[i_d].project['sites'][k]['location'])
-                elif all([site[n] is k[n] for n in range(len(k))]):
+                elif all([site[n] == k[n] for n in range(len(k))]):
                     siteKeys.append(k)
                     siteLocs.append(self.datasetList[i_d].project['sites'][k]['location'])
         return siteKeys,siteLocs
@@ -138,7 +140,7 @@ class Datasets:
             projectAbbr = self.datasetList[i_d].project['abbreviation']
             if len(project)<len(projectAbbr):
                 continue
-            if any([not project[n] is projectAbbr[n] for n in range(len(projectAbbr))]):
+            if any([project[n] != projectAbbr[n] for n in range(len(projectAbbr))]):
                 continue
             # if it gets here, found match for project, now look for a match for site
             projectInd = i_d
@@ -146,7 +148,7 @@ class Datasets:
             for k in allSiteKeys:
                 if len(site) < len(k): 
                     continue
-                elif all([site[n] is k[n] for n in range(len(k))]):
+                elif all([site[n] == k[n] for n in range(len(k))]):
                     if dataType in list(self.datasetList[i_d].project['sites'][k]['data_types'].keys()):
                         siteKey = k
             if not siteKey is None:
@@ -231,27 +233,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.goButton.clicked.connect(self.goClicked)
 
     def addPlotIsClicked(self):
-        self.currentPlotType = self.plotTypeBox.currentText()
+        plotType = self.plotTypeBox.currentText()
         newItem = QTreeWidgetItem()
         pixmap = QPixmap()
         pixmap.load(':/images/icons/plot_22.png')
         icon = QIcon(pixmap)
         newItem.setIcon(0,icon)
-        newItem.setText(0,self.currentPlotType)
+        newItem.setText(0,plotType)
         self.plotsTreeWidget.addTopLevelItem(newItem)
         self.plotsTreeWidget.setCurrentItem(newItem)
         self.plotsTreeWidget.expandItem(newItem)
         self.plotTypeIsChanged()
 
     def plotTypeIsChanged(self):
-        itemClicked = self.plotsTreeWidget.currentItem()
-        # Find top level item, there are only 2 levels. Top level has no parent
-        if itemClicked is None:
+        currentItem = self.plotsTreeWidget.currentItem()
+        # Find top level item, there are only 2 levels.
+        # According to Qt Docs, top level has no parent
+        if currentItem is None:
             plotType = None
-        elif itemClicked.parent() is None:
-            plotType = itemClicked.text(0)
-        elif itemClicked.parent().parent() is None:
-            plotType = itemClicked.parent().text(0)
+        elif currentItem.parent() is None:
+            plotType = currentItem.text(0)
+        elif currentIitem.parent().parent() is None:
+            plotType = currentItem.parent().text(0)
+        if self.currentPlotType == plotType:
+            return
         self.currentPlotType = plotType
         self.projectBox.clear()
         self.siteBox.clear()
