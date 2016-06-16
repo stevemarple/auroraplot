@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Thu Jun 16 09:04:53 2016
+# Created: Thu Jun 16 13:44:37 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -270,7 +270,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Aurora Plot - Data Viewer", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Data type:", None, QtGui.QApplication.UnicodeUTF8))
-        self.channelsLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "eg 0-3,5,7,10-12", None, QtGui.QApplication.UnicodeUTF8))
+        self.channelsLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "eg. 3-7,9,12 or H,Z", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Channels:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("MainWindow", "Plot type:", None, QtGui.QApplication.UnicodeUTF8))
         self.addDatasetButton.setText(QtGui.QApplication.translate("MainWindow", "Add data set", None, QtGui.QApplication.UnicodeUTF8))

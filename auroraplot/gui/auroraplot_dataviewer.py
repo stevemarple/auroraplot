@@ -52,6 +52,14 @@ class Datasets:
                           'Riometer keogram, latitude/dB':['RioKeo'],
                           'Temperature, Celcius':['TemperatureData'],
                           'Voltage, V':['VoltageData']}
+        self.yLabels = {'Magnetic field, nT':'Magnetic field, nT',
+                          'Magnetometer Stack, nT':'Magnetic field, nT',
+                          'Riometer power, dB':'Power, dB',
+                          'Riometer raw power':'Raw power',
+                          'Riometer absorption, dB':'Absorption, dB',
+                          'Riometer keogram, latitude/dB':'Latitude',
+                          'Temperature, Celcius':'Temperature, Celcius',
+                          'Voltage, V':'Voltage, V'}
 
     def listAllPlotTypes(self):
         return list(sorted(self.dataTypes.keys()))
@@ -253,7 +261,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             plotType = None
         elif currentItem.parent() is None:
             plotType = currentItem.text(0)
-        elif currentIitem.parent().parent() is None:
+        elif currentItem.parent().parent() is None:
             plotType = currentItem.parent().text(0)
         if self.currentPlotType == plotType:
             return
@@ -331,7 +339,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif currentTreeItem.parent().parent() is None:
             parent = currentTreeItem.parent()
             parent.takeChild(parent.indexOfChild(currentTreeItem))
-        
+
+    def parseChannels(self,ctext):
+        if ctext is None:
+            return [None]
+        channels = []
+        try:
+            if len(ctext)>1:
+                # remove spaces
+                channels = []
+                ctext = ''.join([c for c in ctext if c!=' '])
+                spl = ctext.split(',')
+                for s in spl:
+                    if len(s)>1:
+                        s2 = s.split('-')
+                        if len(s2)==2:
+                            s2 = list(range(s2[0],s2[1]+1))
+                        channels.extend(s2)
+                    else:
+                        channels.extend(s)
+            else:
+                channels = ctext
+        except Exception as e:
+            self.log.append("Channels not understood.")
+            self.log.append("Error {}".format(e.args[0]))
+        return channels
+    
     def showAbout(self):
         aboutbox = AboutWindow()
         aboutbox.exec()
@@ -361,31 +394,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for sp in range(numberOfPlots):
                 ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)                
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
+                plotType = topLevelItem.text(0)
+                yLabel = self.datasets.yLabels[plotType]
                 numberOfData = topLevelItem.childCount()
                 for p in range(numberOfData):
                     child = topLevelItem.child(p)
                     dataType = child.text(0)
                     site = child.text(1)
-                    channels = child.text(2)
+                    channels = self.parseChannels(child.text(2))
                     project = child.text(3)
                     archive = child.text(4)
                     pabbr,pnames = self.datasets.getProjects(project=project)
-                    sabbr,snames = self.datasets.getSites(project=project,site=site)
+                    skey,sloc = self.datasets.getSites(project=project,site=site)
                     try:
-                        md = ap.load_data(pabbr[0], sabbr[0], dataType, st, et,
-                                          archive=archive,
-                                          cadence=np.timedelta64(40,'s'))
-                        if md is not None and md.data.size:
-                            md.mark_missing_data(cadence=2*md.nominal_cadence)
-                            self.statusBar().showMessage("Plotting data...")
-                            #self.datafig.clear()
-                            md.plot(axes = ax)
-                            self.dataCanvas.draw()
-                            self.log.append("Plotting completed successfully.")
-                            self.statusBar().showMessage("Ready.")
-                        else:
-                            self.log.append("No data.")
-                            self.statusBar().showMessage("No data.")
+                        for chan in channels:
+                            md = ap.load_data(pabbr[0], skey[0], dataType, st, et,
+                                              archive=archive,channels=chan,
+                                              cadence=np.timedelta64(40,'s'))
+                            if md is not None and md.data.size:
+                                md.mark_missing_data(cadence=2*md.nominal_cadence)
+                                self.statusBar().showMessage("Plotting data...")
+                                md.plot(axes = ax,label="/".join([dataType,#pabbr[0],
+                                                                  skey[0],chan]))
+                                self.dataCanvas.draw()
+                                self.log.append("Plotting completed successfully.")
+                                self.statusBar().showMessage("Ready.")
+                            else:
+                                self.log.append("No data.")
+                                self.statusBar().showMessage("No data.")
+                        ax.legend()
+                        ax.set_ylabel(yLabel)
+                        self.dataCanvas.draw()
+                                
                     except Exception as e:
                         self.log.append("Loading data failed.")
                         self.log.append("Error {}".format(e.args[0]))
@@ -436,7 +476,11 @@ class Log:
             except Exception as e:
                 self.append("Failed to write log to file")
                 self.append("Error {}".format(e.args[0]))
+
         
+                        
+                    
+
 class CheckOption:
     def __init__(self,listWidget,optionText="Check option",checked=True):
         self.listItem = QListWidgetItem(optionText,listWidget)
