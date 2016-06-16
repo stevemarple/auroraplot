@@ -53,7 +53,7 @@
         <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
         <property name="spacing">
          <number>6</number>
@@ -94,6 +94,57 @@
             <string>Data sets</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="8" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Data type:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QLineEdit" name="channelsLineEdit">
+              <property name="placeholderText">
+               <string>eg 0-3,5,7,10-12</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Channels:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Plot type:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="2">
+             <widget class="QPushButton" name="addDatasetButton">
+              <property name="text">
+               <string>Add data set</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" colspan="2">
+             <widget class="QComboBox" name="dataTypeBox"/>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="plotTypeBox"/>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QComboBox" name="projectBox"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Project:</string>
+              </property>
+             </widget>
+            </item>
             <item row="7" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
@@ -101,27 +152,26 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="1" colspan="2">
-             <widget class="QComboBox" name="projectBox"/>
+            <item row="1" column="0" colspan="3">
+             <widget class="QTreeWidget" name="plotsTreeWidget">
+              <column>
+               <property name="text">
+                <string notr="true">1</string>
+               </property>
+              </column>
+             </widget>
             </item>
-            <item row="9" column="2">
-             <widget class="QPushButton" name="addDatasetButton">
+            <item row="0" column="2">
+             <widget class="QPushButton" name="addPlotButton">
               <property name="text">
-               <string>Add</string>
+               <string>Add new plot</string>
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label_6">
+            <item row="2" column="2">
+             <widget class="QPushButton" name="removeDatasetButton">
               <property name="text">
-               <string>Channels:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QLineEdit" name="channelsLineEdit">
-              <property name="placeholderText">
-               <string>eg 0-3,5,7,10-12</string>
+               <string>Remove</string>
               </property>
              </widget>
             </item>
@@ -135,16 +185,6 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Data:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1" colspan="2">
-             <widget class="QComboBox" name="methodBox"/>
-            </item>
             <item row="5" column="0" colspan="3">
              <widget class="Line" name="line">
               <property name="orientation">
@@ -152,43 +192,13 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_4">
+            <item row="9" column="1" colspan="2">
+             <widget class="QComboBox" name="archiveBox"/>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>Project:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0" colspan="3">
-             <widget class="QTreeWidget" name="plotsTreeWidget">
-              <column>
-               <property name="text">
-                <string notr="true">1</string>
-               </property>
-              </column>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QPushButton" name="removeDatasetButton">
-              <property name="text">
-               <string>Remove</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="plotTypeBox"/>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Plot type:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QPushButton" name="addPlotButton">
-              <property name="text">
-               <string>Add New Plot</string>
+               <string>Archive:</string>
               </property>
              </widget>
             </item>

@@ -51,20 +51,20 @@ class Datasets:
                           'Temperature, Celcius':['TemperatureData'],
                           'Voltage, V':['VoltageData']}
 
-    def listAllTypes(self):
+    def listAllPlotTypes(self):
         return list(sorted(self.dataTypes.keys()))
 
-    def getDataMethods(self,project=None,dataType=None):
+    def getDataTypes(self,project=None,plotType=None):
         # project is a string beginning with abbreviation
-        # Used to check which methods associated
-        # with each datatype are available to project
-        # Returns subset of methods as from self.dataTypes
+        # Used to check which dataType associated
+        # with each plotType are available to project
+        # Returns subset of dataTypes from self.dataTypes
         # as a list
-        if dataType is None:
+        if plotType is None:
             return [None]
-        allMethods = self.dataTypes[dataType]
+        allDataTypes = self.dataTypes[plotType]
         if project is None:
-            return allMethods
+            return allDataTypes
         for i_d in range(len(self.datasetList)):
             abbr = self.datasetList[i_d].project['abbreviation']
             if len(project)<len(abbr):
@@ -72,22 +72,22 @@ class Datasets:
             if any([not project[n] is abbr[n] for n in range(len(abbr))]):
                 continue
             # If we get here, we found match for project
-            availableMethods = dir(self.datasetList[i_d])
-            return [t for t in allMethods if t in availableMethods]
+            availableDataTypes = dir(self.datasetList[i_d])
+            return [t for t in allDataTypes if t in availableDataTypes]
         # Didn't find a match for project
         return [None]
     
-    def getProjects(self,dataType=None,project=None):
-        # dataType is a key from the self.dataTypes dict
+    def getProjects(self,plotType=None,project=None):
+        # plotType is a key from the self.dataTypes dict
         # project is None, or text that begins with project abbreviation
         # returns lists of project abbreviations and names 
         projectAbbrs = []
         projectNames = []
         for i_d in range(len(self.datasetList)):
-            if not dataType is None:
-                allMethods = self.dataTypes[dataType]
-                availableMethods = dir(self.datasetList[i_d])
-                if all([not t in availableMethods for t in allMethods]):
+            if not plotType is None:
+                allDataTypes = self.dataTypes[plotType]
+                availableDataTypes = dir(self.datasetList[i_d])
+                if all([not t in availableDataTypes for t in allDataTypes]):
                     continue
             if not project is None:
                 abbr = self.datasetList[i_d].project['abbreviation']
@@ -99,9 +99,10 @@ class Datasets:
             projectNames.append(self.datasetList[i_d].project['name'])
         return projectAbbrs,projectNames
     
-    def getSites(self,project=None,dataType=None,site=None):
+    def getSites(self,project=None,plotType=None,site=None):
         # project is None, or text that begins with project abbreviation
-        # dataType is a key from the self.dataTypes dict
+        # site is None, or text that begins with site key
+        # plotType is a key from the self.dataTypes dict
         siteKeys = []
         siteLocs = []
         for i_d in range(len(self.datasetList)):
@@ -111,8 +112,8 @@ class Datasets:
                     continue
                 if any([not project[n] is abbr[n] for n in range(len(abbr))]):
                     continue
-            if not dataType is None:
-                wantedTypes = self.dataTypes[dataType]
+            if not plotType is None:
+                wantedTypes = self.dataTypes[plotType]
                 currentTypes = dir(self.datasetList[i_d])
                 if all([t not in currentTypes for t in wantedTypes]):
                     continue
@@ -125,7 +126,40 @@ class Datasets:
                     siteKeys.append(k)
                     siteLocs.append(self.datasetList[i_d].project['sites'][k]['location'])
         return siteKeys,siteLocs
-            
+
+    def getAvailableArchives(self,project,site,dataType):
+        # Returns sorted list of available archives for particular project, site, dataType.
+        # Returns None if it fails to find any.
+        # project is text that begins with project abbreviation
+        # site is text that begins with site key
+        projectInd = None
+        siteKey = None
+        for i_d in range(len(self.datasetList)):
+            projectAbbr = self.datasetList[i_d].project['abbreviation']
+            if len(project)<len(projectAbbr):
+                continue
+            if any([not project[n] is projectAbbr[n] for n in range(len(projectAbbr))]):
+                continue
+            # if it gets here, found match for project, now look for a match for site
+            projectInd = i_d
+            allSiteKeys = list(sorted(self.datasetList[i_d].project['sites'].keys()))
+            for k in allSiteKeys:
+                if len(site) < len(k): 
+                    continue
+                elif all([site[n] is k[n] for n in range(len(k))]):
+                    if dataType in list(self.datasetList[i_d].project['sites'][k]['data_types'].keys()):
+                        siteKey = k
+            if not siteKey is None:
+                break
+        if (not projectInd is None) and (not siteKey is None):
+            arch = sorted(list(
+                self.datasetList[projectInd].project['sites'][siteKey]['data_types'][dataType].keys()))
+            if len(arch):
+                return arch
+            else:
+                return None
+        else:
+            return None
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -140,23 +174,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dataLayout.addWidget(self.dataCanvas)
         
         # Set up data types
-        self.currentDataType = None
+        self.currentPlotType = None
         self.datasets = Datasets()
-        self.plotsTreeWidget.setColumnCount(4)
-        self.plotsTreeWidget.setHeaderLabels(["Plot type","Project",
-                                              "Site","Channels"])
-        self.plotsTreeWidget.header().resizeSection(0,150)
+        self.plotsTreeWidget.setColumnCount(5)
+        self.plotsTreeWidget.setHeaderLabels(["Plot type","Site",
+                                              "Channels","Project","Archive"])
+        self.plotsTreeWidget.header().resizeSection(0,130)
         self.plotsTreeWidget.header().resizeSection(1,60)
-        self.plotsTreeWidget.header().resizeSection(2,60)
-        for u in self.datasets.listAllTypes():
+        self.plotsTreeWidget.header().resizeSection(2,90)
+        self.plotsTreeWidget.header().resizeSection(3,60)
+        self.plotsTreeWidget.header().resizeSection(4,60)
+        for u in self.datasets.listAllPlotTypes():
             self.plotTypeBox.addItem(u)
         self.plotTypeBox.setCurrentIndex(0)
         self.addPlotButton.clicked.connect(self.addPlotIsClicked)
-        self.plotsTreeWidget.itemClicked.connect(self.dataTypeIsChanged)
+        self.plotsTreeWidget.itemClicked.connect(self.plotTypeIsChanged)
         self.addDatasetButton.clicked.connect(self.addDatasetIsClicked)
         self.projectBox.currentIndexChanged.connect(self.projectIsChanged)
         self.projectBox.setCurrentIndex(0)
         self.projectIsChanged()
+        self.siteBox.currentIndexChanged.connect(self.updateArchiveBox)
+        self.dataTypeBox.currentIndexChanged.connect(self.updateArchiveBox)
         self.removeDatasetButton.clicked.connect(self.removeDatasetIsClicked)
 
         
@@ -193,35 +231,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.goButton.clicked.connect(self.goClicked)
 
     def addPlotIsClicked(self):
-        self.currentDataType = self.plotTypeBox.currentText()
+        self.currentPlotType = self.plotTypeBox.currentText()
         newItem = QTreeWidgetItem()
         pixmap = QPixmap()
         pixmap.load(':/images/icons/plot_22.png')
         icon = QIcon(pixmap)
         newItem.setIcon(0,icon)
-        newItem.setText(0,self.currentDataType)
+        newItem.setText(0,self.currentPlotType)
         self.plotsTreeWidget.addTopLevelItem(newItem)
         self.plotsTreeWidget.setCurrentItem(newItem)
         self.plotsTreeWidget.expandItem(newItem)
-        self.dataTypeIsChanged()
+        self.plotTypeIsChanged()
 
-    def dataTypeIsChanged(self):
+    def plotTypeIsChanged(self):
         itemClicked = self.plotsTreeWidget.currentItem()
         # Find top level item, there are only 2 levels. Top level has no parent
         if itemClicked is None:
-            dataType = None
+            plotType = None
         elif itemClicked.parent() is None:
-            dataType = itemClicked.text(0)
+            plotType = itemClicked.text(0)
         elif itemClicked.parent().parent() is None:
-            dataType = itemClicked.parent().text(0)
-        self.currentDataType = dataType
+            plotType = itemClicked.parent().text(0)
+        self.currentPlotType = plotType
         self.projectBox.clear()
         self.siteBox.clear()
-        self.methodBox.clear()
-        if self.currentDataType is None:
+        self.dataTypeBox.clear()
+        if self.currentPlotType is None:
             return
         projectAbbrs, projectNames = self.datasets.getProjects(
-                                              dataType=self.currentDataType)
+                                              plotType=self.currentPlotType)
         for n in range(len(projectNames)):
             self.projectBox.addItem("".join([projectAbbrs[n],", ",
                                              projectNames[n]]))
@@ -229,23 +267,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def projectIsChanged(self):
         project = self.projectBox.currentText()
-        self.methodBox.clear()
+        self.dataTypeBox.clear()
         self.siteBox.clear()
-        methods = self.datasets.getDataMethods(project=project,
-                                               dataType=self.currentDataType)
+        dataTypes = self.datasets.getDataTypes(project=project,
+                                               plotType=self.currentPlotType)
         siteKeys, siteLocs = self.datasets.getSites(project=project,
-                                                    dataType=self.currentDataType)
+                                                    plotType=self.currentPlotType)
         for n in range(len(siteKeys)):
             self.siteBox.addItem("".join([siteKeys[n],", ",siteLocs[n]]))
-        for n in range(len(methods)):
-            self.methodBox.addItem(methods[n])
+        for n in range(len(dataTypes)):
+            self.dataTypeBox.addItem(dataTypes[n])
+
+    def updateArchiveBox(self):
+        project = self.projectBox.currentText()
+        site = self.siteBox.currentText()
+        dataType = self.dataTypeBox.currentText()
+        self.archiveBox.clear()
+        if (not project is None) and (not site is None) and (not dataType is None):
+            archives = self.datasets.getAvailableArchives(project,site,dataType)
+        if not archives is None:
+            for n in range(len(archives)):
+                self.archiveBox.addItem(archives[n])
+        defaultInd = self.archiveBox.findText("default")
+        if defaultInd > -1:
+            self.archiveBox.setCurrentIndex(defaultInd)
             
+                
     def addDatasetIsClicked(self):
         currentTreeItem = self.plotsTreeWidget.currentItem()
         project = self.projectBox.currentText()
         site = self.siteBox.currentText()
-        dataMethod = self.methodBox.currentText()
+        dataType = self.dataTypeBox.currentText()
         channelsText = self.channelsLineEdit.text()
+        archive = self.archiveBox.currentText()
         # Find top level item, there are only 2 levels. Top level has no parent
         if currentTreeItem is None:
             return
@@ -254,10 +308,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif currentTreeItem.parent().parent() is None:
             topLevelItem = currentTreeItem.parent()
         newItem = QTreeWidgetItem()
-        newItem.setText(0,dataMethod)
-        newItem.setText(1,project)
-        newItem.setText(2,site)
-        newItem.setText(3,channelsText)
+        newItem.setText(0,dataType)
+        newItem.setText(1,site)
+        newItem.setText(2,channelsText)
+        newItem.setText(3,project)
+        newItem.setText(4,archive)
         topLevelItem.addChild(newItem)
             
     def removeDatasetIsClicked(self):
@@ -267,7 +322,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if currentTreeItem.parent() is None:
             self.plotsTreeWidget.takeTopLevelItem(
                 self.plotsTreeWidget.indexOfTopLevelItem(currentTreeItem))
-            self.dataTypeIsChanged() # Need to update currentDataType
+            self.plotTypeIsChanged() # Need to update currentPlotType
         elif currentTreeItem.parent().parent() is None:
             parent = currentTreeItem.parent()
             parent.takeChild(parent.indexOfChild(currentTreeItem))
@@ -304,14 +359,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 numberOfData = topLevelItem.childCount()
                 for p in range(numberOfData):
                     child = topLevelItem.child(p)
-                    method = child.text(0)
-                    project = child.text(1)
-                    site = child.text(2)
-                    channels = child.text(3)
+                    dataType = child.text(0)
+                    site = child.text(1)
+                    channels = child.text(2)
+                    project = child.text(3)
+                    archive = child.text(4)
                     pabbr,pnames = self.datasets.getProjects(project=project)
                     sabbr,snames = self.datasets.getSites(project=project,site=site)
                     try:
-                        md = ap.load_data(pabbr[0], sabbr[0], method, st, et,
+                        md = ap.load_data(pabbr[0], sabbr[0], dataType, st, et,
+                                          archive=archive,
                                           cadence=np.timedelta64(40,'s'))
                         if md is not None and md.data.size:
                             md.mark_missing_data(cadence=2*md.nominal_cadence)
@@ -326,7 +383,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             self.statusBar().showMessage("No data.")
                     except Exception as e:
                         self.log.append("Loading data failed.")
-                        #self.log.append("Error {}".format(e.args[0]))
+                        self.log.append("Error {}".format(e.args[0]))
         except Exception as e:
             self.log.append("Plotting failed.")
             self.log.append("Error {}".format(e.args[0]))
