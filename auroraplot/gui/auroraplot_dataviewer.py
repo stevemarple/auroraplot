@@ -154,6 +154,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.projectBox.clear()
         self.siteBox.clear()
         self.archiveBox.clear()
+        self.channelsLineEdit.clear()
         if self.current_data_type not in self.datadict.keys():
             return
         projects = sorted(list(self.datadict[self.current_data_type].keys()))
