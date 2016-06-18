@@ -286,10 +286,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         # remove spaces that follow commas
                         while len(s) and s[0] == ' ':
                             s = s[1:]
+                        # remove trailing spaces
+                        while len(s) and s[-1] == ' ':
+                            s = s[:-1]
                         if len(s)>1:
                             s2 = s.split('-')
+                            if len(s2)>2:
+                                # more than one '-'
+                                continue
                             if len(s2)==2:
-                                s2 = list(range(s2[0],s2[1]+1))
+                                if s2[0].isnumeric() and s2[1].isnumeric():
+                                    if int(s2[0]) >= int(s2[1]):
+                                        s2 = [str(n) for n in range(int(s2[0]),
+                                                                    int(s2[1])+1)]
+                                    else:
+                                        s2 = [str(n) for n in range(int(s2[1]),
+                                                                    int(s2[0])+1)]
+                                else:
+                                    # Don't understand eg H-Z
+                                    continue
                             channels.extend(s2)
                         else:
                             channels.extend(s)
@@ -339,6 +354,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     channels = self.parseChannels(child.text(3))
                     project = child.text(1).split(',')[0]
                     archive = child.text(0).split(',')[0]
+                    ainfo = ap.get_archive_info(project,site,
+                                                data_type,archive)[1]
+                    all_channels = ainfo['channels']
+                    channels = [c for c in channels if c in all_channels]
                     try:
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
