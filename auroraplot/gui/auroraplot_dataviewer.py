@@ -21,15 +21,16 @@ mpl.use('Qt4Agg')
 mpl.rcParams['backend.qt4']='PySide'
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from ui_auroraplot_dataviewer import Ui_MainWindow
+from ui_about import Ui_AboutWindow
 
 import matplotlib.pyplot as plt
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
-import auroraplot.magdata
+from auroraplot.data import Data
 
-from ui_auroraplot_dataviewer import Ui_MainWindow
-from ui_about import Ui_AboutWindow
+import auroraplot.magdata
 
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
@@ -37,6 +38,12 @@ import auroraplot.datasets.uit
 import auroraplot.datasets.dtu
 import auroraplot.datasets.bgs_schools
 
+def get_units_prefix(data_type):
+    if data_type == "MagData":
+        units_prefix = 'n'
+    else:
+        units_prefix = ''
+    return units_prefix
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -200,7 +207,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.archive_changed()
 
     def archive_changed(self):
-        pass
+        project = self.projectBox.currentText().split(',')[0]
+        site = self.siteBox.currentText().split(',')[0]
+        archive = self.archiveBox.currentText().split(',')[0]
+        if not self.current_data_type in self.datadict.keys():
+            return
+        if not project in self.datadict[self.current_data_type].keys():
+            return
+        if not site in self.datadict[self.current_data_type][project].keys():
+            return
+        if not archive in self.datadict[self.current_data_type][project][site].keys():
+            return
+        ainfo = ap.get_archive_info(project,site,self.current_data_type,archive)[1]
+        all_channels = ainfo['channels']
+        if not hasattr(all_channels,'__iter__'):
+            all_channels = list(all_channels)
+        channels=''
+        if all([c.isnumeric() for c in all_channels]):
+            all_channels = sorted(all_channels)
+            min_c = str(np.min(np.array([int(c) for c in all_channels])))
+            max_c = str(np.max(np.array([int(c) for c in all_channels])))
+            if len(all_channels) < 6 and all([c in all_channels for c in range(min_c,max_c+1)]):
+                channels = "-".join([min_c,max_c])
+            else:
+                c = str(int(np.percentile(np.array([int(c) for c in all_channels]),50)))
+                if c in all_channels:
+                    channels = c
+        else:
+            if len(all_channels) < 6:
+                channels = ", ".join([c for c in all_channels])
+            else:
+                channels = channels[0]
+        self.channelsLineEdit.setText(channels)
         
     def add_dataset_clicked(self):
         currentTreeItem = self.plotsTreeWidget.currentItem()
@@ -286,13 +324,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QApplication.flush()
             self.dataFig.clear()
             for sp in range(numberOfPlots):
-                ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)                
+                ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 data_type = topLevelItem.text(0)
-                #yLabel = self.datasets.yLabels[plotType]
+                units_prefix = get_units_prefix(data_type)
                 numberOfData = topLevelItem.childCount()
-                for p in range(numberOfData):
-                    child = topLevelItem.child(p)
+                previous_units = None
+                for n in range(numberOfData):
+                    child = topLevelItem.child(n)
                     site = child.text(2).split(',')[0]
                     channels = self.parseChannels(child.text(3))
                     project = child.text(1).split(',')[0]
@@ -302,9 +341,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             md = ap.load_data(project, site, data_type, st, et,
                                               archive=archive,channels=chan)
                             if md is not None and md.data.size:
-                                md = md.mark_missing_data(cadence=2*md.nominal_cadence)
+                                if (not previous_units is None and
+                                    md.units != previous_units):
+                                    self.log.append("Data have different units.")
+                                    continue
+                                previous_units = md.units
+                                md = md.mark_missing_data(cadence=\
+                                                          2*md.nominal_cadence)
                                 self.statusBar().showMessage("Plotting data...")
-                                md.plot(axes = ax,label="/".join([project,site,chan]))
+                                md.plot(units_prefix = units_prefix,
+                                        axes = ax,
+                                        label="/".join([project,site,chan]))
                                 self.dataCanvas.draw()
                                 self.log.append("Plotting completed successfully.")
                                 self.statusBar().showMessage("Ready.")
@@ -312,7 +359,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 self.log.append("No data.")
                                 self.statusBar().showMessage("No data.")
                         ax.legend()
-                        ax.set_ylabel(yLabel)
+                        if not previous_units is None:
+                            ax.set_ylabel("".join([data_type,', ',
+                                                   units_prefix,previous_units]))
+                        else:
+                            ax.set_ylabel(data_type)
                         self.dataCanvas.draw()
                                 
                     except Exception as e:

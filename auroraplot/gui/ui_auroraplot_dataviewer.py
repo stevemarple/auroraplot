@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Fri Jun 17 22:37:52 2016
+# Created: Sat Jun 18 09:24:51 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,7 +59,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toolBox.sizePolicy().hasHeightForWidth())
         self.toolBox.setSizePolicy(sizePolicy)
-        self.toolBox.setMinimumSize(QtCore.QSize(420, 0))
+        self.toolBox.setMinimumSize(QtCore.QSize(400, 0))
         self.toolBox.setMaximumSize(QtCore.QSize(1000, 16777215))
         self.toolBox.setObjectName("toolBox")
         self.page_0 = QtGui.QWidget()
@@ -124,7 +124,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addItem(spacerItem1, 1, 4, 1, 1)
         self.toolBox.addItem(self.page_0, "")
         self.page_1 = QtGui.QWidget()
-        self.page_1.setGeometry(QtCore.QRect(0, 0, 420, 413))
+        self.page_1.setGeometry(QtCore.QRect(0, 0, 262, 329))
         self.page_1.setObjectName("page_1")
         self.gridLayout = QtGui.QGridLayout(self.page_1)
         self.gridLayout.setObjectName("gridLayout")
@@ -223,7 +223,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
         self.groupBox.setSizePolicy(sizePolicy)
-        self.groupBox.setMinimumSize(QtCore.QSize(420, 100))
+        self.groupBox.setMinimumSize(QtCore.QSize(400, 100))
         self.groupBox.setMaximumSize(QtCore.QSize(1000, 100))
         self.groupBox.setTitle("")
         self.groupBox.setObjectName("groupBox")
