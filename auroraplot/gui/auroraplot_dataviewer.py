@@ -279,18 +279,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         channels = []
         try:
             if len(ctext)>1:
-                # remove spaces
                 channels = []
-                ctext = ''.join([c for c in ctext if c!=' '])
                 spl = ctext.split(',')
                 for s in spl:
-                    if len(s)>1:
-                        s2 = s.split('-')
-                        if len(s2)==2:
-                            s2 = list(range(s2[0],s2[1]+1))
-                        channels.extend(s2)
-                    else:
-                        channels.extend(s)
+                    if len(s):
+                        # remove spaces that follow commas
+                        while len(s) and s[0] == ' ':
+                            s = s[1:]
+                        if len(s)>1:
+                            s2 = s.split('-')
+                            if len(s2)==2:
+                                s2 = list(range(s2[0],s2[1]+1))
+                            channels.extend(s2)
+                        else:
+                            channels.extend(s)
             else:
                 channels = ctext
         except Exception as e:
@@ -340,7 +342,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     try:
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
-                                              archive=archive,channels=chan)
+                                              archive=archive,channels=[chan])
                             if md is not None and md.data.size:
                                 if (not previous_units is None and
                                     md.units != previous_units):
