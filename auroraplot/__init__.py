@@ -244,6 +244,34 @@ def get_site_info(project, site, info=None):
     else:
         return projects[project]['sites'][site][info]
 
+def get_data_types(project, site):
+    """
+    Returns a list of data_types for a particular project and site.
+    """
+    return list(get_site_info(project, site)['data_types'].keys())
+
+def get_archives(project, site, data_type):
+    """
+    Get archive names associated with a particular project, site, and data_type.
+
+    Returns tuple containing a list of archive names, and a string
+    naming the default archive.
+    """
+    
+    site_info = get_site_info(project, site)
+    if data_type not in site_info['data_types']:
+        raise ValueError('Unknown data_type (%s)' % data_type)
+
+    archive_names = []
+    default_name = ''
+    archives = site_info['data_types'][data_type]
+    for akey in list(archives.keys()):
+        if type(archives[akey]) == dict:
+            archive_names.append(akey)
+        elif isinstance(archives[akey], six.string_types):
+            default_name = archives[akey]
+    return (archive_names, default_name)
+
 
 def get_archive_info(project, site, data_type, archive=None):
     '''
@@ -283,10 +311,12 @@ def get_archive_info(project, site, data_type, archive=None):
 
         format: name of the data file format (optional).
     '''
-
-    site_info = get_site_info(project, site)
-
     # Sanity checking
+    if project not in projects:
+        raise Exception('Unknown project (%s)' % project)
+    elif site not in projects[project]['sites']:
+        raise Exception('Unknown site (%s)' % site)
+    site_info = get_site_info(project, site)
     if data_type not in site_info['data_types']:
         raise ValueError('Unknown data_type (%s)' % data_type)
     
