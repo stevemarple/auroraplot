@@ -21,6 +21,7 @@ mpl.use('Qt4Agg')
 mpl.rcParams['backend.qt4']='PySide'
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigationtoolbar
 from ui_auroraplot_dataviewer import Ui_MainWindow
 from ui_about import Ui_AboutWindow
 
@@ -56,6 +57,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.dataFig.patch.set_facecolor('w')
         self.dataCanvas = FigureCanvas(self.dataFig)
         self.dataLayout.addWidget(self.dataCanvas)
+        self.mpltoolbar = Navigationtoolbar(self.dataCanvas, self.toolbarFrame)
+        self.toolbarLayout.setAlignment(Qt.AlignCenter)
+        self.toolbarLayout.addWidget(self.mpltoolbar)
         
         # Set up data types
         self.current_data_type = None
@@ -102,20 +106,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.durationBox.setMaximum(60)
         self.durationBox.setValue(1)
 
-        # Fill plot options list - Problem with Qt when last item is spinBox (can vanish)
-        self.optionsDict = {}
-        self.optionsDict['dataResolution'] = SpinOption(self.optionsListWidget,
-                                                        prefix="Data resolution ",
-                                                        suffix=" seconds.",
-                                                        value=1,minimum=1,maximum=120)
-        self.optionsDict['updateInterval'] = SpinOption(self.optionsListWidget,
-                                                        prefix="Auto-update interval ",
-                                                        suffix=" minutes.",
-                                                        value=5,minimum=1,maximum=120)
-        self.optionsDict['drawQDC'] = CheckOption(self.optionsListWidget,
-                                                  optionText="Draw Quiet Day Curve",
-                                                  checked = False)
-
+        # Fill plot options page
+        self.optionsLayout.setAlignment(Qt.AlignTop)
+        #self.option1 = QCheckBox("Choose")
+        #self.optionsLayout.addWidget(self.option1)
+        
         # Set up logging
         self.log = Log(self.logTextEdit)
         self.logClearButton.clicked.connect(self.log.clear)
@@ -341,8 +336,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                      np.datetime_as_string(et)]))
             QApplication.flush()
             self.dataFig.clear()
+            ax = []
             for sp in range(numberOfPlots):
-                ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
+                if sp > 0:
+                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax)
+                else:
+                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 data_type = topLevelItem.text(0)
                 units_prefix = get_units_prefix(data_type)
@@ -371,9 +370,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 md = md.mark_missing_data(cadence=\
                                                           2*md.nominal_cadence)
                                 self.statusBar().showMessage("Plotting data...")
-                                md.plot(units_prefix = units_prefix,
-                                        axes = ax,
-                                        label="/".join([project,site,chan]))
+                                md.plot(units_prefix = units_prefix,axes = ax,
+                                        label="/".join([project,site,chan]))                                    
                                 self.dataCanvas.draw()
                                 self.log.append("Plotting completed successfully.")
                                 self.statusBar().showMessage("Ready.")
@@ -439,43 +437,8 @@ class Log:
                 self.append("Failed to write log to file")
                 self.append("Error {}".format(e.args[0]))
 
-        
-                        
-                    
 
-class CheckOption:
-    def __init__(self,listWidget,optionText="Check option",checked=True):
-        self.listItem = QListWidgetItem(optionText,listWidget)
-        #self.listItem.setFlags(Qt.ItemIsUserCheckable) # locks widget
-        self.setCheckState(checked)
-    def setCheckState(self,checked):
-        if checked:
-            self.listItem.setCheckState(Qt.Checked)
-        else:
-            self.listItem.setCheckState(Qt.Unchecked)
-    def getCheckState(self):
-        return self.listItem.checkState()
-    
-class SpinOption:
-    def __init__(self,listWidget,prefix="",suffix="",value=0,minimum=0,maximum=99):
-        self.spinWidget = QSpinBox()
-        self.spinWidget.setPrefix(prefix)
-        self.spinWidget.setSuffix(suffix)
-        self.spinWidget.setValue(value)
-        self.spinWidget.setMinimum(minimum)
-        self.spinWidget.setMaximum(maximum)
-        self.listItem = QListWidgetItem("",listWidget)
-        listWidget.setItemWidget(self.listItem,self.spinWidget)
-    def setMinimum(self,minimum):
-        self.spinWidget.setMinimum(minimum)
-    def setMaximum(self,maximum):
-        self.spinWidget.setMaximum(maximum)
-    def setValue(self,value):
-        self.spinWidget.setValue(value)
-    def getValue(self):
-        return self.spinWidget.value()
 
-        
 def Qdate_Qtime_to_dt64(Qdate,Qtime):
     d = datetime.datetime(Qdate.year(),Qdate.month(),Qdate.day(),
                           Qtime.hour(),Qtime.minute(),Qtime.second(),
