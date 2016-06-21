@@ -63,8 +63,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.mpltoolbar = Navigationtoolbar(self.dataCanvas, self.toolbarFrame)
         self.toolbarLayout.setAlignment(Qt.AlignCenter)
         self.toolbarLayout.addWidget(self.mpltoolbar)
-        self.progressBar.setTextVisible(False)
+        self.progressBar.setFormat(" ")
         self.progressBar.setValue(0)
+
+        # Fill plot options page
+        self.optionsLayout.setAlignment(Qt.AlignTop)
+        self.updateIntervalBox = QSpinBox()
+        self.updateIntervalBox.setValue(20)
+        self.updateIntervalBox.setRange(1,3600)
+        self.updateIntervalBox.setPrefix("Update interval: ")
+        self.updateIntervalBox.setSuffix(" s")
+        
+        self.optionsLayout.addWidget(self.updateIntervalBox)
         
         # Set up data types
         self.current_data_type = None
@@ -101,6 +111,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.archiveBox.currentIndexChanged.connect(self.archive_changed)
         self.removeDatasetButton.clicked.connect(self.remove_dataset_clicked)
 
+        # Set up timer for auto-update
+        self.last_auto_update = np.datetime64('now')
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.check_timer)
+        self.timer.start(1000)
         
         # Set up time selection
         self.durationUnitsBox.addItem("days")
@@ -110,11 +125,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.durationUnitsBox.setCurrentIndex(0)
         self.durationBox.setMaximum(60)
         self.durationBox.setValue(1)
-
-        # Fill plot options page
-        self.optionsLayout.setAlignment(Qt.AlignTop)
-        #self.option1 = QCheckBox("Choose")
-        #self.optionsLayout.addWidget(self.option1)
         
         # Set up logging
         self.log = Log(self.logTextEdit)
@@ -123,8 +133,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Define other actions
         self.helpButton.clicked.connect(self.showHelp)
-        self.goButton.clicked.connect(self.goClicked)
+        self.goButton.clicked.connect(self.draw_plots)
 
+    def check_timer(self):
+        if not self.autoUpdateCheckBox.checkState():
+            self.progressBar.setFormat(" ")
+            self.progressBar.setValue(0)
+            return
+        time_now = np.datetime64('now')
+        interval = self.updateIntervalBox.value()
+        seconds_left = (self.last_auto_update+np.timedelta64(interval,'s')
+                        -time_now).astype('m8[s]').astype('int64')
+        if seconds_left <= 0:
+            self.last_auto_update = time_now
+            self.draw_plots()
+        else:
+            self.progressBar.setFormat("Updating in %v s")
+            self.progressBar.setMaximum(interval)
+            self.progressBar.setValue(seconds_left)
+            QApplication.flush()
+        
     def add_plot_clicked(self):
         data_type = self.dataTypeBox.currentText()
         newItem = QTreeWidgetItem()
@@ -319,7 +347,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         helpBox = auroraplot_help.HelpWindow(self)
         helpBox.show()
 
-    def goClicked(self):
+    def draw_plots(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             numberOfPlots = self.plotsTreeWidget.topLevelItemCount()
@@ -347,15 +375,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for sp in range(numberOfPlots):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 total_num_data += topLevelItem.childCount()
+            self.progressBar.setFormat("Loading data: %v of %m")
+            self.progressBar.setMaximum(total_num_data)
             for sp in range(numberOfPlots):
-                if sp > 0:
-                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax)
-                else:
-                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 data_type = topLevelItem.text(0)
                 units_prefix = get_units_prefix(data_type)
                 numberOfData = topLevelItem.childCount()
+                if numberOfData < 1:
+                    continue
+                if sp > 0:
+                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax)
+                else:
+                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
                 previous_units = None
                 for n in range(numberOfData):
                     child = topLevelItem.child(n)
@@ -394,8 +426,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         else:
                             ax.set_ylabel(data_type)
                         current_num_data += 1
-                        self.progressBar.setValue(int(100*
-                                          current_num_data/total_num_data))
+                        self.progressBar.setValue(current_num_data)
                         QApplication.flush()
                         self.dataCanvas.draw()
                     except Exception as e:
@@ -411,6 +442,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("Error {}".format(e.args[0]))
         finally:
             self.progressBar.setValue(0)
+            self.progressBar.setFormat(" ")
             QApplication.restoreOverrideCursor()
             QApplication.flush()
 
