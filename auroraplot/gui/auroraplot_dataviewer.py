@@ -115,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.last_auto_update = np.datetime64('now')
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_timer)
-        self.timer.start(100)
+        self.timer.start(500)
         
         # Set up time selection
         self.durationUnitsBox.addItem("days")
@@ -146,6 +146,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         -time_now).astype('m8[s]').astype('int64')
         if seconds_left <= 0:
             self.last_auto_update = time_now
+            durationUnits = self.durationUnitsBox.currentText()
+            if durationUnits == "days":
+                dt_unit = 'D'
+            elif durationUnits == "hours":
+                dt_unit = 'h'
+            elif durationUnits == "minutes":
+                dt_unit = 'm'
+            else:
+                dt_unit = 's'
+            # Get next dt_unit boundary
+            et = (time_now.astype(''.join(['M8[',dt_unit,']']))
+                  +np.timedelta64(1,dt_unit)).astype('M8[s]')
+            st = et - np.timedelta64(self.durationBox.value(),dt_unit)
+            Qdate, Qtime = dt64_to_Qdate_Qtime(st)
+            self.calendarWidget.setSelectedDate(Qdate)
+            self.starttimeWidget.setTime(Qtime)
             self.draw_plots()
         else:
             self.progressBar.setFormat("Updating in %v s")
@@ -446,6 +462,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("Error {}".format(e.args[0]))
         finally:
             self.progressBar.setValue(0)
+            self.progressBar.setMaximum(1)
             self.progressBar.setTextVisible(False)
             QApplication.restoreOverrideCursor()
             QApplication.flush()
@@ -488,7 +505,11 @@ class Log:
                 self.append("Failed to write log to file")
                 self.append("Error {}".format(e.args[0]))
 
-
+def dt64_to_Qdate_Qtime(dt64):
+    d = dt64.astype(datetime.datetime)
+    Qdate = QDate(d.year,d.month,d.day)
+    Qtime = QTime(d.hour,d.minute,d.second,d.microsecond/1000.0)
+    return Qdate,Qtime
 
 def Qdate_Qtime_to_dt64(Qdate,Qtime):
     d = datetime.datetime(Qdate.year(),Qdate.month(),Qdate.day(),
