@@ -405,9 +405,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if numberOfData < 1:
                     continue
                 if len(ax):
-                    ax.append(self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax[0]))
+                    current_ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,
+                                                          sharex=ax[0])
                 else:
-                    ax.append(self.dataFig.add_subplot(numberOfPlots,1,sp+1))
+                    current_ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
+                ax.append(current_ax)
                 previous_units = None
                 for n in range(numberOfData):
                     child = topLevelItem.child(n)
@@ -419,10 +421,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                 data_type,archive)[1]
                     all_channels = ainfo['channels']
                     channels = [c for c in channels if c in all_channels]
-                    try:
+                    if True:
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
-                                              archive=archive,channels=[chan])
+                                              archive=archive,channels=[chan],
+                                              cadence=np.timedelta64(1,'s'))
                             if md is not None and md.data.size:
                                 if (not previous_units is None and
                                     md.units != previous_units):
@@ -441,20 +444,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 self.log.append("No data.")
                                 self.statusBar().showMessage("No data.")
                         if not previous_units is None:
-                            ax.set_ylabel("".join([data_type,', ',
+                            current_ax.set_ylabel("".join([data_type,', ',
                                                    units_prefix,previous_units]))
                         else:
-                            ax.set_ylabel(data_type)
+                            current_ax.set_ylabel(data_type)
                         current_num_data += 1
                         self.progressBar.setValue(current_num_data)
                         QApplication.flush()
                         self.dataCanvas.draw()
-                    except Exception as e:
-                        self.log.append("Loading data failed.")
-                        self.log.append("Error {}".format(e.args[0]))
-                ax.legend()
+                    #except Exception as e:
+                    #    self.log.append("Loading data failed.")
+                    #    self.log.append("Error {}".format(e.args[0]))
+                current_ax.legend()
                 if (sp+1)<numberOfPlots:
-                    ax.set_xlabel(" ")
+                    current_ax.set_xlabel(" ")
                 self.dataCanvas.draw()
                 
         except Exception as e:

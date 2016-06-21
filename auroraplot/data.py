@@ -750,7 +750,7 @@ class Data(object):
 
         
     def set_cadence(self, cadence, ignore_nan=True,
-                    offset_interval=None, inplace=False,
+                    offset_interval=None, inplace=False, fast=True,
                     aggregate=None):
         tu = dt64.get_units(cadence)
 
@@ -760,7 +760,7 @@ class Data(object):
         if aggregate is None:
             aggregate=scipy.average
 
-        if cadence > self.nominal_cadence:
+        if cadence > self.nominal_cadence and not fast:
             sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
                                            + offset_interval, 
                                            self.end_time, 
@@ -836,6 +836,96 @@ class Data(object):
             r.nominal_cadence = cadence.copy()
             r.data = d
 
+        elif fast and cadence != self.nominal_cadence:
+            mean_integration = True # Otherwise sum
+            from numpy.ctypeslib import ndpointer
+            import ctypes
+            import os
+            this_dir = os.path.dirname(__file__)
+            ctsint = ctypes.cdll.LoadLibrary(this_dir+'/tsintegrate.so')
+            class OutStruct(ctypes.Structure):
+                _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),
+                            ("weight", ctypes.POINTER(ctypes.c_double))]
+
+            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
+                                           + offset_interval, 
+                                           self.end_time, 
+                                           cadence),
+                                 time_type=self.start_time,
+                                 units=tu)
+            sam_et = sam_st + cadence
+
+            nnew = sam_st.size
+            nold = self.sample_start_time.size
+            nchan = len(self.channels)
+            
+            if self.integration_interval is not None:
+                assert not np.any(dt64.isnat(self.integration_interval)), \
+                    'integration_interval must not contain NaT'
+            else:
+                self.integration_interval = np.ones([nchan,nold])\
+                                            *self.nominal_cadence
+
+            wu = dt64.get_units(self.integration_interval)
+            
+            output_p = ctypes.POINTER(OutStruct)
+            ctsint.tsIntegrate.restype= ctypes.POINTER(OutStruct)
+            ctsint.tsIntegrate.argtypes = [ctypes.c_int64,
+                                ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                                ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                                ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                                ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                                ctypes.c_int64,
+                                ndpointer(dtype=ctypes.c_int64,shape=(nnew,)),
+                                ndpointer(dtype=ctypes.c_int64,shape=(nnew,))]
+            
+            new_data = np.zeros([nchan,nnew])
+            new_weight = np.zeros([nchan,nnew])
+            
+            self.integration_interval[np.isnan(self.data)] = 0
+            self.data[np.isnan(self.data)] = 0
+
+            for cn in range(nchan):
+                output_p = ctsint.tsIntegrate(np.int64(nold),
+                      self.sample_start_time.astype('M8[ms]').astype('int64'),
+                      self.sample_end_time.astype('M8[ms]').astype('int64'),
+                      self.data[cn,:].astype('float64'),
+                      self.integration_interval[cn,:].\
+                                         astype('int64').astype('float64'),
+                      np.int64(nnew),
+                      sam_st.astype('M8[ms]').astype('int64'),
+                      sam_et.astype('M8[ms]').astype('int64'))
+                new_weight[cn,:] = np.fromiter(output_p.contents.weight,
+                                            dtype=np.float64,count=nnew).copy()
+                new_data[cn,:] = np.fromiter(output_p.contents.data,
+                                             dtype=np.float64,count=nnew).copy()
+                ctsint.freemem()
+
+                if mean_integration:
+                    non_zero_weight = (new_weight[cn,:]!=0.0)
+                    new_data[cn,non_zero_weight] = new_data[cn,non_zero_weight]\
+                                                /new_weight[cn,non_zero_weight]
+            new_data[new_weight==0.0] = np.NaN
+
+            if inplace:
+                r = self
+            else:
+                r = copy.copy(self)
+                for k in (set(self.__dict__.keys())
+                          - set(['sample_start_time', 'sample_end_time', 
+                                 'integration_interval', 'nominal_cadence',
+                                 'data'])):
+                    setattr(r, k, copy.deepcopy(getattr(self, k)))
+
+            r.start_time = dt64.astype(r.start_time, units=tu)
+            r.end_time = dt64.astype(r.end_time, units=tu)
+            r.sample_start_time = sam_st
+            r.sample_end_time = sam_et
+            r.integration_interval = dt64.astype(new_weight,
+                                                 time_type=cadence,
+                                                 units=wu)
+            r.nominal_cadence = cadence.copy()
+            r.data = new_data
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
         else:
