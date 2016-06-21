@@ -4,6 +4,8 @@ import sys
 import platform
 
 import os
+workingdir = os.path.dirname(__file__)
+
 import time
 os.environ['QT_API'] = 'pyside'
 os.environ['TZ'] = 'UTC'
@@ -23,7 +25,7 @@ mpl.rcParams['backend.qt4']='PySide'
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigationtoolbar
 from ui_auroraplot_dataviewer import Ui_MainWindow
-from ui_about import Ui_AboutWindow
+import auroraplot_help
 
 import matplotlib.pyplot as plt
 
@@ -50,7 +52,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
-        
+        self.statusBar().setVisible(False)
+        self.menuBar().setVisible(False)
         # Set up data canvas and ancillary data canvas
         self.splitter.setSizes([1,0])
         self.dataFig = plt.figure()
@@ -60,6 +63,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.mpltoolbar = Navigationtoolbar(self.dataCanvas, self.toolbarFrame)
         self.toolbarLayout.setAlignment(Qt.AlignCenter)
         self.toolbarLayout.addWidget(self.mpltoolbar)
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setValue(0)
         
         # Set up data types
         self.current_data_type = None
@@ -81,9 +86,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.plotsTreeWidget.setColumnCount(4)
         self.plotsTreeWidget.setHeaderLabels(["Plot/Archive","Project","Site",
                                               "Channels"])
-        self.plotsTreeWidget.header().resizeSection(0,130)
-        self.plotsTreeWidget.header().resizeSection(1,60)
-        self.plotsTreeWidget.header().resizeSection(2,60)
+        self.plotsTreeWidget.header().resizeSection(0,120)
+        self.plotsTreeWidget.header().resizeSection(1,55)
+        self.plotsTreeWidget.header().resizeSection(2,45)
         self.plotsTreeWidget.header().resizeSection(3,130)
         for d in sorted(list(self.datadict.keys())):
             self.dataTypeBox.addItem(d)
@@ -117,7 +122,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logSaveButton.clicked.connect(self.log.save)
         
         # Define other actions
-        self.actionAbout.triggered.connect(self.showAbout)
+        self.helpButton.clicked.connect(self.showHelp)
         self.goButton.clicked.connect(self.goClicked)
 
     def add_plot_clicked(self):
@@ -310,9 +315,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("Error {}".format(e.args[0]))
         return channels
     
-    def showAbout(self):
-        aboutbox = AboutWindow()
-        aboutbox.exec()
+    def showHelp(self):
+        helpBox = auroraplot_help.HelpWindow(self)
+        helpBox.show()
 
     def goClicked(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -337,6 +342,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QApplication.flush()
             self.dataFig.clear()
             ax = []
+            current_num_data = 0.0
+            total_num_data = 0.0
+            for sp in range(numberOfPlots):
+                topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
+                total_num_data += topLevelItem.childCount()
             for sp in range(numberOfPlots):
                 if sp > 0:
                     ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax)
@@ -378,28 +388,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             else:
                                 self.log.append("No data.")
                                 self.statusBar().showMessage("No data.")
-                        ax.legend()
                         if not previous_units is None:
                             ax.set_ylabel("".join([data_type,', ',
                                                    units_prefix,previous_units]))
                         else:
                             ax.set_ylabel(data_type)
+                        current_num_data += 1
+                        self.progressBar.setValue(int(100*
+                                          current_num_data/total_num_data))
+                        QApplication.flush()
                         self.dataCanvas.draw()
-                                
                     except Exception as e:
                         self.log.append("Loading data failed.")
                         self.log.append("Error {}".format(e.args[0]))
+                ax.legend()
+                if (sp+1)<numberOfPlots:
+                    ax.set_xlabel(" ")
+                self.dataCanvas.draw()
+                
         except Exception as e:
             self.log.append("Plotting failed.")
             self.log.append("Error {}".format(e.args[0]))
         finally:
+            self.progressBar.setValue(0)
             QApplication.restoreOverrideCursor()
             QApplication.flush()
-        
-class AboutWindow(QDialog,Ui_AboutWindow):
-    def __init__(self, parent=None):
-        super(AboutWindow, self).__init__(parent)
-        self.setupUi(self)
+
 
 class Log:
     def __init__(self,textEditWidget):

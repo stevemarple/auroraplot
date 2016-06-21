@@ -2,36 +2,47 @@
 
 import sys
 import platform
+import os
+workingdir = os.path.dirname(__file__)
 
 import PySide
 from PySide.QtGui import *
 from PySide.QtCore import *
 
-from ui_auroraplot_launcher import Ui_MainWindow
-from ui_about import Ui_AboutWindow
-
 import auroraplot_dataviewer
+import auroraplot_help
 
-__version__ = '2016.0.1'
+import resources_rc
 
-
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setupUi(self)
-        self.statusBar().hide()
+        self.centralPanel = QWidget()
+        self.centralLayout = QGridLayout()
+        self.centralPanel.setLayout(self.centralLayout)
+        self.setCentralWidget(self.centralPanel)
+        self.statusBar().setVisible(False)
+        self.statusBar().setVisible(False)
+        self.setWindowTitle("AuroraPlot")
+        self.setGeometry(0,0,20,20)
+        icon = QPixmap()
+        icon.load(":/images/icons/auroraplot_32.png")
+        self.setWindowIcon(icon)
+
         self.viewerIcon = ClickLabel(":/images/icons/dataviewer_128.png")
-        self.centralLayout.addWidget(self.viewerIcon)
+        self.centralLayout.addWidget(self.viewerIcon,0,0,Qt.AlignLeft)
         self.creatorIcon = ClickLabel(":/images/icons/qdccreator_128.png")
-        self.centralLayout.addWidget(self.creatorIcon)
+        self.centralLayout.addWidget(self.creatorIcon,0,1,Qt.AlignLeft)
+        self.helpButton = QPushButton("Help")
+        self.centralLayout.addWidget(self.helpButton,1,0,1,2,Qt.AlignCenter)
+        
         # Define actions
-        self.actionAbout.triggered.connect(self.showAbout)
+        self.helpButton.clicked.connect(self.showHelp)
         self.viewerIcon.clicked.connect(self.viewerClicked)
         self.creatorIcon.clicked.connect(self.creatorClicked)
-                
-    def showAbout(self):
-        aboutbox = AboutWindow()
-        aboutbox.exec()
+
+
+
 
     def viewerClicked(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -56,9 +67,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         finally:
             QApplication.restoreOverrideCursor()
 
+    def showHelp(self):
+        helpBox = auroraplot_help.HelpWindow(self)
+        helpBox.show()
+        
     def closeEvent(self, event):
         msgBox = QMessageBox()
-        msgBox.setText("Really quit?")
+        msgBox.setText("Are you sure?")
         msgBox.setWindowTitle(" ")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.No)
@@ -78,14 +93,14 @@ class ClickLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit(self.objectName())
             
-class AboutWindow(QDialog,Ui_AboutWindow):
-    def __init__(self, parent=None):
-        super(AboutWindow, self).__init__(parent)
-        self.setupUi(self)
-            
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     frame = MainWindow()
     frame.show()
+    screenRect = QApplication.desktop().screenGeometry()
+    QApplication.flush() # Need to process .show() before size is known
+    frame.setGeometry(screenRect.right()-frame.width(),
+                     screenRect.bottom()-frame.height(),
+                     frame.width(),frame.height())
     app.exec_()
 
