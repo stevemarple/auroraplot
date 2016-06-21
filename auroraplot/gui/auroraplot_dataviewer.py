@@ -348,6 +348,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         helpBox.show()
 
     def draw_plots(self):
+        self.timer.stop()
+        self.last_auto_update = np.datetime64('now')
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             numberOfPlots = self.plotsTreeWidget.topLevelItemCount()
@@ -445,6 +447,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.progressBar.setFormat(" ")
             QApplication.restoreOverrideCursor()
             QApplication.flush()
+            self.timer.start(1000)
 
 
 class Log:
