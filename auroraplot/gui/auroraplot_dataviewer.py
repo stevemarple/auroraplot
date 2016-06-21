@@ -63,7 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.mpltoolbar = Navigationtoolbar(self.dataCanvas, self.toolbarFrame)
         self.toolbarLayout.setAlignment(Qt.AlignCenter)
         self.toolbarLayout.addWidget(self.mpltoolbar)
-        self.progressBar.setFormat(" ")
+        self.progressBar.setFormat("")
         self.progressBar.setValue(0)
 
         # Fill plot options page
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.last_auto_update = np.datetime64('now')
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_timer)
-        self.timer.start(500)
+        self.timer.start(1000)
         
         # Set up time selection
         self.durationUnitsBox.addItem("days")
@@ -384,7 +384,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 dt_unit = 's'
             st = Qdate_Qtime_to_dt64(Qdate,Qtime)
             et = st + np.timedelta64(self.durationBox.value(),dt_unit)
-            self.log.append("".join(["loading data: ",np.datetime_as_string(st)," to ",
+            self.log.append("".join(["Loading data: ",np.datetime_as_string(st)," to ",
                                      np.datetime_as_string(et)]))
             QApplication.flush()
             self.dataFig.clear()
@@ -404,10 +404,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 numberOfData = topLevelItem.childCount()
                 if numberOfData < 1:
                     continue
-                if sp > 0:
-                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax)
+                if len(ax):
+                    ax.append(self.dataFig.add_subplot(numberOfPlots,1,sp+1,sharex=ax[0]))
                 else:
-                    ax = self.dataFig.add_subplot(numberOfPlots,1,sp+1)
+                    ax.append(self.dataFig.add_subplot(numberOfPlots,1,sp+1))
                 previous_units = None
                 for n in range(numberOfData):
                     child = topLevelItem.child(n)
