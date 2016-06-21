@@ -115,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.last_auto_update = np.datetime64('now')
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_timer)
-        self.timer.start(1000)
+        self.timer.start(100)
         
         # Set up time selection
         self.durationUnitsBox.addItem("days")
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def check_timer(self):
         if not self.autoUpdateCheckBox.checkState():
-            self.progressBar.setFormat(" ")
+            self.progressBar.setTextVisible(False)
             self.progressBar.setValue(0)
             return
         time_now = np.datetime64('now')
@@ -149,6 +149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.draw_plots()
         else:
             self.progressBar.setFormat("Updating in %v s")
+            self.progressBar.setTextVisible(True)
             self.progressBar.setMaximum(interval)
             self.progressBar.setValue(seconds_left)
             QApplication.flush()
@@ -378,6 +379,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 total_num_data += topLevelItem.childCount()
             self.progressBar.setFormat("Loading data: %v of %m")
+            self.progressBar.setTextVisible(True)
             self.progressBar.setMaximum(total_num_data)
             for sp in range(numberOfPlots):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
@@ -444,7 +446,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.log.append("Error {}".format(e.args[0]))
         finally:
             self.progressBar.setValue(0)
-            self.progressBar.setFormat(" ")
+            self.progressBar.setTextVisible(False)
             QApplication.restoreOverrideCursor()
             QApplication.flush()
             self.timer.start(1000)
