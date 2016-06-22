@@ -354,7 +354,7 @@
            <attribute name="label">
             <string>Plotting options</string>
            </attribute>
-           <layout class="QVBoxLayout" name="optionsLayout"/>
+           <layout class="QGridLayout" name="optionsLayout"/>
           </widget>
           <widget class="QWidget" name="logPage">
            <property name="geometry">
@@ -438,12 +438,12 @@
             <rect>
              <x>10</x>
              <y>70</y>
-             <width>105</width>
+             <width>151</width>
              <height>22</height>
             </rect>
            </property>
            <property name="text">
-            <string>Auto-update</string>
+            <string>Real-time updating</string>
            </property>
           </widget>
           <widget class="QFrame" name="toolbarFrame">

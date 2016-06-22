@@ -68,7 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Fill plot options page
         self.optionsLayout.setAlignment(Qt.AlignTop)
-        self.updateIntervalLabel1 = QLabel("Auto update interval: ")
+        self.updateIntervalLabel = QLabel("Real-time update interval: ")
         self.updateIntervalUnitsBox = QComboBox()
         self.updateIntervalUnitsBox.addItem("days")
         self.updateIntervalUnitsBox.addItem("hours")
@@ -78,15 +78,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateIntervalBox = QSpinBox()
         self.updateIntervalBox.setRange(1,60)
         self.updateIntervalBox.setValue(20)
-        self.updateIntervalLayout = QHBoxLayout()
-        self.updateIntervalLayout.addWidget(self.updateIntervalLabel1,0,
+        self.optionsLayout.addWidget(self.updateIntervalLabel,0,0,
                                             Qt.AlignRight)
-        self.updateIntervalLayout.addWidget(self.updateIntervalBox,1,
+        self.optionsLayout.addWidget(self.updateIntervalBox,0,1,
                                             Qt.AlignRight)
-        self.updateIntervalLayout.addWidget(self.updateIntervalUnitsBox,2,
+        self.optionsLayout.addWidget(self.updateIntervalUnitsBox,0,2,
                                             Qt.AlignLeft)
-        self.optionsLayout.addLayout(self.updateIntervalLayout)
-        self.integrationLabel1 = QLabel("Integration: ")
+        self.integrationLabel = QLabel("Integration: ")
         self.integrationUnitsBox = QComboBox()
         self.integrationUnitsBox.addItem("days")
         self.integrationUnitsBox.addItem("hours")
@@ -96,11 +94,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.integrationBox = QSpinBox()
         self.integrationBox.setRange(1,60)
         self.integrationBox.setValue(1)
-        self.integrationLayout = QHBoxLayout()
-        self.integrationLayout.addWidget(self.integrationLabel1,0,Qt.AlignRight)
-        self.integrationLayout.addWidget(self.integrationBox,1,Qt.AlignRight)
-        self.integrationLayout.addWidget(self.integrationUnitsBox,2,Qt.AlignLeft)
-        self.optionsLayout.addLayout(self.integrationLayout)
+        self.optionsLayout.addWidget(self.integrationLabel,1,0,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationBox,1,1,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationUnitsBox,1,2,Qt.AlignLeft)
+        
         
         
         # Set up data types
@@ -178,7 +175,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             dt_unit = 's'
         interval = np.timedelta64(self.updateIntervalBox.value(),dt_unit)
-        interval_seconds = interval/np.timedelta64(1,'s')
         seconds_left = (self.last_auto_update+interval
                         -time_now).astype('m8[s]').astype('int64')
         if seconds_left <= 0:
@@ -203,7 +199,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.progressBar.setFormat("Updating in %v s")
             self.progressBar.setTextVisible(True)
-            self.progressBar.setMaximum(interval_seconds)
+            self.progressBar.setMaximum(interval/np.timedelta64(1,'s'))
             self.progressBar.setValue(seconds_left)
             QApplication.flush()
         
@@ -475,6 +471,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                             md = ap.load_data(project, site, data_type, st, et,
                                               archive=archive,channels=[chan],
                                               cadence=integration_interval)
+                            self.log.append("Ldcwcddwc.")
                             if md is not None and md.data.size:
                                 if (not previous_units is None and
                                     md.units != previous_units):
@@ -484,7 +481,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 md = md.mark_missing_data(cadence=\
                                                           2*md.nominal_cadence)
                                 self.statusBar().showMessage("Plotting data...")
-                                md.plot(units_prefix = units_prefix,axes = ax,
+                                md.plot(units_prefix = units_prefix,axes = current_ax,
                                         label="/".join([project,site,chan]))                                    
                                 self.dataCanvas.draw()
                                 self.log.append("Plotting completed successfully.")

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Tue Jun 21 13:37:44 2016
+# Created: Wed Jun 22 08:06:14 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -184,7 +184,7 @@ class Ui_MainWindow(object):
         self.optionsPage = QtGui.QWidget()
         self.optionsPage.setGeometry(QtCore.QRect(0, 0, 400, 434))
         self.optionsPage.setObjectName("optionsPage")
-        self.optionsLayout = QtGui.QVBoxLayout(self.optionsPage)
+        self.optionsLayout = QtGui.QGridLayout(self.optionsPage)
         self.optionsLayout.setObjectName("optionsLayout")
         self.toolBox.addItem(self.optionsPage, "")
         self.logPage = QtGui.QWidget()
@@ -223,7 +223,7 @@ class Ui_MainWindow(object):
         self.goButton.setGeometry(QtCore.QRect(10, 10, 61, 51))
         self.goButton.setObjectName("goButton")
         self.autoUpdateCheckBox = QtGui.QCheckBox(self.commandBox)
-        self.autoUpdateCheckBox.setGeometry(QtCore.QRect(10, 70, 105, 22))
+        self.autoUpdateCheckBox.setGeometry(QtCore.QRect(10, 70, 151, 22))
         self.autoUpdateCheckBox.setObjectName("autoUpdateCheckBox")
         self.toolbarFrame = QtGui.QFrame(self.commandBox)
         self.toolbarFrame.setGeometry(QtCore.QRect(70, 10, 331, 51))
@@ -264,7 +264,7 @@ class Ui_MainWindow(object):
         self.logSaveButton.setText(QtGui.QApplication.translate("MainWindow", "Save log", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBox.setItemText(self.toolBox.indexOf(self.logPage), QtGui.QApplication.translate("MainWindow", "Log", None, QtGui.QApplication.UnicodeUTF8))
         self.goButton.setText(QtGui.QApplication.translate("MainWindow", "Draw", None, QtGui.QApplication.UnicodeUTF8))
-        self.autoUpdateCheckBox.setText(QtGui.QApplication.translate("MainWindow", "Auto-update", None, QtGui.QApplication.UnicodeUTF8))
+        self.autoUpdateCheckBox.setText(QtGui.QApplication.translate("MainWindow", "Real-time updating", None, QtGui.QApplication.UnicodeUTF8))
         self.helpButton.setText(QtGui.QApplication.translate("MainWindow", "Show help", None, QtGui.QApplication.UnicodeUTF8))
 
 import resources_rc
