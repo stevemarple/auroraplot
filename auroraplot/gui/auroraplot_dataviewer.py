@@ -68,13 +68,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Fill plot options page
         self.optionsLayout.setAlignment(Qt.AlignTop)
+        self.updateIntervalLabel1 = QLabel("Auto update interval: ")
+        self.updateIntervalUnitsBox = QComboBox()
+        self.updateIntervalUnitsBox.addItem("days")
+        self.updateIntervalUnitsBox.addItem("hours")
+        self.updateIntervalUnitsBox.addItem("minutes")
+        self.updateIntervalUnitsBox.addItem("seconds")
+        self.updateIntervalUnitsBox.setCurrentIndex(3)
         self.updateIntervalBox = QSpinBox()
+        self.updateIntervalBox.setRange(1,60)
         self.updateIntervalBox.setValue(20)
-        self.updateIntervalBox.setRange(1,3600)
-        self.updateIntervalBox.setPrefix("Update interval: ")
-        self.updateIntervalBox.setSuffix(" s")
+        self.updateIntervalLayout = QHBoxLayout()
+        self.updateIntervalLayout.addWidget(self.updateIntervalLabel1,0,
+                                            Qt.AlignRight)
+        self.updateIntervalLayout.addWidget(self.updateIntervalBox,1,
+                                            Qt.AlignRight)
+        self.updateIntervalLayout.addWidget(self.updateIntervalUnitsBox,2,
+                                            Qt.AlignLeft)
+        self.optionsLayout.addLayout(self.updateIntervalLayout)
+        self.integrationLabel1 = QLabel("Integration: ")
+        self.integrationUnitsBox = QComboBox()
+        self.integrationUnitsBox.addItem("days")
+        self.integrationUnitsBox.addItem("hours")
+        self.integrationUnitsBox.addItem("minutes")
+        self.integrationUnitsBox.addItem("seconds")
+        self.integrationUnitsBox.setCurrentIndex(3)
+        self.integrationBox = QSpinBox()
+        self.integrationBox.setRange(1,60)
+        self.integrationBox.setValue(1)
+        self.integrationLayout = QHBoxLayout()
+        self.integrationLayout.addWidget(self.integrationLabel1,0,Qt.AlignRight)
+        self.integrationLayout.addWidget(self.integrationBox,1,Qt.AlignRight)
+        self.integrationLayout.addWidget(self.integrationUnitsBox,2,Qt.AlignLeft)
+        self.optionsLayout.addLayout(self.integrationLayout)
         
-        self.optionsLayout.addWidget(self.updateIntervalBox)
         
         # Set up data types
         self.current_data_type = None
@@ -123,7 +150,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.durationUnitsBox.addItem("minutes")
         self.durationUnitsBox.addItem("seconds")
         self.durationUnitsBox.setCurrentIndex(0)
-        self.durationBox.setMaximum(60)
+        self.durationBox.setRange(1,60)
         self.durationBox.setValue(1)
         
         # Set up logging
@@ -141,8 +168,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.progressBar.setValue(0)
             return
         time_now = np.datetime64('now')
-        interval = self.updateIntervalBox.value()
-        seconds_left = (self.last_auto_update+np.timedelta64(interval,'s')
+        intervalUnits = self.updateIntervalUnitsBox.currentText()
+        if intervalUnits == "days":
+            dt_unit = 'D'
+        elif intervalUnits == "hours":
+            dt_unit = 'h'
+        elif intervalUnits == "minutes":
+            dt_unit = 'm'
+        else:
+            dt_unit = 's'
+        interval = np.timedelta64(self.updateIntervalBox.value(),dt_unit)
+        interval_seconds = interval/np.timedelta64(1,'s')
+        seconds_left = (self.last_auto_update+interval
                         -time_now).astype('m8[s]').astype('int64')
         if seconds_left <= 0:
             self.last_auto_update = time_now
@@ -166,7 +203,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.progressBar.setFormat("Updating in %v s")
             self.progressBar.setTextVisible(True)
-            self.progressBar.setMaximum(interval)
+            self.progressBar.setMaximum(interval_seconds)
             self.progressBar.setValue(seconds_left)
             QApplication.flush()
         
@@ -384,8 +421,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 dt_unit = 's'
             st = Qdate_Qtime_to_dt64(Qdate,Qtime)
             et = st + np.timedelta64(self.durationBox.value(),dt_unit)
-            self.log.append("".join(["Loading data: ",np.datetime_as_string(st)," to ",
-                                     np.datetime_as_string(et)]))
+
+            integrationUnits = self.integrationUnitsBox.currentText()
+            if integrationUnits == "days":
+                dt_unit = 'D'
+            elif integrationUnits == "hours":
+                dt_unit = 'h'
+            elif integrationUnits == "minutes":
+                dt_unit = 'm'
+            else:
+                dt_unit = 's'
+            integration_interval = np.timedelta64(self.integrationBox.value(),dt_unit)
+            
+            self.log.append("".join(["Loading data: ",np.datetime_as_string(st),
+                                     " to ", np.datetime_as_string(et)]))
             QApplication.flush()
             self.dataFig.clear()
             ax = []
@@ -425,7 +474,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
                                               archive=archive,channels=[chan],
-                                              cadence=np.timedelta64(1,'s'))
+                                              cadence=integration_interval)
                             if md is not None and md.data.size:
                                 if (not previous_units is None and
                                     md.units != previous_units):
