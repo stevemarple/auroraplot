@@ -7,6 +7,7 @@ import os
 workingdir = os.path.dirname(__file__)
 
 import logging
+import traceback
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
