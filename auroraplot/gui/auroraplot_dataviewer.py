@@ -469,17 +469,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     if True:
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
-                                              archive=archive,channels=[chan],
-                                              cadence=integration_interval)
-                            self.log.append("Ldcwcddwc.")
+                                              archive=archive,channels=[chan])
                             if md is not None and md.data.size:
+                                if integration_interval != md.nominal_cadence:
+                                    self.log.append("Integrating...")
+                                    md.set_cadence(integration_interval,inplace=True)
+                                else:
+                                    md = md.mark_missing_data(cadence=\
+                                                          2*md.nominal_cadence)
                                 if (not previous_units is None and
                                     md.units != previous_units):
                                     self.log.append("Data have different units.")
                                     continue
                                 previous_units = md.units
-                                md = md.mark_missing_data(cadence=\
-                                                          2*md.nominal_cadence)
                                 self.statusBar().showMessage("Plotting data...")
                                 md.plot(units_prefix = units_prefix,axes = current_ax,
                                         label="/".join([project,site,chan]))                                    
