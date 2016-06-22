@@ -686,13 +686,16 @@ class Data(object):
             cidx = chan_tup.index(channels[n])
             u = ap.str_units(np.nanmax(np.abs(self.data[cidx])), self.units, 
                              prefix=units_prefix, ascii=False, wantstr=False)
-            xdata = dt64.mean(self.sample_start_time, self.sample_end_time)
+            
             if u['mul'] == 1:
                 # Can avoid a copy
                 ydata = self.data[cidx]
             else:
                 ydata = self.data[cidx] / u['mul']
 
+            xdata = np.vstack((self.sample_start_time,self.sample_end_time)).flatten('F')
+            ydata = np.vstack((ydata,ydata)).flatten('F')
+                
             if 'label' in kwargs:
                 r.append(dt64.plot_dt64(xdata, ydata,
                                         x_time_units=time_units,
