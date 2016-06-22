@@ -234,8 +234,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>400</width>
-             <height>434</height>
+             <width>262</width>
+             <height>329</height>
             </rect>
            </property>
            <attribute name="label">
@@ -347,8 +347,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>400</width>
-             <height>434</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
            <attribute name="label">
@@ -361,8 +361,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>400</width>
-             <height>434</height>
+             <width>188</width>
+             <height>128</height>
             </rect>
            </property>
            <attribute name="label">
@@ -460,9 +460,9 @@
           <widget class="QPushButton" name="helpButton">
            <property name="geometry">
             <rect>
-             <x>310</x>
+             <x>300</x>
              <y>60</y>
-             <width>81</width>
+             <width>91</width>
              <height>31</height>
             </rect>
            </property>

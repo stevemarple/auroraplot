@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Wed Jun 22 08:06:14 2016
+# Created: Wed Jun 22 14:43:42 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addItem(spacerItem1, 1, 4, 1, 1)
         self.toolBox.addItem(self.datetimePage, "")
         self.datasetPage = QtGui.QWidget()
-        self.datasetPage.setGeometry(QtCore.QRect(0, 0, 400, 434))
+        self.datasetPage.setGeometry(QtCore.QRect(0, 0, 262, 329))
         self.datasetPage.setObjectName("datasetPage")
         self.gridLayout = QtGui.QGridLayout(self.datasetPage)
         self.gridLayout.setObjectName("gridLayout")
@@ -182,13 +182,13 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.addDatasetButton, 9, 2, 1, 1)
         self.toolBox.addItem(self.datasetPage, "")
         self.optionsPage = QtGui.QWidget()
-        self.optionsPage.setGeometry(QtCore.QRect(0, 0, 400, 434))
+        self.optionsPage.setGeometry(QtCore.QRect(0, 0, 96, 26))
         self.optionsPage.setObjectName("optionsPage")
         self.optionsLayout = QtGui.QGridLayout(self.optionsPage)
         self.optionsLayout.setObjectName("optionsLayout")
         self.toolBox.addItem(self.optionsPage, "")
         self.logPage = QtGui.QWidget()
-        self.logPage.setGeometry(QtCore.QRect(0, 0, 400, 434))
+        self.logPage.setGeometry(QtCore.QRect(0, 0, 188, 128))
         self.logPage.setObjectName("logPage")
         self.gridLayout_3 = QtGui.QGridLayout(self.logPage)
         self.gridLayout_3.setObjectName("gridLayout_3")
@@ -231,7 +231,7 @@ class Ui_MainWindow(object):
         self.toolbarLayout = QtGui.QHBoxLayout(self.toolbarFrame)
         self.toolbarLayout.setObjectName("toolbarLayout")
         self.helpButton = QtGui.QPushButton(self.commandBox)
-        self.helpButton.setGeometry(QtCore.QRect(310, 60, 81, 31))
+        self.helpButton.setGeometry(QtCore.QRect(300, 60, 91, 31))
         self.helpButton.setObjectName("helpButton")
         self.verticalLayout.addWidget(self.commandBox)
         self.gridLayout_4.addWidget(self.splitter_2, 0, 0, 1, 1)
