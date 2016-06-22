@@ -348,7 +348,7 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': ap.data._generic_load_converter,
 #                    'load_converter': load_new_samnet_data,
-                    'nominal_cadence': np.timedelta64(1, 's'),
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     # Generic load/save information
                     'constructor': ap.magdata.MagData,
@@ -578,7 +578,7 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
 #                    'load_converter': ap.data._generic_load_converter,
                     'load_converter': load_new_samnet_data,
-                    'nominal_cadence': np.timedelta64(1, 's'),
+                    'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     # Generic load/save information
                     'constructor': ap.magdata.MagData,
