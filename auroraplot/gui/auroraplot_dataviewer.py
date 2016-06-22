@@ -6,6 +6,10 @@ import platform
 import os
 workingdir = os.path.dirname(__file__)
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 import time
 os.environ['QT_API'] = 'pyside'
 os.environ['TZ'] = 'UTC'
@@ -77,7 +81,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateIntervalUnitsBox.setCurrentIndex(3)
         self.updateIntervalBox = QSpinBox()
         self.updateIntervalBox.setRange(1,60)
-        self.updateIntervalBox.setValue(20)
+        self.updateIntervalBox.setValue(30)
         self.optionsLayout.addWidget(self.updateIntervalLabel,0,0,
                                             Qt.AlignRight)
         self.optionsLayout.addWidget(self.updateIntervalBox,0,1,
@@ -152,6 +156,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         # Set up logging
         self.log = Log(self.logTextEdit)
+        self.log_handler = CustomLogHandler(self.log)
+        logger.addHandler(self.log_handler)
         self.logClearButton.clicked.connect(self.log.clear)
         self.logSaveButton.clicked.connect(self.log.save)
         
@@ -389,8 +395,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 channels = ctext
         except Exception as e:
-            self.log.append("Channels not understood.")
-            self.log.append("Error {}".format(e.args[0]))
+            logger.info('Could not parse channels')
+            logger.debug(str(e))
+            logger.debug(traceback.format_exc())
         return channels
     
     def showHelp(self):
@@ -429,7 +436,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 dt_unit = 's'
             integration_interval = np.timedelta64(self.integrationBox.value(),dt_unit)
             
-            self.log.append("".join(["Loading data: ",np.datetime_as_string(st),
+            logger.info("".join(["Loading data: ",np.datetime_as_string(st),
                                      " to ", np.datetime_as_string(et)]))
             QApplication.flush()
             self.dataFig.clear()
@@ -439,9 +446,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for sp in range(numberOfPlots):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 total_num_data += topLevelItem.childCount()
+            self.progressBar.setMaximum(total_num_data)
             self.progressBar.setFormat("Loaded data: %v of %m")
             self.progressBar.setTextVisible(True)
-            self.progressBar.setMaximum(total_num_data)
             for sp in range(numberOfPlots):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 data_type = topLevelItem.text(0)
@@ -469,30 +476,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                 data_type,archive)[1]
                     all_channels = ainfo['channels']
                     channels = [c for c in channels if c in all_channels]
-                    if True:
+                    try:
                         for chan in channels:
                             md = ap.load_data(project, site, data_type, st, et,
                                               archive=archive,channels=[chan])
                             if md is not None and md.data.size:
                                 if integration_interval != md.nominal_cadence:
-                                    self.log.append("Integrating...")
+                                    logger.info("Integrating...")
                                     md.set_cadence(integration_interval,inplace=True)
+                                    logger.info("Finished integrating")
                                 else:
                                     md = md.mark_missing_data(cadence=\
                                                           2*md.nominal_cadence)
                                 if (not previous_units is None and
                                     md.units != previous_units):
-                                    self.log.append("Data have different units.")
+                                    logger.warning("Data have different units.")
                                     continue
                                 previous_units = md.units
                                 self.statusBar().showMessage("Plotting data...")
                                 md.plot(units_prefix = units_prefix,axes = current_ax,
                                         label="/".join([project,site,chan]))                                    
                                 self.dataCanvas.draw()
-                                self.log.append("Plotting completed successfully.")
                                 self.statusBar().showMessage("Ready.")
                             else:
-                                self.log.append("No data.")
+                                logger.info("No data.")
                                 self.statusBar().showMessage("No data.")
                         if not previous_units is None:
                             current_ax.set_ylabel("".join([data_type,', ',
@@ -500,17 +507,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         else:
                             current_ax.set_ylabel(data_type)
                         self.dataCanvas.draw()
-                    #except Exception as e:
-                    #    self.log.append("Loading data failed.")
-                    #    self.log.append("Error {}".format(e.args[0]))
+                    except Exception as e:
+                        logger.info('Loading/plotting data failed')
+                        logger.debug(str(e))
+                        logger.debug(traceback.format_exc())
                 current_ax.legend()
                 if (sp+1)<numberOfPlots:
                     current_ax.set_xlabel(" ")
                 self.dataCanvas.draw()
-                
         except Exception as e:
-            self.log.append("Plotting failed.")
-            self.log.append("Error {}".format(e.args[0]))
+            logger.info('Draw failed')
+            logger.debug(str(e))
+            logger.debug(traceback.format_exc())
         finally:
             self.progressBar.setValue(0)
             self.progressBar.setMaximum(1)
@@ -519,6 +527,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QApplication.flush()
             self.timer.start(1000)
 
+class CustomLogHandler(logging.Handler):
+    def __init__(self,the_log):
+        super().__init__()
+        self.the_log = the_log
+    def emit(self,record):
+        msg = self.format(record)
+        self.the_log.append(msg)
 
 class Log:
     def __init__(self,textEditWidget):
@@ -527,8 +542,7 @@ class Log:
         self.textEditWidget.appendPlainText("".join(["Log started at  ",
             "{:%X %Z %a %d %B %Y}".format(datetime.datetime.now())]))
     def append(self,logText):
-        self.textEditWidget.appendPlainText("".join([
-            "{:%X %Z} ".format(datetime.datetime.now()),logText]))
+        self.textEditWidget.appendPlainText(logText)
     def clear(self):
         msgBox = QMessageBox()
         msgBox.setText("Really clear the log?")
