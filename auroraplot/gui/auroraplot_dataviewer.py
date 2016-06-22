@@ -439,7 +439,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for sp in range(numberOfPlots):
                 topLevelItem = self.plotsTreeWidget.topLevelItem(sp)
                 total_num_data += topLevelItem.childCount()
-            self.progressBar.setFormat("Loading data: %v of %m")
+            self.progressBar.setFormat("Loaded data: %v of %m")
             self.progressBar.setTextVisible(True)
             self.progressBar.setMaximum(total_num_data)
             for sp in range(numberOfPlots):
@@ -457,6 +457,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 ax.append(current_ax)
                 previous_units = None
                 for n in range(numberOfData):
+                    self.progressBar.setValue(current_num_data)
+                    current_num_data += 1
+                    QApplication.flush()
                     child = topLevelItem.child(n)
                     site = child.text(2).split(',')[0]
                     channels = self.parseChannels(child.text(3))
@@ -496,9 +499,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                    units_prefix,previous_units]))
                         else:
                             current_ax.set_ylabel(data_type)
-                        current_num_data += 1
-                        self.progressBar.setValue(current_num_data)
-                        QApplication.flush()
                         self.dataCanvas.draw()
                     #except Exception as e:
                     #    self.log.append("Loading data failed.")
