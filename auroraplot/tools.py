@@ -52,7 +52,7 @@ class smart_open:
     temporary name ('.tmp' appended) and if there are no errors it is
     renamed automatically when closed. In the case of errors the
     default is to delete the temporary file (set delete_temp_on_error
-    to True to keep the temporary file).
+    to False to keep the temporary file).
 
     The use of a temporary file is automatically disabled when the mode
     includes 'r', 'x', 'a', or '+'. It can be prevented manually by
