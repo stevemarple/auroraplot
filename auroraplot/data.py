@@ -422,7 +422,7 @@ class Data(object):
         elif conversion == 'a':
             r = ascii(r) # Python3 only
         elif conversion == 'c':
-            r = capitalize(r)
+            r = str(r).capitalize()
         elif conversion == 'l':
             r = str(r).lower()
         elif conversion == 'r':
