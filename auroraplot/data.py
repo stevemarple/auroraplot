@@ -528,7 +528,8 @@ class Data(object):
 
 
     def extract(self, start_time=None, end_time=None, channels=None, 
-                inplace=False):
+                inplace=False, 
+                straddle_boundary=False, trim_straddles=False):
         if start_time is not None:
             start_time = dt64.astype(start_time, units=self.nominal_cadence)
         if end_time is not None:
@@ -554,14 +555,23 @@ class Data(object):
             if end_time is None:
                 end_time = self.end_time
 
-            ### TODO: Add option to accept sample which straddle
-            ### boundary conditions.
-            tidx = (self.sample_start_time >= start_time) & \
-                (self.sample_end_time <= end_time)
+            if straddle_boundary:
+                tidx = (self.sample_end_time > start_time) & \
+                    (self.sample_start_time < end_time)
+            else:
+                tidx = (self.sample_start_time >= start_time) & \
+                    (self.sample_end_time <= end_time)
+
             r.start_time = start_time
             r.end_time = end_time
             r.sample_start_time = r.sample_start_time[tidx]
             r.sample_end_time = r.sample_end_time[tidx]
+            if straddle_boundary and trim_straddles:
+                idx = r.sample_start_time < start_time
+                r.sample_start_time[idx] = start_time 
+                r.sample_end_time[r.sample_end_time > end_time] \
+                    = end_time
+
             r.data = r.data[:, tidx]
             if r.integration_interval is not None:
                 r.integration_interval = r.integration_interval[:, tidx]
