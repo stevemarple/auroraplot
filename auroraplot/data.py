@@ -356,57 +356,92 @@ class Data(object):
             Field names which return string or numerical values can be
             appended by an optional format specifier which is passed
             to the str.format() function, e.g., 'site:elevation:.1f'.
-            If an optional format specifier is not provided the value
-            is converted to a string by calling str().
+
+            The format string can be preceded by a conversion type,
+            where 'a' is for ascii() (Python 3 only), 'r' for repr(),
+            and 's' for str(). In addition the following non-standard
+            conversions are also provided: 'c' for str().capitalize(),
+            capitalize(), 'l' for str().lower(), 't' for str().title()
+            and 'u' for str().upper().
+
+            If a conversion type or format specifier is not provided
+            the value is converted to a string by calling str().
         """
+
+        if fmt.startswith('!'):
+            conversion, _, fmt = fmt[1:].partition(':')
+        else:
+            conversion = None
 
         if fmt.startswith('+'):
             # Unix date command uses + to mark the format specifier
-            return dt64.strftime(self.start_time, fmt[1:])
+            r = dt64.strftime(self.start_time, fmt[1:])
+            fmt2 = ''
 
-        # Cases below are of form 'field' or 'field:fmt2'
-        # Use str.format() to do any additional format conversion
-        f, sep, fmt2 = fmt.partition(':') 
-
-        if f in ('start_time', 'end_time'):
-            # Custom formatting by strftime, so return immediately
-            if fmt2:
-                return dt64.strftime(getattr(self, f), fmt2)
-            else:
-                return dt64.strftime(getattr(self, f), 
-                                     '%Y-%m-%dT%H:%M:%S+0000')
-
-        elif f in ('project_lc', 'site_lc'):
-            r = getattr(self, f.split('_')[0])
-            r = 'none' if r is None else r.lower()
-        elif f == 'description':
-            r = self.data_description()
-        elif f == 'date_range':
-            r = dt64.fmt_dt64_range(self.start_time, self.end_time)
-        elif f == 'site':
-            if sep:
-                # Takes form 'site:info' or site:info:fmt2'
-                info, _, fmt2 = fmt2.partition(':')
-                r = self.get_site_info(info)
-            else:
-                # Just site
-                r = self.site
-        elif f == 'project':
-            if sep:
-                # Takes form 'project:info' or project:info:fmt2'
-                info, _, fmt2 = fmt2.partition(':')
-                r = self.get_project_info(info)
-            else:
-                r = self.project
         else:
-            raise ValueError("Invalid format ('%s') for type '%s'" % 
+            # Cases below are of form 'field' or 'field:fmt2'
+            # Use str.format() to do any additional format conversion
+            f, sep, fmt2 = fmt.partition(':') 
+
+            if f in ('start_time', 'end_time'):
+                # Custom formatting by strftime
+                if fmt2:
+                    r = dt64.strftime(getattr(self, f), fmt2)
+                else:
+                    r = dt64.strftime(getattr(self, f), 
+                                      '%Y-%m-%dT%H:%M:%S+0000')
+
+            elif f in ('project_lc', 'site_lc'):
+                r = getattr(self, f.split('_')[0])
+                r = 'none' if r is None else r.lower()
+            elif f == 'description':
+                r = self.data_description()
+            elif f == 'date_range':
+                r = dt64.fmt_dt64_range(self.start_time, self.end_time)
+            elif f == 'site':
+                if sep:
+                    # Takes form 'site:info' or site:info:fmt2'
+                    info, _, fmt2 = fmt2.partition(':')
+                    r = self.get_site_info(info)
+                else:
+                    # Just site
+                    r = self.site
+            elif f == 'project':
+                if sep:
+                    # Takes form 'project:info' or project:info:fmt2'
+                    info, _, fmt2 = fmt2.partition(':')
+                    r = self.get_project_info(info)
+                else:
+                    r = self.project
+            else:
+                raise ValueError("Invalid format ('%s') for type '%s'" % 
+                                 (fmt, self.__class__.__name__))
+
+        if conversion is None:
+            r = str(r)
+        elif conversion == 'a':
+            r = ascii(r) # Python3 only
+        elif conversion == 'c':
+            r = capitalize(r)
+        elif conversion == 'l':
+            r = str(r).lower()
+        elif conversion == 'r':
+            r = repr(r)
+        elif conversion == 's':
+            r = str(r)
+        elif conversion == 't':
+            r = str(r).title()
+        elif conversion == 'u':
+            r = str(r).upper()
+        else:
+            raise ValueError("Unknown conversion ('%s') for type '%s'" %
                              (fmt, self.__class__.__name__))
 
         if fmt2:
-            return ('{0:%s}' % fmt2).format(r)
-        else:
-            return str(r)
-        
+            r = ('{0:%s}' % fmt2).format(r)        
+
+        return r
+
 
     def data_description(self):
         return 'Data'
