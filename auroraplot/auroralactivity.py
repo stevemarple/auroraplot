@@ -205,25 +205,24 @@ class AuroraWatchActivity(Data):
         if plot_func == plt.bar:
             if time_units is None:
                 time_units = dt64.get_units(self.sample_start_time)
-            if not kwargs.has_key('width'):
+            if 'width' not in kwargs:
                 kwargs['width'] = dt64.dt64_to(self.nominal_cadence, time_units)
 
-            if not kwargs.has_key('align'):
+            if 'align' not in kwargs:
                 kwargs['align'] = 'center'
 
-            if not kwargs.has_key('color'):
+            if 'color' not in kwargs:
                 kwargs['color'] = self.get_color()
 
-            if not kwargs.has_key('edgecolor'):
-                kwargs['edgecolor'] = self.get_color() * .9
+            if 'edgecolor' not in kwargs:
+                kwargs['edgecolor'] = np.tile(0.6, (1,3))
 
-            if not kwargs.has_key('linewidth'):
+            if 'linewidth' not in kwargs:
                 kwargs['linewidth'] = 0.5
 
-            if not kwargs.has_key('zorder'):
-                kwargs['zorder'] = 4
+            if 'zorder' not in kwargs:
+                kwargs['zorder'] = 2
 
-                
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot, units_prefix=units_prefix,
                       title=title, 
@@ -252,7 +251,7 @@ class AuroraWatchActivity(Data):
                           color=self.colors[n], 
                           linestyle='-',
                           linewidth=2,
-                          zorder=3)
+                          zorder=1)
             axes.set_ylim(top=new_ylim_top)
         return r
 
@@ -419,18 +418,21 @@ class KIndex(Data):
                 
             if time_units is None:
                 time_units = dt64.get_units(self.sample_start_time)
-            if not kwargs.has_key('width'):
+            if 'width' not in kwargs:
                 kwargs['width'] = dt64.dt64_to(self.nominal_cadence, 
-                                               time_units) * 0.8
+                                               time_units) * 1.0
 
-            if not kwargs.has_key('align'):
+            if 'align' not in kwargs:
                 kwargs['align'] = 'center'
 
-            if not kwargs.has_key('color'):
+            if 'color' not in kwargs:
                 kwargs['color'] = self.get_color()
 
-            if not kwargs.has_key('linewidth'):
-                kwargs['linewidth'] = 0.0
+            if 'edgecolor' not in kwargs:
+                kwargs['edgecolor'] = np.tile(0.6, (1,3))
+
+            if 'linewidth' not in kwargs:
+                kwargs['linewidth'] = 1
 
         else:
             bottom = 0

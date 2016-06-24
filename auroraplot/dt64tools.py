@@ -168,6 +168,17 @@ def isnat(x):
     # Do not trust that NaT will compare equal with NaT!
     return np.array(x).astype('int64') == -(2**63)
     
+def get_utc_days(st, et):
+    day = np.timedelta64(1, 'D')
+    t1 = st + 0 * day # Units are D or higher precision
+
+    while t1 < et:
+        t2 = astype(floor(t1 + day, day), units=t1)
+        if t2 > et:
+            t2 = astype(et, units=t1)
+        yield t1, t2
+        t1 = t2
+
 def get_date(t):
     return t.astype('<M8[D]')
 
