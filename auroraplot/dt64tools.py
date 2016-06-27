@@ -280,7 +280,12 @@ def _aggregate(*a, **kwargs):
             assert isinstance(b.dtype.type(), a0.dtype.type), \
                 'Arrays must hold the same data type'
             tmp += b.astype(d).astype('int64')
-        return (tmp / len(a)).astype(d)
+        for new_tu in time_units[time_units.index(tu)::-1]:
+            new_d = get_time_type(a0) + '[' + new_tu + ']'
+            ratio = np.array([1]).astype(d).astype(new_d).astype('int64')
+            if all( (tmp*ratio) % len(a) == 0):
+                break
+        return (tmp*ratio / len(a)).astype(new_d)
 
 def _round_to_func(dt, td, func, func_name):
     td_units = get_units(td)
