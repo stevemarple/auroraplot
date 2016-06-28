@@ -29,6 +29,7 @@ import auroraplot.magdata
 import auroraplot.dt64tools as dt64
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
+import auroraplot.datasets.bgs_schools
 
 # Define command line arguments
 parser = \
