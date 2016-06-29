@@ -16,6 +16,8 @@ import copy
 
 logger = logging.getLogger(__name__)
 
+time_label = 'Time'
+date_label = 'Date'
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
 
@@ -888,9 +890,9 @@ class Datetime64Formatter(Formatter):
                                   self.axis.get_label().get_text() == ''):
                 if r == strftime(t + np.timedelta64(1, 'D'), fmt):
                     # No date information present in string
-                    s = 'Time' 
+                    s = time_label
                 else:
-                    s = 'Date'
+                    s = date_label
 
                 if isinstance(self.autolabel, str):
                     s = self.autolabel % s
