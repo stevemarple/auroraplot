@@ -1,6 +1,8 @@
 import copy
 import logging
 import os
+import tempfile
+
 import numpy as np
 
 import auroraplot as ap
@@ -52,7 +54,7 @@ class smart_open:
     temporary name ('.tmp' appended) and if there are no errors it is
     renamed automatically when closed. In the case of errors the
     default is to delete the temporary file (set delete_temp_on_error
-    to True to keep the temporary file).
+    to False to keep the temporary file).
 
     The use of a temporary file is automatically disabled when the mode
     includes 'r', 'x', 'a', or '+'. It can be prevented manually by
@@ -102,7 +104,23 @@ class smart_open:
                     os.rename(self.file.name, self.filename)
                 elif self.delete_temp_on_error:
                     os.remove(self.file.name)
-                    
+
+
+def atomic_symlink(src, dst):
+    """Create or update a symlink atomically."""
+    dst_dir = os.path.dirname(dst)
+    tmp = None
+    try:
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        tmp = tempfile.mktemp(dir=dst_dir)
+        os.symlink(src, tmp)
+        os.rename(tmp, dst)
+    except Exception as e:
+        if tmp and os.path.exists(tmp):
+            os.remove(tmp)
+        raise
+
 
 def least_squares_error(a, b):
     e = np.power(a - b, 2)

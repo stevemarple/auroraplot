@@ -892,8 +892,9 @@ class MagQDC(MagData):
                                       channels=r.channels,
                                       archive=fit)
                     if bl is None or bl.data.size == 0:
-                        raise Exception('No %s MagData for %s' 
-                                        % (fit, str(d)))
+                        raise Exception('No %s MagData for %s/%s %s' 
+                                        % (fit, self.project, self.site,
+                                           str(d)))
                     r.data[:, d == dt64.get_date(r.sample_start_time)] \
                         += bl.data
             else:
