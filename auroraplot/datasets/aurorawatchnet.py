@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import os
 import logging
 
@@ -386,11 +387,28 @@ sites = {
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
         'copyright': 'Met Office.',
-        'attribution': 'Met Office, ' + \
-            'http://www.metoffice.gov.uk/',
+        'attribution': 'Met Office, http://www.metoffice.gov.uk/',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # EXE
+
+        'EXE2': {
+        # University of Exeter
+        'location': 'Exeter, UK',
+        'latitude': Decimal('50.735498'),
+        'longitude': Decimal('-3.533339'),
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-08-01T00:00:00+0000'),
+        'end_time': None, # Still operational
+        'url': 'http://www.exeter.ac.uk/', # Provisional
+        'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
+        'k_index_filter': None,
+        'license': cc3_by_nc_sa,
+        'copyright': 'University of Exeter.',
+        'attribution': 'University of Exeter, http://www.exeter.ac.uk/',
+        'line_color': [0x00/255.0, 0x5d/255.0, 0xab/255.0],
+        }, # EXE2
     }
+
 
 
 # Set activity color/thresholds unless already set.
