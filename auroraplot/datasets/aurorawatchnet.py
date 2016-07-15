@@ -37,7 +37,7 @@ def check_temperature(data):
     return data
 
 def check_voltage(data):
-    data[np.logical_or(data < 0, data > 10)] = np.nan
+    data[np.logical_or(data < 0, data > 50)] = np.nan
     return data
 
 def load_awn_data(file_name, archive_data, 
