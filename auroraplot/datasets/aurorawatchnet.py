@@ -391,11 +391,11 @@ sites = {
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # EXE
 
-        'EXE2': {
-        # University of Exeter
-        'location': 'Exeter, UK',
-        'latitude': Decimal('50.735498'),
-        'longitude': Decimal('-3.533339'),
+        'SID': {
+        # University of Exeter mag at Norman Lockyer observatory
+        'location': 'Sidmouth, UK',
+        'latitude': Decimal('50.687911'), 
+        'longitude': Decimal('-3.219600'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-08-01T00:00:00+0000'),
         'end_time': None, # Still operational
@@ -404,9 +404,9 @@ sites = {
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
         'copyright': 'University of Exeter.',
-        'attribution': 'University of Exeter, http://www.exeter.ac.uk/',
+        'attribution': 'University of Exeter and Norman Lockye Observatory',
         'line_color': [0x00/255.0, 0x5d/255.0, 0xab/255.0],
-        }, # EXE2
+        }, # SID
     }
 
 
