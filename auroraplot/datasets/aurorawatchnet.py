@@ -397,7 +397,7 @@ sites = {
         'latitude': Decimal('50.687911'), 
         'longitude': Decimal('-3.219600'),
         'elevation': np.nan,
-        'start_time': np.datetime64('2016-08-01T00:00:00+0000'),
+        'start_time': np.datetime64('2016-07-15T00:00:00+0000'),
         'end_time': None, # Still operational
         'url': 'http://www.exeter.ac.uk/', # Provisional
         'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
