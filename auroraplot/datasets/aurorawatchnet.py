@@ -524,6 +524,17 @@ for s in sites:
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
+
+for s in ('EXE', 'SID'):
+    for dt in ('MagData', 'MagQDC'):
+        for an in sites[s]['data_types'][dt]:
+            ai = sites[s]['data_types'][dt][an]
+            if isinstance(ai, six.string_types):
+                continue
+            ai['channels'] = np.array(['H', 'E', 'Z'])
+
+            
+
 project = {
     'name': 'AuroraWatch Magnetometer Network',
     'abbreviation': 'AWN',
