@@ -478,12 +478,38 @@ def parse_datetime64(s, prec, now=None, timezone='+0000'):
 
 def parse_timedelta64(s, prec):
     r = np.timedelta64(0, prec)
+    value_next = True
+    values = []
+    units = []
     for w in s.split():
-        m = re.match('^(-?[0-9]+)(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)$', w)
+        m = re.match('^(-?[0-9]+)?(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)?$', w)
         if m is None:
             raise ValueError('unknown value/unit (%s)' % w)
         v, u = m.groups()
-        r += np.timedelta64(int(v), u)
+        if v is not None and u is not None:
+            # Value and unit
+            if not value_next:
+                raise ValueError('unit expected but found %s' % repr(w))
+            values.append(v)
+            units.append(u)
+        elif v is None and u is not None:
+            # unit only
+            if value_next:
+                raise ValueError('value expected but found %s' % repr(w))
+            units.append(u)
+            value_next = True
+        elif v is not None and u is None:
+            # value only
+            if not value_next:
+                raise ValueError('unit expected but found %s' % repr(w))
+            values.append(v)
+            value_next = False
+
+    if not value_next:
+        raise ValueError('Last value missing unit: %s' % repr(s))
+
+    for n in range(len(values)):
+        r += np.timedelta64(int(values[n]), units[n])
     return astype(r, units=prec)
 
 
