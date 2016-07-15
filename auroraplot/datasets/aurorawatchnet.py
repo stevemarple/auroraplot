@@ -404,7 +404,7 @@ sites = {
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
         'copyright': 'University of Exeter.',
-        'attribution': 'University of Exeter and Norman Lockye Observatory',
+        'attribution': 'University of Exeter and Norman Lockyer Observatory',
         'line_color': [0x00/255.0, 0x5d/255.0, 0xab/255.0],
         }, # SID
     }
