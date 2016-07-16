@@ -478,7 +478,7 @@ default_data_types = {
         },
     'VoltageData': {
         'realtime': {
-            'channels': np.array(['Battery voltage']),
+            'channels': np.array(['Supply voltage']),
             'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
