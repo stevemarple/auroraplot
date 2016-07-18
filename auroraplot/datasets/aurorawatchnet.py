@@ -26,6 +26,7 @@ from auroraplot.voltagedata import VoltageData
 logger = logging.getLogger(__name__)
 
 base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
+#base_url = '/data/aurorawatchnet/'
 
 def check_mag_data(data):
     data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
