@@ -37,7 +37,7 @@ def check_temperature(data):
     return data
 
 def check_voltage(data):
-    data[np.logical_or(data < 0, data > 10)] = np.nan
+    data[np.logical_or(data < 0, data > 50)] = np.nan
     return data
 
 def load_awn_data(file_name, archive_data, 
@@ -397,14 +397,14 @@ sites = {
         'latitude': Decimal('50.687911'), 
         'longitude': Decimal('-3.219600'),
         'elevation': np.nan,
-        'start_time': np.datetime64('2016-08-01T00:00:00+0000'),
+        'start_time': np.datetime64('2016-07-15T00:00:00+0000'),
         'end_time': None, # Still operational
         'url': 'http://www.exeter.ac.uk/', # Provisional
         'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
         'copyright': 'University of Exeter.',
-        'attribution': 'University of Exeter and Norman Lockye Observatory',
+        'attribution': 'University of Exeter and Norman Lockyer Observatory',
         'line_color': [0x00/255.0, 0x5d/255.0, 0xab/255.0],
         }, # SID
     }
@@ -478,7 +478,7 @@ default_data_types = {
         },
     'VoltageData': {
         'realtime': {
-            'channels': np.array(['Battery voltage']),
+            'channels': np.array(['Supply voltage']),
             'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -523,6 +523,17 @@ for s in sites:
 
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
+
+
+for s in ('EXE', 'SID'):
+    for dt in ('MagData', 'MagQDC'):
+        for an in sites[s]['data_types'][dt]:
+            ai = sites[s]['data_types'][dt][an]
+            if isinstance(ai, six.string_types):
+                continue
+            ai['channels'] = np.array(['H', 'E', 'Z'])
+
+            
 
 project = {
     'name': 'AuroraWatch Magnetometer Network',
