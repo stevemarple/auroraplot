@@ -288,13 +288,14 @@ def _aggregate(*a, **kwargs):
         for new_tu in time_units[time_units.index(tu)::-1]:
             new_d = get_time_type(a0) + '[' + new_tu + ']'
             new_s = np.array([1]).astype(d).astype(new_d).astype('int64')
-            if any( tmp > (np.iinfo(np.int64).max/new_s) ):
+            if (any( tmp > (np.iinfo(np.int64).max/new_s) )
+                or any( tmp < (np.iinfo(np.int64).min/new_s) )):
                 break
             good_d = new_d
             good_s = new_s
             if all( (tmp*good_s) % len(a) == 0):
                 break
-        return (tmp*good_s / len(a)).astype(good_d)
+        return ( (tmp*good_s) / len(a)).astype(good_d)
 
 def _round_to_func(dt, td, func, func_name):
     td_units = get_units(td)
