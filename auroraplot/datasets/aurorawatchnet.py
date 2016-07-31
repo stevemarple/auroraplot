@@ -212,6 +212,10 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'description': (
+            'Test magnetometer system. ' +
+            '2013: battery-operated AuroraWatchNet magnetometer'. +
+            '2016: Raspberry Pi magnetometer sytem operating outside with sensor buried for temperature stability.'),
         }, # TEST1
 
     'BRA': {
