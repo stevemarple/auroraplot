@@ -530,7 +530,7 @@ for s in sites:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
 
-for s in ('EXE', 'SID'):
+for s in ('EXE', 'SID', 'TEST1'):
     for dt in ('MagData', 'MagQDC'):
         for an in sites[s]['data_types'][dt]:
             ai = sites[s]['data_types'][dt][an]
