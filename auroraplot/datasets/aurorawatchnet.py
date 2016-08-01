@@ -216,6 +216,7 @@ sites = {
             'Test magnetometer system. ' +
             '2013: battery-operated AuroraWatchNet magnetometer. ' +
             '2016: Raspberry Pi magnetometer sytem operating outside with sensor buried for temperature stability.'),
+        'line_color': [.1, .4, .1],
         }, # TEST1
 
     'BRA': {
