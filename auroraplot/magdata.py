@@ -430,7 +430,7 @@ def stack_plot(data_array, offset, channel=None,
         kwargs = {}
         try:
             kwargs['color'] = da[n].get_site_info('line_color')
-        except KeyError as e:
+        except Exception as e:
             pass
         lh = dt64.plot_dt64(d.get_mean_sample_time(), 
                             y,
