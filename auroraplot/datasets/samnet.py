@@ -310,7 +310,7 @@ sites = {
         'end_time': np.datetime64('2015-06-29T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'bo',
         },
     'CRK1': {
