@@ -4,6 +4,7 @@ import os
 import tempfile
 
 import numpy as np
+import scipy.signal
 
 import auroraplot as ap
 
@@ -382,3 +383,50 @@ def lookup_module_name(s):
     module = s[:last_dot]
     name = s[(last_dot+1):]
     return (module, name)
+
+
+def remove_spikes_chauvenet(md,
+                       inplace=False,
+                       want_outliers=False,
+                       savgol_window=np.timedelta64(5, 'm'),
+                       chauvenet_window=np.array([89,79]).astype('timedelta64[s]')):
+    """Remove spikes caused by running cron jobs.
+
+    Cron jobs can cause spikes in the data from magnetometers in the
+    BGS Schools magnetometer network (most likely by a drop in supply
+    voltage). This function removes most of the spikes."""
+
+
+    # Regularly space the data prior to Savitzky Golay smoothing
+    md2 = md.space_regularly(md.nominal_cadence,
+                             missing_cadence=md.nominal_cadence * 4)
+
+    # Smooth the regularly-spaced data
+    window_length = 2 * int(savgol_window / (2 * md.nominal_cadence)) + 1
+    md2.data = scipy.signal.savgol_filter(md2.data, window_length, 3)
+
+    # Interpolate the smoothed data back to the original sample times
+    smoothed = md2.interp(md.sample_start_time, md.sample_end_time)
+
+    # Calculate the difference between the original data and the
+    # smoothed version. Hopefully it is normally-distributed and
+    # suitable to use Chauvenet's criterion to remove outliers.
+    residuals = copy.deepcopy(md)
+    residuals.data -= smoothed.data
+
+    outliers = residuals.chauvenet_filter(window=chauvenet_window,
+                                          want_outliers=True)
+
+    if want_outliers:
+        return outliers
+    
+    if inplace:
+        r = self
+    else:
+        r = copy.deepcopy(md)
+
+    r.data[outliers] = np.nan
+    return r
+
+
+    
