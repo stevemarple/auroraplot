@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
 import scipy.stats
+import scipy.special
 
 import auroraplot as ap
 import auroraplot.tools
@@ -1242,4 +1243,44 @@ class Data(object):
                                  units, a)
             setattr(r, a, t2)
         return r
+        
+
+    def chauvenet_filter(self, window, inplace=False, want_outliers=False):
+
+        data = self.data.copy()
+        samt = dt64.mean(self.sample_start_time, self.sample_end_time)
+        r_outliers = np.zeros_like(data, dtype=bool)
+        for win in np.nditer(window):
+            outliers = np.zeros_like(data, dtype=bool)
+            for t1 in dt64.dt64_range(self.start_time, self.end_time, win):
+                t2 = t1 + win
+                for n in range(data.shape[0]):
+                    idx = np.logical_and(samt >= t1, samt < t2)
+                    N = np.count_nonzero(np.isfinite(data[n, idx]))
+                    if not N:
+                        continue
+                    mean = np.nanmean(data[n, idx])
+                    std = np.nanstd(data[n, idx])
+                    criterion = 1.0 / (2*N)
+                    d = np.abs(data[n, idx] - mean) / std
+                    d /= 2.0 ** 0.5
+                    prob = scipy.special.erfc(d)
+                    outliers[n, idx] = (prob < criterion)
+
+            r_outliers = np.logical_or(r_outliers, outliers)
+            
+        data[r_outliers] = np.nan
+
+        print('outliers: ' + str(np.count_nonzero(r_outliers)))
+        if want_outliers:
+            return r_outliers
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+
+        r.data = data
+        return r
+
+        
         
