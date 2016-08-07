@@ -540,6 +540,15 @@ for s in ('EXE', 'SID', 'TEST1'):
 
             
 
+
+sites['TEST1']['data_types']['MagData']['raw'] \
+    = copy.deepcopy(sites['TEST1']['data_types']['MagData']['realtime'])
+sites['TEST1']['data_types']['MagData']['realtime']['filter_function'] \
+    = lambda x: ap.data.Data.remove_spikes_chauvenet(x,
+                                                savgol_window=np.timedelta64(5, 'm'),
+                                                chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
+
+            
 project = {
     'name': 'AuroraWatch Magnetometer Network',
     'abbreviation': 'AWN',
