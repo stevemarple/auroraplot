@@ -25,6 +25,13 @@ import auroraplot as ap
 import auroraplot.tools
 import auroraplot.dt64tools as dt64
 
+try:
+    from numpy import nanmean
+    from numpy import nanstd
+except ImportError:
+    from scipy.stats import nanmean
+    from scipy.stats import nanstd
+
 logger = logging.getLogger(__name__)
 
 def leastsq_error(p, obj, ref, channel):
@@ -1259,8 +1266,8 @@ class Data(object):
                     N = np.count_nonzero(np.isfinite(data[n, idx]))
                     if not N:
                         continue
-                    mean = np.nanmean(data[n, idx])
-                    std = np.nanstd(data[n, idx])
+                    mean = nanmean(data[n, idx])
+                    std = nanstd(data[n, idx])
                     criterion = 1.0 / (2*N)
                     d = np.abs(data[n, idx] - mean) / std
                     d /= 2.0 ** 0.5
@@ -1301,7 +1308,10 @@ class Data(object):
 
         # Smooth the regularly-spaced data
         window_length = 2 * int(savgol_window / (2 * self.nominal_cadence)) + 1
-        self2.data = scipy.signal.savgol_filter(self2.data, window_length, 3)
+        #self2.data = scipy.signal.savgol_filter(self2.data, window_length, 3)
+        for n in range(self2.data.shape[0]):
+            self2.data[n] = ap.tools.savitzky_golay(self2.data[n], 
+                                                    window_length, 3)
 
         # Interpolate the smoothed data back to the original sample times
         smoothed = self2.interp(self.sample_start_time, self.sample_end_time)
