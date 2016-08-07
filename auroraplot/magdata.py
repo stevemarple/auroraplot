@@ -377,30 +377,31 @@ def stack_plot(data_array, offset, channel=None,
         channel = channel[0]
 
     if sort:
-        latitude = np.zeros_like(da, dtype=float)
-        for n in range(da.size):
-            latitude[n] = da[n].get_site_info('latitude')
-        sort_idx = np.argsort(latitude)
-        da = da[sort_idx]
+        da = sorted(list(da), 
+                    cmp=lambda a,b: (cmp(a.get_site_info('latitude'), 
+                                         b.get_site_info('latitude')) or 
+                                     cmp(b.project, a.project) or 
+                                     cmp(b.site, a.site)))
+
 
     r = []
     fig = plt.figure()
     ax = plt.subplot(1, 1, 1)
     ax.hold(True)
-    tick_locs = np.arange(da.size) * offset
+    tick_locs = np.arange(len(da)) * offset
     tick_labels = []
     st = da[0].start_time
     et = da[0].end_time
 
     # To estimate range of data, ignoring a few extreme cases.
-    ydiff = np.zeros(da.size)
+    ydiff = np.zeros(len(da))
     max5 = ap.tools.NthLargest(5)
     min5 = ap.tools.NthLargest(5, smallest=True)
 
     plot_count = 0
 
     # Plot each data set
-    for n in range(da.size):        
+    for n in range(len(da)):        
         label = da[n].format_project_site()
 
         if isinstance(channel, six.string_types):
@@ -463,11 +464,11 @@ def stack_plot(data_array, offset, channel=None,
         # Round up to multiple of offset for aesthetic reasons.
         ydisturb = np.ceil(ydisturb / offset) * offset
 
-        ylim = [-offset, da.size * offset]
+        ylim = [-offset, len(da) * offset]
         if ax.yaxis.get_data_interval()[0] < ylim[0]:
             ylim[0] = -ydisturb
         if ax.yaxis.get_data_interval()[1] > ylim[1]:
-            ylim[1] = ((da.size - 1) * offset) + ydisturb
+            ylim[1] = ((len(da) - 1) * offset) + ydisturb
         ax.set_ylim(ylim)
     
     ax.yaxis.set_ticks(tick_locs)
