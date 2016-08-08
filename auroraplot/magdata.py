@@ -329,6 +329,7 @@ def _save_baseline_data(md, file_name, archive_data):
 def stack_plot(data_array, offset, channel=None, 
                start_time=None, end_time=None,
                sort=True, scale_bar=True,
+               ylabel_fmt='{data:project}\n{data:site}',
                 **kwargs):
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
@@ -397,19 +398,19 @@ def stack_plot(data_array, offset, channel=None,
     my_min = ap.tools.NthLargest(10, smallest=True)
     cidx = np.tile(-1, len(da))
     for n in range(len(da)):
-        label = da[n].format_project_site()
         if isinstance(channel, six.string_types):
             cidx[n] = da[n].get_channel_index(channel)[0]
         else:
             for c in channel:
                 if c in da[n].channels:
                     cidx[n] = da[n].get_channel_index(c)[0]
-                    label += ' (%s)' % c
                     break
                 if cidx[n] == -1:
                     # Not found
                     continue
         ydiff[n] = my_max(da[n].data[cidx[n]]) - my_min(da[n].data[cidx[n]])
+        tick_labels.append(ylabel_fmt.format(data=da[n], 
+                                             channel=da[n].channels[cidx[n]]))
 
     if len(da) == 2:
         ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
@@ -449,8 +450,6 @@ def stack_plot(data_array, offset, channel=None,
                             **kwargs)
         plot_count += 1
         r.extend(lh)
-        # tick_labels.append(d.project + '\n' + d.site)
-        tick_labels.append(label.replace('/', '\n'))
 
 
     if start_time is not None:
