@@ -98,8 +98,8 @@ parser.add_argument('--log-format',
                     help='Set format of log messages',
                     metavar='FORMAT')
 parser.add_argument('--offset', 
-                    default=100,
-                    type=float,
+                    default='auto',
+                    type=lambda x: np.nan if x.lower() == 'auto' else float(x),
                     help='Offset between sites for stack plot (nT)')
 parser.add_argument('--plot-function',
                     help='Name of matplotlib plot function',
