@@ -289,7 +289,7 @@ for n in range(len(project_list)):
     # If result is None then no data available so ignore those
     # results.
     if md is not None and md.data.size:
-        md = md.mark_missing_data(cadence=2*md.nominal_cadence)
+        md = md.mark_missing_data(cadence=3*md.nominal_cadence)
         mdl.append(md)
 
 if args.plot_function:
