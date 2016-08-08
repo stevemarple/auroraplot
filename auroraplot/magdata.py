@@ -399,7 +399,7 @@ def stack_plot(data_array, offset, channel=None,
     for n in range(len(da)):
         label = da[n].format_project_site()
         if isinstance(channel, six.string_types):
-            cidx[n] = da[n].get_channel_index(channel)
+            cidx[n] = da[n].get_channel_index(channel)[0]
         else:
             for c in channel:
                 if c in da[n].channels:
