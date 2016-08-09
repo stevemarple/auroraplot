@@ -516,9 +516,10 @@ def draw_scale_marker(ax, y, length,
     ax.plot(x2, y2[[0,0]], color=color, linewidth=linewidth) # Bottom bar
     ax.plot(x2, y2[[1,1]], color=color, linewidth=linewidth) # Top bar
     if text:
-        ax.text(x2[1], y, text, color=color,
-                horizontalalignment='left',
-                verticalalignment='center')
+        t = ax.text(x2[1], y, text, color=color,
+                    horizontalalignment='left',
+                    verticalalignment='center')
+        t.set_bbox(dict(color='white', alpha=0.7))
 
     return r
 
