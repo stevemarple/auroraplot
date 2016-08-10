@@ -113,6 +113,9 @@ parser.add_argument('--k-index-cadence',
                     default='3h',
                     help='Cadence for K index plot',
                     metavar='CADENCE')
+parser.add_argument('--legend',
+                    action='store_true',
+                    help='Add legend to plot')
 parser.add_argument('--save-filename',
                     help='Save plot',
                     metavar='FILE')
@@ -309,7 +312,8 @@ if args.plot_type is None or args.plot_type == 'stack_plot':
         # Create a stackplot.
         ap.magdata.stack_plot(mdl, 
                               offset=args.offset * 1e-9,
-                              channel=args.channels.split())
+                              channel=args.channels.split(),
+                              add_legend=args.legend)
 else:
     # Every other plot type makes one figure per site
     for md in mdl:
