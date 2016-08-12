@@ -1100,7 +1100,7 @@ def _strftime_td64(td, fstr, customspec=None):
 
     return s
 
-def get_sidereal_timedelta(t,lon):
+def get_sidereal_timedelta(t,lon,time_units='us'):
     '''
     Convert numpy.datetime64 array to numpy.timedelta64 representing
     the sidereal time of day, in solar time units.
@@ -1110,6 +1110,8 @@ def get_sidereal_timedelta(t,lon):
 
     t = numpy.datetime64 or array of numpy.datetime64
     lon = longitude or array of longitudes
+
+    optional: time_units = default 'us' (microseconds)
     '''
 
     t = np.array(t)
@@ -1118,17 +1120,16 @@ def get_sidereal_timedelta(t,lon):
         logger.error("Input array lengths do not match")
         return np.nan
 
-    # working time units
-    t_units = 'us'
-    one_day = np.timedelta64(1,'D').astype(''.join(['m8[',t_units,']']))
+    time_type = ''.join(['m8[',time_units,']'])
+    one_day = np.timedelta64(1,'D').astype(time_type)
 
     # D is days (with fraction) from 12 UT Jan 1, 2000.
-    D = (t-np.datetime64('2000-01-01T12:00:00Z')).astype(
-             ''.join(['m8[',t_units,']'])) / one_day
+    # although datetimes are integers, dividing them gives float
+    D = (t-np.datetime64('2000-01-01T12:00:00Z')).astype(time_type) / one_day
     # This is the value for 2000, will be 24.06570982583508 in 2100.
-    day_in_sidereal_hours = 24.06570982441908
+    solar_day_in_sidereal_hours = 24.06570982441908
     # Greenwich mean sidereal time, accurate to 0.1s from 2000-2100
-    GMST = 18.697374558 + day_in_sidereal_hours * D
-    LMST = GMST + lon / 15
-    fraction_solar_day = (LMST % 24.0) / day_in_sidereal_hours
+    GMST = 18.697374558 + solar_day_in_sidereal_hours * D
+    LMST = GMST + lon / 15.0
+    fraction_solar_day = (LMST % 24.0) / solar_day_in_sidereal_hours
     return (fraction_solar_day * one_day)
