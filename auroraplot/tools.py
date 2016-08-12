@@ -4,6 +4,7 @@ import os
 import tempfile
 
 import numpy as np
+import scipy.signal
 
 import auroraplot as ap
 
@@ -382,3 +383,7 @@ def lookup_module_name(s):
     module = s[:last_dot]
     name = s[(last_dot+1):]
     return (module, name)
+
+
+
+    

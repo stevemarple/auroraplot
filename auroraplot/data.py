@@ -19,10 +19,18 @@ import matplotlib.pyplot as plt
 import scipy
 import scipy.interpolate
 import scipy.stats
+import scipy.special
 
 import auroraplot as ap
 import auroraplot.tools
 import auroraplot.dt64tools as dt64
+
+try:
+    from numpy import nanmean
+    from numpy import nanstd
+except ImportError:
+    from scipy.stats import nanmean
+    from scipy.stats import nanstd
 
 logger = logging.getLogger(__name__)
 
@@ -1357,4 +1365,102 @@ class Data(object):
                                  units, a)
             setattr(r, a, t2)
         return r
+        
+
+    def chauvenet_criterion(self, window, inplace=False, want_outliers=False):
+
+        data = self.data.copy()
+        samt = dt64.mean(self.sample_start_time, self.sample_end_time)
+        r_outliers = np.zeros_like(data, dtype=bool)
+        for win in np.nditer(window):
+            outliers = np.zeros_like(data, dtype=bool)
+            for t1 in dt64.dt64_range(self.start_time, self.end_time, win):
+                t2 = t1 + win
+                for n in range(data.shape[0]):
+                    idx = np.logical_and(samt >= t1, samt < t2)
+                    N = np.count_nonzero(np.isfinite(data[n, idx]))
+                    if not N:
+                        continue
+                    mean = nanmean(data[n, idx])
+                    std = nanstd(data[n, idx])
+                    criterion = 1.0 / (2*N)
+                    d = np.abs(data[n, idx] - mean) / std
+                    d /= 2.0 ** 0.5
+                    prob = scipy.special.erfc(d)
+                    outliers[n, idx] = (prob < criterion)
+
+            r_outliers = np.logical_or(r_outliers, outliers)
+            
+        data[r_outliers] = np.nan
+
+        if want_outliers:
+            return r_outliers
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+
+        r.data = data
+        return r
+
+        
+    def remove_spikes_chauvenet(self,
+                                inplace=False,
+                                want_outliers=False,
+                                link_channels=True,
+                                savgol_window=np.timedelta64(5, 'm'),
+                                chauvenet_window=np.array([89,79]).astype('timedelta64[s]')):
+        """Remove spikes.
+
+        Cron jobs can cause spikes in the data from magnetometers in the
+        BGS Schools magnetometer network (most likely by a drop in supply
+        voltage). This function removes most of the spikes."""
+
+
+        # Regularly space the data prior to Savitzky Golay smoothing
+        self2 = self.space_regularly(self.nominal_cadence,
+                                     missing_cadence=self.nominal_cadence * 4)
+
+        # Smooth the regularly-spaced data
+        window_length = 2 * int(savgol_window / (2 * self.nominal_cadence)) + 1
+        #self2.data = scipy.signal.savgol_filter(self2.data, window_length, 3)
+        for n in range(self2.data.shape[0]):
+            self2.data[n] = ap.tools.savitzky_golay(self2.data[n], 
+                                                    window_length, 3)
+
+        # Interpolate the smoothed data back to the original sample times
+        smoothed = self2.interp(self.sample_start_time, self.sample_end_time)
+
+        # Calculate the difference between the original data and the
+        # smoothed version. Hopefully it is normally-distributed and
+        # suitable to use Chauvenet's criterion to remove outliers.
+        residuals = copy.deepcopy(self)
+        residuals.data -= smoothed.data
+
+        outliers = residuals.chauvenet_criterion(window=chauvenet_window,
+                                                 want_outliers=True)
+
+        if link_channels:
+            for n in range(1,outliers.shape[0]):
+                outliers[0] = np.logical_or(outliers[0], outliers[n])
+                outliers[1:] = outliers[0]
+
+        if want_outliers:
+            return outliers
+
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self)
+
+        # r.data[outliers] = np.nan
+        good_data = np.logical_not(outliers[0])
+        r.sample_start_time = r.sample_start_time[good_data]
+        r.sample_end_time = r.sample_end_time[good_data]
+        r.integration_interval = r.integration_interval[:,good_data]
+        r.data = r.data[:,good_data]
+        r = r.mark_missing_data(3*r.nominal_cadence)
+        
+        return r
+    
         

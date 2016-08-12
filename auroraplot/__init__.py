@@ -353,7 +353,8 @@ def load_data(project,
               load_function=None,
               raise_all=False,
               cadence=None,
-              aggregate=None):
+              aggregate=None,
+              filter_function=None):
     '''Load data. 
     project: name of the project (upper case)
 
@@ -404,6 +405,9 @@ def load_data(project,
 
     if load_function is None:
         load_function = ad.get('load_function')
+
+    if filter_function is None:
+        filter_function = ad.get('filter_function')
         
     if load_function:
         # Pass responsibility for loading to some other
@@ -418,7 +422,8 @@ def load_data(project,
                              path=path,
                              raise_all=raise_all,
                              cadence=cadence,
-                             aggregate=aggregate)
+                             aggregate=aggregate,
+                             filter_function=filter_function)
 
 
     data = []
@@ -524,6 +529,9 @@ def load_data(project,
                       aggregate=aggregate,
                       inplace=True)
 
+    if filter_function:
+        r = filter_function(r)
+        
     return r
 
 

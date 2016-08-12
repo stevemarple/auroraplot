@@ -329,6 +329,8 @@ def _save_baseline_data(md, file_name, archive_data):
 def stack_plot(data_array, offset, channel=None, 
                start_time=None, end_time=None,
                sort=True, scale_bar=True,
+               ylabel_fmt='{data:project}\n{data:site}',
+               add_legend=None,
                 **kwargs):
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
@@ -377,60 +379,71 @@ def stack_plot(data_array, offset, channel=None,
         channel = channel[0]
 
     if sort:
-        latitude = np.zeros_like(da, dtype=float)
-        for n in range(da.size):
-            latitude[n] = da[n].get_site_info('latitude')
-        sort_idx = np.argsort(latitude)
-        da = da[sort_idx]
+        da = sorted(list(da), 
+                    cmp=lambda a,b: (cmp(a.get_site_info('latitude'), 
+                                         b.get_site_info('latitude')) or 
+                                     cmp(b.project, a.project) or 
+                                     cmp(b.site, a.site)))
 
     r = []
     fig = plt.figure()
     ax = plt.subplot(1, 1, 1)
     ax.hold(True)
-    tick_locs = np.arange(da.size) * offset
     tick_labels = []
     st = da[0].start_time
     et = da[0].end_time
 
     # To estimate range of data, ignoring a few extreme cases.
-    ydiff = np.zeros(da.size)
-    max5 = ap.tools.NthLargest(5)
-    min5 = ap.tools.NthLargest(5, smallest=True)
-
-    plot_count = 0
-
-    # Plot each data set
-    for n in range(da.size):        
-        label = da[n].format_project_site()
-
+    ydiff = np.tile(np.nan, len(da))
+    my_max = ap.tools.NthLargest(10)
+    my_min = ap.tools.NthLargest(10, smallest=True)
+    cidx = np.tile(-1, len(da))
+    for n in range(len(da)):
         if isinstance(channel, six.string_types):
-            cidx = da[n].get_channel_index(channel)
+            cidx[n] = da[n].get_channel_index(channel)[0]
         else:
-            cidx = None
             for c in channel:
                 if c in da[n].channels:
-                   cidx = da[n].get_channel_index(c)
-                   label += ' (%s)' % c
-                   break
-            if cidx is None:
-                # None found
-                continue
+                    cidx[n] = da[n].get_channel_index(c)[0]
+                    break
+                if cidx[n] == -1:
+                    # Not found
+                    continue
+        ydiff[n] = my_max(da[n].data[cidx[n]]) - my_min(da[n].data[cidx[n]])
+        tick_labels.append(ylabel_fmt.format(data=da[n], 
+                                             channel=da[n].channels[cidx[n]]))
 
+    if len(da) == 2:
+        ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
+    else:
+        ydisturb = scipy.stats.nanmedian(ydiff)
+
+    if offset == 'auto' or np.isnan(offset):
+        # Compute sensible value for offset
+        y_test = ydisturb/2
+        offset_tries = (np.array([1, 2, 5, 10, 20]) *
+                             np.power(10.0, np.floor(np.log10(ydisturb/2))))
+        offset = offset_tries[list(offset_tries >= y_test).index(True)]
+
+    # Plot each data set
+    plot_count = 0
+    for n in range(len(da)):        
+        if cidx[n] == -1:
+            continue # Required channel not present
         
-        # Keep track of earliest latest times, but only for plotted
-        # datasets
+        # Keep track of earliest and latest times, but only for
+        # plotted datasets
         st = np.min([st, da[n].start_time])
         et = np.max([et, da[n].end_time])
 
         d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
-        y = (d.data[cidx] - scipy.stats.nanmedian(d.data[cidx], axis=-1) \
+        y = (d.data[cidx[n]] - scipy.stats.nanmedian(d.data[cidx[n]], axis=-1) \
                  + (plot_count * offset)).flatten()
-        ydiff[n] = max5(y) - min5(y)
 
         kwargs = {}
         try:
             kwargs['color'] = da[n].get_site_info('line_color')
-        except KeyError as e:
+        except Exception as e:
             pass
         lh = dt64.plot_dt64(d.get_mean_sample_time(), 
                             y,
@@ -438,8 +451,6 @@ def stack_plot(data_array, offset, channel=None,
                             **kwargs)
         plot_count += 1
         r.extend(lh)
-        # tick_labels.append(d.project + '\n' + d.site)
-        tick_labels.append(label.replace('/', '\n'))
 
 
     if start_time is not None:
@@ -450,28 +461,33 @@ def stack_plot(data_array, offset, channel=None,
             dt64.dt64_to(et, ax.xaxis.dt64tools.units))
     ax.set_xlim(xlim)
 
-    # Calculate some reasonable ylimits. Should show large activity
-    # seen by most sites but exclude cases when the one site has a
-    # major disturbance.  Use median disturbance as estimate of what
-    # to realistically expect.
-    if ydiff.size == 2:
-        ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
-    else:
-        ydisturb = scipy.stats.nanmedian(ydiff)
 
     if offset:
         # Round up to multiple of offset for aesthetic reasons.
         ydisturb = np.ceil(ydisturb / offset) * offset
 
-        ylim = [-offset, da.size * offset]
-        if ax.yaxis.get_data_interval()[0] < ylim[0]:
-            ylim[0] = -ydisturb
-        if ax.yaxis.get_data_interval()[1] > ylim[1]:
-            ylim[1] = ((da.size - 1) * offset) + ydisturb
-        ax.set_ylim(ylim)
-    
-    ax.yaxis.set_ticks(tick_locs)
-    ax.yaxis.set_ticklabels(tick_labels)
+        ylim = ax.yaxis.get_data_interval()
+        ylim[0] = max(np.floor(ylim[0] / offset) * offset, -ydisturb)
+        ylim[1] = min(np.ceil(ylim[1] / offset) * offset, 
+                      (len(da) - 1) * offset + ydisturb)
+
+        tick_labels2 = []
+        yn_min = int(round(ylim[0]/offset))
+        yn_max = int(round(ylim[1]/offset))
+        yn_nums = range(yn_min, yn_max + 1)
+        for yn in yn_nums:
+            if yn >= 0 and yn < len(da):
+                tick_labels2.append(tick_labels[yn])
+            else:
+                tick_labels2.append('')
+
+        ax.yaxis.set_ticks(np.array(yn_nums) * offset)
+        ax.yaxis.set_ticklabels(tick_labels2)
+
+    if add_legend or (add_legend is None and offset == 0):
+        leg = plt.legend(prop={'size': 'medium'})
+        leg.get_frame().set_alpha(0.7)
+        
     ax.set_title('\n'.join(['Magnetometer stackplot', 
                             dt64.fmt_dt64_range(st, et)]))
 
@@ -504,9 +520,10 @@ def draw_scale_marker(ax, y, length,
     ax.plot(x2, y2[[0,0]], color=color, linewidth=linewidth) # Bottom bar
     ax.plot(x2, y2[[1,1]], color=color, linewidth=linewidth) # Top bar
     if text:
-        ax.text(x2[1], y, text, color=color,
-                horizontalalignment='left',
-                verticalalignment='center')
+        t = ax.text(x2[1], y, text, color=color,
+                    horizontalalignment='left',
+                    verticalalignment='center')
+        t.set_bbox(dict(color='white', alpha=0.7))
 
     return r
 

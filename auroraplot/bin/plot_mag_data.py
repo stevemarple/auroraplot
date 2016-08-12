@@ -98,9 +98,12 @@ parser.add_argument('--log-format',
                     help='Set format of log messages',
                     metavar='FORMAT')
 parser.add_argument('--offset', 
-                    default=100,
-                    type=float,
+                    default='auto',
+                    type=lambda x: np.nan if x.lower() == 'auto' else float(x),
                     help='Offset between sites for stack plot (nT)')
+parser.add_argument('--plot-function',
+                    help='Name of matplotlib plot function',
+                    metavar='FUNCTION_NAME')
 parser.add_argument('--qdc-tries', 
                     default=2,
                     type=int,
@@ -110,6 +113,9 @@ parser.add_argument('--k-index-cadence',
                     default='3h',
                     help='Cadence for K index plot',
                     metavar='CADENCE')
+parser.add_argument('--legend',
+                    action='store_true',
+                    help='Add legend to plot')
 parser.add_argument('--save-filename',
                     help='Save plot',
                     metavar='FILE')
@@ -286,9 +292,13 @@ for n in range(len(project_list)):
     # If result is None then no data available so ignore those
     # results.
     if md is not None and md.data.size:
-        md = md.mark_missing_data(cadence=2*md.nominal_cadence)
+        md = md.mark_missing_data(cadence=3*md.nominal_cadence)
         mdl.append(md)
 
+if args.plot_function:
+    plot_args = dict(plot_func=getattr(plt, args.plot_function))
+else:
+    plot_args = {}
 
 if len(mdl) == 0:
     print('No data to plot')
@@ -297,12 +307,13 @@ if len(mdl) == 0:
 if args.plot_type is None or args.plot_type == 'stack_plot':
     if len(mdl) == 1:
         # No point in using a stackplot for a single site
-        mdl[0].plot()
+        mdl[0].plot(**plot_args)
     else:
         # Create a stackplot.
         ap.magdata.stack_plot(mdl, 
                               offset=args.offset * 1e-9,
-                              channel=args.channels.split())
+                              channel=args.channels.split(),
+                              add_legend=args.legend)
 else:
     # Every other plot type makes one figure per site
     for md in mdl:
@@ -319,9 +330,9 @@ else:
             k_cadence = dt64.parse_timedelta64(args.k_index_cadence, 's')
             k = ap.auroralactivity.KIndex(magdata=md, magqdc=qdc,
                                           nominal_cadence=k_cadence)
-            k.plot()
+            k.plot(**plot_args)
         else:
-            md.plot()
+            md.plot(**plot_args)
 
 # Override the labelling format for all figures
 for fn in plt.get_fignums():

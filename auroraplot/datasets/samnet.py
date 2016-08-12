@@ -310,7 +310,7 @@ sites = {
         'end_time': np.datetime64('2015-06-29T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'bo',
         },
     'CRK1': {
@@ -323,7 +323,7 @@ sites = {
         'k_index_scale': 800e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'cr',
         },
     'CRK2': {
@@ -336,7 +336,7 @@ sites = {
         'k_index_scale': 800e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'line_color': [1, 0, 0],
         'samnet_code': 'cr',
         'data_types': {
@@ -418,7 +418,7 @@ sites = {
         'k_index_scale': 750e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'es',
         'data_types': {
             'MagData': {
@@ -442,7 +442,7 @@ sites = {
         'end_time': np.datetime64('2011-02-12T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'fa',
         },
     'GML1': {
@@ -454,7 +454,7 @@ sites = {
         'end_time': np.datetime64('2002-05-15T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'gm',
         },
     'HAD1': {
@@ -467,7 +467,7 @@ sites = {
         'k_index_scale': 500e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'hd',
         'data_types': {
             'MagData': {
@@ -491,7 +491,7 @@ sites = {
         'end_time': np.datetime64('2005-05-16T00:00:00+0000', 's'),
         'copyright': 'Finnish Meteorological Institute / Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ha',
         },
     'HAN3': {
@@ -503,7 +503,7 @@ sites = {
         'end_time': None,
         'copyright': 'Finnish Meteorological Institute / Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ha',
         },
     'HLL1': {
@@ -515,7 +515,7 @@ sites = {
         'end_time': None,
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'hl',
         },
     'KIL1': {
@@ -527,7 +527,7 @@ sites = {
         'end_time': None,
         'copyright': 'Finnish Meteorological Institute / Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ki',
         },
     'KVI1': {
@@ -539,7 +539,7 @@ sites = {
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'kv',
         },
     'LAN1': {
@@ -552,7 +552,7 @@ sites = {
         'k_index_scale': 650e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'line_color': [1, 0, 0],
         'samnet_code': 'la',
         },
@@ -566,7 +566,7 @@ sites = {
         'k_index_scale': 650e-9, # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'line_color': [181/255., 18/255., 27/255.],
         'samnet_code': 'la',
         'data_types': {
@@ -648,7 +648,7 @@ sites = {
         'k_index_scale': 1000e-9, # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'le',
         'data_types': {
             'MagData': {
@@ -672,7 +672,7 @@ sites = {
         'end_time': np.datetime64('2008-06-27T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'ln',
         },
     'NOR1': {
@@ -684,7 +684,7 @@ sites = {
         'end_time': np.datetime64('2003-03-01T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'no',
         },
     'NUR1': {
@@ -696,7 +696,7 @@ sites = {
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'nu',
         },
     'NUR3': {
@@ -708,7 +708,7 @@ sites = {
         'end_time': None,
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'nu',
         },
     'OUJ2': {
@@ -720,7 +720,7 @@ sites = {
         'end_time': None,
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'oj',
         },
     'OUL1': {
@@ -732,7 +732,7 @@ sites = {
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'ou',
         },
     'UPS2': {
@@ -744,7 +744,7 @@ sites = {
         'end_time': None,
         'copyright': 'Geological Survey of Sweden / Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by Geological Survey of Sweden.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by Geological Survey of Sweden.',
         'samnet_code': 'up',
         },
     'YOR1': {
@@ -756,7 +756,7 @@ sites = {
         'end_time': np.datetime64('2006-03-30T12:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
-        'attribution': 'The Sub-Auroral Magnetometer Network data (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
+        'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'yo',
         },
     

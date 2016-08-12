@@ -23,7 +23,8 @@ class AuroraWatchActivity(Data):
     by AuroraWatch UK.
     '''
 
-    
+    color_names = ('green', 'yellow', 'amber', 'red')
+
     def __init__(self,
                  project=None,
                  site=None,
@@ -190,6 +191,23 @@ class AuroraWatchActivity(Data):
         for n in range(1, len(self.thresholds)):
             r[data >= self.thresholds[n]] = n
         return r
+
+    
+    def get_status(self):
+        """Return list of levels by name.
+
+        Missing values return the lowest level."""
+
+        assert len(self.data.shape) == 2 and self.data.shape[0] == 1
+        level = self.get_level()
+        r = []
+        for n in range(level.shape[1]):
+            if level[0,n] < 0:
+                r.append(self.color_names[0])
+            else:
+                r.append(self.color_names[level[0,n]])
+        return r
+
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, title=None, 

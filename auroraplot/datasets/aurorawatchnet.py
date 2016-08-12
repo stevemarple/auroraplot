@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import os
 import logging
 
@@ -37,7 +38,7 @@ def check_temperature(data):
     return data
 
 def check_voltage(data):
-    data[np.logical_or(data < 0, data > 10)] = np.nan
+    data[np.logical_or(data < 0, data > 50)] = np.nan
     return data
 
 def load_awn_data(file_name, archive_data, 
@@ -212,6 +213,11 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
+        'description': (
+            'Test magnetometer system. ' +
+            '2013: battery-operated AuroraWatchNet magnetometer. ' +
+            '2016: Raspberry Pi magnetometer sytem operating outside with sensor buried for temperature stability.'),
+        'line_color': [.1, .4, .1],
         }, # TEST1
 
     'BRA': {
@@ -387,11 +393,28 @@ sites = {
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
         'copyright': 'Met Office.',
-        'attribution': 'Met Office, ' + \
-            'http://www.metoffice.gov.uk/',
+        'attribution': 'Met Office, http://www.metoffice.gov.uk/',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # EXE
+
+        'SID': {
+        # University of Exeter mag at Norman Lockyer observatory
+        'location': 'Sidmouth, UK',
+        'latitude': Decimal('50.687911'), 
+        'longitude': Decimal('-3.219600'),
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-07-15T00:00:00+0000'),
+        'end_time': None, # Still operational
+        'url': 'http://www.exeter.ac.uk/', # Provisional
+        'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
+        'k_index_filter': None,
+        'license': cc3_by_nc_sa,
+        'copyright': 'University of Exeter.',
+        'attribution': 'University of Exeter and Norman Lockyer Observatory',
+        'line_color': [0x00/255.0, 0x5d/255.0, 0xab/255.0],
+        }, # SID
     }
+
 
 
 # Set activity color/thresholds unless already set.
@@ -461,7 +484,7 @@ default_data_types = {
         },
     'VoltageData': {
         'realtime': {
-            'channels': np.array(['Battery voltage']),
+            'channels': np.array(['Supply voltage']),
             'path': base_url + '{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -507,6 +530,26 @@ for s in sites:
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
+
+for s in ('EXE', 'SID', 'TEST1'):
+    for dt in ('MagData', 'MagQDC'):
+        for an in sites[s]['data_types'][dt]:
+            ai = sites[s]['data_types'][dt][an]
+            if isinstance(ai, six.string_types):
+                continue
+            ai['channels'] = np.array(['H', 'E', 'Z'])
+
+            
+
+
+sites['TEST1']['data_types']['MagData']['raw'] \
+    = copy.deepcopy(sites['TEST1']['data_types']['MagData']['realtime'])
+sites['TEST1']['data_types']['MagData']['realtime']['filter_function'] \
+    = lambda x: ap.data.Data.remove_spikes_chauvenet(x,
+                                                savgol_window=np.timedelta64(5, 'm'),
+                                                chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
+
+            
 project = {
     'name': 'AuroraWatch Magnetometer Network',
     'abbreviation': 'AWN',

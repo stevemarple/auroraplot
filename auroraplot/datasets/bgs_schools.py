@@ -121,6 +121,13 @@ def load_bgs_sch_data(file_name, archive_data,
 
     return None
 
+
+def remove_spikes(md):
+    return md.remove_spikes_chauvenet(savgol_window=np.timedelta64(5, 'm'),
+                                      chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
+
+
+
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
     'To view a copy of this license, visit ' + \
@@ -237,6 +244,15 @@ defaults = {
 default_data_types = {
     'MagData': {
         'default': 'realtime',
+        'raw': {
+            'channels': np.array(['H', 'E', 'Z']),
+            'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'aurorawatchnet',
+            'load_converter': load_bgs_sch_data,
+            'nominal_cadence': np.timedelta64(5, 's'),
+            'units': 'T',
+            },
         'realtime': {
             'channels': np.array(['H', 'E', 'Z']),
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
@@ -245,6 +261,7 @@ default_data_types = {
             'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
+            'filter_function': remove_spikes,
             },
         },
     'MagQDC': {
