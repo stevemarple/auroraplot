@@ -1073,3 +1073,36 @@ def _strftime_td64(td, fstr, customspec=None):
         i += 1
 
     return s
+
+def get_sidereal_timedelta(t,lon):
+    '''
+    Convert numpy.datetime64 array to numpy.timedelta64 representing
+    the sidereal time of day, in solar time units.
+
+    Usage:
+    get_sidereal_timedelta(t,lon)
+
+    t = numpy.datetime64 or array of numpy.datetime64
+    lon = longitude or array of longitudes
+    '''
+
+    t = np.array(t)
+    lon = np.array(lon)
+    if np.size(t)>1 and np.size(lon)>1 and np.shape(t)!=np.shape(lon):
+        logger.error("Input array lengths do not match")
+        return np.nan
+
+    # working time units
+    t_units = 'us'
+    one_day = np.timedelta64(1,'D').astype(''.join(['m8[',t_units,']']))
+
+    # D is days (with fraction) from 12 UT Jan 1, 2000.
+    D = (t-np.datetime64('2000-01-01T12:00:00Z')).astype(
+             ''.join(['m8[',t_units,']'])) / one_day
+    # This is the value for 2000, will be 24.06570982583508 in 2100.
+    day_in_sidereal_hours = 24.06570982441908
+    # Greenwich mean sidereal time, accurate to 0.1s from 2000-2100
+    GMST = 18.697374558 + day_in_sidereal_hours * D
+    LMST = GMST + lon / 15
+    fraction_solar_day = (LMST % 24.0) / day_in_sidereal_hours
+    return (fraction_solar_day * one_day)

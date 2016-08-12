@@ -212,30 +212,31 @@ def load_qdc_data(file_name, archive_data,
 
 def _save_baseline_data(md, file_name, archive_data):
     assert isinstance(md, RioData), 'Data is wrong type'
-    assert md.units == 'T', 'Data units incorrect'
+    assert md.units == 'dB', 'Data units incorrect'
     assert md.data.shape[0] == np.size(md.channels), \
         'data shape incorrect for number of channels'
     assert md.data.shape[1] == np.size(md.sample_start_time), \
         'data shape incorrect for number of samples'
     data = np.empty([1 + np.size(md.channels), np.size(md.sample_start_time)])
     data[0] = (md.sample_end_time - md.start_time) / md.nominal_cadence
-    data[1:] = md.data * 1e9
+    data[1:] = md.data
     fmt = ['%d']
     fmt.extend(['%.2f'] * np.size(md.channels))
     np.savetxt(file_name, data.T, delimiter='\t', fmt=fmt)
 
-
+###########################################################################
+### Not applicable to riometers, change to different plot type
 def stack_plot(data_array, offset, channel=None, 
                start_time=None, end_time=None,
                sort=True, scale_bar=True,
                 **kwargs):
     '''
-    Plot multiple MagData objects on a single axes. Magnetometer
+    Plot multiple RioData objects on a single axes. Riometer
     stackplots have a distinct meaning and should not be confused with
     the matplotlib.stackplot which implements a different type of
     stacked plot.
 
-    The variation in each MagData object (measured from the median
+    The variation in each RioData object (measured from the median
     value) is displayed. Each object displayed offset from the
     previous. If "sort" is True then plots are ordered North (top) to
     South (bottom).
@@ -387,7 +388,7 @@ def stack_plot(data_array, offset, channel=None,
 
     return r
 
-
+### Part of magnetometer stack plot, can go
 def draw_scale_marker(ax, y, length, 
                       color='black', 
                       linewidth=2, 
@@ -408,9 +409,11 @@ def draw_scale_marker(ax, y, length,
                 verticalalignment='center')
 
     return r
+############################################################################
 
-class MagData(Data):
-    '''Class to manipulate and display magnetometer data.'''
+
+class RioData(Data):
+    '''Class to manipulate and display riometer data.'''
 
     def __init__(self,
                  project=None,
@@ -440,16 +443,16 @@ class MagData(Data):
                       sort=sort)
 
     def data_description(self):
-        return 'Magnetic field'
+        return 'Riometer raw data'
 
 
     def savetxt(self, filename, fmt=None):
         a = np.zeros([self.channels.size+1, self.data.shape[-1]],
                      dtype='float')
         a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
-        if self.units == 'T':
-            # Convert to nT
-            a[1:] = self.data * 1e9
+        if self.units == 'dB':
+            # Convert to dB here, if conversion needed
+            a[1:] = self.data
         else:
             warnings.warn('Unknown units')
             a[1:] = self.data 
@@ -475,9 +478,9 @@ class MagData(Data):
         else:
             subplot2=subplot
 
-        if units_prefix is None and self.units == 'T':
-            # Use nT for plotting
-            units_prefix = 'n'
+        #if units_prefix is None and self.units == 'dB':
+        #    # Use just dB for plotting
+        #    units_prefix = ''
         
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot2, units_prefix=units_prefix,
@@ -494,6 +497,8 @@ class MagData(Data):
                                                             **kwargs)
 
 
+############################################################################
+#### remove
     def variometer_plot(self, channels=None, qdc=None, axes=None, **kwargs):
         if channels is None:
             channels = self.channels
@@ -525,8 +530,10 @@ class MagData(Data):
             
         leg = plt.legend(prop={'size': 'medium'})
         leg.get_frame().set_alpha(0.7)
+#######################################################################
 
-
+## probably not applicable
+#####################################################################
     def get_quiet_days(self, nquiet=5, channels=None, 
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
@@ -630,8 +637,9 @@ class MagData(Data):
         for n in range(nquiet):
             r.append(daily_data[idx[n]])
         return r
-        
-    
+#########################################################################        
+
+
     def make_qdc(self, nquiet=5, channels=None, 
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  quiet_days_method=None, smooth=True):
