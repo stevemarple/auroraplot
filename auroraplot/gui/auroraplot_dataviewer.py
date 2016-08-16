@@ -39,7 +39,9 @@ import auroraplot.dt64tools as dt64
 from auroraplot.data import Data
 
 import auroraplot.magdata
+import auroraplot.riodata
 
+import auroraplot.datasets.riometernet
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.samnet
 import auroraplot.datasets.uit
@@ -309,10 +311,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not hasattr(all_channels,'__iter__'):
             all_channels = list(all_channels)
         channels=''
-        if all([c.isnumeric() for c in all_channels]):
+        if all([c.isdigit() for c in all_channels]):
             all_channels = sorted(all_channels)
-            min_c = str(np.min(np.array([int(c) for c in all_channels])))
-            max_c = str(np.max(np.array([int(c) for c in all_channels])))
+            min_c = (np.min(np.array([int(c) for c in all_channels])))
+            max_c = (np.max(np.array([int(c) for c in all_channels])))
             if len(all_channels) < 6 and all([c in all_channels for c in range(min_c,max_c+1)]):
                 channels = "-".join([min_c,max_c])
             else:
