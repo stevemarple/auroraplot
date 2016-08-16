@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import platform
@@ -530,7 +530,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 class CustomLogHandler(logging.Handler):
     def __init__(self,the_log):
-        super().__init__()
+        super(CustomLogHandler,self).__init__()
         self.the_log = the_log
     def emit(self,record):
         msg = self.format(record)
@@ -550,7 +550,7 @@ class Log:
         msgBox.setWindowTitle(" ")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.No)
-        ret = msgBox.exec()
+        ret = msgBox.exec_()
         if ret == QMessageBox.Yes:
             self.textEditWidget.clear()
             self.textEditWidget.appendPlainText("".join(["Log started at  ",
@@ -559,7 +559,7 @@ class Log:
         fileBox = QFileDialog()
         fileBox.setAcceptMode(QFileDialog.AcceptSave)
         fileBox.setDirectory(self.saveDir)
-        ret = fileBox.exec()
+        ret = fileBox.exec_()
         self.saveDir = fileBox.directory()
         if ret == QFileDialog.Accepted:
             try:

@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         msgBox.setWindowTitle(" ")
         msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         msgBox.setDefaultButton(QMessageBox.No)
-        ret = msgBox.exec()
+        ret = msgBox.exec_()
         if ret == QMessageBox.Yes:
             event.accept()
         else:

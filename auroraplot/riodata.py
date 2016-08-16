@@ -640,12 +640,13 @@ class RioData(Data):
 #########################################################################        
 
 
-    def make_qdc(self, nquiet=5, channels=None, 
+    def upper_envelope_qdc(self,
+                 channels=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 quiet_days_method=None, smooth=True):
-        qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
-                                 cadence=cadence, method=quiet_days_method)
+                 outputrows=[2,3],
+                 smooth=True):
 
+        ## QDC times are in sidereal units, 0-24 sidereal hrs, not 0-23:56..
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
@@ -661,7 +662,7 @@ class RioData(Data):
 
         qdc_data /= count
             
-        qdc = MagQDC(project=self.project,
+        qdc = RioQDC(project=self.project,
                      site=self.site,
                      channels=qd[0].channels,
                      start_time=np.timedelta64(0, 'h'),
@@ -679,8 +680,8 @@ class RioData(Data):
 
         return qdc
 
-class MagQDC(MagData):
-    '''Class to load and manipulate magnetometer quiet-day curves (QDC).'''
+class RioQDC(RioData):
+    '''Class to load and manipulate Riometer quiet-day curves (QDC).'''
     def __init__(self,
                  project=None,
                  site=None,
@@ -694,7 +695,7 @@ class MagQDC(MagData):
                  data=np.array([]),
                  units=None,
                  sort=None):
-        MagData.__init__(self,
+        RioData.__init__(self,
                          project=project,
                          site=site,
                          channels=channels,
@@ -709,7 +710,7 @@ class MagQDC(MagData):
                          sort=sort)
 
     def data_description(self):
-        return 'Magnetic field QDC'
+        return 'Riometer QDC'
 
 
     def smooth(self, fit_order=5, inplace=False):
@@ -732,10 +733,13 @@ class MagQDC(MagData):
             start_time = self.start_time
         if end_time is None:
             end_time = self.end_time
+#########################################
 
-        r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
-                      subplot=subplot, units_prefix=units_prefix,
-                      title=title, 
+        ### NEED TO CONVERT SIDEREAL
+
+        r = RioData.plot(self, channels=channels, figure=figure, axes=axes,
+                         subplot=subplot, units_prefix=units_prefix,
+                         title=title, 
                          start_time=start_time, end_time=end_time, 
                          time_units=time_units, **kwargs)
         return r
@@ -743,7 +747,7 @@ class MagQDC(MagData):
     
     def align(self, ref, fit=None, **fit_kwargs):
         day = np.timedelta64(24, 'h')
-        if isinstance(ref, MagData):
+        if isinstance(ref, RioData):
             r = copy.deepcopy(ref)
             interp_times = ref.get_mean_sample_time()
         else:
@@ -755,7 +759,7 @@ class MagQDC(MagData):
                 nc = np.median(np.diff(ta))
             else:
                 nc = None
-            r = MagData(project=self.project,
+            r = RioData(project=self.project,
                         site=self.site,
                         channels=copy.copy(self.channels),
                         start_time=ta[0],
@@ -781,6 +785,8 @@ class MagQDC(MagData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
+######### Sidereal changes ###################################
+
         xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
         r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
             (xo.astype('int64'))
@@ -794,12 +800,12 @@ class MagQDC(MagData):
                 for n in range(r.data.shape[0]):
                     r.data[n] -= nanmean(self.data[n])
                 for d in np.unique(dt64.get_date(r.sample_start_time)):
-                    bl = ap.load_data(r.project, r.site, 'MagData',
+                    bl = ap.load_data(r.project, r.site, 'RioData',
                                       d, d + np.timedelta64(1, 'D'),
                                       channels=r.channels,
                                       archive=fit)
                     if bl is None or bl.data.size == 0:
-                        raise Exception('No %s MagData for %s/%s %s' 
+                        raise Exception('No %s RioData for %s/%s %s' 
                                         % (fit, self.project, self.site,
                                            str(d)))
                     r.data[:, d == dt64.get_date(r.sample_start_time)] \
