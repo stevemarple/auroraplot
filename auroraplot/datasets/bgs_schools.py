@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import logging
 import os
 import traceback
@@ -146,8 +147,8 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
 sites = {
     'BGS3': {
         'location': 'Lancaster, UK',
-        'latitude': 54.01,
-        'longitude': -2.78,
+        'latitude': Decimal('54.01'),
+        'longitude': Decimal('-2.78'),
         'elevation': 27,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
         'end_time': None, # Still operational
@@ -160,25 +161,71 @@ sites = {
         'line_color': [1, 0, 0],
         }, # BGS3
 
-    'BGS4': {
+    'LAN1': { # Formerly BGS4
         'location': 'Lancaster, UK',
-        'latitude': 54.0,
-        'longitude': -2.78,
+        'latitude': Decimal('54.0'),
+        'longitude': Decimal('-2.78'),
         'elevation': 27,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
         'end_time': None, # Still operational
         'k_index_scale': 650e-9, # Estimated
         'k_index_filter': None,
-        'copyright': 'Steve Marple.',
+        'copyright': 'Steve Marple/British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution': 'Data provided by Steve Marple.', 
+        'attribution': 'Operated by Steve Marple.', 
         'line_color': [0, 0.6, 0],
-        }, # BGS4
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan1/qdc/%Y/bgs4_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+        }, # LAN1
 
-    'BGS5': {
+    'LAN2': { # Formerly BGS5
         'location': 'Lancaster, UK',
-        'latitude': 54.01,
-        'longitude': -2.77,
+        'latitude': Decimal('54.01'),
+        'longitude': Decimal('-2.77'),
         'elevation': 93,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
         'end_time': None, # Still operational
@@ -189,12 +236,58 @@ sites = {
         'attribution':  'Space and Plasma Physics group, ' + \
             'Department of Physics, Lancaster University, UK.',
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
-        }, # BGS5
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan2/%Y/%m/lan2_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan2/%Y/%m/lan2_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/lan2/qdc/%Y/lan2_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/lan2/%Y/%m/lan2_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+        }, # LAN2
 
-    'BGS8': {
-        'location': 'Eskdalemuir, UK',
-        'latitude': 55.32,
-        'longitude': -3.2,
+    'BRO': { # Formerly BGS8
+        'location': 'Broxburn, UK',
+        'latitude': Decimal('55.94'),
+        'longitude': Decimal('-3.47'),
         'elevation': 245,
         'start_time': np.datetime64('2016-06-02T00:00Z'),
         'end_time': None, # Still operational
@@ -204,38 +297,175 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
-        }, # BGS8
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs8/%Y/%m/bgs8_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs8/%Y/%m/bgs8_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs8/qdc/%Y/bgs8_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/bgs8/%Y/%m/bgs8_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+        }, # BRX
 
-    'BGS9': {
+    'NOR': { # Previously BGS9
         'location': 'Edinburgh, UK',
-        'latitude': 55.952,
-        'longitude': -3.190,
+        'latitude': Decimal('52.6316'),
+        'longitude': Decimal('1.30042'),
         'elevation': np.nan,
-        'start_time': np.datetime64('2016-01-01T00:00Z'),
+        'start_time': np.datetime64('2016-08-16T12:30Z'),
         'end_time': None, # Still operational
-        'k_index_scale': 750e-9, # Estimated
+        'k_index_scale': 580e-9, # Estimated
         'k_index_filter': None,
-        'copyright': 'Lancaster University.',
+        'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
-        }, # BGS9
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/nor/%Y/%m/bgs9_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/nor/%Y/%m/bgs9_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/nor/qdc/%Y/bgs9_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/nor/%Y/%m/bgs9_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+        }, # NOR
 
-    'BGS10': {
-        'location': 'Edinburgh, UK',
-        'latitude': 55.952,
-        'longitude': -3.190,
+    'OUN': { # Previously BGS10
+        'location': 'Oundle, UK',
+        'latitude': Decimal('52.4809'), 
+        'longitude': Decimal('-0.46904'),
         'elevation': np.nan,
-        'start_time': np.datetime64('2016-01-01T00:00Z'),
+        'start_time': np.datetime64('2016-08-15T15:30Z'),
         'end_time': None, # Still operational
-        'k_index_scale': 750e-9, # Estimated
+        'k_index_scale': 560e-9, # Estimated
         'k_index_filter': None,
-        'copyright': 'Lancaster University.',
+        'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
         'line_color': [0x7b/255., 0x03/255., 0x48/255.],
-        }, # BGS10
-
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/oun/%Y/%m/bgs10_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/oun/%Y/%m/bgs10_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/oun/qdc/%Y/bgs10_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/oun/%Y/%m/bgs10_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+        }, # OUN
 
     }
 
