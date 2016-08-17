@@ -346,7 +346,7 @@ sites = {
         }, # BRX
 
     'NOR': { # Previously BGS9
-        'location': 'Edinburgh, UK',
+        'location': 'Norwich, UK',
         'latitude': Decimal('52.6316'),
         'longitude': Decimal('1.30042'),
         'elevation': np.nan,
