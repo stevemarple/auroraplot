@@ -179,7 +179,7 @@ sites = {
                 'default': 'realtime',
                 'raw': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
@@ -188,7 +188,7 @@ sites = {
                     },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
@@ -200,7 +200,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/qdc/%Y/bgs4_qdc_%Y%m.csv',
+                    'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'load_converter': ap.magdata.load_qdc_data,
@@ -211,7 +211,7 @@ sites = {
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
-                    'path': data_dir + '/lan1/%Y/%m/bgs4_%Y%m%d.csv',
+                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
