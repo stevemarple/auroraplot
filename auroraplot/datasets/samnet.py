@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import logging
 import os
 import traceback
@@ -303,8 +304,8 @@ def load_rt_data(file_name, archive_data,
 sites = {
     'BOR1': {
         'location': 'Borok, CIS',
-        'latitude': 58.03,
-        'longitude': 38.33,
+        'latitude': Decimal('58.03'),
+        'longitude': Decimal('38.33'),
         'elevation': np.nan,
         'start_time': np.datetime64('1998-12-03T00:00:00+0000', 's'),
         'end_time': np.datetime64('2015-06-29T00:00:00+0000', 's'),
@@ -315,8 +316,8 @@ sites = {
         },
     'CRK1': {
         'location': 'Crooktree, UK',
-        'latitude': 57.09,
-        'longitude': -2.64,
+        'latitude': Decimal('57.09'),
+        'longitude': Decimal('-2.64'),
         'elevation': np.nan,
         'start_time': np.datetime64('2002-05-17T00:00:00+0000', 's'),
         'end_time': np.datetime64('2013-02-26T00:00:00+0000', 's'),
@@ -328,8 +329,8 @@ sites = {
         },
     'CRK2': {
         'location': 'Crooktree, UK',
-        'latitude': 57.09,
-        'longitude': -2.64,
+        'latitude': Decimal('57.09'),
+        'longitude': Decimal('-2.64'),
         'elevation': np.nan,
         'start_time': np.datetime64('2015-08-18T00:00:00+0000', 's'),
         'end_time': None,
@@ -410,8 +411,8 @@ sites = {
         },
     'ESK1': {
         'location': 'Eskdalemuir, UK',
-        'latitude': 55.32,
-        'longitude': -3.2,
+        'latitude': Decimal('55.32'),
+        'longitude': Decimal('-3.2'),
         'elevation': 245,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -435,8 +436,8 @@ sites = {
     },
     'FAR1': {
         'location': 'Faroe Islands',
-        'latitude': 62.05,
-        'longitude': -7.02,
+        'latitude': Decimal('62.05'),
+        'longitude': Decimal('-7.02'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2011-02-12T00:00:00+0000', 's'),
@@ -447,8 +448,8 @@ sites = {
         },
     'GML1': {
         'location': 'Glenmore Lodge, UK',
-        'latitude': 57.16,
-        'longitude': -3.68,
+        'latitude': Decimal('57.16'),
+        'longitude': Decimal('-3.68'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2002-05-15T00:00:00+0000', 's'),
@@ -459,8 +460,8 @@ sites = {
         },
     'HAD1': {
         'location': 'Hartland, UK',
-        'latitude': 50.99,
-        'longitude': -4.48,
+        'latitude': Decimal('50.99'),
+        'longitude': Decimal('-4.48'),
         'elevation': 95,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -484,8 +485,8 @@ sites = {
     },
     'HAN1': {
         'location': 'Hankasalmi, Finland',
-        'latitude': 62.3,
-        'longitude': 26.65,
+        'latitude': Decimal('62.3'),
+        'longitude': Decimal('26.65'),
         'elevation': np.nan,
         'start_time': np.datetime64('1997-01-03T00:00:00+0000', 's'),
         'end_time': np.datetime64('2005-05-16T00:00:00+0000', 's'),
@@ -496,8 +497,8 @@ sites = {
         },
     'HAN3': {
         'location': 'Hankasalmi, Finland',
-        'latitude': 62.2539,
-        'longitude': 26.5967,
+        'latitude': Decimal('62.2539'),
+        'longitude': Decimal('26.5967'),
         'elevation': np.nan,
         'start_time': np.datetime64('2005-08-18T00:00:00+0000', 's'),
         'end_time': None,
@@ -508,8 +509,8 @@ sites = {
         },
     'HLL1': {
         'location': 'Hella, Iceland',
-        'latitude': 63.77,
-        'longitude': -20.56,
+        'latitude': Decimal('63.77'),
+        'longitude': Decimal('-20.56'),
         'elevation': np.nan,
         'start_time': np.datetime64('1998-10-06T00:00:00+0000', 's'),
         'end_time': None,
@@ -520,8 +521,8 @@ sites = {
         },
     'KIL1': {
         'location': 'Kilpisjarvi, Finland',
-        'latitude': 69.02,
-        'longitude': 20.79,
+        'latitude': Decimal('69.02'),
+        'longitude': Decimal('20.79'),
         'elevation': np.nan,
         'start_time': np.datetime64('1997-12-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -532,8 +533,8 @@ sites = {
         },
     'KVI1': {
         'location': 'Kvistaberg, Sweden',
-        'latitude': 59.5,
-        'longitude': 17.63,
+        'latitude': Decimal('59.5'),
+        'longitude': Decimal('17.63'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-13T00:00:00+0000', 's'),
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
@@ -544,8 +545,8 @@ sites = {
         },
     'LAN1': {
         'location': 'Lancaster, UK',
-        'latitude': 54.01,
-        'longitude': -2.77,
+        'latitude': Decimal('54.01'),
+        'longitude': Decimal('-2.77'),
         'elevation': np.nan,
         'start_time': np.datetime64('2003-02-20T17:00:00+0000', 's'),
         'end_time': np.datetime64('2013-10-24T00:00:00+0000', 's'),
@@ -558,8 +559,8 @@ sites = {
         },
     'LAN2': {
         'location': 'Lancaster, UK',
-        'latitude': 54.01,
-        'longitude': -2.77,
+        'latitude': Decimal('54.01'),
+        'longitude': Decimal('-2.77'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-03-21T18:31:00+0000', 's'),
         'end_time': None,
@@ -640,8 +641,8 @@ sites = {
         },
     'LER1': {
         'location': 'Lerwick, UK',
-        'latitude': 60.13,
-        'longitude': -1.18,
+        'latitude': Decimal('60.13'),
+        'longitude': Decimal('-1.18'),
         'elevation': 85,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -665,8 +666,8 @@ sites = {
     },
     'LNC2': {
         'location': 'Lancaster, UK',
-        'latitude': 54.01,
-        'longitude': -2.77,
+        'latitude': Decimal('54.01'),
+        'longitude': Decimal('-2.77'),
         'elevation': np.nan,
         'start_time': np.datetime64('2006-12-24T00:00:00+0000', 's'),
         'end_time': np.datetime64('2008-06-27T00:00:00+0000', 's'),
@@ -677,8 +678,8 @@ sites = {
         },
     'NOR1': {
         'location': 'Nordli, Norway',
-        'latitude': 64.37,
-        'longitude': 13.36,
+        'latitude': Decimal('64.37'),
+        'longitude': Decimal('13.36'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2003-03-01T00:00:00+0000', 's'),
@@ -689,8 +690,8 @@ sites = {
         },
     'NUR1': {
         'location': 'Nurmijarvi, Finland',
-        'latitude': 60.51,
-        'longitude': 24.66,
+        'latitude': Decimal('60.51'),
+        'longitude': Decimal('24.66'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
@@ -701,8 +702,8 @@ sites = {
         },
     'NUR3': {
         'location': 'Nurmijarvi, Finland',
-        'latitude': 60.5,
-        'longitude': 24.65,
+        'latitude': Decimal('60.5'),
+        'longitude': Decimal('24.65'),
         'elevation': 105,
         'start_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -713,8 +714,8 @@ sites = {
         },
     'OUJ2': {
         'location': 'Oulujarvi, Finland',
-        'latitude': 64.52,
-        'longitude': 27.23,
+        'latitude': Decimal('64.52'),
+        'longitude': Decimal('27.23'),
         'elevation': np.nan,
         'start_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -725,8 +726,8 @@ sites = {
         },
     'OUL1': {
         'location': 'Oulu, Finland',
-        'latitude': 65.1,
-        'longitude': 25.85,
+        'latitude': Decimal('65.1'),
+        'longitude': Decimal('25.85'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
@@ -737,8 +738,8 @@ sites = {
         },
     'UPS2': {
         'location': 'Uppsala, Sweden',
-        'latitude': 59.9,
-        'longitude': 17.35,
+        'latitude': Decimal('59.9'),
+        'longitude': Decimal('17.35'),
         'elevation': 50,
         'start_time': np.datetime64('2003-01-01T00:00:00+0000', 's'),
         'end_time': None,
@@ -749,8 +750,8 @@ sites = {
         },
     'YOR1': {
         'location': 'York, UK',
-        'latitude': 53.95,
-        'longitude': -1.05,
+        'latitude': Decimal('53.95'),
+        'longitude': Decimal('-1.05'),
         'elevation': np.nan,
         'start_time': np.datetime64('1987-10-01T00:00:00+0000', 's'),
         'end_time': np.datetime64('2006-03-30T12:00:00+0000', 's'),
