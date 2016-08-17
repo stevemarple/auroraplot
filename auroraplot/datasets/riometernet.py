@@ -23,15 +23,15 @@ from auroraplot.riodata import RioQDC
 
 logger = logging.getLogger(__name__)
 
-base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
-base_url = '/data/'
+remote_base_url = 'http://www.riometer.net/data/'
+local_base_url = '/data/'
 
 def check_rio_data(data):
     #data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
     return data
 
 
-def load_awn_data(file_name, archive_data, 
+def load_rn_data(file_name, archive_data, 
                   project, site, data_type, channels, start_time, 
                   end_time, **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
@@ -124,8 +124,8 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'To view a copy of this license, visit ' + \
     'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
-unknown_license = 'Please ask permission from the PI of this instrument ' + \
-                  'before using the data in a publication'
+unknown_license = 'Please ask permission from the PI of the instrument ' + \
+                  'before using this data in a publication.'
 
 sites = {
     'TEST6': {
@@ -135,7 +135,7 @@ sites = {
         'elevation': 27,
         'start_time': np.datetime64('2016-08-11T00:00Z'),
         'end_time': None, # Still operational
-        'copyright': 'Unknown.',
+        'copyright': 'Mat Beharrell.',
         'license': unknown_license,
         'attribution': 'Unknown.', 
         'line_color': [0, 0.6, 0],
@@ -154,35 +154,57 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
 
 default_data_types = {
     'RioData': {
-        'default': 'standard',
-        'local': {
+        'default': 'remote archive',
+        'local capture': {
             'channels': np.array(['0']),
-            'path': base_url + 'local/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': local_base_url + 'capture/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
-            'load_converter': load_awn_data,
+            'load_converter': load_rn_data,
             'nominal_cadence': np.timedelta64(5000000, 'us'),
             'units': 'dB',
             'sort': True,
             },
-        'standard': {
+        'local archive': {
             'channels': np.array(['0']),
-            'path': base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': local_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
-            'load_converter': load_awn_data,
+            'load_converter': load_rn_data,
+            'nominal_cadence': np.timedelta64(5000000, 'us'),
+            'units': 'dB',
+            'sort': True,
+            },
+        'remote archive': {
+            'channels': np.array(['0']),
+            'path': remote_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'aurorawatchnet',
+            'load_converter': load_rn_data,
             'nominal_cadence': np.timedelta64(5000000, 'us'),
             'units': 'dB',
             'sort': True,
             },
         },
     'RioQDC': {
-        'qdc': {
+        'local qdc': {
             'channels': np.array([0]),
-            'path': base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
+            'path': local_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
-            'format': 'aurorawatchnet_qdc',
-            'load_converter': ap.magdata.load_qdc_data,
+            'format': 'riometernet_qdc',
+            'load_converter': ap.riodata.load_qdc_data,
+            'nominal_cadence': np.timedelta64(5, 's'),
+            'units': 'T',
+            'sort': False,
+            },
+        },
+    'RioQDC': {
+        'remote qdc': {
+            'channels': np.array([0]),
+            'path': remote_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'riometernet_qdc',
+            'load_converter': ap.riodata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,
