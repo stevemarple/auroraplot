@@ -36,9 +36,16 @@ def check_voltage(data):
     data[np.logical_or(data < 0, data > 10)] = np.nan
     return data
 
-def load_bgs_sch_data(file_name, archive_data, 
-                      project, site, data_type, channels, start_time, 
-                      end_time, **kwargs):
+def load_bgs_sch_data(file_name,
+                      archive_data,
+                      project,
+                      site,
+                      data_type,
+                      channels,
+                      start_time,
+                      end_time,
+                      invalid_raise=False,
+                      **kwargs):
     '''Convert AuroraWatchNet data to match standard data type
 
     data: MagData or other similar format data object
@@ -83,7 +90,10 @@ def load_bgs_sch_data(file_name, archive_data,
             if file_name.endswith('.csv'):
                 kw['delimiter'] = ','
 
-            data = np.genfromtxt(uh, unpack=True, **kw)
+            data = np.genfromtxt(uh, 
+                                 unpack=True, 
+                                 invalid_raise=invalid_raise, 
+                                 **kw)
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
