@@ -296,7 +296,8 @@ sites = {
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
-        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        'line_color': [0x07/255., 0x0e/255., 0x68/255.],
+        'url': 'https://blogs.glowscotland.org.uk/wl/broxburnps/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -357,7 +358,8 @@ sites = {
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
-        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        'line_color': [0x70/255., 0x00/255., 0x3b/255.],
+        'url': 'http://www.norwich-school.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -418,7 +420,8 @@ sites = {
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
         'attribution':  'British Geological Survey.',
-        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        'line_color': [0x05/255., 0x31/255., 0x61/255.],
+        'url': 'http://www.oundleschool.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
