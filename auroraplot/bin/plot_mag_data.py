@@ -66,7 +66,7 @@ parser.add_argument('--aurorawatch-activity',
                     const='aurorawatch_activity',
                     help='Make AuroraWatch activity plot(s)')
 parser.add_argument('--cadence', 
-                    help='Set cadence')
+                    help='Set cadence (used when loading data)')
 parser.add_argument('-s', '--start-time', 
                     default='today',
                     help='Start time for data transfer (inclusive)',
@@ -74,6 +74,8 @@ parser.add_argument('-s', '--start-time',
 parser.add_argument('-e', '--end-time',
                     help='End time for data transfer (exclusive)',
                     metavar='DATETIME')
+parser.add_argument('--post-cadence', 
+                    help='Set cadence (after loading data)')
 parser.add_argument('--rolling',
                     action='store_true',
                     default=False,
@@ -291,6 +293,16 @@ if args.highlight:
     if not args.highlight_color:
         args.highlight_color = ['#ffffaa']
 
+if args.cadence:
+    cadence = dt64.parse_timedelta64(args.cadence, 's')
+else:
+    cadence = None
+
+if args.post_cadence:
+    post_cadence = dt64.parse_timedelta64(args.post_cadence, 's')
+else:
+    post_cadence = None
+
 # Load the data for each site. 
 mdl = []
 for n in range(len(project_list)):
@@ -299,8 +311,8 @@ for n in range(len(project_list)):
     kwargs = {}
     if project in archive and site in archive[project]:
         kwargs['archive'] = archive[project][site]
-    if args.cadence:
-        kwargs['cadence'] = dt64.parse_timedelta64(args.cadence, 's')
+    if cadence:
+        kwargs['cadence'] = cadence
         agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
         agg_module = import_module(agg_mname)
         agg_func = getattr(agg_module, agg_fname)
@@ -311,6 +323,8 @@ for n in range(len(project_list)):
     if (md is not None and md.data.size 
         and np.any(np.isfinite(md.data))):
         md = md.mark_missing_data(cadence=3*md.nominal_cadence)
+        if post_cadence:
+            md.set_cadence(post_cadence, inplace=True)
         mdl.append(md)
 
 if args.plot_function:
