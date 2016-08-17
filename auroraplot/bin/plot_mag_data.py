@@ -308,7 +308,8 @@ for n in range(len(project_list)):
     md = ap.load_data(project, site, data_type, st, et, **kwargs)
     # If result is None then no data available so ignore those
     # results.
-    if md is not None and md.data.size:
+    if (md is not None and md.data.size 
+        and np.any(np.isfinite(md.data))):
         md = md.mark_missing_data(cadence=3*md.nominal_cadence)
         mdl.append(md)
 
