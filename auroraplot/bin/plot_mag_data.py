@@ -74,6 +74,10 @@ parser.add_argument('-s', '--start-time',
 parser.add_argument('-e', '--end-time',
                     help='End time for data transfer (exclusive)',
                     metavar='DATETIME')
+parser.add_argument('--post-aggregate', 
+                    default='scipy.average',
+                    help='Aggregate function used for setting post-load cadence',
+                    metavar='MODULE.NAME')
 parser.add_argument('--post-cadence', 
                     help='Set cadence (after loading data)')
 parser.add_argument('--rolling',
@@ -295,11 +299,18 @@ if args.highlight:
 
 if args.cadence:
     cadence = dt64.parse_timedelta64(args.cadence, 's')
+    agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
+    agg_module = import_module(agg_mname)
+    agg_func = getattr(agg_module, agg_fname)
 else:
     cadence = None
 
 if args.post_cadence:
     post_cadence = dt64.parse_timedelta64(args.post_cadence, 's')
+    pa_mname, pa_fname = ap.tools.lookup_module_name(args.post_aggregate)
+    pa_module = import_module(pa_mname)
+    post_agg_func = getattr(pa_module, pa_fname)
+
 else:
     post_cadence = None
 
@@ -313,9 +324,6 @@ for n in range(len(project_list)):
         kwargs['archive'] = archive[project][site]
     if cadence:
         kwargs['cadence'] = cadence
-        agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
-        agg_module = import_module(agg_mname)
-        agg_func = getattr(agg_module, agg_fname)
         kwargs['aggregate'] = agg_func
     md = ap.load_data(project, site, data_type, st, et, **kwargs)
     # If result is None then no data available so ignore those
@@ -324,7 +332,7 @@ for n in range(len(project_list)):
         and np.any(np.isfinite(md.data))):
         md = md.mark_missing_data(cadence=3*md.nominal_cadence)
         if post_cadence:
-            md.set_cadence(post_cadence, inplace=True)
+            md.set_cadence(post_cadence, aggregate=post_agg_func, inplace=True)
         mdl.append(md)
 
 if args.plot_function:
