@@ -311,7 +311,7 @@ sites = {
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
-                             'baseline/realtime/lan2/lan2_%Y.txt'),
+                             '/baseline/realtime/lan2/lan2_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
                     'load_converter': ap.data._generic_load_converter,
                     'save_converter': ap.data._generic_save_converter,
@@ -392,7 +392,7 @@ sites = {
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
-                             'baseline/realtime/bro/bro_%Y.txt'),
+                             '/baseline/realtime/bro/bro_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
                     'load_converter': ap.data._generic_load_converter,
                     'save_converter': ap.data._generic_save_converter,
@@ -473,7 +473,7 @@ sites = {
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
-                             'baseline/realtime/nor/nor_%Y.txt'),
+                             '/baseline/realtime/nor/nor_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
                     'load_converter': ap.data._generic_load_converter,
                     'save_converter': ap.data._generic_save_converter,
@@ -554,7 +554,7 @@ sites = {
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
-                             'baseline/realtime/oun/oun_%Y.txt'),
+                             '/baseline/realtime/oun/oun_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
                     'load_converter': ap.data._generic_load_converter,
                     'save_converter': ap.data._generic_save_converter,
