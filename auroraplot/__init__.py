@@ -36,6 +36,16 @@ from tempfile import NamedTemporaryFile
 
 import auroraplot.dt64tools as dt64
 
+try:
+    from numpy import nanmean
+    from numpy import nanmedian
+    from numpy import nanstd
+except ImportError:
+    from scipy.stats import nanmean
+    from scipy.stats import nanmedian
+    from scipy.stats import nanstd
+
+
 logger = logging.getLogger(__name__)
 
 
