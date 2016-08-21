@@ -103,6 +103,8 @@ def load_bgs_sch_data(file_name,
                                             len(sample_start_time)],
                                             dtype='m8[us]')
             data = data[col_idx] * data_type_info[data_type]['scaling']
+            if data_type == 'MagData' and archive_data.get('swap_H_E'):
+                data[[0,1]] = data[[1,0]]
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)
             r = data_type_info[data_type]['class']( \
@@ -469,6 +471,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
+                    'swap_H_E': True,
                     },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
