@@ -351,6 +351,23 @@ def get_archive_info(project, site, data_type, archive=None):
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
 
+def is_operational(project, site, t1=None, t2=None):
+    now = np.datetime64('now')
+    if t1 is None and t2 is None:
+        t1 = now
+
+    st = get_site_info(project, site, 'start_time')
+    et = get_site_info(project, site, 'end_time') or now
+
+    if t1 >= st and t1 < et:
+        return True
+    if t2 and t2 > st and t2 <= et:
+        return True
+    if t2 and t1 <= st and t2 >= et:
+        return True
+    return False
+
+
 
 def load_data(project, 
               site, 
