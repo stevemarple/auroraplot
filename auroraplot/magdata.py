@@ -19,7 +19,6 @@ import auroraplot as ap
 from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
 import auroraplot.tools
-from scipy.stats import nanmean
 import scipy.interpolate
 import warnings
 
@@ -416,7 +415,7 @@ def stack_plot(data_array, offset, channel=None,
     if len(da) == 2:
         ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
     else:
-        ydisturb = scipy.stats.nanmedian(ydiff)
+        ydisturb = ap.nanmedian(ydiff)
 
     if offset == 'auto' or np.isnan(offset):
         # Compute sensible value for offset
@@ -437,7 +436,7 @@ def stack_plot(data_array, offset, channel=None,
         et = np.max([et, da[n].end_time])
 
         d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
-        y = (d.data[cidx[n]] - scipy.stats.nanmedian(d.data[cidx[n]], axis=-1) \
+        y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) \
                  + (plot_count * offset)).flatten()
 
         kwargs = {}
@@ -682,26 +681,26 @@ class MagData(Data):
         daily_act = np.zeros(num_days)
 
         # Compute monthly mean for each selected channel
-        monthly_means = nanmean(s.data[cidx], axis=1)
+        monthly_means = ap.nanmean(s.data[cidx], axis=1)
 
         if method == 'monthly_mean':
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # monthly mean
                 daily_act[n] = \
-                    nanmean(np.sqrt(nanmean((daily_data[n].data[cidx] \
-                                                 .transpose() - 
-                                             monthly_means)**2, axis=1)))
+                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx] \
+                                                   .transpose() - 
+                                                   monthly_means)**2, axis=1)))
 
         elif method == 'daily_mean':
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # daily mean
-                daily_means = nanmean(daily_data[n].data[cidx], axis=1)
+                daily_means = ap.nanmean(daily_data[n].data[cidx], axis=1)
                 daily_act[n] = \
-                    nanmean(np.sqrt(nanmean((daily_data[n].data[cidx] \
-                                                 .transpose() - \
-                                                 daily_means)**2, axis=1)))
+                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx] \
+                                                   .transpose() - \
+                                                   daily_means)**2, axis=1)))
             
                 # Shift the data by the difference between the monthly
                 # and daily means
@@ -721,8 +720,8 @@ class MagData(Data):
                 tmp_act = np.zeros([1, len(cidx)])
                 for cn in range(len(cidx)):
                     daily_y = fits[cn][0]*daily_x + fits[cn][1]
-                    tmp_act[cn] = nanmean((daily_data[n].data[cidx[cn]]\
-                                               .transpose() - daily_y)**2)
+                    tmp_act[cn] = ap.nanmean((daily_data[n].data[cidx[cn]]\
+                                              .transpose() - daily_y)**2)
                     
                     # Shift the data by the difference between the
                     # monthly mean and the fit.
@@ -730,7 +729,7 @@ class MagData(Data):
                         (monthly_means[cn] - daily_y)
 
 
-                daily_act[n] = nanmean(np.sqrt(nanmean(tmp_act)))
+                daily_act[n] = ap.nanmean(np.sqrt(ap.nanmean(tmp_act)))
 
 
 
@@ -902,7 +901,7 @@ class MagQDC(MagData):
                 # QDC must be zero-mean for baseline adjustment,
                 # correct any offset
                 for n in range(r.data.shape[0]):
-                    r.data[n] -= nanmean(self.data[n])
+                    r.data[n] -= ap.nanmean(self.data[n])
                 for d in np.unique(dt64.get_date(r.sample_start_time)):
                     bl = ap.load_data(r.project, r.site, 'MagData',
                                       d, d + np.timedelta64(1, 'D'),

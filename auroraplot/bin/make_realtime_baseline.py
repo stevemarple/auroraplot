@@ -7,9 +7,6 @@ import logging
 import numpy as np
 import traceback
 
-# Only in numpy >= 1.8
-from scipy.stats import nanmean
-
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -207,7 +204,7 @@ for n in range(len(project_list)):
 
             # Ensure each channel is zero-mean
             for n in range(qdc.data.shape[0]):
-                qdc.data[n] -= nanmean(qdc.data[n])
+                qdc.data[n] -= ap.nanmean(qdc.data[n])
 
             fitted_qdc, errors, fit_info = qdc.align(md, \
                 fit=ap.data.Data.minimise_sign_error_fit,
