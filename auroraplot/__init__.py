@@ -705,6 +705,11 @@ def download_url(url, prefix=__name__, temporary_file=True):
     local_file = None
     try:
         url_file = urlopen(url)
+        http_result = url_file.getcode()
+        if http_result and http_result != 200:
+            logger.info('could not access %s (%s)', url, http_result)
+            return None
+        
         if temporary_file:
             local_file = NamedTemporaryFile(prefix=prefix, 
                                             delete=False)
