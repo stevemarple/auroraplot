@@ -325,7 +325,12 @@ for n in range(len(project_list)):
     if cadence:
         kwargs['cadence'] = cadence
         kwargs['aggregate'] = agg_func
-    md = ap.load_data(project, site, data_type, st, et, **kwargs)
+
+    if ap.is_operational(project, site, st, et):
+        md = ap.load_data(project, site, data_type, st, et, **kwargs)
+    else:
+        logger.info('%s/%s not operational at this time', project, site)
+        md = None
     # If result is None then no data available so ignore those
     # results.
     if (md is not None and md.data.size 
