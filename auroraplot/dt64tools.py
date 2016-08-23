@@ -1100,15 +1100,25 @@ def _strftime_td64(td, fstr, customspec=None):
 
     return s
 
-def get_sidereal_timedelta(t,lon,time_units='us',sidereal_units=True):
+
+def solar_day_in_sidereal_hours():
     '''
-    Convert numpy.datetime64 array to numpy.timedelta64 representing
-    the sidereal time of day, in solar time units.
+    For Jan 1 2000, accurate to ~0.1s per century.
+    '''
+    # This is the value for 2000, will be 24.06570982583508 in 2100.
+    return 24.06570982441908
+
+def get_sidereal_day(t,lon,time_units='us',sidereal_units=True):
+    '''
+    Convert numpy.datetime64 array to the sidereal day
+    including fraction, from epoch near 2000-01-01 given by
+    http://aa.usno.navy.mil/faq/docs/GAST.php 
 
     Usage:
-    get_sidereal_timedelta(t,lon)
+    day = get_sidereal_day(t,lon)
 
-    t = numpy.datetime64 or array of numpy.datetime64
+    day = number of sidereal days since.
+    t = UTC numpy.datetime64 or array of numpy.datetime64
     lon = longitude or array of longitudes
 
     optional: time_units = 'us' (return in microseconds)
@@ -1124,16 +1134,45 @@ def get_sidereal_timedelta(t,lon,time_units='us',sidereal_units=True):
     time_type = ''.join(['m8[',time_units,']'])
     one_day = np.timedelta64(1,'D').astype(time_type)
 
+    # Calculation from http://aa.usno.navy.mil/faq/docs/GAST.php
     # D is days (with fraction) from 12 UT Jan 1, 2000.
     # although datetimes are integers, dividing them gives float
     D = (t-np.datetime64('2000-01-01T12:00:00Z')).astype(time_type) / one_day
-    # This is the value for 2000, will be 24.06570982583508 in 2100.
-    solar_day_in_sidereal_hours = 24.06570982441908
-    # Greenwich mean sidereal time, accurate to 0.1s from 2000-2100
-    GMST = 18.697374558 + solar_day_in_sidereal_hours * D
-    LMST = GMST + lon / 15.0
+    sdsh = solar_day_in_sidereal_hours() 
+    # Greenwich mean sidereal time
+    GMST = 18.697374558 + sdsh * D
+    return (GMST + lon / 15.0) / 24.0
+
+def get_sidereal_time(t,lon,time_units='us',sidereal_units=True,
+                      time_of_day = True):
+    '''
+    Convert numpy.datetime64 array to numpy.timedelta64 representing
+    the sidereal time of day, in solar time units or sidereal time units.
+
+    Usage:
+    tod = get_sidereal_time_of_day(t,lon)
+
+    tod = sidereal time of day (numpy timedelta64)
+    t = UTC numpy.datetime64 or array of numpy.datetime64
+    lon = longitude or array of longitudes
+
+    optional: time_units = 'us' (return in microseconds)
+              sidereal_units = True (return 0 < t < 24 sidereal hours)
+              time_of_day = returns time of day instead of time since
+                            2000 epoch. (default True)
+    '''
+
+    sdsh = solar_day_in_sidereal_hours() 
+    time_type = ''.join(['m8[',time_units,']'])
+    one_day = np.timedelta64(1,'D').astype(time_type).astype('int64')
+    fday = get_sidereal_day(t,lon,time_units='us')
+    if time_of_day:
+        fday -= np.floor(fday)
     if sidereal_units:
-        # Make sure rounding errors cannot cause it to return >= one_day
-        return (((LMST % 24.0) / 24)  * one_day) % one_day
+        if time_of_day:
+            # Make sure rounding errors cannot cause it to return >= one_day
+            return ((fday * one_day) % one_day).astype(time_type)
+        else:
+            return ((fday * one_day)).astype(time_type)
     else:
-        return ((LMST % 24.0) / solar_day_in_sidereal_hours) * one_day
+        return ((fday * 24.0) / sdsh) * one_day

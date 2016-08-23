@@ -443,7 +443,7 @@ class RioData(Data):
                       sort=sort)
 
     def data_description(self):
-        return 'Riometer raw data'
+        return 'Riometer data'
 
 
     def savetxt(self, filename, fmt=None):
@@ -640,38 +640,92 @@ class RioData(Data):
 #########################################################################        
 
 
-    def upper_envelope_qdc(self,
+    def make_qdc(self,
                  channels=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  outputrows=[2,3],
-                 smooth=True):
+                 smooth=True,method='upper_envelope'):
 
-        ## QDC times are in sidereal units, 0-24 sidereal hrs, not 0-23:56..
-        sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
+        if channels is None:
+            # Default to first channel
+            cidx = [0]
+            channels = self.channels[0]
+        else:
+            cidx = self.get_channel_index(channels)
+
+        lon = ap.get_site_info(self.project,self.site)['longitude']
+
+        # Create array *qdc_arr_st* that is shape:
+        #      [number sidereal days, num samples in a day]
+        # it contains sidereal start times of samples in sidereal time
+        # from the 2000 epoch. A corresponding array *data_arr* of the
+        # same size will be filled with data interpolated for these times
+        # using tsintegrate.so will be implemented in future.
+        sid_start_day = np.floor(dt64.get_sidereal_day(
+                                 self.sample_start_time[0],lon)
+                                ).astype('int64')
+        sid_end_day = np.ceil(dt64.get_sidereal_day(
+                              self.sample_end_time[-1],lon)
+                              ).astype('int64')
+        num_sid_days = sid_end_day - sid_start_day
+        # QDC times are in sidereal units, 0-24 sidereal hrs, not 0-23:56
+        qdc_sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
-        sam_et = sam_st + cadence
+        qdc_sam_et = qdc_sam_st + cadence
+        num_qdc_sam = qdc_sam_st.size
+        sid_days = np.arange(sid_start_day,sid_end_day
+                            ).astype('m8[D]').astype('m8[us]')
+        qdc_arr_st = np.repeat(sid_days,num_qdc_sam).reshape(num_sid_days,
+                                                            num_qdc_sam)+\
+                     np.tile(qdc_sam_st,num_sid_days).reshape(num_sid_days,
+                                                            num_qdc_sam)
+        qdc_arr_et = qdc_arr_st + cadence
+
+ 
+        # Calculate the sidereal times of the recorded data samples
+        sid_sam_st = dt64.get_sidereal_time(self.sample_start_time,lon,
+                                            time_units='us',
+                                            time_of_day = False,
+                                            sidereal_units=True)
+        sid_sam_et = dt64.get_sidereal_time(self.sample_end_time,lon,
+                                            time_units='us',
+                                            time_of_day = False,
+                                            sidereal_units=True)
 
 
-        qdc_data = np.zeros([len(qd[0].channels), len(sam_st)])
-        count = np.zeros_like(qdc_data)
-        for n in range(nquiet):
-            not_nan = np.logical_not(np.isnan(qd[n].data))
-            qdc_data[not_nan] += qd[n].data[not_nan]
-            count[not_nan] += 1
+        qdc_data = np.zeros([len(cidx), num_qdc_sam])*np.nan
+        xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
+        xo = qdc_arr_st + (qdc_arr_et-qdc_arr_st)/2
+        for n in cidx:
+            print(self.data[cidx,:].flatten().shape)
+            data_arr = scipy.interpolate.interp1d(xi.astype('int64'),
+                                                 self.data[cidx],
+                                                 bounds_error=False,
+                                                 fill_value=np.nan)\
+                                                 (xo.astype('int64'))
+            ########
+            # Here is the QDC calculation code.
+            # Upper envelope: sort the values, then select the index...
+            upper_idx = [2,3]
+            # NaNs get sorted to the top, want them at the bottom
+            data_arr[np.isnan(data_arr)] = -np.inf
+            data_arr = np.sort(data_arr,axis=0)
+            data_arr[np.isinf(data_arr)] = np.nan
+            if data_arr.shape[0] >= (np.max(upper_idx)+1):
+                qdc_data[n,:] = np.mean(data_arr[upper_idx,:],axis=0)
 
-        qdc_data /= count
-            
+
         qdc = RioQDC(project=self.project,
                      site=self.site,
-                     channels=qd[0].channels,
+                     channels=self.channels[cidx],
                      start_time=np.timedelta64(0, 'h'),
                      end_time=np.timedelta64(24, 'h'),
-                     sample_start_time=sam_st,
-                     sample_end_time=sam_et,
+                     sample_start_time=qdc_sam_st,
+                     sample_end_time=qdc_sam_et,
                      integration_interval=None,
                      nominal_cadence=cadence,
-                      data=qdc_data,
+                     data=qdc_data,
                      units=self.units,
                      sort=False)
         
@@ -679,6 +733,7 @@ class RioData(Data):
             qdc.smooth(inplace=True)
 
         return qdc
+
 
 class RioQDC(RioData):
     '''Class to load and manipulate Riometer quiet-day curves (QDC).'''
