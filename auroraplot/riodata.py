@@ -698,23 +698,25 @@ class RioData(Data):
         xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
         xo = qdc_arr_st + (qdc_arr_et-qdc_arr_st)/2
         for n in cidx:
-            print(self.data[cidx,:].flatten().shape)
+            ## This needs mark_missing_data before. Replacing with 
+            ## tsintegrate would be better
             data_arr = scipy.interpolate.interp1d(xi.astype('int64'),
-                                                 self.data[cidx],
+                                                 self.data[n],kind='nearest',
                                                  bounds_error=False,
                                                  fill_value=np.nan)\
                                                  (xo.astype('int64'))
+            
             ########
             # Here is the QDC calculation code.
             # Upper envelope: sort the values, then select the index...
-            upper_idx = [2,3]
+            upper_idx = [-2,-3]
             # NaNs get sorted to the top, want them at the bottom
             data_arr[np.isnan(data_arr)] = -np.inf
             data_arr = np.sort(data_arr,axis=0)
             data_arr[np.isinf(data_arr)] = np.nan
             if data_arr.shape[0] >= (np.max(upper_idx)+1):
-                qdc_data[n,:] = np.mean(data_arr[upper_idx,:],axis=0)
-
+                qdc_data[n,:] = np.nanmean(data_arr[upper_idx,:],axis=0)
+            
 
         qdc = RioQDC(project=self.project,
                      site=self.site,
