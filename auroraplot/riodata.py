@@ -476,7 +476,7 @@ class RioData(Data):
             for n in range(1, len(channels) + 1):
                 xch = np.int(np.ceil(np.sqrt(len(channels))))
                 ych = np.int(np.ceil(len(channels)/xch))
-                subplot2.append(xch*100 + ych*10 + n)
+                subplot2.append((xch,ych,n))
         else:
             subplot2=subplot
 

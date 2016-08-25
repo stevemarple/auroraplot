@@ -733,7 +733,11 @@ class Data(object):
             if axes is not None:
                 ax = plt.axes(axes2[n])
             elif subplot is not None:
-                ax = plt.subplot(subplot2[n], sharex=first_axes)
+                if hasattr(subplot2[n],'__iter__'):
+                    ax = plt.subplot(subplot2[n][0],subplot2[n][1],
+                                     subplot2[n][2],sharex=first_axes)
+                else:
+                    ax = plt.subplot(subplot2[n], sharex=first_axes)
             else:
                 ax = plt.gca()
             ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter(useOffset=False))
