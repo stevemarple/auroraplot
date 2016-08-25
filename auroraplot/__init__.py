@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.5.1'
+__version__ = '0.5.3'
 __license__ = 'PSF'
 
 import copy
@@ -35,6 +35,16 @@ import os
 from tempfile import NamedTemporaryFile
 
 import auroraplot.dt64tools as dt64
+
+try:
+    from numpy import nanmean
+    from numpy import nanmedian
+    from numpy import nanstd
+except ImportError:
+    from scipy.stats import nanmean
+    from scipy.stats import nanmedian
+    from scipy.stats import nanstd
+
 
 logger = logging.getLogger(__name__)
 
@@ -340,6 +350,23 @@ def get_archive_info(project, site, data_type, archive=None):
 
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
+
+def is_operational(project, site, t1=None, t2=None):
+    now = np.datetime64('now')
+    if t1 is None and t2 is None:
+        t1 = now
+
+    st = get_site_info(project, site, 'start_time')
+    et = get_site_info(project, site, 'end_time') or now
+
+    if t1 >= st and t1 < et:
+        return True
+    if t2 and t2 > st and t2 <= et:
+        return True
+    if t2 and t1 <= st and t2 >= et:
+        return True
+    return False
+
 
 
 def load_data(project, 
@@ -678,6 +705,11 @@ def download_url(url, prefix=__name__, temporary_file=True):
     local_file = None
     try:
         url_file = urlopen(url)
+        http_result = url_file.getcode()
+        if http_result and http_result != 200:
+            logger.info('could not access %s (%s)', url, http_result)
+            return None
+        
         if temporary_file:
             local_file = NamedTemporaryFile(prefix=prefix, 
                                             delete=False)

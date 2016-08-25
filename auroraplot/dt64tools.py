@@ -8,7 +8,9 @@ import logging
 import six
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from matplotlib.ticker import Locator
 from matplotlib.ticker import Formatter
 
@@ -660,6 +662,14 @@ def ylim_dt64(ymin=None, ymax=None, ax=None):
 def get_plot_units(axis):
     return axis.dt64tools.units
 
+
+def highlight(ax, st, et, color='y', **kwargs):
+    u = get_plot_units(ax.xaxis)
+    yl = ax.get_ylim()
+    x1 = dt64_to(st, u)
+    x2 = dt64_to(et, u)
+    ax.add_patch(patches.Rectangle([x1, yl[0]], x2 - x1, yl[1] - yl[0],
+                                   **kwargs))
 
 class Dt64ToolsData(object):
     def __init__(self, units, type):

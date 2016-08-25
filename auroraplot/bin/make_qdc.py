@@ -20,6 +20,7 @@ import auroraplot as ap
 import auroraplot.dt64tools as dt64
 import auroraplot.magdata
 import auroraplot.datasets.aurorawatchnet
+import auroraplot.datasets.bgs_schools
 import auroraplot.datasets.samnet
 
 logger = logging.getLogger(__name__)
@@ -35,11 +36,18 @@ assert os.environ.get('TZ') == 'UTC', \
 # Parse command line options
 parser = argparse.ArgumentParser(description\
                                      ='Make AuroraWatch quiet-day curve(s).')
+
+parser.add_argument('--aggregate', 
+                    default='scipy.average',
+                    help='Aggregate function used for setting cadence',
+                    metavar='MODULE.NAME')
 parser.add_argument('-a', '--archive', 
                     action='append',
                     nargs=2,
                     help='Select data archive used for project or site',
                     metavar=('PROJECT[/SITE]', 'ARCHIVE'))
+parser.add_argument('--cadence', 
+                    help='Set cadence (used when loading data)')
 parser.add_argument('--dry-run',
                     action='store_true',
                     help='Test, do not save quiet day curves')
@@ -59,6 +67,11 @@ parser.add_argument('--only-missing',
                     default=False,
                     action='store_true',
                     help='Create only if QDC file is missing')
+parser.add_argument('--post-aggregate', 
+                    default='scipy.average',
+                    help='Aggregate function used for setting post-load cadence')
+parser.add_argument('--post-cadence', 
+                    help='Set cadence (after loading data)')
 parser.add_argument('--qdc-archive', 
                     action='append',
                     nargs=2,
@@ -131,6 +144,25 @@ if args.qdc_archive:
 else:
     qdc_archive = {}
 
+
+if args.cadence:
+    cadence = dt64.parse_timedelta64(args.cadence, 's')
+    agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
+    agg_module = import_module(agg_mname)
+    agg_func = getattr(agg_module, agg_fname)
+else:
+    cadence = None
+
+if args.post_cadence:
+    post_cadence = dt64.parse_timedelta64(args.post_cadence, 's')
+    pa_mname, pa_fname = ap.tools.lookup_module_name(args.post_aggregate)
+    pa_module = import_module(pa_mname)
+    post_agg_func = getattr(pa_module, pa_fname)
+
+else:
+    post_cadence = None
+
+
 for n in range(len(project_list)):
     project = project_list[n]
     site = site_list[n]
@@ -195,10 +227,22 @@ for n in range(len(project_list)):
                                 qdc_file_name)
                     continue
 
+            kwargs = {}
+            if cadence:
+                kwargs['cadence'] = cadence
+                kwargs['aggregate'] = agg_func
+
             mag_data = ap.load_data(project, site, 'MagData', t1, t2,
                                     archive=archive,
-                                    raise_all=args.raise_all)
+                                    raise_all=args.raise_all,
+                                    **kwargs)
             if mag_data is not None:
+
+                if post_cadence:
+                    mag_data.set_cadence(post_cadence, 
+                                         aggregate=post_agg_func, 
+                                         inplace=True)
+
                 mag_qdc = mag_data.make_qdc(smooth=args.smooth)
 
                 filename = dt64.strftime(t1, qdc_ad['path'])

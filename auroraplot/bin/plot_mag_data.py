@@ -66,7 +66,7 @@ parser.add_argument('--aurorawatch-activity',
                     const='aurorawatch_activity',
                     help='Make AuroraWatch activity plot(s)')
 parser.add_argument('--cadence', 
-                    help='Set cadence')
+                    help='Set cadence (used when loading data)')
 parser.add_argument('-s', '--start-time', 
                     default='today',
                     help='Start time for data transfer (inclusive)',
@@ -74,6 +74,12 @@ parser.add_argument('-s', '--start-time',
 parser.add_argument('-e', '--end-time',
                     help='End time for data transfer (exclusive)',
                     metavar='DATETIME')
+parser.add_argument('--post-aggregate', 
+                    default='scipy.average',
+                    help='Aggregate function used for setting post-load cadence',
+                    metavar='MODULE.NAME')
+parser.add_argument('--post-cadence', 
+                    help='Set cadence (after loading data)')
 parser.add_argument('--rolling',
                     action='store_true',
                     default=False,
@@ -88,6 +94,14 @@ parser.add_argument('--dataset',
 parser.add_argument('--list-sites',
                     action='store_true',
                     help='List available sites and exit')
+parser.add_argument('--highlight',
+                    nargs=2,
+                    action='append',
+                    help='Highlight interval on plot',
+                    metavar=('START_DATETIME', 'END_DATETIME'))
+parser.add_argument('--highlight-color',
+                    action='append',
+                    help='Color used for plot highlights')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -273,7 +287,33 @@ elif args.plot_type == 'aurorawatch_activity':
     data_type = 'AuroraWatchActivity'
 else:
     data_type = 'MagData'
-    
+
+
+highlight_t = []
+if args.highlight:
+    for h_st, h_et in args.highlight:
+        highlight_t.append([dt64.parse_datetime64(h_st, 's'),
+                            dt64.parse_datetime64(h_et, 's')])
+    if not args.highlight_color:
+        args.highlight_color = ['#ffffaa']
+
+if args.cadence:
+    cadence = dt64.parse_timedelta64(args.cadence, 's')
+    agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
+    agg_module = import_module(agg_mname)
+    agg_func = getattr(agg_module, agg_fname)
+else:
+    cadence = None
+
+if args.post_cadence:
+    post_cadence = dt64.parse_timedelta64(args.post_cadence, 's')
+    pa_mname, pa_fname = ap.tools.lookup_module_name(args.post_aggregate)
+    pa_module = import_module(pa_mname)
+    post_agg_func = getattr(pa_module, pa_fname)
+
+else:
+    post_cadence = None
+
 # Load the data for each site. 
 mdl = []
 for n in range(len(project_list)):
@@ -282,17 +322,22 @@ for n in range(len(project_list)):
     kwargs = {}
     if project in archive and site in archive[project]:
         kwargs['archive'] = archive[project][site]
-    if args.cadence:
-        kwargs['cadence'] = dt64.parse_timedelta64(args.cadence, 's')
-        agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
-        agg_module = import_module(agg_mname)
-        agg_func = getattr(agg_module, agg_fname)
+    if cadence:
+        kwargs['cadence'] = cadence
         kwargs['aggregate'] = agg_func
-    md = ap.load_data(project, site, data_type, st, et, **kwargs)
+
+    if ap.is_operational(project, site, st, et):
+        md = ap.load_data(project, site, data_type, st, et, **kwargs)
+    else:
+        logger.info('%s/%s not operational at this time', project, site)
+        md = None
     # If result is None then no data available so ignore those
     # results.
-    if md is not None and md.data.size:
+    if (md is not None and md.data.size 
+        and np.any(np.isfinite(md.data))):
         md = md.mark_missing_data(cadence=3*md.nominal_cadence)
+        if post_cadence:
+            md.set_cadence(post_cadence, aggregate=post_agg_func, inplace=True)
         mdl.append(md)
 
 if args.plot_function:
@@ -345,6 +390,17 @@ for fn in plt.get_fignums():
         # Have axis labelled with date or time, as appropriate. Indicate UT.
         ax.xaxis.set_major_formatter( \
             dt64.Datetime64Formatter(autolabel='%s (UT)'))
+        h_color_n = 0
+        for h_st, h_et in highlight_t:
+            if h_color_n >= len(args.highlight_color):
+                h_color_n = 0
+            h_color = args.highlight_color[h_color_n]
+            dt64.highlight(ax, h_st, h_et, 
+                           facecolor=h_color, 
+                           edgecolor=h_color, 
+                           zorder=-2)
+            h_color_n += 1
+
 
 if args.save_filename:
     fig.savefig(args.save_filename, dpi=args.dpi)

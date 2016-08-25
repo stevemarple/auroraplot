@@ -539,7 +539,8 @@ for s in ('EXE', 'SID', 'TEST1'):
                 continue
             ai['channels'] = np.array(['H', 'E', 'Z'])
 
-            
+    sites[s]['data_types']['MagData']['realtime_baseline']['fmt'] = \
+        ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f']
 
 
 sites['TEST1']['data_types']['MagData']['raw'] \

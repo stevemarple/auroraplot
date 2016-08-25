@@ -25,13 +25,6 @@ import auroraplot as ap
 import auroraplot.tools
 import auroraplot.dt64tools as dt64
 
-try:
-    from numpy import nanmean
-    from numpy import nanstd
-except ImportError:
-    from scipy.stats import nanmean
-    from scipy.stats import nanstd
-
 logger = logging.getLogger(__name__)
 
 def leastsq_error(p, obj, ref, channel):
@@ -1519,8 +1512,8 @@ class Data(object):
                     N = np.count_nonzero(np.isfinite(data[n, idx]))
                     if not N:
                         continue
-                    mean = nanmean(data[n, idx])
-                    std = nanstd(data[n, idx])
+                    mean = ap.nanmean(data[n, idx])
+                    std = ap.nanstd(data[n, idx])
                     criterion = 1.0 / (2*N)
                     d = np.abs(data[n, idx] - mean) / std
                     d /= 2.0 ** 0.5

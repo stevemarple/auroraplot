@@ -12,8 +12,6 @@ from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
 import auroraplot.tools
 
-from scipy.stats import nanmean
-
 logger = logging.getLogger(__name__)
 
     
