@@ -151,12 +151,12 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
                                     [1.0, 0.6, 0.0],  # amber
                                     [1.0, 0.0, 0.0]]) # red
 #################################################################
-
+channels = np.arange(1,50).astype('str')
 default_data_types = {
     'RioData': {
         'default': 'remote archive',
         'local capture': {
-            'channels': np.array(['0']),
+            'channels': channels,
             'path': local_base_url + 'capture/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -166,7 +166,7 @@ default_data_types = {
             'sort': True,
             },
         'local archive': {
-            'channels': np.array(['0']),
+            'channels': channels,
             'path': local_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -176,7 +176,7 @@ default_data_types = {
             'sort': True,
             },
         'remote archive': {
-            'channels': np.array(['0']),
+            'channels': channels,
             'path': remote_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
@@ -188,7 +188,7 @@ default_data_types = {
         },
     'RioQDC': {
         'local qdc': {
-            'channels': np.array([0]),
+            'channels': channels,
             'path': local_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'riometernet_qdc',
@@ -200,7 +200,7 @@ default_data_types = {
         },
     'RioQDC': {
         'remote qdc': {
-            'channels': np.array([0]),
+            'channels': channels,
             'path': remote_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'riometernet_qdc',

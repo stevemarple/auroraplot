@@ -1022,6 +1022,140 @@ class Data(object):
         r.assert_valid()
         return r
 
+
+    def resample_data(self,sample_start_time,sample_end_time,
+                      alt_sample_start_time = None,
+                      alt_sample_end_time = None,
+                      inplace=False):
+        '''
+        Resample data.
+
+        Usage:
+        r = resample_data(sample_start_time,sample_end_time,...)
+
+        Optional inputs:
+            inplace : (default False) Change the input (self) object itself.
+            alt_sample_start_time : (default None) Alternative data sample
+            alt_sample_end_time   :             start/end times to use instead
+                                                of self.sample_start_time, etc
+                                                useful if using different time
+                                                basis, eg sidereal time.
+        '''
+                      
+        import os
+        tsint_so_file = os.path.dirname(__file__) + '/tsintegrate.so'
+
+        try:
+            from numpy.ctypeslib import ndpointer
+            import ctypes
+            ctsint = ctypes.cdll.LoadLibrary(tsint_so_file)
+        except:
+            logger.error('Fast integration library (%s) unavailable',
+                        tsint_so_file)
+            return
+
+        sample_start_time = np.array(sample_start_time).flatten()
+        sample_end_time = np.array(sample_end_time).flatten()
+
+        if sample_start_time.size != sample_end_time.size:
+            logger.error('sample_start_time and sample_end_time '
+                         'are different sizes')
+            return
+            
+        if inplace:
+            r = self
+        else:
+            r = copy.copy(self)
+            for k in (set(self.__dict__.keys())
+                      - set(['sample_start_time', 'sample_end_time', 
+                             'integration_interval', 'nominal_cadence',
+                             'data'])):
+                setattr(r, k, copy.deepcopy(getattr(self, k)))
+
+        class OutStruct(ctypes.Structure):
+            _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),
+                        ("weight", ctypes.POINTER(ctypes.c_double))]
+
+        if alt_sample_start_time is None:
+            sam_st = r.sample_start_time
+        else:
+            sam_st = alt_sample_start_time
+        if alt_sample_end_time is None:
+            sam_et = r.sample_end_time
+        else:
+            sam_et = alt_sample_end_time
+
+        nnew = sample_start_time.size
+        nold = sam_st.size
+        nchan = len(r.channels)
+            
+        if self.integration_interval is not None:
+            assert not np.any(dt64.isnat(r.integration_interval)), \
+                'integration_interval must not contain NaT'
+        else:
+            self.integration_interval = np.ones([nchan,nold])\
+                                        *self.nominal_cadence
+        # weights units
+        wu = dt64.get_units(self.integration_interval)
+        # integration/resampling units
+        iu = dt64.smallest_unit((sam_st,sam_et,
+                                 sample_start_time,
+                                 sample_end_time))
+        ius = 'M8['+iu+']'
+        
+        output_p = ctypes.POINTER(OutStruct)
+        ctsint.tsIntegrate.restype= ctypes.POINTER(OutStruct)
+        ctsint.tsIntegrate.argtypes = [ctypes.c_int64,
+                            ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                            ctypes.c_int64,
+                            ndpointer(dtype=ctypes.c_int64,shape=(nnew,)),
+                            ndpointer(dtype=ctypes.c_int64,shape=(nnew,))]
+        
+        new_data = np.zeros([nchan,nnew])
+        new_weight = np.zeros([nchan,nnew])
+
+        # C code doesn't want NaN, but zero integration interval is same thing
+        r.integration_interval[np.isnan(r.data)] = 0
+        r.data[np.isnan(r.data)] = 0
+
+        for cn in range(nchan):
+            output_p = ctsint.tsIntegrate(np.int64(nold),
+                  sam_st.astype(ius).astype('int64'),
+                  sam_et.astype(ius).astype('int64'),
+                  r.data[cn,:].astype('float64'),
+                  r.integration_interval[cn,:].\
+                                     astype('int64').astype('float64'),
+                  np.int64(nnew),
+                  sample_start_time.astype(ius).astype('int64'),
+                  sample_end_time.astype(ius).astype('int64'))
+            new_weight[cn,:] = np.fromiter(output_p.contents.weight,
+                                        dtype=np.float64,count=nnew).copy()
+            new_data[cn,:] = np.fromiter(output_p.contents.data,
+                                         dtype=np.float64,count=nnew).copy()
+            ctsint.freemem()
+            non_zero_weight = (new_weight[cn,:]!=0.0)
+            new_data[cn,non_zero_weight] = new_data[cn,non_zero_weight]\
+                                           /new_weight[cn,non_zero_weight]
+        new_data[new_weight==0.0] = np.NaN
+
+        r.start_time = np.min(sample_start_time)
+        r.end_time = np.max(sample_end_time)
+        r.sample_start_time = sample_start_time
+        r.sample_end_time = sample_end_time
+        r.integration_interval = dt64.astype(new_weight,
+                                             time_type=r.integration_interval,
+                                             units=wu)
+        if sample_start_time.size > 1:
+            r.nominal_cadence = np.median(np.diff(sample_start_time))
+        else:
+            r.nominal_cadence = sample_end_time - sample_start_time
+        r.data = new_data
+
+        return r
+
         
     # TODO: fix inplace option which does not work
     def mark_missing_data(self, cadence=None, # inplace=False

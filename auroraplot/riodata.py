@@ -474,7 +474,9 @@ class RioData(Data):
         elif subplot is None:
             subplot2 = []
             for n in range(1, len(channels) + 1):
-                subplot2.append(len(channels)*100 + 10 + n)
+                xch = np.int(np.ceil(np.sqrt(len(channels))))
+                ych = np.int(np.ceil(len(channels)/xch))
+                subplot2.append(xch*100 + ych*10 + n)
         else:
             subplot2=subplot
 
@@ -693,19 +695,22 @@ class RioData(Data):
                                             time_of_day = False,
                                             sidereal_units=True)
 
-
+        r = self.resample_data(qdc_arr_st,qdc_arr_et,
+                               alt_sample_start_time = sid_sam_st,
+                               alt_sample_end_time = sid_sam_et,
+                               inplace=False)
         qdc_data = np.zeros([len(cidx), num_qdc_sam])*np.nan
-        xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
-        xo = qdc_arr_st + (qdc_arr_et-qdc_arr_st)/2
         for n in cidx:
-            ## This needs mark_missing_data before. Replacing with 
-            ## tsintegrate would be better
-            data_arr = scipy.interpolate.interp1d(xi.astype('int64'),
-                                                 self.data[n],kind='nearest',
-                                                 bounds_error=False,
-                                                 fill_value=np.nan)\
-                                                 (xo.astype('int64'))
-            
+            ## interp1d needs mark_missing_data before. Replacing with 
+            ## resample_data be better, but depends on compiled code
+            #xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
+            #xo = qdc_arr_st + (qdc_arr_et-qdc_arr_st)/2
+            #data_arr = scipy.interpolate.interp1d(xi.astype('int64'),
+            #                                     self.data[n],kind='nearest',
+            #                                     bounds_error=False,
+            #                                     fill_value=np.nan)\
+            #                                     (xo.astype('int64'))
+            data_arr = r.data[n].reshape(num_sid_days,num_qdc_sam)
             ########
             # Here is the QDC calculation code.
             # Upper envelope: sort the values, then select the index...
@@ -716,7 +721,6 @@ class RioData(Data):
             data_arr[np.isinf(data_arr)] = np.nan
             if data_arr.shape[0] >= (np.max(upper_idx)+1):
                 qdc_data[n,:] = np.nanmean(data_arr[upper_idx,:],axis=0)
-            
 
         qdc = RioQDC(project=self.project,
                      site=self.site,
