@@ -69,7 +69,7 @@ def _generic_load_converter(file_name, archive_data,
             for s in ('comments', 'delimiter', 'converters', 'skiprows'):
                 if s in archive_data:
                     kwargs[s] = archive_data[s]
-                      
+
             data = np.loadtxt(uh, unpack=True, **kwargs)
 
             sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
@@ -274,7 +274,9 @@ class Data(object):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=False):
+                 sort=False,
+                 processing=[]):
+
         self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
@@ -303,6 +305,9 @@ class Data(object):
         if sort:
             self.sort(inplace=True)
 
+        self.processing = processing
+ 
+
     def __repr__(self):
         units = self.units
         if units == u'\N{DEGREE SIGN}C':
@@ -321,7 +326,8 @@ class Data(object):
                 'integration intv. : ' + repr(self.integration_interval)+'\n'+
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
                 '             data : ' + repr(self.data) + '\n' + 
-                '            units : ' + str(units))
+                '            units : ' + str(units) + '\n' +
+                '       processing : ' + repr(self.processing) )
 
     def __format__(self, fmt):
         """Custom format for Data auroraplot.data.Data objects.
@@ -1000,6 +1006,7 @@ class Data(object):
                 r.integration_interval = None
             r.nominal_cadence = cadence.copy()
             r.data = d
+            r.processing.append('resample') 
 
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
@@ -1015,7 +1022,6 @@ class Data(object):
                       'sample_start_time', 'sample_end_time',
                       'nominal_cadence'):
                 setattr(r, k, dt64.astype(getattr(r, k), units=tu))
-        
         r.assert_valid()
         return r
 
@@ -1062,12 +1068,7 @@ class Data(object):
         if inplace:
             r = self
         else:
-            r = copy.copy(self)
-            for k in (set(self.__dict__.keys())
-                      - set(['sample_start_time', 'sample_end_time', 
-                             'integration_interval', 'nominal_cadence',
-                             'data'])):
-                setattr(r, k, copy.deepcopy(getattr(self, k)))
+            r = copy.deepcopy(self)
 
         class OutStruct(ctypes.Structure):
             _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),
@@ -1150,6 +1151,8 @@ class Data(object):
         else:
             r.nominal_cadence = sample_end_time - sample_start_time
         r.data = new_data
+
+        r.processing.append('resample') 
 
         return r
 

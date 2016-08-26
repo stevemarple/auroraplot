@@ -240,7 +240,8 @@ class RioData(Data):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=None):
+                 sort=None,
+                 processing=[]):
         Data.__init__(self,
                       project=project,
                       site=site,
@@ -253,11 +254,15 @@ class RioData(Data):
                       nominal_cadence=nominal_cadence,
                       data=data,
                       units=units,
-                      sort=sort)
+                      sort=sort,
+                      processing=processing)
 
 
     def data_description(self):
-        return 'Riometer ' + subtype
+        if 'subtract QDC' in self.processing:
+            return 'Absorption'
+        else:
+            return 'Power'
 
     def savetxt(self, filename, fmt=None):
         a = np.zeros([self.channels.size+1, self.data.shape[-1]],
@@ -306,12 +311,26 @@ class RioData(Data):
 
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
+        if 'subtract QDC' in self.p:
+            logger.warn('QDC plotted with data, but QDC already '
+                        'subtracted from data.')
         self.plot(**kwargs)
         if qdc is not None:
             qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
                                                             **kwargs)
 
-
+    def subtract_qdc(self, qdc, fit_err_func=None, inplace=True):
+        if inplace:
+            r = self
+        else:
+            r = copy.deepcopy(self) 
+        if 'subtract QDC' in self.processing:
+            logger.warn('QDC already subtracted from data.')
+            return r
+        if qdc is not None:
+            r.data -= qdc.align(self, fit_err_func=fit_err_func).data
+            r.processing.append('subtract QDC')
+        return r
 
     def make_qdc(self,
                  channels=None,
