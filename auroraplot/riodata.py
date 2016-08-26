@@ -259,7 +259,7 @@ class RioData(Data):
 
 
     def data_description(self):
-        if 'subtract QDC' in self.processing:
+        if 'apply QDC' in self.processing:
             return 'Absorption'
         else:
             return 'Power'
@@ -311,7 +311,7 @@ class RioData(Data):
 
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
-        if 'subtract QDC' in self.p:
+        if 'apply QDC' in self.p:
             logger.warn('QDC plotted with data, but QDC already '
                         'subtracted from data.')
         self.plot(**kwargs)
@@ -319,17 +319,17 @@ class RioData(Data):
             qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
                                                             **kwargs)
 
-    def subtract_qdc(self, qdc, fit_err_func=None, inplace=True):
+    def apply_qdc(self, qdc, fit_err_func=None, inplace=True):
         if inplace:
             r = self
         else:
             r = copy.deepcopy(self) 
-        if 'subtract QDC' in self.processing:
+        if 'apply QDC' in self.processing:
             logger.warn('QDC already subtracted from data.')
             return r
         if qdc is not None:
-            r.data -= qdc.align(self, fit_err_func=fit_err_func).data
-            r.processing.append('subtract QDC')
+            r.data = qdc.align(self, fit_err_func=fit_err_func).data - r.data
+            r.processing.append('apply QDC')
         return r
 
     def make_qdc(self,
