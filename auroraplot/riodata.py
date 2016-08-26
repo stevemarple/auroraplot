@@ -255,9 +255,9 @@ class RioData(Data):
                       units=units,
                       sort=sort)
 
-    def data_description(self):
-        return 'Riometer data'
 
+    def data_description(self):
+        return 'Riometer ' + subtype
 
     def savetxt(self, filename, fmt=None):
         a = np.zeros([self.channels.size+1, self.data.shape[-1]],
@@ -320,11 +320,10 @@ class RioData(Data):
                  smooth=True,method='upper_envelope'):
 
         if channels is None:
-            # Default to first channel
-            cidx = [0]
-            channels = self.channels[0]
-        else:
-            cidx = self.get_channel_index(channels)
+            # Default to all channels
+            channels = self.channels
+        
+        cidx = self.get_channel_index(channels)
 
         lon = ap.get_site_info(self.project,self.site)['longitude']
 
@@ -514,9 +513,9 @@ class RioQDC(RioData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
-######### Sidereal changes ###################################
-
-        xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
+        lon = ap.get_site_info(self.project,self.site)['longitude']
+        xo = dt64.get_sidereal_time(interp_times,lon,time_of_day=True
+                                    ).astype('m8[us]')
         r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
             (xo.astype('int64'))
 

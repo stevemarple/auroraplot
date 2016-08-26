@@ -1175,7 +1175,7 @@ def get_sidereal_time(t,lon,time_units='us',sidereal_units=True,
     sdsh = solar_day_in_sidereal_hours() 
     time_type = ''.join(['m8[',time_units,']'])
     one_day = np.timedelta64(1,'D').astype(time_type).astype('int64')
-    fday = get_sidereal_day(t,lon,time_units='us')
+    fday = get_sidereal_day(t,lon,time_units=time_units)
     if time_of_day:
         fday -= np.floor(fday)
     if sidereal_units:
