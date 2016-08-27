@@ -929,6 +929,7 @@ class Data(object):
                                                  units=wu)
             r.nominal_cadence = cadence.copy()
             r.data = new_data
+            r.processing.append('resample') 
 
             
         elif cadence > self.nominal_cadence:

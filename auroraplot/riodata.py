@@ -311,12 +311,12 @@ class RioData(Data):
 
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
-        if 'apply QDC' in self.p:
+        if 'apply QDC' in self.processing:
             logger.warn('QDC plotted with data, but QDC already '
                         'subtracted from data.')
         self.plot(**kwargs)
         if qdc is not None:
-            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
+            qdc.align(self, fit_err_func=fit_err_func).plot(figure=plt.gcf(),
                                                             **kwargs)
 
     def apply_qdc(self, qdc, fit_err_func=None, inplace=True):
