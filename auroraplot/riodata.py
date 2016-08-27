@@ -310,13 +310,19 @@ class RioData(Data):
         return r
 
 
-    def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
+    def plot_with_qdc(self, qdc, fit_err_func=None,channels=None,**kwargs):
         if 'apply QDC' in self.processing:
             logger.warn('Plotting QDC with data, but QDC already '
                         'applied to the data.')
-        self.plot(**kwargs)
         if qdc is not None:
+            if channels is None:
+                channels = self.channels
+            channels = list(set(channels)
+                            &set(self.channels)
+                            &set(qdc.channels))
+            self.plot(channels=channels,**kwargs)
             qdc.align(self, fit_err_func=fit_err_func).plot(figure=plt.gcf(),
+                                                            channels=channels,
                                                             **kwargs)
 
     def apply_qdc(self, qdc, fit_err_func=None, inplace=True):
@@ -328,8 +334,15 @@ class RioData(Data):
             logger.warn('QDC already applied to the data.')
             return r
         if qdc is not None:
-            r.data -= qdc.align(self, fit_err_func=fit_err_func).data
-            r.data *= -1
+            if any([rc not in qdc.channels for rc in r.channels]):
+                logger.warn('Required channels not in QDC.')
+                return r
+            qdc_data = qdc.align(self, fit_err_func=fit_err_func).data
+            for chan in r.channels:
+                rcidx = r.get_channel_index(chan)
+                qcidx = qdc.get_channel_index(chan)
+                r.data[cidx] -= qdc_data[qcidx]
+                r.data[cidx] *= -1
             r.processing.append('apply QDC')
         return r
 
@@ -393,7 +406,7 @@ class RioData(Data):
                                alt_sample_end_time = sid_sam_et,
                                inplace=False)
         qdc_data = np.zeros([len(cidx), num_qdc_sam])*np.nan
-        for n in cidx:
+        for n in range(len(cidx)):
             ## interp1d needs mark_missing_data before. Replacing with 
             ## resample_data be better, but depends on compiled code
             #xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
@@ -403,7 +416,7 @@ class RioData(Data):
             #                                     bounds_error=False,
             #                                     fill_value=np.nan)\
             #                                     (xo.astype('int64'))
-            data_arr = r.data[n].reshape(num_sid_days,num_qdc_sam)
+            data_arr = r.data[cidx[n]].reshape(num_sid_days,num_qdc_sam)
             ########
             # Here is the QDC calculation code.
             # Upper envelope: sort the values, then select the index...
@@ -499,30 +512,34 @@ class RioQDC(RioData):
     def align(self, ref, fit=None, **fit_kwargs):
         day = np.timedelta64(24, 'h')
         if isinstance(ref, RioData):
-            r = copy.deepcopy(ref)
-            interp_times = ref.get_mean_sample_time()
+            sample_start_time = copy.copy(ref.sample_start_time)
+            sample_end_time = copy.copy(ref.sample_end_time)
+            nominal_cadence = copy.copy(ref.nominal_cadence)
         else:
             # ref parameter must contain sample timestamps
             assert not fit, 'Cannot fit without reference data'
-            ta = np.sort(np.array(ref).flatten())
-            if len(ta) >= 2:
+            sample_start_time = np.sort(np.array(ref).flatten())
+            sample_end_time = copy.copy(sample_start_time)
+            if len(sample_start_time) >= 2:
                 # Guess the nominal cadence
-                nc = np.median(np.diff(ta))
+                nominal_cadence = np.median(np.diff(sample_start_time))
             else:
-                nc = None
-            r = RioData(project=self.project,
-                        site=self.site,
-                        channels=copy.copy(self.channels),
-                        start_time=ta[0],
-                        end_time=ta[-1],
-                        sample_start_time=ta,
-                        sample_end_time=copy.copy(ta),
-                        integration_interval=None,
-                        nominal_cadence=nc,
-                        data=None,
-                        units=self.units,
-                        sort=False)
-            interp_times = ta
+                nominal_cadence = None
+        start_time = sample_start_time[0]
+        end_time = sample_end_time[-1]
+        r = RioData(project=self.project,
+                    site=self.site,
+                    channels=copy.copy(self.channels),
+                    start_time=start_time,
+                    end_time=end_time,
+                    sample_start_time=sample_start_time,
+                    sample_end_time=sample_end_time,
+                    integration_interval=None,
+                    nominal_cadence=nominal_cadence,
+                    data=None,
+                    units=self.units,
+                    sort=False)
+        interp_times = r.get_mean_sample_time()
 
         # Create array with room for additional entries at start and end
         xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')
