@@ -1,7 +1,6 @@
 import copy
 import os
 import logging
-import csv
 
 # Python 2/3 compatibility
 import six
@@ -63,9 +62,9 @@ def load_rn_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            #data = np.loadtxt(uh, unpack=True)
-            data = np.array([l for l in csv.reader(uh,delimiter='\t')]
-                            ).T.astype('float64')
+
+            data = ap.loadtxt(uh)
+
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates

@@ -368,6 +368,24 @@ def is_operational(project, site, t1=None, t2=None):
     return False
 
 
+def loadtxt(uh):
+    '''
+    Can be used instead of data = np.loadtxt(uh, unpack=True)
+    for faster loading of data .txt files. 
+
+    '''
+    try:
+        import pandas
+        data = pandas.read_csv(uh, sep='\t').values.T
+    except:
+        try:
+            import csv
+            data = np.array([l for l in csv.reader(uh,delimiter='\t')]
+                            ).astype('float64').T
+        except:
+            data = np.loadtxt(uh, unpack=True)
+    return data
+
 
 def load_data(project, 
               site, 

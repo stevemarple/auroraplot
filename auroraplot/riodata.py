@@ -312,8 +312,8 @@ class RioData(Data):
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
         if 'apply QDC' in self.processing:
-            logger.warn('QDC plotted with data, but QDC already '
-                        'subtracted from data.')
+            logger.warn('Plotting QDC with data, but QDC already '
+                        'applied to the data.')
         self.plot(**kwargs)
         if qdc is not None:
             qdc.align(self, fit_err_func=fit_err_func).plot(figure=plt.gcf(),
@@ -325,10 +325,11 @@ class RioData(Data):
         else:
             r = copy.deepcopy(self) 
         if 'apply QDC' in self.processing:
-            logger.warn('QDC already subtracted from data.')
+            logger.warn('QDC already applied to the data.')
             return r
         if qdc is not None:
-            r.data = qdc.align(self, fit_err_func=fit_err_func).data - r.data
+            r.data -= qdc.align(self, fit_err_func=fit_err_func).data
+            r.data *= -1
             r.processing.append('apply QDC')
         return r
 
@@ -337,6 +338,9 @@ class RioData(Data):
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  outputrows=[2,3],
                  smooth=True,method='upper_envelope'):
+
+        if 'apply QDC' in self.processing:
+            logger.warn('A QDC has already been applied to the data.')
 
         if channels is None:
             # Default to all channels
