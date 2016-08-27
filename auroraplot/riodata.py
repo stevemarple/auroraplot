@@ -325,7 +325,7 @@ class RioData(Data):
                                                             channels=channels,
                                                             **kwargs)
 
-    def apply_qdc(self, qdc, fit_err_func=None, inplace=True):
+    def apply_qdc(self, qdc, fit_err_func=None, inplace=False):
         if inplace:
             r = self
         else:
@@ -341,8 +341,8 @@ class RioData(Data):
             for chan in r.channels:
                 rcidx = r.get_channel_index(chan)
                 qcidx = qdc.get_channel_index(chan)
-                r.data[cidx] -= qdc_data[qcidx]
-                r.data[cidx] *= -1
+                r.data[rcidx] -= qdc_data[qcidx]
+                r.data[rcidx] *= -1
             r.processing.append('apply QDC')
         return r
 
@@ -350,7 +350,7 @@ class RioData(Data):
                  channels=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  outputrows=[2,3],
-                 smooth=True,method='upper_envelope'):
+                 smooth=True):
 
         if 'apply QDC' in self.processing:
             logger.warn('A QDC has already been applied to the data.')
@@ -428,9 +428,9 @@ class RioData(Data):
             if data_arr.shape[0] >= (np.max(upper_idx)+1):
                 qdc_data[n,:] = ap.nanmean(data_arr[upper_idx,:],axis=0)
 
-        qdc = RioQDC(project=self.project,
-                     site=self.site,
-                     channels=self.channels[cidx],
+        qdc = RioQDC(project=copy.copy(self.project),
+                     site=copy.copy(self.site),
+                     channels=copy.copy(self.channels[cidx]),
                      start_time=np.timedelta64(0, 'h'),
                      end_time=np.timedelta64(24, 'h'),
                      sample_start_time=qdc_sam_st,
@@ -438,9 +438,11 @@ class RioData(Data):
                      integration_interval=None,
                      nominal_cadence=cadence,
                      data=qdc_data,
-                     units=self.units,
-                     sort=False)
-        
+                     units=copy.copy(self.units),
+                     sort=False,
+                     processing=copy.copy(self.processing))
+        qdc.processing.append('make QDC')
+
         if smooth:
             qdc.smooth(inplace=True)
 
@@ -461,7 +463,8 @@ class RioQDC(RioData):
                  nominal_cadence=None,
                  data=np.array([]),
                  units=None,
-                 sort=None):
+                 sort=None,
+                 processing=[]):
         RioData.__init__(self,
                          project=project,
                          site=site,
@@ -474,13 +477,14 @@ class RioQDC(RioData):
                          nominal_cadence=nominal_cadence,
                          data=data,
                          units=units,
-                         sort=sort)
+                         sort=sort,
+                         processing=processing)
 
     def data_description(self):
         return 'Riometer QDC'
 
 
-    def smooth(self, fit_order=5, inplace=False):
+    def smooth(self, fit_order=20, inplace=False):
         if inplace:
             r = self
         else:
@@ -489,6 +493,7 @@ class RioQDC(RioData):
         coeffs = np.fft.fft(r.data)
         coeffs[:, range(fit_order+1, coeffs.shape[1]-fit_order)] = 0
         r.data = np.fft.ifft(coeffs).real
+        r.processing.append('smooth')
         return r
 
 
