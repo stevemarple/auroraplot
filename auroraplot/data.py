@@ -306,7 +306,7 @@ class Data(object):
         if sort:
             self.sort(inplace=True)
 
-        self.processing = processing
+        self.processing = copy.copy(processing)
  
 
     def __repr__(self):
