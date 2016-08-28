@@ -200,8 +200,6 @@ default_data_types = {
             'units': 'T',
             'sort': False,
             },
-        },
-    'RioQDC': {
         'remote qdc': {
             'channels': channels,
             'path': remote_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
