@@ -822,10 +822,8 @@ class Data(object):
                 np.timedelta64(0, tu)
         if aggregate is None:
             aggregate=scipy.average
-            mean_integration = True # Otherwise sum
         else:
             use_fallback = True # aggregate not supported by fast method
-
 
         import os
         tsint_so_file = os.path.dirname(__file__) + '/tsintegrate.so'
@@ -836,111 +834,20 @@ class Data(object):
             ctsint = ctypes.cdll.LoadLibrary(tsint_so_file)
         except:
             use_fallback = True
-            logger.info('Fast integration library (%s) unavailable, using fallback',
-                        tsint_so_file)
+            logger.info('Fast integration library (%s) unavailable, '
+                        'using fallback', tsint_so_file)
             
 
+        sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
+                                       + offset_interval, 
+                                       self.end_time, 
+                                       cadence),
+                             time_type=self.start_time,
+                             units=tu)
+        sam_et = sam_st + cadence
         if not use_fallback:
-            class OutStruct(ctypes.Structure):
-                _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),
-                            ("weight", ctypes.POINTER(ctypes.c_double))]
-
-            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
-                                           + offset_interval, 
-                                           self.end_time, 
-                                           cadence),
-                                 time_type=self.start_time,
-                                 units=tu)
-            sam_et = sam_st + cadence
-
-            nnew = sam_st.size
-            nold = self.sample_start_time.size
-            nchan = len(self.channels)
-            
-            if self.integration_interval is not None:
-                assert not np.any(dt64.isnat(self.integration_interval)), \
-                    'integration_interval must not contain NaT'
-            else:
-                self.integration_interval = np.ones([nchan,nold])\
-                                            *self.nominal_cadence
-
-            wu = dt64.get_units(self.integration_interval)
-            iu = dt64.smallest_unit((cadence,self.nominal_cadence,
-                                     self.sample_start_time,
-                                     self.sample_end_time,
-                                     sam_st,sam_et))
-            ius = 'M8['+iu+']'
-            
-            output_p = ctypes.POINTER(OutStruct)
-            ctsint.tsIntegrate.restype= ctypes.POINTER(OutStruct)
-            ctsint.tsIntegrate.argtypes = [ctypes.c_int64,
-                                ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
-                                ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
-                                ndpointer(dtype=ctypes.c_double,shape=(nold,)),
-                                ndpointer(dtype=ctypes.c_double,shape=(nold,)),
-                                ctypes.c_int64,
-                                ndpointer(dtype=ctypes.c_int64,shape=(nnew,)),
-                                ndpointer(dtype=ctypes.c_int64,shape=(nnew,))]
-            
-            new_data = np.zeros([nchan,nnew])
-            new_weight = np.zeros([nchan,nnew])
-            
-            self.integration_interval[np.isnan(self.data)] = 0
-            self.data[np.isnan(self.data)] = 0
-
-            for cn in range(nchan):
-                output_p = ctsint.tsIntegrate(np.int64(nold),
-                      self.sample_start_time.astype(ius).astype('int64'),
-                      self.sample_end_time.astype(ius).astype('int64'),
-                      self.data[cn,:].astype('float64'),
-                      self.integration_interval[cn,:].\
-                                         astype('int64').astype('float64'),
-                      np.int64(nnew),
-                      sam_st.astype(ius).astype('int64'),
-                      sam_et.astype(ius).astype('int64'))
-                new_weight[cn,:] = np.fromiter(output_p.contents.weight,
-                                            dtype=np.float64,count=nnew).copy()
-                new_data[cn,:] = np.fromiter(output_p.contents.data,
-                                             dtype=np.float64,count=nnew).copy()
-                ctsint.freemem()
-
-                if mean_integration:
-                    non_zero_weight = (new_weight[cn,:]!=0.0)
-                    new_data[cn,non_zero_weight] = new_data[cn,non_zero_weight]\
-                                                /new_weight[cn,non_zero_weight]
-            new_data[new_weight==0.0] = np.NaN
-
-            if inplace:
-                r = self
-            else:
-                r = copy.copy(self)
-                for k in (set(self.__dict__.keys())
-                          - set(['sample_start_time', 'sample_end_time', 
-                                 'integration_interval', 'nominal_cadence',
-                                 'data'])):
-                    setattr(r, k, copy.deepcopy(getattr(self, k)))
-
-            r.start_time = dt64.astype(r.start_time, units=tu)
-            r.end_time = dt64.astype(r.end_time, units=tu)
-            r.sample_start_time = sam_st
-            r.sample_end_time = sam_et
-            r.integration_interval = dt64.astype(new_weight,
-                                                 time_type=cadence,
-                                                 units=wu)
-            r.nominal_cadence = cadence.copy()
-            r.data = new_data
-            r.processing.append('resample') 
-
-            
+            r = self.resample_data(sam_st,sam_et,inplace=inplace)
         elif cadence > self.nominal_cadence:
-            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
-                                           + offset_interval, 
-                                           self.end_time, 
-                                           cadence),
-                                 time_type=self.start_time,
-                                 units=tu)
-            sam_et = sam_st + cadence
-
             sample_time = dt64.mean(self.sample_start_time, 
                                     self.sample_end_time)
             d = np.ones([len(self.channels), len(sam_st)]) * ap.NaN
@@ -958,7 +865,8 @@ class Data(object):
                                                sample_time <= sam_et[sn]))[0]
                 for cn in range(len(self.channels)):
                     if ignore_nan:
-                        notnanidx = np.where(np.logical_not(np.isnan(self.data[cn, tidx])))[0]
+                        notnanidx = np.where(np.logical_not(
+                                            np.isnan(self.data[cn, tidx])))[0]
                         tidx2 = tidx[notnanidx]
                     else:
                         tidx2 = tidx
@@ -1030,6 +938,7 @@ class Data(object):
     def resample_data(self,sample_start_time,sample_end_time,
                       alt_sample_start_time = None,
                       alt_sample_end_time = None,
+                      channels = None,
                       inplace=False):
         '''
         Resample data.
@@ -1044,8 +953,40 @@ class Data(object):
                                                 of self.sample_start_time, etc
                                                 useful if using different time
                                                 basis, eg sidereal time.
+            channels : (default None (all channels)) Return an object including
+                                                only the listed channels.
         '''
                       
+
+        sample_start_time = np.array(sample_start_time).flatten()
+        sample_end_time = np.array(sample_end_time).flatten()
+
+        if sample_start_time.size != sample_end_time.size:
+            logger.error('sample_start_time and sample_end_time '
+                         'are different sizes')
+            return
+
+        if channels is None:
+            channels = copy.copy(self.channels)
+        channels = [c for c in self.channels if c in channels]
+        cidx = self.get_channel_index(channels)
+        if inplace:
+            r = self
+            r.channels = r.channels[cidx]
+            r.data = r.data[cidx]
+            if r.integration_interval is not None:
+                r.integration_interval = r.integration_interval[cidx]
+        else:
+            r = copy.copy(self)
+            for k in (set(self.__dict__.keys())
+                      - set(['channels','data',
+                             'integration_interval', 'nominal_cadence'])):
+                setattr(r, k, copy.deepcopy(getattr(self, k)))
+            r.channels = copy.copy(self.channels[cidx])
+            r.data = copy.copy(self.data[cidx])
+            if r.integration_interval is not None:
+                r.integration_interval = copy.copy(r.integration_interval[cidx])
+
         import os
         tsint_so_file = os.path.dirname(__file__) + '/tsintegrate.so'
 
@@ -1056,20 +997,7 @@ class Data(object):
         except:
             logger.error('Fast integration library (%s) unavailable',
                         tsint_so_file)
-            return
-
-        sample_start_time = np.array(sample_start_time).flatten()
-        sample_end_time = np.array(sample_end_time).flatten()
-
-        if sample_start_time.size != sample_end_time.size:
-            logger.error('sample_start_time and sample_end_time '
-                         'are different sizes')
-            return
-            
-        if inplace:
-            r = self
-        else:
-            r = copy.deepcopy(self)
+            return r
 
         class OutStruct(ctypes.Structure):
             _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),

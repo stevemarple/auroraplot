@@ -317,9 +317,9 @@ class RioData(Data):
         if qdc is not None:
             if channels is None:
                 channels = self.channels
-            channels = list(set(channels)
-                            &set(self.channels)
-                            &set(qdc.channels))
+            # Only plot channels in QDC and data, in order
+            channels = list(set(channels)&set(qdc.channels))
+            channels = [c for c in self.channels if c in channels]
             self.plot(channels=channels,**kwargs)
             qdc.align(self, fit_err_func=fit_err_func).plot(figure=plt.gcf(),
                                                             channels=channels,
@@ -356,9 +356,8 @@ class RioData(Data):
             logger.warn('A QDC has already been applied to the data.')
 
         if channels is None:
-            # Default to all channels
-            channels = self.channels
-        
+            channels = copy.copy(self.channels)
+        channels = [c for c in self.channels if c in channels]
         cidx = self.get_channel_index(channels)
 
         lon = ap.get_site_info(self.project,self.site)['longitude']
@@ -401,7 +400,7 @@ class RioData(Data):
                                             time_of_day = False,
                                             sidereal_units=True)
 
-        r = self.resample_data(qdc_arr_st,qdc_arr_et,
+        r = self.resample_data(qdc_arr_st,qdc_arr_et,channels=channels,
                                alt_sample_start_time = sid_sam_st,
                                alt_sample_end_time = sid_sam_et,
                                inplace=False)
@@ -532,8 +531,8 @@ class RioQDC(RioData):
                 nominal_cadence = None
         start_time = sample_start_time[0]
         end_time = sample_end_time[-1]
-        r = RioData(project=self.project,
-                    site=self.site,
+        r = RioData(project=copy.copy(self.project),
+                    site=copy.copy(self.site),
                     channels=copy.copy(self.channels),
                     start_time=start_time,
                     end_time=end_time,
@@ -542,27 +541,32 @@ class RioQDC(RioData):
                     integration_interval=None,
                     nominal_cadence=nominal_cadence,
                     data=None,
-                    units=self.units,
+                    units=copy.copy(self.units),
                     sort=False)
         interp_times = r.get_mean_sample_time()
 
         # Create array with room for additional entries at start and end
         xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')
         xi[1:-1] = self.get_mean_sample_time().astype('m8[us]')
-        yi = np.zeros([len(self.channels), self.data.shape[1] + 2],
-                      dtype=self.data.dtype)
-        yi[:,1:-1] = self.data
         # Extend so that interpolation can happen correctly near midnight
         xi[0] = xi[-2] - day
         xi[-1] = xi[1] + day
-        yi[:, 0] = yi[:, -2]
-        yi[:, -1] = yi[:, 1]
 
         lon = ap.get_site_info(self.project,self.site)['longitude']
         xo = dt64.get_sidereal_time(interp_times,lon,time_of_day=True
                                     ).astype('m8[us]')
-        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
-            (xo.astype('int64'))
+
+
+        yi = np.zeros(self.data.shape[1] + 2, dtype=self.data.dtype)
+        r.data = np.zeros([len(r.channels), len(xo)], dtype=self.data.dtype)
+        for c in r.channels:
+            cidx = self.get_channel_index(c)
+            yi[1:-1] = self.data[cidx]
+            yi[0] = yi[-2]
+            yi[-1] = yi[1]
+            cidx = r.get_channel_index(c)
+            r.data[cidx] = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
+                                                     (xo.astype('int64'))
 
         if fit:
             if hasattr(fit, '__call__'):
