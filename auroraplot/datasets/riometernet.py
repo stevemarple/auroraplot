@@ -34,7 +34,7 @@ def check_rio_data(data):
 def load_rn_data(file_name, archive_data, 
                   project, site, data_type, channels, start_time, 
                   end_time, **kwargs):
-    '''Convert AuroraWatchNet data to match standard data type
+    '''Convert RiometerNet data to match standard data type
 
     data: RioData or other similar format data object
     archive: name of archive from which data was loaded
@@ -69,9 +69,9 @@ def load_rn_data(file_name, archive_data,
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
-            integration_interval = np.ones([len(channels), 
-                                            len(sample_start_time)],
-                                            dtype='m8[us]')
+            integration_interval = 1E6*np.ones([len(channels), 
+                                                len(sample_start_time)],
+                                                dtype='m8[us]')
             data = data[col_idx] * data_type_info[data_type]['scaling']
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)
@@ -196,6 +196,7 @@ default_data_types = {
             'duration': np.timedelta64(24, 'h'),
             'format': 'riometernet_qdc',
             'load_converter': ap.riodata.load_qdc_data,
+            'save_converter': ap.riodata._save_baseline_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,

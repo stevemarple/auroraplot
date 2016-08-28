@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+ 
+\usepackage{listings}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.92,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    %commentstyle=\color{codegreen},
+    %keywordstyle=\color{magenta},
+    %numberstyle=\tiny\color{codegray},
+    %stringstyle=\color{codepurple},
+    basicstyle=\footnotesize\ttfamily,
+    basewidth={0.5em,0.5em},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+ 
+\lstset{style=mystyle}
+ 
+\begin{document}
+
+\title{Getting started with auroraplot}
+\date{}
+\maketitle
+
+\section{Minimum requirements}
+Auroraplot has been tested on Fedora 24, Ubuntu 16.04 LTS, and Debian 8.
+It should work on Apple OSX with minimal changes to the configuration steps.
+Microsoft Windows is not currently supported.
+
+Loading and manipulating large data sets requires significant amounts of RAM.
+On systems with 8 GB frequent swapping to disk and slow-downs can occur,
+especially when creating Quiet Day Curves. 16 GB or more is recommended.
+
+\section{Installing Auroraplot}
+
+Install the dependencies. In a terminal type
+
+\begin{figure}[htb!]
+\begin{minipage}[b]{0.45\linewidth}
+Fedora 24
+\begin{lstlisting}[language=Bash]
+sudo dnf install python-pyside git python2-matplotlib-qt4 python-requests ipython python-scipy python-pandas
+\end{lstlisting}
+\end{minipage}
+\hspace{0.5cm}
+\begin{minipage}[b]{0.45\linewidth}
+Debian 8 / Ubuntu 16.04
+\begin{lstlisting}                 
+sudo apt-get install git
+\end{lstlisting}
+\end{minipage} 
+\end{figure}
+
+Pandas is an optional dependency that speeds up the loading of data.
+
+\subsection{Getting the latest version of Auroraplot}
+To install Auroraplot in your home folder type
+\begin{lstlisting}[language=Bash]
+cd ~
+git clone https://github.com/m-j-b/auroraplot.git
+\end{lstlisting}
+
+To update to the latest version
+\begin{lstlisting}[language=Bash]
+cd ~/auroraplot/
+git fetch --all
+git checkout --force origin/master
+\end{lstlisting}
+
+
+\section{Running Auroraplot in IPython}
+\subsection{Show logging information}
+It is helpful to see the logger output. To show log messages on the screen run
+\begin{lstlisting}[language=Python]
+import logging
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+\end{lstlisting}
+
+\subsection{Examples}
+
+
+\end{document}
+
+
