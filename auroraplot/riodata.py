@@ -177,7 +177,7 @@ def load_qdc_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            data = np.loadtxt(uh, unpack=True)
+            data = ap.loadtxt(uh)
             sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
             sample_end_time = sample_start_time \
                 + archive_data['nominal_cadence']
@@ -195,7 +195,8 @@ def load_qdc_data(file_name, archive_data,
                        nominal_cadence=archive_data['nominal_cadence'],
                        data=data,
                        units=archive_data['units'],
-                       sort=False)
+                       sort=False,
+                       processing=[])
             return r
 
         except Exception as e:
@@ -291,9 +292,9 @@ class RioData(Data):
             subplot2 = None
         elif subplot is None:
             subplot2 = []
+            xch = np.int(np.ceil(np.sqrt(len(channels))))
+            ych = np.int(np.ceil(np.float(len(channels))/xch))
             for n in range(1, len(channels) + 1):
-                xch = np.int(np.ceil(np.sqrt(len(channels))))
-                ych = np.int(np.ceil(len(channels)/xch))
                 subplot2.append((xch,ych,n))
         else:
             subplot2=subplot
@@ -326,19 +327,30 @@ class RioData(Data):
                                                             **kwargs)
 
     def apply_qdc(self, qdc, fit_err_func=None, inplace=False):
-        if inplace:
-            r = self
-        else:
-            r = copy.deepcopy(self) 
+        if any([c not in qdc.channels for c in self.channels]):
+            logger.warn('Not all data channels in QDC.')
         if 'apply QDC' in self.processing:
             logger.warn('QDC already applied to the data.')
-            return r
+        channels = [c for c in self.channels if c in qdc.channels]
+        cidx = self.get_channel_index(channels)
+        if inplace:
+            r = self
+            r.channels = r.channels[cidx]
+            r.data = r.data[cidx]
+            if r.integration_interval is not None:
+                r.integration_interval = r.integration_interval[cidx]
+        else:
+            r = copy.copy(self)
+            for k in (set(self.__dict__.keys())
+                      - set(['channels','data','integration_interval'])):
+                setattr(r, k, copy.deepcopy(getattr(self, k)))
+            r.channels = copy.copy(self.channels[cidx])
+            r.data = copy.copy(self.data[cidx])
+            if r.integration_interval is not None:
+                r.integration_interval = copy.copy(r.integration_interval[cidx])
         if qdc is not None:
-            if any([rc not in qdc.channels for rc in r.channels]):
-                logger.warn('Required channels not in QDC.')
-                return r
             qdc_data = qdc.align(self, fit_err_func=fit_err_func).data
-            for chan in r.channels:
+            for chan in channels:
                 rcidx = r.get_channel_index(chan)
                 qcidx = qdc.get_channel_index(chan)
                 r.data[rcidx] -= qdc_data[qcidx]
@@ -358,7 +370,6 @@ class RioData(Data):
         if channels is None:
             channels = copy.copy(self.channels)
         channels = [c for c in self.channels if c in channels]
-        cidx = self.get_channel_index(channels)
 
         lon = ap.get_site_info(self.project,self.site)['longitude']
 
@@ -404,6 +415,7 @@ class RioData(Data):
                                alt_sample_start_time = sid_sam_st,
                                alt_sample_end_time = sid_sam_et,
                                inplace=False)
+        cidx = r.get_channel_index(channels)
         qdc_data = np.zeros([len(cidx), num_qdc_sam])*np.nan
         for n in range(len(cidx)):
             ## interp1d needs mark_missing_data before. Replacing with 
@@ -427,9 +439,9 @@ class RioData(Data):
             if data_arr.shape[0] >= (np.max(upper_idx)+1):
                 qdc_data[n,:] = ap.nanmean(data_arr[upper_idx,:],axis=0)
 
-        qdc = RioQDC(project=copy.copy(self.project),
-                     site=copy.copy(self.site),
-                     channels=copy.copy(self.channels[cidx]),
+        qdc = RioQDC(project=copy.copy(r.project),
+                     site=copy.copy(r.site),
+                     channels=copy.copy(r.channels[cidx]),
                      start_time=np.timedelta64(0, 'h'),
                      end_time=np.timedelta64(24, 'h'),
                      sample_start_time=qdc_sam_st,
@@ -437,9 +449,9 @@ class RioData(Data):
                      integration_interval=None,
                      nominal_cadence=cadence,
                      data=qdc_data,
-                     units=copy.copy(self.units),
+                     units=copy.copy(r.units),
                      sort=False,
-                     processing=copy.copy(self.processing))
+                     processing=copy.copy(r.processing))
         qdc.processing.append('make QDC')
 
         if smooth:

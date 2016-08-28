@@ -166,7 +166,8 @@ def _generic_load_converter(file_name, archive_data,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
                 units=archive_data['units'],
-                sort=archive_data.get('sort', False))
+                sort=archive_data.get('sort', False),
+                processing=[])
             return r
 
         except Exception as e:
@@ -979,8 +980,7 @@ class Data(object):
         else:
             r = copy.copy(self)
             for k in (set(self.__dict__.keys())
-                      - set(['channels','data',
-                             'integration_interval', 'nominal_cadence'])):
+                      - set(['channels','data','integration_interval'])):
                 setattr(r, k, copy.deepcopy(getattr(self, k)))
             r.channels = copy.copy(self.channels[cidx])
             r.data = copy.copy(self.data[cidx])
@@ -1078,7 +1078,7 @@ class Data(object):
         if sample_start_time.size > 1:
             r.nominal_cadence = np.median(np.diff(sample_start_time))
         else:
-            r.nominal_cadence = sample_end_time - sample_start_time
+            r.nominal_cadence = None
         r.data = new_data
 
         r.processing.append('resample') 

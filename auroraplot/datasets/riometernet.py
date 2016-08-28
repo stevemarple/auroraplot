@@ -87,7 +87,8 @@ def load_rn_data(file_name, archive_data,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
                 units=archive_data['units'],
-                sort=True)
+                sort=True,
+                processing=[])
             return r
 
         except Exception as e:
