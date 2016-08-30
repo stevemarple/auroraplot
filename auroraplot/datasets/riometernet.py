@@ -192,7 +192,7 @@ default_data_types = {
     'RioQDC': {
         'local archive': {
             'channels': channels,
-            'path': local_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
+            'path': local_base_url+'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m%d.txt',
             'duration': np.timedelta64(14, 'D'),
             'format': 'riometernet_qdc',
             'load_converter': ap.riodata.load_qdc_data,
@@ -203,7 +203,7 @@ default_data_types = {
             },
         'remote qdc': {
             'channels': channels,
-            'path': remote_base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
+            'path': remote_base_url+'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m%d.txt',
             'duration': np.timedelta64(14, 'D'),
             'format': 'riometernet_qdc',
             'load_converter': ap.riodata.load_qdc_data,

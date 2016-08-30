@@ -35,7 +35,9 @@ def load_qdc(project,
              tries=1,
              realtime=False,
              load_function=None,
-             full_output=False):
+             full_output=False,
+             boundary_epoch=None,
+             duration=None):
     '''Load quiet-day curve. 
     project: name of the project (upper case)
 
@@ -76,6 +78,18 @@ def load_qdc(project,
     else:
         channels = ad['channels']
 
+    if boundary_epoch is None:
+        if 'boundary_epoch' in ad.keys():
+            boundary_epoch = ad['boundary_epoch']
+        else:
+            boundary_epoch = np.datetime64('1900')
+
+    if duration is None:
+        if 'duration' in ad.keys():
+            duration = ad['duration']
+        else:
+            duration = np.timedelta64(7,'D')
+
     if path is None:
         path = ad['path']
 
@@ -100,18 +114,7 @@ def load_qdc(project,
                              full_output=full_output)
     data = []
 
-    t = dt64.get_start_of_month(time)
-
-    if realtime:
-        # For realtime use the QDC for the month is (was) not
-        # available, so use the previous month's QDC
-        t = dt64.get_start_of_previous_month(t)
-        
-        # Early in the month the previous motnh's QDC was probably not
-        # computed, so use the month before that
-        qdc_rollover_day = ad.get('qdc_rollover_day', 4)
-        if dt64.get_day_of_month(time) < qdc_rollover_day:
-            t = dt64.get_start_of_previous_month(t)
+    t = np.array(dt64.floor(time-boundary_epoch, duration)+boundary_epoch)
 
     for n in range(tries):
         try:
@@ -148,7 +151,7 @@ def load_qdc(project,
                 
         finally:
             # Go to start of previous month
-            t = dt64.get_start_of_month(t - np.timedelta64(24, 'h'))
+            t = t - duration
 
     return None
 
@@ -181,7 +184,7 @@ def load_qdc_data(file_name, archive_data,
             sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
             sample_end_time = sample_start_time \
                 + archive_data['nominal_cadence']
-            
+    
             integration_interval = None
             data = data[col_idx]
             r = RioQDC(project=project,
@@ -219,7 +222,7 @@ def _save_baseline_data(md, file_name, archive_data):
     assert md.data.shape[1] == np.size(md.sample_start_time), \
         'data shape incorrect for number of samples'
     data = np.empty([1 + np.size(md.channels), np.size(md.sample_start_time)])
-    data[0] = (md.sample_end_time - md.start_time) / md.nominal_cadence
+    data[0] = md.sample_start_time.astype('m8[s]').astype('int64')
     data[1:] = md.data
     fmt = ['%d']
     fmt.extend(['%.2f'] * np.size(md.channels))
