@@ -494,6 +494,30 @@ class RioQDC(RioData):
     def data_description(self):
         return 'Riometer QDC'
 
+    def qsave(self,t,archive=None,path=None,save_converter=None):
+        assert ((archive is not None and path is None) or 
+                (archive is None and path is not None)), \
+            'archive or path must be defined (and not both)'
+        an, ai = ap.get_archive_info(self.project,
+                                     self.site,
+                                     self.__class__.__name__,
+                                     archive=archive)
+        if path is None:
+            path = ai['path']
+            t0 = np.datetime64('1900') # A Monday, best time for boundaries
+            t = dt64.floor(t-t0, ai['duration'])+t0
+        if save_converter is None:
+            save_converter = ai['save_converter']
+
+        file_name = dt64.strftime(t, path)
+        q = self.set_time_units(ai['nominal_cadence'], inplace=False)
+        import os
+        dir_name = os.path.dirname(file_name)
+        if not os.path.exists(dir_name):
+            logger.debug('making directory %s', dir_name)
+            os.makedirs(dir_name)
+        logger.info('saving to %s', file_name)
+        save_converter(q, file_name, ai)
 
     def smooth(self, fit_order=20, inplace=False):
         if inplace:

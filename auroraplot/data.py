@@ -1354,7 +1354,10 @@ class Data(object):
              archive=None,
              path=None,
              merge=None,
-             save_converter=None):
+             save_converter=None,
+             duration=None,
+             file_time=None,
+             boundary_epoch=None):
         assert ((archive is not None and path is None) or 
                 (archive is None and path is not None)), \
             'archive or path must be defined (and not both)'
@@ -1363,31 +1366,49 @@ class Data(object):
                                      self.site,
                                      self.__class__.__name__,
                                      archive=archive)
-        if merge is None:
-            merge = path is None
+        if boundary_epoch is None:
+            if 'boundary_epoch' in ai.keys():
+                boundary_epoch = ai['boundary_epoch']
+            else:
+                boundary_epoch = np.datetime64('1900')
 
-        if path is None:
-            # Save to a default location
-            assert save_converter is None, \
-                'Cannot set save_converter when saving to default location'
-            save_converter = ai['save_converter']
-            path = ai['path']
+        if duration is None:
             duration = ai['duration']
-            t = dt64.dt64_range(dt64.floor(self.start_time, duration),
-                                dt64.ceil(self.end_time, duration),
+
+        if save_converter is None:
+            save_converter = ai['save_converter']
+        if file_time is None:
+            multiple_files = True
+            t = dt64.dt64_range(dt64.floor(self.start_time-boundary_epoch,
+                                           duration)+boundary_epoch,
+                                dt64.ceil(self.end_time-boundary_epoch,
+                                          duration)+boundary_epoch,
                                 duration)
         else:
-            # Save to single file
-            t = [self.start_time]
-            duration = self.end_time - self.start_time
+            multiple_files = False
+            t = [dt64.floor(file_time-boundary_epoch, duration)+boundary_epoch]
+
+        if path is None:
+            path = ai['path']
+            # Save to a default location
+        else: # by convention make one file if path specified
+            multiple_files = False
 
         if save_converter is None:
             raise Exception('Cannot save, save_converter not defined')
+
+        if merge is None:
+            merge = multiple_files
+
         for t1 in t:
             t2 = t1 + duration
             file_name = dt64.strftime(t1, path)
-            d = self.extract(t1, t2)
-            d.set_time_units(ai['nominal_cadence'], inplace=True)
+            if multiple_files:
+                d = self.extract(t1, t2)
+                d.set_time_units(ai['nominal_cadence'], inplace=True)
+            else:
+                d = self.set_time_units(ai['nominal_cadence'], inplace=False)
+                
             if merge:
                 # Load existing data and merge before saving
                 tmp = ap.load_data(self.project,
