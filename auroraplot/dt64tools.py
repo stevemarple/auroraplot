@@ -289,37 +289,35 @@ def _aggregate(*a, **kwargs):
             tmp += b.astype(d).astype('int64')
         return (tmp / len(a)).astype(d)
 
-def _round_to_func(dt, td, func, func_name):
+def _round_to_func(t, td, func, func_name):
+    t0 = np.datetime64('1900')
     td_units = get_units(td)
+    t_is_datetime = t.dtype.char == 'M'
+    if td_units is smallest_unit([get_units(t),td_units]):
+        t = t.astype(t.dtype.char+'8['+td_units+']')
+    if t_is_datetime:
+        t = t - t0
     if td_units in ('M', 'Y'):
-        if func_name not in ('ceil', 'floor'):
-            # round(), and possibly other unknown functions, must
-            # evaluate the days, hours, etc to decide whether to round
-            # up or down.
+        if not t_is_datetime:
+            raise Exception('Cannot round a time delta to non-fixed units.')
+        if func_name not in ('ceil', 'floor','round'):
+            # unknown functions must evaluate the days, hours, etc 
+            # to decide whether to round up or down.
             raise Exception('Cannot use ' + func_name 
                             + ' with units of ' + td_units)
-        # Convert the datetime to units of month or year. Discard parts
-        # smaller than this, for floor() they can be ignored
-        ret_type = dt.dtype.char + '8[' + td_units + ']'
-        dt2 = dt.astype(ret_type)
+        ft = np.floor(t.astype('m8['+td_units+']')/td)*td
+        round_up = False
         if func_name == 'ceil':
-            # Parts smaller than month or year matter for ceil so
-            # round up by one month or year where they were discarded
-            if len(dt2.shape):
-                dt2[dt2 - dt < 0] += np.timedelta64(1, td_units)
-            elif dt2 < dt:
-                dt2 += np.timedelta64(1, td_units)
-        dt2f = dt2.astype('float')
-        tdf = td.astype('float')
-        r = (func(dt2f / tdf) * tdf).astype('int64').astype(ret_type)
-        return r
-
-    u = smallest_unit([get_units(dt), get_units(td)])
-    dti = dt64_to(dt, u)
-    tdi = dt64_to(td, u)
-    ret_type = dt.dtype.char + '8[' + u + ']'
-    return (func(float(dti) / tdi) * tdi).astype('int64').astype(ret_type)
-
+            round_up = (t+t0) > (ft+t0)
+        if func_name == 'round':
+            round_up = ((t+t0)-(ft+t0)) > \
+                       (((ft+td)+t0)-(t+t0))
+        r = ft + np.array(round_up).astype('int')*td            
+    else:
+        if td_units != get_units(t):
+            td = td.astype('m8['+get_units(t)+']')
+        r = td * func(t.astype('float64')/td.astype('float64'))
+    return r + t0 if t_is_datetime else r
 
 def round(dt, td):
     '''
