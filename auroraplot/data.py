@@ -1356,8 +1356,7 @@ class Data(object):
              merge=None,
              save_converter=None,
              duration=None,
-             file_time=None,
-             boundary_epoch=None):
+             time=None):
         assert ((archive is not None and path is None) or 
                 (archive is None and path is not None)), \
             'archive or path must be defined (and not both)'
@@ -1366,27 +1365,20 @@ class Data(object):
                                      self.site,
                                      self.__class__.__name__,
                                      archive=archive)
-        if boundary_epoch is None:
-            if 'boundary_epoch' in ai.keys():
-                boundary_epoch = ai['boundary_epoch']
-            else:
-                boundary_epoch = np.datetime64('1900')
 
         if duration is None:
             duration = ai['duration']
 
         if save_converter is None:
             save_converter = ai['save_converter']
-        if file_time is None:
+        if time is None:
             multiple_files = True
-            t = dt64.dt64_range(dt64.floor(self.start_time-boundary_epoch,
-                                           duration)+boundary_epoch,
-                                dt64.ceil(self.end_time-boundary_epoch,
-                                          duration)+boundary_epoch,
+            t = dt64.dt64_range(dt64.floor(self.start_time, duration),
+                                dt64.ceil(self.end_time, duration),
                                 duration)
         else:
             multiple_files = False
-            t = [dt64.floor(file_time-boundary_epoch, duration)+boundary_epoch]
+            t = [dt64.floor(time, duration)]
 
         if path is None:
             path = ai['path']
