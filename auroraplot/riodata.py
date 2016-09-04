@@ -19,7 +19,6 @@ import auroraplot as ap
 from auroraplot.data import Data
 import auroraplot.dt64tools as dt64
 import auroraplot.tools
-from scipy.stats import nanmean
 import scipy.interpolate
 import warnings
 
@@ -631,7 +630,7 @@ class RioQDC(RioData):
                 # QDC must be zero-mean for baseline adjustment,
                 # correct any offset
                 for n in range(r.data.shape[0]):
-                    r.data[n] -= nanmean(self.data[n])
+                    r.data[n] -= ap.nanmean(self.data[n])
                 for d in np.unique(dt64.get_date(r.sample_start_time)):
                     bl = ap.load_data(r.project, r.site, 'RioData',
                                       d, d + np.timedelta64(1, 'D'),
