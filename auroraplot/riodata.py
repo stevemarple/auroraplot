@@ -36,7 +36,6 @@ def load_qdc(project,
              realtime=False,
              load_function=None,
              full_output=False,
-             boundary_epoch=None,
              duration=None):
     '''Load quiet-day curve. 
     project: name of the project (upper case)
@@ -44,7 +43,10 @@ def load_qdc(project,
     site: site abbreviation (upper case)
 
     time: a time within the quiet-day curve period
-    
+   
+    duration: the length of the quiet-day curve period 
+              (default 14 days, unless specified in archive)
+ 
     The following optional parameters are recognised: 
     
     archive: name of the archive. Required if more than one archive is
@@ -78,17 +80,11 @@ def load_qdc(project,
     else:
         channels = ad['channels']
 
-    if boundary_epoch is None:
-        if 'boundary_epoch' in ad.keys():
-            boundary_epoch = ad['boundary_epoch']
-        else:
-            boundary_epoch = np.datetime64('1900')
-
     if duration is None:
         if 'duration' in ad.keys():
             duration = ad['duration']
         else:
-            duration = np.timedelta64(7,'D')
+            duration = np.timedelta64(14,'D')
 
     if path is None:
         path = ad['path']
@@ -114,7 +110,7 @@ def load_qdc(project,
                              full_output=full_output)
     data = []
 
-    t = np.array(dt64.floor(time-boundary_epoch, duration)+boundary_epoch)
+    t = dt64.floor(time, duration)
 
     for n in range(tries):
         try:
@@ -302,10 +298,6 @@ class RioData(Data):
         else:
             subplot2=subplot
 
-        #if units_prefix is None and self.units == 'dB':
-        #    # Use just dB for plotting
-        #    units_prefix = ''
-        
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot2, units_prefix=units_prefix,
                       title=title, 
@@ -313,6 +305,31 @@ class RioData(Data):
                       time_units=time_units, **kwargs)
         return r
 
+    def plot_keogram(self, channels=None, figure=None, axes=None,
+                     start_time=None, end_time=None, time_units=None,
+                     **kwargs):
+        new_figure = False
+        if axes is not None:
+            axes2 = axes
+            if not hasattr(axes2, '__iter__'):
+                axes2 = [axes2]
+            if len(axes2) == 1:
+                axes2 *= len(channels)
+            else:
+                assert len(axes2) == len(channels), \
+                    'axes and channels must be same length'
+        elif figure is None:
+            figure=plt.figure()
+            new_figure = True
+        else:
+            if isinstance(figure, mpl.figure.Figure):
+                plt.figure(figure.number)
+            else:
+                plt.figure(figure)
+        if channels is None:
+            channels = self.channels
+        ax = plt.gca()
+        ax.pcolormesh(self.data,shading='flat')
 
     def plot_with_qdc(self, qdc, fit_err_func=None,channels=None,**kwargs):
         if 'apply QDC' in self.processing:

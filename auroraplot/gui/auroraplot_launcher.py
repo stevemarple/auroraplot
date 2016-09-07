@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+import matplotlib as mpl
+mpl.use('Qt4Agg')
+mpl.rcParams['backend.qt4']='PySide'
+
 import sys
 import platform
 import os
@@ -93,14 +97,13 @@ class ClickLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit(self.objectName())
             
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    frame = MainWindow()
-    frame.show()
-    screenRect = QApplication.desktop().screenGeometry()
-    QApplication.flush() # Need to process .show() before size is known
-    frame.setGeometry(screenRect.right()-frame.width(),
-                     screenRect.bottom()-frame.height(),
-                     frame.width(),frame.height())
-    app.exec_()
+app = QApplication(sys.argv)
+frame = MainWindow()
+frame.show()
+screenRect = QApplication.desktop().screenGeometry()
+QApplication.flush() # Need to process .show() before size is known
+frame.setGeometry(screenRect.right()-frame.width(),
+                  screenRect.bottom()-frame.height(),
+                  frame.width(),frame.height())
+app.exec_()
 
