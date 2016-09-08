@@ -216,7 +216,8 @@ def _save_baseline_data(md, file_name, archive_data):
         'data shape incorrect for number of channels'
     assert md.data.shape[1] == np.size(md.sample_start_time), \
         'data shape incorrect for number of samples'
-    data = np.empty([1 + np.size(md.channels), np.size(md.sample_start_time)])
+    data = np.empty([1 + np.size(md.channels),
+                     np.size(md.sample_start_time)])
     data[0] = md.sample_start_time.astype('m8[s]').astype('int64')
     data[1:] = md.data
     fmt = ['%d']
@@ -239,8 +240,8 @@ class RioData(Data):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=None,
-                 processing=[]):
+                 processing=[],
+                 sort=None):
         Data.__init__(self,
                       project=project,
                       site=site,
@@ -253,15 +254,12 @@ class RioData(Data):
                       nominal_cadence=nominal_cadence,
                       data=data,
                       units=units,
-                      sort=sort,
-                      processing=processing)
+                      processing=processing,
+                      sort=sort)
 
 
     def data_description(self):
-        if 'apply QDC' in self.processing:
-            return 'Absorption'
-        else:
-            return 'Power'
+        return 'Riometer data'
 
     def savetxt(self, filename, fmt=None):
         a = np.zeros([self.channels.size+1, self.data.shape[-1]],
@@ -304,31 +302,45 @@ class RioData(Data):
                       time_units=time_units, **kwargs)
         return r
 
-    def plot_keogram(self, channels=None, figure=None, axes=None,
-                     start_time=None, end_time=None, time_units=None,
-                     **kwargs):
-        new_figure = False
-        if axes is not None:
-            axes2 = axes
-            if not hasattr(axes2, '__iter__'):
-                axes2 = [axes2]
-            if len(axes2) == 1:
-                axes2 *= len(channels)
-            else:
-                assert len(axes2) == len(channels), \
-                    'axes and channels must be same length'
-        elif figure is None:
-            figure=plt.figure()
-            new_figure = True
-        else:
-            if isinstance(figure, mpl.figure.Figure):
-                plt.figure(figure.number)
-            else:
-                plt.figure(figure)
-        if channels is None:
-            channels = self.channels
-        ax = plt.gca()
-        ax.pcolormesh(self.data,shading='flat')
+
+
+class RioPower(RioData):
+    '''Class to manipulate and display riometer power data.'''
+
+    def __init__(self,
+                 project=None,
+                 site=None,
+                 channels=None,
+                 start_time=None,
+                 end_time=None,
+                 sample_start_time=np.array([], dtype='datetime64[s]'), 
+                 sample_end_time=np.array([], dtype='datetime64[s]'), 
+                 integration_interval=None,
+                 nominal_cadence=None,
+                 data=None,
+                 units=None,
+                 processing=[],
+                 sort=None):
+        RioData.__init__(self,
+                      project=project,
+                      site=site,
+                      channels=channels,
+                      start_time=start_time,
+                      end_time=end_time,
+                      sample_start_time=sample_start_time,
+                      sample_end_time=sample_end_time,
+                      integration_interval=integration_interval,
+                      nominal_cadence=nominal_cadence,
+                      data=data,
+                      units=units,
+                      processing=processing,
+                      sort=sort)
+
+
+    def data_description(self):
+        return 'Power'
+
+
 
     def plot_with_qdc(self, qdc, fit_err_func=None,channels=None,**kwargs):
         if 'apply QDC' in self.processing:
@@ -472,11 +484,73 @@ class RioData(Data):
                      sort=False,
                      processing=copy.copy(r.processing))
         qdc.processing.append('make QDC')
-
         if smooth:
             qdc.smooth(inplace=True)
-
         return qdc
+
+class RioAbs(RioData):
+    '''Class to manipulate and display riometer absorption data.'''
+
+    def __init__(self,
+                 project=None,
+                 site=None,
+                 channels=None,
+                 start_time=None,
+                 end_time=None,
+                 sample_start_time=np.array([], dtype='datetime64[s]'), 
+                 sample_end_time=np.array([], dtype='datetime64[s]'), 
+                 integration_interval=None,
+                 nominal_cadence=None,
+                 data=None,
+                 units=None,
+                 processing=[],
+                 sort=None):
+        RioData.__init__(self,
+                      project=project,
+                      site=site,
+                      channels=channels,
+                      start_time=start_time,
+                      end_time=end_time,
+                      sample_start_time=sample_start_time,
+                      sample_end_time=sample_end_time,
+                      integration_interval=integration_interval,
+                      nominal_cadence=nominal_cadence,
+                      data=data,
+                      units=units,
+                      processing=processing,
+                      sort=sort)
+
+    def data_description(self):
+        return 'Absorption'
+
+    def plot_keogram(self, channels=None, figure=None, axes=None,
+                     start_time=None, end_time=None, time_units=None,
+                     **kwargs):
+        new_figure = False
+        if axes is not None:
+            axes2 = axes
+            if not hasattr(axes2, '__iter__'):
+                axes2 = [axes2]
+            if len(axes2) == 1:
+                axes2 *= len(channels)
+            else:
+                assert len(axes2) == len(channels), \
+                    'axes and channels must be same length'
+        elif figure is None:
+            figure=plt.figure()
+            new_figure = True
+        else:
+            if isinstance(figure, mpl.figure.Figure):
+                plt.figure(figure.number)
+            else:
+                plt.figure(figure)
+        if channels is None:
+            channels = self.channels
+        ax = plt.gca()
+        ax.pcolormesh(self.data,shading='flat')
+
+
+
 
 
 class RioQDC(RioData):
