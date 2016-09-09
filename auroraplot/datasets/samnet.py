@@ -830,9 +830,25 @@ default_data_types = {
             'load_converter': ap.magdata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5000000, 'us'),
             'units': 'T',
-            },
         },
-    }
+    },
+    'AuroraWatchActivity': {
+        'realtime': {
+            'channels': np.array(['Activity']),
+            'path': base_url + 'activity/aurorawatch/{site_lc}/%Y/{site_lc}_%Y%m.txt',
+            'duration': np.timedelta64(1, 'Y'),
+            'load_converter': ap.data._generic_load_converter,
+            'save_converter': ap.data._generic_save_converter,
+            'nominal_cadence': np.timedelta64(60, 'm'),
+            'units': 'T',
+            # Information for generic load/save
+            'constructor': ap.auroralactivity.AuroraWatchActivity,
+            'timestamp_method': 'YMDh',
+            'fmt': ['%04d', '%02d', '%02d', '%02d', '%.2f'],
+            'data_multiplier': 1000000000, # Store as nT values
+        }
+    },
+}
 
 for s in sites:
     site_lc = s.lower()
