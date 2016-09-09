@@ -18,8 +18,9 @@ import auroraplot as ap
 import auroraplot.data
 import auroraplot.riodata
 import auroraplot.tools
-from auroraplot.riodata import RioData
 from auroraplot.riodata import RioQDC
+from auroraplot.riodata import RioPower
+from auroraplot.riodata import RioAbs
 
 logger = logging.getLogger(__name__)
 
