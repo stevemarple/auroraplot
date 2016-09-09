@@ -42,8 +42,8 @@ def load_rn_data(file_name, archive_data,
     '''
 
     data_type_info = {
-        'RioData': {
-            'class': RioData,
+        'RioPower': {
+            'class': RioPower,
             'col_offset': 1,
             'scaling': 1,
             'data_check': check_rio_data,
