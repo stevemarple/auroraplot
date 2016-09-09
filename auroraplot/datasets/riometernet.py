@@ -156,7 +156,7 @@ default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
 #################################################################
 channels = np.arange(1,50).astype('str')
 default_data_types = {
-    'RioData': {
+    'RioPower': {
         'default': 'remote archive',
         'local capture': {
             'channels': channels,
@@ -165,7 +165,7 @@ default_data_types = {
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
             'nominal_cadence': np.timedelta64(1000000, 'us'),
-            'units': 'dB',
+            'units': 'dBm',
             'sort': True,
             },
         'local archive': {
@@ -175,7 +175,7 @@ default_data_types = {
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
             'nominal_cadence': np.timedelta64(1000000, 'us'),
-            'units': 'dB',
+            'units': 'dBm',
             'sort': True,
             },
         'remote archive': {
@@ -185,7 +185,7 @@ default_data_types = {
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
             'nominal_cadence': np.timedelta64(1000000, 'us'),
-            'units': 'dB',
+            'units': 'dBm',
             'sort': True,
             },
         },
@@ -198,7 +198,7 @@ default_data_types = {
             'load_converter': ap.riodata.load_qdc_data,
             'save_converter': ap.riodata._save_baseline_data,
             'nominal_cadence': np.timedelta64(5, 's'),
-            'units': 'dB',
+            'units': 'dBm',
             'sort': False,
             },
         'remote qdc': {
@@ -208,7 +208,7 @@ default_data_types = {
             'format': 'riometernet_qdc',
             'load_converter': ap.riodata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5, 's'),
-            'units': 'dB',
+            'units': 'dBm',
             'sort': False,
             },
         },
