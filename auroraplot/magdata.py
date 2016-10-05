@@ -763,10 +763,15 @@ class MagData(Data):
     
     def make_qdc(self, nquiet=5, channels=None, 
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 quiet_days_method=None, smooth=True):
+                 quiet_days_method=None, 
+                 smooth=True,
+                 plot_quiet_days=False):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
-
+        if plot_quiet_days:
+            for q in qd:
+                q.plot()
+            
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
