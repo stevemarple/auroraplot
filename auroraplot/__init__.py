@@ -557,8 +557,9 @@ def load_data(project,
                       inplace=True)
 
     if filter_function:
+        logger.debug('filtering with function %s', filter_function.__name__)
         r = filter_function(r)
-        
+
     return r
 
 
