@@ -329,6 +329,7 @@ def stack_plot(data_array, offset, channel=None,
                start_time=None, end_time=None,
                sort=True, scale_bar=True,
                ylabel_fmt='{data:project}\n{data:site}',
+               ylabel_color=None,
                add_legend=None,
                 **kwargs):
     '''
@@ -426,10 +427,11 @@ def stack_plot(data_array, offset, channel=None,
 
     # Plot each data set
     plot_count = 0
-    for n in range(len(da)):        
+    tick_colors = []
+    for n in range(len(da)):
         if cidx[n] == -1:
             continue # Required channel not present
-        
+
         # Keep track of earliest and latest times, but only for
         # plotted datasets
         st = np.min([st, da[n].start_time])
@@ -448,6 +450,10 @@ def stack_plot(data_array, offset, channel=None,
                             y,
                             label=d.format_project_site(),
                             **kwargs)
+        if ylabel_color == 'auto':
+            tick_colors.append(lh[0].get_color())
+        else:
+            tick_colors.append(None)
         plot_count += 1
         r.extend(lh)
 
@@ -471,17 +477,23 @@ def stack_plot(data_array, offset, channel=None,
                       (len(da) - 1) * offset + ydisturb)
 
         tick_labels2 = []
+        tick_colors2 = []
         yn_min = int(round(ylim[0]/offset))
         yn_max = int(round(ylim[1]/offset))
         yn_nums = range(yn_min, yn_max + 1)
         for yn in yn_nums:
             if yn >= 0 and yn < len(da):
                 tick_labels2.append(tick_labels[yn])
+                tick_colors2.append(tick_colors[yn])
             else:
                 tick_labels2.append('')
+                tick_colors2.append('k')
 
         ax.yaxis.set_ticks(np.array(yn_nums) * offset)
         ax.yaxis.set_ticklabels(tick_labels2)
+        for tl, c in zip(ax.yaxis.get_ticklabels(), tick_colors2):
+            if c is not None and c != '':
+                tl.set_color(c)
 
     if add_legend or (add_legend is None and offset == 0):
         leg = plt.legend(prop={'size': 'medium'})
