@@ -148,6 +148,10 @@ def load_bad_data(project, site, data_type, start_time, end_time,
                         archive=ai[0], path=path, **kwargs)
 
 
+def remove_spikes(md, **kwargs):
+    return md.remove_spikes_chauvenet(savgol_window=np.timedelta64(5, 'm'),
+                                      chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
+
 
 cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
@@ -168,6 +172,40 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'Data provided by Steve Marple.', 
         'line_color': [0, 0.6, 0],
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'realtime': {
+                    'channels': np.array(['H']),
+                    'path': base_url + 'lan1/%Y/%m/lan1_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_awn_data,
+                    'nominal_cadence': np.timedelta64(5000000, 'us'),
+                    'units': 'T',
+                    'sort': True,
+                    },
+                'realtime_baseline': {
+                    'channels': np.array(['H']),
+                    'path': (base_url +
+                             'baseline/realtime/lan1/lan1_%Y.txt'),
+                    'duration': np.timedelta64(1, 'Y'),
+                    'load_converter': ap.data._generic_load_converter,
+                    'save_converter': ap.data._generic_save_converter,
+                    'nominal_cadence': np.timedelta64(1, 'D'),
+                    'units': 'T',
+                    # Information for generic load/save 
+                    'constructor': ap.magdata.MagData,
+                    'sort': False,
+                    'timestamp_method': 'YMD',
+                    'fmt': ['%04d', '%02d', '%02d', '%.2f'],
+                    'data_multiplier': 1000000000, # Store as nT values
+                    # Information for making the data files
+                    'qdc_fit_duration': np.timedelta64(10, 'D'),
+                    'realtime_qdc': True,
+                    },
+                },
+            },
         }, # LAN1
 
     'LAN3': {
@@ -377,6 +415,22 @@ sites = {
         'attribution': 'Cumbernauld Weather, ' + \
             'http://www.cumbernauld-weather.co.uk/',
         'line_color': [0.3, 0.3, 1],
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'filtered': {
+                    'channels': np.array(['H']),
+                    'path': base_url + 'cwx/%Y/%m/cwx_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_awn_data,
+                    'nominal_cadence': np.timedelta64(30000000, 'us'),
+                    'units': 'T',
+                    'sort': True,
+                    'filter_function': remove_spikes,
+                    },
+                },
+            }
         }, # CWX
 
     'EXE': {
@@ -541,13 +595,6 @@ for s in ('EXE', 'SID', 'TEST1'):
     sites[s]['data_types']['MagData']['realtime_baseline']['fmt'] = \
         ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f']
 
-
-sites['TEST1']['data_types']['MagData']['raw'] \
-    = copy.deepcopy(sites['TEST1']['data_types']['MagData']['realtime'])
-sites['TEST1']['data_types']['MagData']['realtime']['filter_function'] \
-    = lambda x: ap.data.Data.remove_spikes_chauvenet(x,
-                                                savgol_window=np.timedelta64(5, 'm'),
-                                                chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
 
             
 project = {
