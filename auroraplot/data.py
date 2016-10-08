@@ -256,7 +256,8 @@ def _generic_save_converter(d, file_name, archive_data):
     else:
         data[col_offset:] = d.data
 
-    np.savetxt(file_name, data.T, delimiter='\t', fmt=archive_data['fmt'])
+    with ap.tools.smart_open(file_name, 'w') as fh:
+        np.savetxt(fh, data.T, delimiter='\t', fmt=archive_data['fmt'])
 
 
 class Data(object):
