@@ -1169,6 +1169,7 @@ class Data(object):
              archive=None,
              path=None,
              merge=None,
+             overwrite=True,
              save_converter=None):
         assert ((archive is not None and path is None) or 
                 (archive is None and path is not None)), \
@@ -1212,7 +1213,14 @@ class Data(object):
                                    t2,
                                    archive=archive)
                 if tmp is not None:
-                    d = ap.concatenate([tmp, d], sort=True)
+                    if overwrite:
+                        d = ap.concatenate([tmp, d], sort=True)
+                    else:
+                        d = ap.concatenate([d, tmp], sort=True)
+
+            elif not overwrite and os.path.exists(file_name):
+                raise Exception('File already exists')
+
             dir_name = os.path.dirname(file_name)
             if not os.path.exists(dir_name):
                 logger.debug('making directory %s', dir_name)
