@@ -62,6 +62,9 @@ parser.add_argument('--log-format',
                     # default='%(levelname)s:%(message)s',
                     help='Set format of log messages',
                     metavar='FORMAT')
+parser.add_argument('--overwrite',
+                    action='store_true',
+                    help='Overwrite existing values')
 parser.add_argument('--realtime-qdc',
                     action='store_true',
                     default=None,
@@ -228,7 +231,7 @@ for n in range(len(project_list)):
                                     data=data,
                                     units=ai['units'])
             bl.assert_valid()
-            bl.save(archive=bl_archive, merge=True)
+            bl.save(archive=bl_archive, merge=True, overwrite=args.overwrite)
         except Exception as e:
             logger.error(e)
             logger.debug(traceback.format_exc())
