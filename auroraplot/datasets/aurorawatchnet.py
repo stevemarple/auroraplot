@@ -176,7 +176,7 @@ sites = {
             'MagData': {
                 'default': 'realtime',
                 'realtime': {
-                    'channels': np.array(['H']),
+                    'channels': np.array(['H', 'E', 'Z']),
                     'path': base_url + 'lan1/%Y/%m/lan1_%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
@@ -185,8 +185,18 @@ sites = {
                     'units': 'T',
                     'sort': True,
                     },
-                'realtime_baseline': {
+                'legacy_realtime': {
                     'channels': np.array(['H']),
+                    'path': base_url + 'lan1/%Y/%m/lan1_%Y%m%d.txt',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_awn_data,
+                    'nominal_cadence': np.timedelta64(30000000, 'us'),
+                    'units': 'T',
+                    'sort': True,
+                    },
+                'realtime_baseline': {
+                    'channels': np.array(['H', 'E', 'Z']),
                     'path': (base_url +
                              'baseline/realtime/lan1/lan1_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
@@ -198,7 +208,7 @@ sites = {
                     'constructor': ap.magdata.MagData,
                     'sort': False,
                     'timestamp_method': 'YMD',
-                    'fmt': ['%04d', '%02d', '%02d', '%.2f'],
+                    'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
                     'data_multiplier': 1000000000, # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
