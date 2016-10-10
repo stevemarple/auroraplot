@@ -454,9 +454,9 @@ sites = {
         'url': 'http://www.metoffice.gov.uk/', # Provisional
         'k_index_scale': 500e-9, # Estimated, based on BGS Hartland site
         'k_index_filter': None,
-        'license': cc3_by_nc_sa,
-        'copyright': 'Met Office.',
-        'attribution': 'Met Office, http://www.metoffice.gov.uk/',
+        'license': 'This work is licensed under the Open Government Licence (OGL). To view a copy of this licence, visit http://www.nationalarchives.gov.uk/doc/open-government-licence',
+        'copyright': u'\xa9 Crown Copyright, Met Office',
+        'attribution': u'Please use the following attribution statements on any copies/reproductions etc: "\xa9 Crown Copyright, Met Office" (or "\xa9 British Crown Copyright, Met Office" where the reproduction is published outside of the UK)',
         'line_color': [186.0/255, 216.0/255, 10.0/255],
         }, # EXE
 
