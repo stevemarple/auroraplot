@@ -128,40 +128,39 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'To view a copy of this license, visit ' + \
     'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
-unknown_license = 'Please ask permission from the PI of the instrument ' + \
-                  'before using this data in a publication.'
 
 sites = {
-    'TEST6': {
-        'location': 'Lancaster, UK',
-        'latitude': 54.0,
-        'longitude': -2.78,
-        'elevation': 27,
-        'start_time': np.datetime64('2016-08-11T00:00Z'),
+    'KIL1': {
+        'location': 'Kilpisjarvi, Finland',
+        'latitude': 69.05,
+        'longitude': 20.79,
+        'elevation': 475, # Estimate from google
+        'start_time': np.datetime64('1994-09-02T00:00Z'),
         'end_time': None, # Still operational
-        'copyright': 'Mat Beharrell.',
-        'license': unknown_license,
-        'attribution': 'Unknown.', 
+        'copyright': 'Lancaster University (UK).',
+        'license': 'Data users are not entitled to distribute data to third '\
+		   'parties outside their own research teams without '\
+		   'requesting permission from the project PI '\
+	           '(Prof. F. Honary)',
+        'attribution': 'The acknowledgement on published papers should state:'\
+                   '"The data originated from the Imaging Riometer for '\
+                   'Ionospheric Studies (IRIS), operated by the Space Plasma '\
+                   'Environment and Radio Science (SPEARS) group, Department '\
+                   'of Physics, Lancaster University (UK) in collaboration '\
+                   'with the Sodankyla Geophysical Observatory."', 
         'line_color': [0, 0.6, 0],
-        }, # TEST6
+        },
 
     }
 
-###### Needed?
-# Set activity color/thresholds unless already set.
-default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
-default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green  
-                                    [1.0, 1.0, 0.0],  # yellow
-                                    [1.0, 0.6, 0.0],  # amber
-                                    [1.0, 0.0, 0.0]]) # red
-#################################################################
 channels = np.arange(1,50).astype('str')
 default_data_types = {
     'RioPower': {
         'default': 'remote archive',
         'local capture': {
             'channels': channels,
-            'path': local_base_url + 'capture/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+            'path': local_base_url + \
+		    'capture/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,

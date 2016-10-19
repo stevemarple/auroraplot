@@ -63,39 +63,89 @@ sudo dnf install python-pyside git python2-matplotlib-qt4 python-requests ipytho
 \begin{minipage}[b]{0.45\linewidth}
 Debian 8 / Ubuntu 16.04
 \begin{lstlisting}                 
-sudo apt-get install git
+sudo apt-get install git python-matplotlib python-scipy 
 \end{lstlisting}
 \end{minipage} 
 \end{figure}
 
-Pandas is an optional dependency that speeds up the loading of data.
+Pandas is an optional dependency (54.8 MB) that will speed up the loading of data.
 
-\subsection{Getting the latest version of Auroraplot}
+\subsection{Installing the latest version of Auroraplot}
 To install Auroraplot in your home folder type
 \begin{lstlisting}[language=Bash]
 cd ~
 git clone https://github.com/m-j-b/auroraplot.git
 \end{lstlisting}
 
-To update to the latest version
+Python looks in the in the site-packages folder for installed python packages. Create the folder, and in it make a symlink to the Auroraplot package.
+\begin{lstlisting}[language=Bash]
+mkdir -p ~/.local/lib/python2.7/site-packages
+ln -s ~/auroraplot/auroraplot ~/.local/lib/python2.7/site-packages/
+\end{lstlisting}
+
+To update to the latest version of Auroraplot run
 \begin{lstlisting}[language=Bash]
 cd ~/auroraplot/
 git fetch --all
-git checkout --force origin/master
+git checkout --force master
 \end{lstlisting}
 
 
 \section{Running Auroraplot in IPython}
-\subsection{Show logging information}
-It is helpful to see the logger output. To show log messages on the screen run
+
+By default, scripts that are imported into python and subsequently edited will not be automatically reloaded.
+To change this behaviour, create a startup file for IPython.
+
+\begin{lstlisting}[language=Bash]
+mkdir -p ~/.ipython/profile_default/startup/
+nano ~/.ipython/profile_default/startup/10-custom.ipy
+\end{lstlisting}
+
+In the file enter (including the \% symbols)
+\begin{lstlisting}[language=python]
+%load_ext autoreload
+%autoreload 2
+%pylab
+\end{lstlisting}
+
+\subsection{IPython Examples}
+
+To speed up loading of data, copy the example riometer data (1.5 GB) to the /data directory, which is the default location. Then start IPython
+
+\begin{lstlisting}[language=Bash]
+sudo mkdir /data
+sudo wget -m -np -nH --cut-dirs=1 -P=/data http://www.riometer.net/example_data/2004
+ipython
+\end{lstlisting}
+
+It is helpful to see the logger output in IPython. This will indicate errors and failures to load data. To show log messages on the screen run
 \begin{lstlisting}[language=Python]
 import logging
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 \end{lstlisting}
 
-\subsection{Examples}
+
+\subsubsection{Example 1: Plotting riometer power data}
+
+In this example, we load Kilpisjarvi power data for 1 Jan 2004, beam 25.
+
+\begin{lstlisting}[language=Python]
+# import the riodata module, and the datasets metadata
+import auroraplot as ap
+import auroraplot.riodata as riodata
+import auroraplot.datasets.riometernet
+
+# set the start and end times
+st = np.datetime64('2004-01-01T00:00:00')
+et = st + np.timedelta64(1,'D')
+
+# load the power data
+rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',['25'])
+
+# plot the data
+rd.plot()
+\end{lstlisting}
 
 
 \end{document}
-
 
