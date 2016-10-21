@@ -391,8 +391,9 @@ class RioPower(RioData):
 
     def make_qdc(self,
                  channels=None,
+                 base_qdc=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 outputrows=[2,3],
+                 upper_envelope_rows=[2,3],
                  smooth=True):
 
         if 'apply QDC' in self.processing:
@@ -446,9 +447,24 @@ class RioPower(RioData):
                                alt_sample_start_time = sid_sam_st,
                                alt_sample_end_time = sid_sam_et,
                                inplace=False)
-        cidx = r.get_channel_index(channels)
-        qdc_data = np.zeros([len(cidx), num_qdc_sam])*np.nan
-        for n in range(len(cidx)):
+
+        if base_qdc is None:
+            qdc_channels = ap.get_archive_info(r.project,
+                                               r.site,
+                                               'RioPower')[1]['channels']
+            if not all([c in qdc_channels for c in channels]):
+                logger.warn('inconsistent channels in data and default archive')
+                qdc_channels = np.union1d(qdc_channels,channels)
+        else:
+            qdc_channels = copy(base_qdc.channels)
+            if not all([c in qdc_channels for c in channels]):
+                logger.warn('inconsistent channels in data and base QDC')
+                qdc_channels = np.union1d(qdc_channels,channels)
+
+        
+        #cidx = r.get_channel_index(channels)
+        qdc_data = np.zeros([len(qdc_channels), num_qdc_sam])*np.nan 
+        for c in channels:
             ## interp1d needs mark_missing_data before. Replacing with 
             ## resample_data be better, but depends on compiled code
             #xi = sid_sam_st + (sid_sam_et-sid_sam_st)/2
@@ -458,21 +474,24 @@ class RioPower(RioData):
             #                                     bounds_error=False,
             #                                     fill_value=np.nan)\
             #                                     (xo.astype('int64'))
-            data_arr = r.data[cidx[n]].reshape(num_sid_days,num_qdc_sam)
+            cidx =  r.get_channel_index(c)
+            data_arr = r.data[cidx].reshape(num_sid_days,num_qdc_sam)
             ########
             # Here is the QDC calculation code.
             # Upper envelope: sort the values, then select the index...
-            upper_idx = [-2,-3]
+            upper_idx = - np.array(upper_envelope_rows)
             # NaNs get sorted to the top, want them at the bottom
             data_arr[np.isnan(data_arr)] = -np.inf
             data_arr = np.sort(data_arr,axis=0)
             data_arr[np.isinf(data_arr)] = np.nan
             if data_arr.shape[0] >= (np.max(upper_idx)+1):
-                qdc_data[n,:] = ap.nanmean(data_arr[upper_idx,:],axis=0)
+                cidx = np.where(qdc_channels==c)[0][0]
+                qdc_data[cidx,:] = ap.nanmean(data_arr[upper_idx,:],axis=0)
+
 
         qdc = RioQDC(project=copy.copy(r.project),
                      site=copy.copy(r.site),
-                     channels=copy.copy(r.channels[cidx]),
+                     channels=qdc_channels,
                      start_time=np.timedelta64(0, 'h'),
                      end_time=np.timedelta64(24, 'h'),
                      sample_start_time=qdc_sam_st,
