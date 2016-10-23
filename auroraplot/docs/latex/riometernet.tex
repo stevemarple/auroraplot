@@ -35,7 +35,7 @@
  
 \begin{document}
 
-\title{Getting started with auroraplot}
+\title{Getting started with Auroraplot}
 \date{}
 \maketitle
 
@@ -110,15 +110,30 @@ In the file enter (including the \% symbols)
 
 \subsection{IPython Examples}
 
-To speed up loading of data, copy the example riometer data (1.5 GB) to the /data directory, which is the default location. Then start IPython
+To speed up loading of data, copy the example riometer data (1.5 GB) to the /data directory, which is the default location.
 
 \begin{lstlisting}[language=Bash]
 sudo mkdir /data
 sudo wget -m -np -nH --cut-dirs=1 -P=/data http://www.riometer.net/example_data/2004
-ipython
 \end{lstlisting}
 
-It is helpful to see the logger output in IPython. This will indicate errors and failures to load data. To show log messages on the screen run
+Create a directory for Quiet Day Curves (QDCs), and a group (qdc) for users that have permission to create and modify QDCs in that directory.
+
+\begin{lstlisting}[language=Bash]
+sudo groupadd qdc
+sudo mkdir /data/qdc
+sudo chown root:qdc /data/qdc
+sudo chmod g+w /data/qdc
+\end{lstlisting}
+
+Add the current user to the qdc group, if required.
+
+\begin{lstlisting}[language=Bash]
+sudo usermod -aG qdc $USER
+\end{lstlisting}
+
+It is helpful to see the logger output in IPython. This will indicate errors and failures to load data. To have log messages display on the screen run
+
 \begin{lstlisting}[language=Python]
 import logging
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -127,7 +142,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 \subsubsection{Example 1: Plotting riometer power data}
 
-In this example, we load Kilpisjarvi power data for 1 Jan 2004, beam 25.
+In this example, we load one day of riometer power data from beam 25 of the Kilpisjarvi riometer, KIL1 (IRIS). The example data covers Jan 2004, but we will load and plot data from the 15th Jan 2004.
 
 \begin{lstlisting}[language=Python]
 # import the riodata module, and the datasets metadata
@@ -136,7 +151,7 @@ import auroraplot.riodata as riodata
 import auroraplot.datasets.riometernet
 
 # set the start and end times
-st = np.datetime64('2004-01-01T00:00:00')
+st = np.datetime64('2004-01-15T00:00:00')
 et = st + np.timedelta64(1,'D')
 
 # load the power data
@@ -144,6 +159,53 @@ rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',['25'])
 
 # plot the data
 rd.plot()
+\end{lstlisting}
+
+Hints on how to use functions such as {\it ap.load\_data} are seen by appending the function with a question mark.
+
+\begin{lstlisting}[language=Python]
+ap.load_data?
+
+Definition:  ap.load_data(project, site, data_type, start_time, end_time, archive=None, channels=None, path=None, load_function=None, raise_all=False, cadence=None, aggregate=None, filter_function=None)
+\end{lstlisting}
+
+Each riometer has a site name (in this case 'KIL1'), and belongs to a particular project. 'RN' stands for the Riometer Network project. The archive name 'local archive' could be changed to 'remote archive' in order to load this example data from www.riometer.net. Sites, projects and archives are defined in the datasets module ({\it auroraplot.datasets.riometernet}).
+
+Note that the channels are specified as a list of strings. When dealing with riometer data, channels (beams) are usually numbered from 1, but magnetometer channels may be named 'X', 'Y', and 'Z', or 'H', 'D', and 'Z'.
+
+
+\subsubsection{Example 2: Making Quiet Day Curves}
+
+To make a quiet day curve, it is necessary to load more than one day of data. Usually 14 days will suffice. By default, the valid period for a QDC will be 14 days long.
+Auroraplot has functions in the ap.dt64tools package to find the standard boundaries for the QDCs: {\it ap.dt64tools.floor, and ap.dt64tools.ceil}.
+Assuming we have already imported auroraplot as ap.
+
+\begin{lstlisting}[language=Python]
+t = np.datetime64('2004-01-15T00:00:00')
+st = ap.dt64tools.floor(t, np.timedelta64(14,'D'))
+et = ap.dt64tools.ceil(t, np.timedelta64(14,'D'))
+rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',channels=['25'])
+
+\end{lstlisting}
+
+{\it st} holds the datetime64 value of '2004-01-12T00:00:00', and {\it et} is '2004-01-26T00:00:00'.
+
+The QDC is made from the power data by calling.
+
+\begin{lstlisting}[language=Python]
+qdc = rd.make_qdc()
+qdc.plot(channels=['25'])
+\end{lstlisting}
+
+Calling make\_qdc() will create QDCs for all channels of the riometer (according to the metadata in auroraplot.datasets). But since {\it rd} only contains data for channel '25', calling {\it qdc.plot()}, without the {\it channels} argument will make mostly empty plots.
+
+If the computer has sufficient RAM ($\ge 12$ GB recommended) data from all channels can be loaded at once.
+
+
+\begin{lstlisting}[language=Python]
+rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive')
+qdc = rd.make_qdc()
+qdc.plot()
 \end{lstlisting}
 
 
