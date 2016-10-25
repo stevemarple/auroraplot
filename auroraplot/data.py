@@ -655,7 +655,7 @@ class Data(object):
              units_prefix=None, title=None, 
              # Our own options
              start_time=None, end_time=None, time_units=None, add_legend=None,
-             samples_as_points=True,
+             step_plot=False,
              **kwargs):
 
         def bracket_units(units):
@@ -751,7 +751,7 @@ class Data(object):
             else:
                 ydata = self.data[cidx] / u['mul']
 
-            if samples_as_points:
+            if not step_plot:
                 xdata = dt64.mean(self.sample_start_time,self.sample_end_time)
             else:
                 xdata = np.vstack((self.sample_start_time,self.sample_end_time)).flatten('F')
@@ -1016,14 +1016,14 @@ class Data(object):
         nold = sam_st.size
         nchan = len(r.channels)
             
-        if self.integration_interval is not None:
+        if r.integration_interval is not None:
             assert not np.any(dt64.isnat(r.integration_interval)), \
                 'integration_interval must not contain NaT'
         else:
-            self.integration_interval = np.ones([nchan,nold])\
-                                        *self.nominal_cadence
+            r.integration_interval = np.ones([nchan,nold])\
+                                        *r.nominal_cadence
         # weights units
-        wu = dt64.get_units(self.integration_interval)
+        wu = dt64.get_units(r.integration_interval)
         # integration/resampling units
         iu = dt64.smallest_unit((sam_st,sam_et,
                                  sample_start_time,

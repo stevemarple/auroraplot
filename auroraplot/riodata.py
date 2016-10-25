@@ -211,7 +211,7 @@ def load_qdc_data(file_name, archive_data,
 
 def _save_baseline_data(md, file_name, archive_data):
     assert isinstance(md, RioData), 'Data is wrong type'
-    assert md.units == 'dB', 'Data units incorrect'
+    assert md.units in ['dB','dBm'], 'Data units incorrect'
     assert md.data.shape[0] == np.size(md.channels), \
         'data shape incorrect for number of channels'
     assert md.data.shape[1] == np.size(md.sample_start_time), \
@@ -357,35 +357,28 @@ class RioPower(RioData):
                                                             channels=channels,
                                                             **kwargs)
 
-    def apply_qdc(self, qdc, fit_err_func=None, inplace=False):
+    def apply_qdc(self, qdc, fit_err_func=None):
         if any([c not in qdc.channels for c in self.channels]):
             logger.warn('Not all data channels in QDC.')
-        if 'apply QDC' in self.processing:
-            logger.warn('QDC already applied to the data.')
+
         channels = [c for c in self.channels if c in qdc.channels]
         cidx = self.get_channel_index(channels)
-        if inplace:
-            r = self
-            r.channels = r.channels[cidx]
-            r.data = r.data[cidx]
-            if r.integration_interval is not None:
-                r.integration_interval = r.integration_interval[cidx]
-        else:
-            r = copy.copy(self)
-            for k in (set(self.__dict__.keys())
-                      - set(['channels','data','integration_interval'])):
-                setattr(r, k, copy.deepcopy(getattr(self, k)))
-            r.channels = copy.copy(self.channels[cidx])
-            r.data = copy.copy(self.data[cidx])
-            if r.integration_interval is not None:
-                r.integration_interval = copy.copy(r.integration_interval[cidx])
+
+        r = RioAbs()
+        for k in (set(self.__dict__.keys())
+                  - set(['channels','data','integration_interval'])):
+            setattr(r, k, copy.deepcopy(getattr(self, k)))
+        r.channels = copy.copy(self.channels[cidx])
+        r.data = copy.copy(self.data[cidx]) * np.nan
+        if r.integration_interval is not None:
+            r.integration_interval = copy.copy(r.integration_interval[cidx])
         if qdc is not None:
             qdc_data = qdc.align(self, fit_err_func=fit_err_func).data
             for chan in channels:
                 rcidx = r.get_channel_index(chan)
                 qcidx = qdc.get_channel_index(chan)
-                r.data[rcidx] -= qdc_data[qcidx]
-                r.data[rcidx] *= -1
+                cidx = self.get_channel_index(chan)
+                r.data[rcidx] = qdc_data[qcidx] - self.data[cidx]
             r.processing.append('apply QDC')
         return r
 
@@ -395,9 +388,6 @@ class RioPower(RioData):
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  upper_envelope_rows=[2,3],
                  smooth=True):
-
-        if 'apply QDC' in self.processing:
-            logger.warn('A QDC has already been applied to the data.')
 
         if channels is None:
             channels = copy.copy(self.channels)
