@@ -25,8 +25,8 @@
     breaklines=true,                 
     captionpos=b,                    
     keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
+    %numbers=left,                    
+    %numbersep=5pt,                  
     showspaces=false,                
     showstringspaces=false,
     showtabs=false,                  
@@ -43,8 +43,8 @@
     breaklines=true,                 
     captionpos=b,                    
     keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
+    %numbers=left,                    
+    %numbersep=5pt,                  
     showspaces=false,                
     showstringspaces=false,
     showtabs=false,                  
@@ -83,7 +83,7 @@ sudo dnf install python-pyside git python2-matplotlib-qt4 python-requests ipytho
 \begin{minipage}[b]{0.45\linewidth}
 Debian 8 / Ubuntu 16.04
 \begin{lstlisting}                 
-sudo apt-get install git python-matplotlib python-scipy 
+sudo apt-get install git python-matplotlib python-scipy python-pyside python-requests python-pandas 
 \end{lstlisting}
 \end{minipage} 
 \end{figure}
@@ -186,7 +186,7 @@ rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',['25'])
 rd.plot()
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_1.png}
+\includegraphics[width=9cm]{images/figure_1.png}
 
 Hints on how to use functions such as {\it ap.load\_data} can be seen by appending a question mark to the function name.
 
@@ -222,7 +222,7 @@ qdc = rd.make_qdc()
 qdc.plot(channels=['25'])
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_2.png}
+\includegraphics[width=9cm]{images/figure_2.png}
 
 
 Calling make\_qdc() will create QDCs for all channels of the riometer (according to the metadata in auroraplot.datasets). But since {\it rd} only contains data for channel '25', calling {\it qdc.plot()}, without the {\it channels} argument will make a large number of mostly empty plots.
@@ -236,7 +236,7 @@ qdc = rd.make_qdc()
 qdc.plot(channels=['24','25','31','32'])
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_3.png}
+\includegraphics[width=12cm]{images/figure_3.png}
 
 
 \noindent The argument inplace=True tells the set\_cadence function to overwrite {\it rd} instead of returning a copy of it with the new cadence (sampling interval).
@@ -262,7 +262,7 @@ rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',channels=['25'])
 rd.plot_with_qdc(qdc)
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_4.png}
+\includegraphics[width=9cm]{images/figure_4.png}
 
 
 \noindent Alternatively, we can plot the ionospheric absorption (ie the quiet day curve minus the riometer received power).
@@ -271,24 +271,31 @@ ab = rd.apply_qdc(qdc)
 ab.plot()
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_5.png}
+\includegraphics[width=9cm]{images/figure_5.png}
 
 \subsubsection{Example 3: Integration of data and further processing}
 
 In this example, we calculate the ionospheric absorption for the 21st, 22nd and 23rd of January, beams 25 and 26. Then integrate the data to 6-hour resolution, plot it, and extract the data for beam 25 for further processing in external functions. We will use the QDC saved in the previous example.
 
 \begin{lstlisting}[style=pythonstyle]
-st = np.datetime64('2004-01-22T00:00:00')
-et = st + np.timedelta64(2,'D')
+st = np.datetime64('2004-01-21T00:00:00')
+et = st + np.timedelta64(3,'D')
 rd = ap.load_data('RN','KIL1','RioPower',st,et,'local archive',channels=['25','26'])
 qdc = ap.riodata.load_qdc('RN', 'KIL1', st, archive='local archive')
 ad = rd.apply_qdc(qdc)
-ad6hr = ad.set_cadence(np.timedelta64(6,'h')
-ad6hr.plot()
+ad6hr = ad.set_cadence(np.timedelta64(6,'h'))
+ad6hr.plot(step_plot=True)
 \end{lstlisting}
 
-\includegraphics[width=8cm]{images/figure_6.png}
+\includegraphics[width=9cm]{images/figure_6.png}
 
+To extract beam 25 data, and find the central time of each sample.
+
+\begin{lstlisting}[style=pythonstyle]
+b25_index = ad6hr.get_channel_index(['25'])
+b25_absorption_data = ad6hr.data[b25_index]
+sample_central_time = ap.dt64tools.mean(ad6hr.sample_start_time,ad6hr.sample_end_time) 
+\end{lstlisting}
 
 
 \section{The Quick-Look Data Viewer}

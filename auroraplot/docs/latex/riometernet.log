@@ -1,10 +1,12 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  25 OCT 2016 18:58
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  26 OCT 2016 09:35
 entering extended mode
  restricted \write18 enabled.
- file:line:error style messages enabled.
  %&-line parsing enabled.
-**\input riometernet.tex
-(./riometernet.tex (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+**riometernet.tex
+(./riometernet.tex
+LaTeX2e <2016/02/01>
+Babel <3.9q> and hyphenation patterns for 3 language(s) loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
@@ -569,18 +571,18 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <8> not available
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2015/06/04 1.6 listings language file
 ) [2]
-<images/figure_1.png, id=17, 578.16pt x 516.7305pt>
+<images/figure_1.png, id=15, 578.16pt x 516.7305pt>
 File: images/figure_1.png Graphic file (type png)
  <use images/figure_1.png>
 Package pdftex.def Info: images/figure_1.png used on input line 189.
-(pdftex.def)             Requested size: 227.62204pt x 203.43216pt.
+(pdftex.def)             Requested size: 256.0748pt x 228.8602pt.
 
 [3 <./images/figure_1.png>]
-<images/figure_2.png, id=24, 578.16pt x 517.4532pt>
+<images/figure_2.png, id=22, 578.16pt x 517.4532pt>
 File: images/figure_2.png Graphic file (type png)
  <use images/figure_2.png>
 Package pdftex.def Info: images/figure_2.png used on input line 225.
-(pdftex.def)             Requested size: 227.62204pt x 203.71667pt.
+(pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 230.
 LaTeX Font Info:    External font `lmex10' loaded for size
@@ -588,55 +590,59 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 230.
 
-<images/figure_3.png, id=25, 1131.0255pt x 734.9859pt>
+[4 <./images/figure_2.png>]
+<images/figure_3.png, id=29, 1131.0255pt x 734.9859pt>
 File: images/figure_3.png Graphic file (type png)
 
 <use images/figure_3.png>
 Package pdftex.def Info: images/figure_3.png used on input line 239.
-(pdftex.def)             Requested size: 227.62204pt x 147.9142pt.
- [4 <./images/figure_2.png>]
-<images/figure_4.png, id=32, 578.16pt x 517.4532pt>
+(pdftex.def)             Requested size: 341.43306pt x 221.8769pt.
+
+Overfull \hbox (11.43306pt too wide) in paragraph at lines 239--240
+[][] 
+ []
+
+<images/figure_4.png, id=30, 578.16pt x 517.4532pt>
 File: images/figure_4.png Graphic file (type png)
  <use images/figure_4.png>
 Package pdftex.def Info: images/figure_4.png used on input line 265.
-(pdftex.def)             Requested size: 227.62204pt x 203.71667pt.
+(pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
 
-[5 <./images/figure_3.png> <./images/figure_4.png>]
-<images/figure_5.png, id=38, 578.16pt x 516.7305pt>
+[5 <./images/figure_3.png>]
+<images/figure_5.png, id=35, 578.16pt x 516.7305pt>
 File: images/figure_5.png Graphic file (type png)
  <use images/figure_5.png>
 Package pdftex.def Info: images/figure_5.png used on input line 274.
-(pdftex.def)             Requested size: 227.62204pt x 203.43216pt.
+(pdftex.def)             Requested size: 256.0748pt x 228.8602pt.
 
-<images/figure_6.png, id=39, 578.16pt x 680.7834pt>
+[6 <./images/figure_4.png> <./images/figure_5.png>]
+<images/figure_6.png, id=41, 578.16pt x 680.7834pt>
 File: images/figure_6.png Graphic file (type png)
  <use images/figure_6.png>
 Package pdftex.def Info: images/figure_6.png used on input line 290.
-(pdftex.def)             Requested size: 227.62204pt x 268.01833pt.
+(pdftex.def)             Requested size: 256.0748pt x 301.51932pt.
 
-[6 <./images/figure_5.png>] [7 <./images/figure_6.png>] (./riometernet.aux) ) 
+[7 <./images/figure_6.png>] [8] (./riometernet.aux) ) 
 Here is how much of TeX's memory you used:
- 4218 strings out of 494953
- 55190 string characters out of 6180977
- 184860 words of memory out of 5000000
- 7422 multiletter control sequences out of 15000+600000
- 58083 words of font info for 46 fonts, out of 8000000 for 9000
+ 4224 strings out of 494953
+ 55320 string characters out of 6180977
+ 183726 words of memory out of 5000000
+ 7429 multiletter control sequences out of 15000+600000
+ 55102 words of font info for 45 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 38i,7n,56p,408b,1707s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/
-usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/
-lm/lm-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}</usr/share/tex
-mf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmb
-x12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fon
-ts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmr5.pfb><
-/usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/p
-ublic/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/sh
-are/texmf/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf/fonts/type1/public
-/lm/lmtt8.pfb>
-Output written on riometernet.pdf (7 pages, 498012 bytes).
+ 38i,7n,56p,401b,1703s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/en
+c/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/s
+hare/texmf/fonts/enc/dvips/lm/lm-ec.enc}</usr/share/texmf/fonts/type1/public/lm
+/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texm
+f/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr17
+.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts
+/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtk10.pfb>
+</usr/share/texmf/fonts/type1/public/lm/lmtt8.pfb>
+Output written on riometernet.pdf (8 pages, 451754 bytes).
 PDF statistics:
- 86 PDF objects out of 1000 (max. 8388607)
- 54 compressed objects within 1 object stream
+ 81 PDF objects out of 1000 (max. 8388607)
+ 50 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

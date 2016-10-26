@@ -75,6 +75,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Fill plot options page
         self.optionsLayout.setAlignment(Qt.AlignTop)
+	self.applyQDCCheckBox = QCheckBox("Apply QDC (if available)")
+	self.applyQDCCheckBox.setCheckState(True)
+	self.optionsLayout.addWidget(self.applyQDCCheckBox,0,1,Qt.AlignRight)
         self.updateIntervalLabel = QLabel("Real-time update interval: ")
         self.updateIntervalUnitsBox = QComboBox()
         self.updateIntervalUnitsBox.addItem("days")
@@ -85,11 +88,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateIntervalBox = QSpinBox()
         self.updateIntervalBox.setRange(1,60)
         self.updateIntervalBox.setValue(30)
-        self.optionsLayout.addWidget(self.updateIntervalLabel,0,0,
+        self.optionsLayout.addWidget(self.updateIntervalLabel,1,0,
                                             Qt.AlignRight)
-        self.optionsLayout.addWidget(self.updateIntervalBox,0,1,
+        self.optionsLayout.addWidget(self.updateIntervalBox,1,1,
                                             Qt.AlignRight)
-        self.optionsLayout.addWidget(self.updateIntervalUnitsBox,0,2,
+        self.optionsLayout.addWidget(self.updateIntervalUnitsBox,1,2,
                                             Qt.AlignLeft)
         self.integrationLabel = QLabel("Integration: ")
         self.integrationUnitsBox = QComboBox()
@@ -101,9 +104,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.integrationBox = QSpinBox()
         self.integrationBox.setRange(1,60)
         self.integrationBox.setValue(1)
-        self.optionsLayout.addWidget(self.integrationLabel,1,0,Qt.AlignRight)
-        self.optionsLayout.addWidget(self.integrationBox,1,1,Qt.AlignRight)
-        self.optionsLayout.addWidget(self.integrationUnitsBox,1,2,Qt.AlignLeft)
+        self.optionsLayout.addWidget(self.integrationLabel,2,0,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationBox,2,1,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationUnitsBox,2,2,Qt.AlignLeft)
         
         
         
