@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'auroraplot_dataviewer.ui'
 #
-# Created: Wed Jun 22 14:43:42 2016
+# Created: Wed Oct 26 18:48:31 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,7 +62,7 @@ class Ui_MainWindow(object):
         self.toolBox.setMaximumSize(QtCore.QSize(1000, 16777215))
         self.toolBox.setObjectName("toolBox")
         self.datetimePage = QtGui.QWidget()
-        self.datetimePage.setGeometry(QtCore.QRect(0, 0, 400, 434))
+        self.datetimePage.setGeometry(QtCore.QRect(0, 0, 400, 433))
         self.datetimePage.setObjectName("datetimePage")
         self.gridLayout_2 = QtGui.QGridLayout(self.datetimePage)
         self.gridLayout_2.setObjectName("gridLayout_2")
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addItem(spacerItem1, 1, 4, 1, 1)
         self.toolBox.addItem(self.datetimePage, "")
         self.datasetPage = QtGui.QWidget()
-        self.datasetPage.setGeometry(QtCore.QRect(0, 0, 262, 329))
+        self.datasetPage.setGeometry(QtCore.QRect(0, 0, 290, 303))
         self.datasetPage.setObjectName("datasetPage")
         self.gridLayout = QtGui.QGridLayout(self.datasetPage)
         self.gridLayout.setObjectName("gridLayout")
@@ -182,13 +182,13 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.addDatasetButton, 9, 2, 1, 1)
         self.toolBox.addItem(self.datasetPage, "")
         self.optionsPage = QtGui.QWidget()
-        self.optionsPage.setGeometry(QtCore.QRect(0, 0, 96, 26))
+        self.optionsPage.setGeometry(QtCore.QRect(0, 0, 98, 28))
         self.optionsPage.setObjectName("optionsPage")
         self.optionsLayout = QtGui.QGridLayout(self.optionsPage)
         self.optionsLayout.setObjectName("optionsLayout")
         self.toolBox.addItem(self.optionsPage, "")
         self.logPage = QtGui.QWidget()
-        self.logPage.setGeometry(QtCore.QRect(0, 0, 188, 128))
+        self.logPage.setGeometry(QtCore.QRect(0, 0, 196, 131))
         self.logPage.setObjectName("logPage")
         self.gridLayout_3 = QtGui.QGridLayout(self.logPage)
         self.gridLayout_3.setObjectName("gridLayout_3")
@@ -223,7 +223,7 @@ class Ui_MainWindow(object):
         self.goButton.setGeometry(QtCore.QRect(10, 10, 61, 51))
         self.goButton.setObjectName("goButton")
         self.autoUpdateCheckBox = QtGui.QCheckBox(self.commandBox)
-        self.autoUpdateCheckBox.setGeometry(QtCore.QRect(10, 70, 151, 22))
+        self.autoUpdateCheckBox.setGeometry(QtCore.QRect(10, 70, 171, 22))
         self.autoUpdateCheckBox.setObjectName("autoUpdateCheckBox")
         self.toolbarFrame = QtGui.QFrame(self.commandBox)
         self.toolbarFrame.setGeometry(QtCore.QRect(70, 10, 331, 51))

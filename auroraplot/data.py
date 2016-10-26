@@ -563,7 +563,7 @@ class Data(object):
                 start_time = self.start_time
             if end_time is None:
                 end_time = self.end_time
-
+    
             if straddle_boundary:
                 tidx = (self.sample_end_time > start_time) & \
                     (self.sample_start_time < end_time)

@@ -661,7 +661,8 @@ class RioQDC(RioData):
             nominal_cadence = copy.copy(ref.nominal_cadence)
         else:
             # ref parameter must contain sample timestamps
-            assert not fit, 'Cannot fit without reference data'
+            assert str(np.array(ref).dtype).startswith('datetime'),\
+                   'Cannot fit without reference data/times'
             sample_start_time = np.sort(np.array(ref).flatten())
             sample_end_time = copy.copy(sample_start_time)
             if len(sample_start_time) >= 2:

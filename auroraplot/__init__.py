@@ -415,6 +415,10 @@ def load_data(project,
     start_time: start time (inclusive) of the data set
 
     end_time: end time (exclusive) of the data set
+
+    start_time and end_time can be datetime64 or timedelta64.
+    If timedelta64s are used (e.g. for quiet day curves) a filename
+    will need to be provided via the path argument.
     
     The following optional parameters are recognised: 
     
@@ -435,8 +439,10 @@ def load_data(project,
     archive, ad = get_archive_info(project, site, data_type, 
                                    archive=archive)
     cad_units = dt64.get_units(ad['nominal_cadence'])
-    start_time = start_time.astype('datetime64[%s]' % cad_units)
-    end_time = end_time.astype('datetime64[%s]' % cad_units)
+    start_time = start_time.astype(dt64.get_time_type(start_time)+'[%s]'
+                                   % cad_units)
+    end_time = end_time.astype(dt64.get_time_type(end_time)+'[%s]'
+                               % cad_units)
 
     if channels is None:
         channels = ad['channels']

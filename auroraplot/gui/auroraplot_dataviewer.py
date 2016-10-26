@@ -75,9 +75,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Fill plot options page
         self.optionsLayout.setAlignment(Qt.AlignTop)
-	self.applyQDCCheckBox = QCheckBox("Apply QDC (if available)")
-	self.applyQDCCheckBox.setCheckState(PySide.QtCore.Qt.CheckState.Checked)
-	self.optionsLayout.addWidget(self.applyQDCCheckBox,0,0,Qt.AlignRight)
+        self.integrateCheckBox = QCheckBox("Integrate data")
+        self.integrateCheckBox.setCheckState(
+                                PySide.QtCore.Qt.CheckState.Checked)
+        self.optionsLayout.addWidget(self.integrateCheckBox,0,0,Qt.AlignLeft)
+        self.integrationLabel = QLabel("Integration: ")
+        self.integrationUnitsBox = QComboBox()
+        self.integrationUnitsBox.addItem("days")
+        self.integrationUnitsBox.addItem("hours")
+        self.integrationUnitsBox.addItem("minutes")
+        self.integrationUnitsBox.addItem("seconds")
+        self.integrationUnitsBox.setCurrentIndex(3)
+        self.integrationBox = QSpinBox()
+        self.integrationBox.setRange(1,60)
+        self.integrationBox.setValue(5)
+        self.optionsLayout.addWidget(self.integrationLabel,1,0,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationBox,1,1,Qt.AlignRight)
+        self.optionsLayout.addWidget(self.integrationUnitsBox,1,2,Qt.AlignLeft)
+        self.applyQDCCheckBox = QCheckBox("Apply QDC (if available)")
+        self.applyQDCCheckBox.setCheckState(PySide.QtCore.Qt.CheckState.Checked)
+        self.optionsLayout.addWidget(self.applyQDCCheckBox,2,0,Qt.AlignLeft)
         self.updateIntervalLabel = QLabel("Real-time update interval: ")
         self.updateIntervalUnitsBox = QComboBox()
         self.updateIntervalUnitsBox.addItem("days")
@@ -88,25 +105,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.updateIntervalBox = QSpinBox()
         self.updateIntervalBox.setRange(1,60)
         self.updateIntervalBox.setValue(30)
-        self.optionsLayout.addWidget(self.updateIntervalLabel,1,0,
+        self.optionsLayout.addWidget(self.updateIntervalLabel,3,0,
                                             Qt.AlignRight)
-        self.optionsLayout.addWidget(self.updateIntervalBox,1,1,
+        self.optionsLayout.addWidget(self.updateIntervalBox,3,1,
                                             Qt.AlignRight)
-        self.optionsLayout.addWidget(self.updateIntervalUnitsBox,1,2,
+        self.optionsLayout.addWidget(self.updateIntervalUnitsBox,3,2,
                                             Qt.AlignLeft)
-        self.integrationLabel = QLabel("Integration: ")
-        self.integrationUnitsBox = QComboBox()
-        self.integrationUnitsBox.addItem("days")
-        self.integrationUnitsBox.addItem("hours")
-        self.integrationUnitsBox.addItem("minutes")
-        self.integrationUnitsBox.addItem("seconds")
-        self.integrationUnitsBox.setCurrentIndex(3)
-        self.integrationBox = QSpinBox()
-        self.integrationBox.setRange(1,60)
-        self.integrationBox.setValue(1)
-        self.optionsLayout.addWidget(self.integrationLabel,2,0,Qt.AlignRight)
-        self.optionsLayout.addWidget(self.integrationBox,2,1,Qt.AlignRight)
-        self.optionsLayout.addWidget(self.integrationUnitsBox,2,2,Qt.AlignLeft)
         
         
         
@@ -388,10 +392,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 if s2[0].isnumeric() and s2[1].isnumeric():
                                     if int(s2[0]) >= int(s2[1]):
                                         s2 = [str(n) for n in range(int(s2[0]),
-                                                                    int(s2[1])+1)]
+                                                                 int(s2[1])+1)]
                                     else:
                                         s2 = [str(n) for n in range(int(s2[1]),
-                                                                    int(s2[0])+1)]
+                                                                 int(s2[0])+1)]
                                 else:
                                     # Don't understand eg H-Z
                                     continue
@@ -440,7 +444,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 dt_unit = 'm'
             else:
                 dt_unit = 's'
-            integration_interval = np.timedelta64(self.integrationBox.value(),dt_unit)
+            integration_interval = np.timedelta64(self.integrationBox.value(),
+                                                  dt_unit)
             
             logger.info("".join(["Loading data: ",np.datetime_as_string(st),
                                      " to ", np.datetime_as_string(et)]))
@@ -483,45 +488,74 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     all_channels = ainfo['channels']
                     channels = [c for c in channels if c in all_channels]
                     try:
-                        for chan in channels:
+                        try: # usual datetime64 data
                             md = ap.load_data(project, site, data_type, st, et,
-                                              archive=archive,channels=[chan])
-                            if md is not None and md.data.size:
-                                if integration_interval != md.nominal_cadence:
-                                    logger.info("Integrating...")
-                                    md.set_cadence(integration_interval,inplace=True)
-                                    logger.info("Finished integrating")
-                                else:
-                                    md = md.mark_missing_data(cadence=\
-                                                          2*md.nominal_cadence)
-                                if self.applyQDCCheckBox.checkState():
+                                              archive=archive,channels=channels)
+                        except: # data is QDC with timedelta64 spanning one day
+                            path = ainfo['path']
+                            ct = ap.dt64.mean(st,et)
+                            ft = ap.dt64.floor(ct, ainfo['duration'])
+                            file_name = dt64.strftime(ft, path)
+                            md = ap.load_data(project, site, data_type,
+                                              np.timedelta64(0,'s'),
+                                              np.timedelta64(24*3600,'s'),
+                                              path=file_name,
+                                              archive=archive,channels=channels)
+                        if md is not None and md.data.size:
+                            if (ap.dt64.get_time_type(md.sample_start_time)
+                                == 'timedelta64'):
+                                cadence = integration_interval
+                                tu = ap.dt64.get_units(cadence)
+                                sam_st = ap.dt64.astype(np.arange(dt64.ceil(st,
+                                                                        cadence)
+                                                                  ,et,cadence),
+                                                        time_type=st,units=tu)
+                                sam_et = sam_st + cadence
+                                sam_ct = ap.dt64.mean(sam_st,sam_et)
+                                md = md.align(sam_ct)
+                            # Don't ever apply QDC to a QDC
+                            # Also QDC already integrated
+                            elif self.applyQDCCheckBox.checkState():
+                                try: 
                                     qdc = md.load_qdc(project,site,
                                                   ap.dt64tools.mean(
                                                   md.start_time,md.end_time)[0],
                                                   archive)
-                                    try:
-                                        md2 = md.apply_qdc(qdc)
-                                        md = md2
-                                    except Exception as e:
-                                        logger.info("Failed to apply a QDC")
-                                        logger.debug(str(e))
-                                if (not previous_units is None and
-                                    md.units != previous_units):
-                                    logger.warning("Data have different units.")
-                                    continue
-                                previous_units = md.units
-                                data_desc = md.data_description()
-                                self.statusBar().showMessage("Plotting data...")
-                                md.plot(units_prefix = units_prefix,axes = current_ax,
-                                        label="/".join([project,site,chan]))                                    
-                                self.dataCanvas.draw()
-                                self.statusBar().showMessage("Ready.")
+                                    md2 = md.apply_qdc(qdc)
+                                    md = md2
+                                except Exception as e:
+                                    logger.info("Failed to apply a QDC")
+                                    logger.debug(str(e))
+                                if (integration_interval != md.nominal_cadence
+                                    and self.integrateCheckBox.checkState()):
+                                    logger.info("Integrating to " 
+                                                +str(integration_interval)+
+                                                " sampling interval.")
+                                    md.set_cadence(integration_interval,
+                                                   inplace=True)
                             else:
-                                logger.info("No data.")
-                                self.statusBar().showMessage("No data.")
+                                md = md.mark_missing_data(cadence=\
+                                                      2*md.nominal_cadence)
+                            if (not previous_units is None and
+                                md.units != previous_units):
+                                logger.warning("Data have different units.")
+                                continue
+                            previous_units = md.units
+                            data_desc = md.data_description()
+                            self.statusBar().showMessage("Plotting data...")
+                            for chan in channels:
+                                md.plot(channels=chan,
+                                        units_prefix = units_prefix,
+                                        axes = current_ax,
+                                        label="/".join([project,site,chan]))
+                            self.dataCanvas.draw()
+                            self.statusBar().showMessage("Ready.")
+                        else:
+                            logger.info("No data.")
+                            self.statusBar().showMessage("No data.")
                         if not previous_units is None:
                             current_ax.set_ylabel("".join([data_desc,', ',
-                                                   units_prefix,previous_units]))
+                                                units_prefix,previous_units]))
                         else:
                             current_ax.set_ylabel(data_type)
                         self.dataCanvas.draw()

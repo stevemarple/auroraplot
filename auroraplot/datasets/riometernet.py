@@ -201,7 +201,7 @@ default_data_types = {
             'units': 'dBm',
             'sort': False,
             },
-        'remote qdc': {
+        'remote archive': {
             'channels': channels,
             'path': remote_base_url+'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m%d.txt',
             'duration': np.timedelta64(14, 'D'),
