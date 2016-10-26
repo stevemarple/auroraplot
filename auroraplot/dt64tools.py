@@ -498,7 +498,7 @@ def parse_timedelta64(s, prec):
     values = []
     units = []
     for w in s.split():
-        m = re.match('^(-?[0-9]+)?(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)?$', w)
+        m = re.match('^([+-]?[0-9]+)?(as|fs|ps|ns|us|ms|s|m|h|D|W|M|Y)?$', w)
         if m is None:
             raise ValueError('unknown value/unit (%s)' % w)
         v, u = m.groups()

@@ -1,4 +1,5 @@
 import codecs
+import glob
 import os
 import re
 
@@ -58,5 +59,6 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    scripts=glob.glob('auroraplot/bin/*.py'),
 )
 

@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.5.3'
+__version__ = '0.6.1'
 __license__ = 'PSF'
 
 import copy
@@ -351,13 +351,18 @@ def get_archive_info(project, site, data_type, archive=None):
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
 
-def is_operational(project, site, t1=None, t2=None):
-    now = np.datetime64('now')
+def is_operational(project, site, t1=None, t2=None, now=None):
+    if now is None:
+        now = np.datetime64('now')
     if t1 is None and t2 is None:
         t1 = now
 
     st = get_site_info(project, site, 'start_time')
-    et = get_site_info(project, site, 'end_time') or now
+    et = get_site_info(project, site, 'end_time')
+    if st is None and et is None:
+        return True
+    if et is None:
+        et = now
 
     if t1 >= st and t1 < et:
         return True
@@ -575,8 +580,9 @@ def load_data(project,
                       inplace=True)
 
     if filter_function:
+        logger.debug('filtering with function %s', filter_function.__name__)
         r = filter_function(r)
-        
+
     return r
 
 

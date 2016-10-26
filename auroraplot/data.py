@@ -257,7 +257,8 @@ def _generic_save_converter(d, file_name, archive_data):
     else:
         data[col_offset:] = d.data
 
-    np.savetxt(file_name, data.T, delimiter='\t', fmt=archive_data['fmt'])
+    with ap.tools.smart_open(file_name, 'w') as fh:
+        np.savetxt(fh, data.T, delimiter='\t', fmt=archive_data['fmt'])
 
 
 class Data(object):
@@ -1354,6 +1355,7 @@ class Data(object):
              archive=None,
              path=None,
              merge=None,
+	     overwrite=True,
              save_converter=None,
              duration=None,
              time=None):
@@ -1410,7 +1412,14 @@ class Data(object):
                                    t2,
                                    archive=archive)
                 if tmp is not None:
-                    d = ap.concatenate([tmp, d], sort=True)
+                    if overwrite:
+                        d = ap.concatenate([tmp, d], sort=True)
+                    else:
+                        d = ap.concatenate([d, tmp], sort=True)
+
+            elif not overwrite and os.path.exists(file_name):
+                raise Exception('File already exists')
+
             dir_name = os.path.dirname(file_name)
             if not os.path.exists(dir_name):
                 logger.debug('making directory %s', dir_name)

@@ -8,6 +8,7 @@ import sys
 import time
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 try:
     # Try to force all times to be read as UTC
@@ -67,10 +68,13 @@ parser.add_argument('--only-missing',
                     default=False,
                     action='store_true',
                     help='Create only if QDC file is missing')
-parser.add_argument('--post-aggregate', 
+parser.add_argument('--plot-quiet-days',
+                    action='store_true',
+                    help='Plot the quiet days')
+parser.add_argument('--post-aggregate',
                     default='scipy.average',
                     help='Aggregate function used for setting post-load cadence')
-parser.add_argument('--post-cadence', 
+parser.add_argument('--post-cadence',
                     help='Set cadence (after loading data)')
 parser.add_argument('--qdc-archive', 
                     action='append',
@@ -240,10 +244,11 @@ for n in range(len(project_list)):
 
                 if post_cadence:
                     mag_data.set_cadence(post_cadence, 
-                                         aggregate=post_agg_func, 
+                                         aggregate=post_agg_func,
                                          inplace=True)
 
-                mag_qdc = mag_data.make_qdc(smooth=args.smooth)
+                mag_qdc = mag_data.make_qdc(smooth=args.smooth,
+                                            plot_quiet_days=args.plot_quiet_days)
 
                 filename = dt64.strftime(t1, qdc_ad['path'])
                 p = os.path.dirname(filename)
@@ -259,3 +264,4 @@ for n in range(len(project_list)):
         finally:
             t1 = t2
 
+plt.show()
