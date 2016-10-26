@@ -19,6 +19,7 @@ import numpy as np
 
 import auroraplot as ap
 import auroraplot.data
+import auroraplot.auroralactivity
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData
 from auroraplot.voltagedata import VoltageData

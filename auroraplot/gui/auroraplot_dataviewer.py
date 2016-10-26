@@ -76,7 +76,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Fill plot options page
         self.optionsLayout.setAlignment(Qt.AlignTop)
 	self.applyQDCCheckBox = QCheckBox("Apply QDC (if available)")
-	self.applyQDCCheckBox.setCheckState(True)
+	self.applyQDCCheckBox.setCheckState(PySide.QtCore.Qt.CheckState.Checked)
 	self.optionsLayout.addWidget(self.applyQDCCheckBox,0,1,Qt.AlignRight)
         self.updateIntervalLabel = QLabel("Real-time update interval: ")
         self.updateIntervalUnitsBox = QComboBox()
@@ -588,11 +588,12 @@ def Qdate_Qtime_to_dt64(Qdate,Qtime):
                           1000*(Qtime.msec())) # datetime uses microseconds
     return np.datetime64(d)
 
-            
-if __name__ == '__main__':
+def run():
     app = QApplication(sys.argv)
     frame = MainWindow()
     frame.show()
     frame.statusBar().showMessage("Ready.")
     app.exec_()
 
+if __name__ == '__main__':
+    run()

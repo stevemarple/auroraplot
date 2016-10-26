@@ -103,11 +103,25 @@ mkdir -p ~/.local/lib/python2.7/site-packages
 ln -s ~/auroraplot/auroraplot ~/.local/lib/python2.7/site-packages/
 \end{lstlisting}
 
-To update to the latest version of Auroraplot run
+Compile Auroraplot binaries for your system
+\begin{lstlisting}
+make -C ~/auroraplot/
+\end{lstlisting}
+
+Make a desktop launcher for the GUI.
+\begin{lstlisting}
+mkdir -p ~/.local/share/applications/
+ln -s ~/.local/lib/python2.7/site-packages/auroraplot/gui/auroraplotx.desktop ~/.local/share/applications/
+xdg-icon-resource install --novendor --size 128 ~/.local/lib/python2.7/site-packages/auroraplot/gui/icons/auroraplot_128.png
+\end{lstlisting}
+
+Once Auroraplot is installed it can be updated to the latest version by running
 \begin{lstlisting}
 cd ~/auroraplot/
 git fetch --all
 git checkout --force master
+make -C ~/auroraplot/ clean
+make -C ~/auroraplot/
 \end{lstlisting}
 
 

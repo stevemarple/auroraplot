@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Auroraplot Data Viewer 
 Comment=Load and view data using auroraplot
-Exec=auroraplot_dataviewer.py
+Exec=python -c "import auroraplot.gui.auroraplot_dataviewer as d;d.run()"
 Icon=auroraplot_128
 Terminal=false
 Type=Application
