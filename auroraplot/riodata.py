@@ -257,6 +257,7 @@ class RioData(Data):
                       processing=processing,
                       sort=sort)
 
+        self.load_qdc = load_qdc
 
     def data_description(self):
         return 'Riometer data'
@@ -380,6 +381,7 @@ class RioPower(RioData):
                 cidx = self.get_channel_index(chan)
                 r.data[rcidx] = qdc_data[qcidx] - self.data[cidx]
             r.processing.append('apply QDC')
+            r.units = 'dB'
         return r
 
     def make_qdc(self,

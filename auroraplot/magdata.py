@@ -567,6 +567,7 @@ class MagData(Data):
                       data=data,
                       units=units,
                       sort=sort)
+        self.load_qdc = load_qdc
 
     def data_description(self):
         return 'Magnetic field'

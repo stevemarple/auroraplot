@@ -77,7 +77,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.optionsLayout.setAlignment(Qt.AlignTop)
 	self.applyQDCCheckBox = QCheckBox("Apply QDC (if available)")
 	self.applyQDCCheckBox.setCheckState(PySide.QtCore.Qt.CheckState.Checked)
-	self.optionsLayout.addWidget(self.applyQDCCheckBox,0,1,Qt.AlignRight)
+	self.optionsLayout.addWidget(self.applyQDCCheckBox,0,0,Qt.AlignRight)
         self.updateIntervalLabel = QLabel("Real-time update interval: ")
         self.updateIntervalUnitsBox = QComboBox()
         self.updateIntervalUnitsBox.addItem("days")
@@ -494,11 +494,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 else:
                                     md = md.mark_missing_data(cadence=\
                                                           2*md.nominal_cadence)
+                                if self.applyQDCCheckBox.checkState():
+                                    qdc = md.load_qdc(project,site,
+                                                  ap.dt64tools.mean(
+                                                  md.start_time,md.end_time)[0],
+                                                  archive)
+                                    try:
+                                        md2 = md.apply_qdc(qdc)
+                                        md = md2
+                                    except Exception as e:
+                                        logger.info("Failed to apply a QDC")
+                                        logger.debug(str(e))
                                 if (not previous_units is None and
                                     md.units != previous_units):
                                     logger.warning("Data have different units.")
                                     continue
                                 previous_units = md.units
+                                data_desc = md.data_description()
                                 self.statusBar().showMessage("Plotting data...")
                                 md.plot(units_prefix = units_prefix,axes = current_ax,
                                         label="/".join([project,site,chan]))                                    
@@ -508,7 +520,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 logger.info("No data.")
                                 self.statusBar().showMessage("No data.")
                         if not previous_units is None:
-                            current_ax.set_ylabel("".join([data_type,', ',
+                            current_ax.set_ylabel("".join([data_desc,', ',
                                                    units_prefix,previous_units]))
                         else:
                             current_ax.set_ylabel(data_type)
