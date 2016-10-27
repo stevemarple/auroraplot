@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  27 OCT 2016 17:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  27 OCT 2016 22:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -596,6 +596,33 @@ Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
 )
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/09/12 v5.6 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in PDF mode is detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2010/03/01 v1.5 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count96
+\Gm@cntv=\count97
+\c@Gm@tempcnt=\count98
+\Gm@bindingoffset=\dimen109
+\Gm@wd@mp=\dimen110
+\Gm@odd@mp=\dimen111
+\Gm@even@mp=\dimen112
+\Gm@layoutwidth=\dimen113
+\Gm@layoutheight=\dimen114
+\Gm@layouthoffset=\dimen115
+\Gm@layoutvoffset=\dimen116
+\Gm@dimlist=\toks18
+)
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2015/06/04 1.6 listings language file
 )
@@ -605,42 +632,42 @@ File: lstlang1.sty 2015/06/04 1.6 listings language file
 (./riometernet.aux)
 \openout1 = `riometernet.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 59.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 59.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 61.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 61.
  (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 59.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 61.
 
 (/usr/share/texmf/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count96
-\scratchdimen=\dimen109
+\scratchcounter=\count99
+\scratchdimen=\dimen117
 \scratchbox=\box28
-\nofMPsegments=\count97
-\nofMParguments=\count98
-\everyMPshowfont=\toks18
-\MPscratchCnt=\count99
-\MPscratchDim=\dimen110
-\MPnumerator=\count100
-\makeMPintoPDFobject=\count101
-\everyMPtoPDFconversion=\toks19
+\nofMPsegments=\count100
+\nofMParguments=\count101
+\everyMPshowfont=\toks19
+\MPscratchCnt=\count102
+\MPscratchDim=\dimen118
+\MPnumerator=\count103
+\makeMPintoPDFobject=\count104
+\everyMPtoPDFconversion=\toks20
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
 )
@@ -648,10 +675,6 @@ Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifluatex.sty
 Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
 Package ifluatex Info: LuaTeX not detected.
-)
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
-Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
-Package ifpdf Info: pdfTeX in PDF mode is detected.
 )
 Package pdftexcmds Info: LuaTeX not detected.
 Package pdftexcmds Info: \pdf@primitive is available.
@@ -689,52 +712,86 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\c@lstlisting=\count102
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 63.
+\c@lstlisting=\count105
 
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(99.58464pt, 415.12572pt, 99.58464pt)
+* v-part:(T,H,B)=(56.9055pt, 681.15898pt, 56.9055pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=415.12572pt
+* \textheight=681.15898pt
+* \oddsidemargin=27.31465pt
+* \evensidemargin=27.31465pt
+* \topmargin=-52.36449pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 65.
 (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 63.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 65.
 
 (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 63.
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 65.
 
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 63.
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 65.
 
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 63.
+(Font)              <12> on input line 65.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 63.
+(Font)              <8> on input line 65.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 63.
+(Font)              <6> on input line 65.
 
 
 LaTeX Warning: No \author given.
 
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 82.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 84.
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <8> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 100.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 105.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2015/06/04 1.6 listings language file
-) [2]
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 197
+)
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 203
 .
 
 (/usr/share/texmf/tex/latex/lm/ts1lmtt.fd
@@ -743,154 +800,128 @@ File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 <images/figure_1.png, id=14, 578.16pt x 516.7305pt>
 File: images/figure_1.png Graphic file (type png)
  <use images/figure_1.png>
-Package pdftex.def Info: images/figure_1.png used on input line 207.
+Package pdftex.def Info: images/figure_1.png used on input line 214.
 (pdftex.def)             Requested size: 256.0748pt x 228.8602pt.
 
-[3 <./images/figure_1.png>]
-<images/figure_2.png, id=23, 578.16pt x 517.4532pt>
+[2] <images/figure_2.png, id=20, 578.16pt x 517.4532pt>
 File: images/figure_2.png Graphic file (type png)
- <use images/figure_2.png>
-Package pdftex.def Info: images/figure_2.png used on input line 243.
-(pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
 
-[4]
+<use images/figure_2.png>
+Package pdftex.def Info: images/figure_2.png used on input line 252.
+(pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
+ [3 <./images/figure_1.png>]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 248.
+(Font)              <10> on input line 258.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 248.
+(Font)              <7> on input line 258.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 248.
- <images/figure_3.png, id=27, 1131.0255pt x 734.9859pt>
+(Font)              <5> on input line 258.
+
+<images/figure_3.png, id=25, 1131.0255pt x 734.9859pt>
 File: images/figure_3.png Graphic file (type png)
 
 <use images/figure_3.png>
-Package pdftex.def Info: images/figure_3.png used on input line 257.
-(pdftex.def)             Requested size: 341.43306pt x 221.8769pt.
-
-Overfull \hbox (11.43306pt too wide) in paragraph at lines 257--258
-[][] 
- []
-
-[5 <./images/figure_2.png>]
-<images/figure_4.png, id=34, 578.16pt x 517.4532pt>
+Package pdftex.def Info: images/figure_3.png used on input line 268.
+(pdftex.def)             Requested size: 369.88582pt x 240.37039pt.
+ [4 <./images/figure_2.png> <./images/figure_3.png>]
+<images/figure_4.png, id=33, 578.16pt x 517.4532pt>
 File: images/figure_4.png Graphic file (type png)
  <use images/figure_4.png>
-Package pdftex.def Info: images/figure_4.png used on input line 283.
+Package pdftex.def Info: images/figure_4.png used on input line 297.
 (pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
 
-[6 <./images/figure_3.png>]
-<images/figure_5.png, id=39, 578.16pt x 517.4532pt>
+<images/figure_5.png, id=34, 578.16pt x 517.4532pt>
 File: images/figure_5.png Graphic file (type png)
  <use images/figure_5.png>
-Package pdftex.def Info: images/figure_5.png used on input line 292.
+Package pdftex.def Info: images/figure_5.png used on input line 308.
 (pdftex.def)             Requested size: 256.0748pt x 229.18028pt.
 
-[7 <./images/figure_4.png> <./images/figure_5.png>]
-<images/figure_6.png, id=46, 578.16pt x 682.2288pt>
+[5 <./images/figure_4.png> <./images/figure_5.png>]
+<images/figure_6.png, id=40, 578.16pt x 682.2288pt>
 File: images/figure_6.png Graphic file (type png)
  <use images/figure_6.png>
-Package pdftex.def Info: images/figure_6.png used on input line 308.
+Package pdftex.def Info: images/figure_6.png used on input line 326.
 (pdftex.def)             Requested size: 256.0748pt x 302.15948pt.
 
-<images/dv-0.png, id=47, 803.0pt x 451.6875pt>
+[6 <./images/figure_6.png>] <images/dv-0.png, id=45, 803.0pt x 451.6875pt>
 File: images/dv-0.png Graphic file (type png)
- <use images/dv-0.png>
-Package pdftex.def Info: images/dv-0.png used on input line 321.
-(pdftex.def)             Requested size: 398.33858pt x 224.0719pt.
 
-Overfull \hbox (24.88583pt too wide) in paragraph at lines 320--323
- []
+<use images/dv-0.png>
+Package pdftex.def Info: images/dv-0.png used on input line 344.
+(pdftex.def)             Requested size: 426.79134pt x 240.07555pt.
+
+Overfull \hbox (11.66562pt too wide) in paragraph at lines 344--345
+ [] 
  []
 
-[8 <./images/figure_6.png>] <images/dv-1.png, id=52, 990.70125pt x 744.7825pt>
+<images/dv-1.png, id=46, 990.70125pt x 744.7825pt>
 File: images/dv-1.png Graphic file (type png)
+ <use images/dv-1.png>
+Package pdftex.def Info: images/dv-1.png used on input line 352.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<use images/dv-1.png>
-Package pdftex.def Info: images/dv-1.png used on input line 326.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
-
-Overfull \hbox (11.43306pt too wide) in paragraph at lines 326--327
-[][] 
- []
-
-[9 <./images/dv-0.png>] <images/dv-2.png, id=56, 990.70125pt x 744.7825pt>
+<images/dv-2.png, id=47, 990.70125pt x 744.7825pt>
 File: images/dv-2.png Graphic file (type png)
+ <use images/dv-2.png>
+Package pdftex.def Info: images/dv-2.png used on input line 359.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<use images/dv-2.png>
-Package pdftex.def Info: images/dv-2.png used on input line 330.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
-
-Overfull \hbox (11.43306pt too wide) in paragraph at lines 330--331
-[][] 
- []
-
-<images/dv-3.png, id=57, 990.70125pt x 744.7825pt>
+[7 <./images/dv-0.png> <./images/dv-1.png>]
+<images/dv-3.png, id=53, 990.70125pt x 744.7825pt>
 File: images/dv-3.png Graphic file (type png)
  <use images/dv-3.png>
-Package pdftex.def Info: images/dv-3.png used on input line 333.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
+Package pdftex.def Info: images/dv-3.png used on input line 372.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<images/dv-4.png, id=58, 990.70125pt x 744.7825pt>
+<images/dv-4.png, id=54, 990.70125pt x 744.7825pt>
 File: images/dv-4.png Graphic file (type png)
  <use images/dv-4.png>
-Package pdftex.def Info: images/dv-4.png used on input line 334.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
+Package pdftex.def Info: images/dv-4.png used on input line 381.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<images/dv-5.png, id=59, 990.70125pt x 744.7825pt>
+[8 <./images/dv-2.png> <./images/dv-3.png>]
+<images/dv-5.png, id=60, 990.70125pt x 744.7825pt>
 File: images/dv-5.png Graphic file (type png)
  <use images/dv-5.png>
-Package pdftex.def Info: images/dv-5.png used on input line 335.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
+Package pdftex.def Info: images/dv-5.png used on input line 387.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<images/dv-6.png, id=60, 990.70125pt x 744.7825pt>
+<images/dv-6.png, id=61, 990.70125pt x 744.7825pt>
 File: images/dv-6.png Graphic file (type png)
  <use images/dv-6.png>
-Package pdftex.def Info: images/dv-6.png used on input line 336.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
+Package pdftex.def Info: images/dv-6.png used on input line 393.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-<images/dv-7.png, id=61, 990.70125pt x 744.7825pt>
+[9 <./images/dv-4.png> <./images/dv-5.png>]
+<images/dv-7.png, id=67, 990.70125pt x 744.7825pt>
 File: images/dv-7.png Graphic file (type png)
  <use images/dv-7.png>
-Package pdftex.def Info: images/dv-7.png used on input line 337.
-(pdftex.def)             Requested size: 341.43306pt x 256.67749pt.
+Package pdftex.def Info: images/dv-7.png used on input line 399.
+(pdftex.def)             Requested size: 312.9803pt x 235.2896pt.
 
-Overfull \hbox (11.43306pt too wide) in paragraph at lines 333--338
-[][]
- []
-
-
-Overfull \hbox (340.08833pt too wide) in paragraph at lines 333--338
-[] []
- []
-
-
-Overfull \hbox (340.08833pt too wide) in paragraph at lines 333--338
-[] [] 
- []
-
-[10 <./images/dv-1.png> <./images/dv-2.png>] [11 <./images/dv-3.png> <./images/
-dv-4.png> <./images/dv-5.png>] [12 <./images/dv-6.png> <./images/dv-7.png>]
-(./riometernet.aux) ) 
+[10 <./images/dv-6.png> <./images/dv-7.png>] (./riometernet.aux) ) 
 Here is how much of TeX's memory you used:
- 4833 strings out of 494953
- 64244 string characters out of 6180977
- 195112 words of memory out of 5000000
- 8015 multiletter control sequences out of 15000+600000
+ 5311 strings out of 494953
+ 71266 string characters out of 6180977
+ 214960 words of memory out of 5000000
+ 8483 multiletter control sequences out of 15000+600000
  55408 words of font info for 46 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 38i,7n,56p,401b,1701s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share
-/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm
--ec.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}</usr/share/texmf/fonts
-/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb>
-</usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1
-/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/s
-hare/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/publi
-c/lm/lmtk10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt8.pfb>
-Output written on riometernet.pdf (12 pages, 1624929 bytes).
+ 38i,7n,56p,401b,1422s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/t
+exmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-maths
+y.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/e
+nc/dvips/lm/lm-ec.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/
+share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/publ
+ic/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/t
+exmf/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lm
+ri10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/f
+onts/type1/public/lm/lmtk10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt8.p
+fb>
+Output written on riometernet.pdf (10 pages, 1655039 bytes).
 PDF statistics:
- 111 PDF objects out of 1000 (max. 8388607)
- 61 compressed objects within 1 object stream
+ 109 PDF objects out of 1000 (max. 8388607)
+ 60 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  71 words of extra memory for PDF output out of 10000 (max. 10000000)
 
