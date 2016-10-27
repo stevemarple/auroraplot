@@ -526,13 +526,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 except Exception as e:
                                     logger.info("Failed to apply a QDC")
                                     logger.debug(str(e))
-                                if (integration_interval != md.nominal_cadence
-                                    and self.integrateCheckBox.checkState()):
-                                    logger.info("Integrating to " 
-                                                +str(integration_interval)+
-                                                " sampling interval.")
-                                    md.set_cadence(integration_interval,
-                                                   inplace=True)
+                            if (integration_interval != md.nominal_cadence
+                                and self.integrateCheckBox.checkState()):
+                                logger.info("Integrating to " 
+                                            +str(integration_interval)+
+                                            " sampling interval.")
+                                md.set_cadence(integration_interval,
+                                               inplace=True)
                             else:
                                 md = md.mark_missing_data(cadence=\
                                                       2*md.nominal_cadence)
