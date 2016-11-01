@@ -581,7 +581,11 @@ class MagData(Data):
         else:
             warnings.warn('Unknown units')
             a[1:] = self.data 
-        logger.info('saving to ' + filename)
+
+        logger.info('saving to %s',
+                    filename.name if isinstance(filename, file)
+                    else filename)
+
         kwargs = {}
         if fmt is not None:
             kwargs['fmt'] = fmt
