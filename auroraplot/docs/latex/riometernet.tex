@@ -13,12 +13,13 @@
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.92,0.92}
+\definecolor{pythonbackcolour}{rgb}{0.95,0.88,0.88}
+\definecolor{backcolour}{rgb}{0.88,0.88,0.95}
  
 \lstdefinestyle{pythonstyle}{
     language=Python,
     upquote=true,
-    backgroundcolor=\color{backcolour},   
+    backgroundcolor=\color{pythonbackcolour},   
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
@@ -83,7 +84,7 @@ First install the dependencies. In a terminal type
 Fedora 25
 \begin{lstlisting}
 sudo dnf upgrade
-sudo dnf install python-pyside git python2-matplotlib-qt4 python-requests ipython python-scipy python-pandas
+sudo dnf install python-pyside git python2-matplotlib-qt4 python-requests python-ipython python-scipy python-pandas
 \end{lstlisting}
 \end{minipage}
 \hspace{0.5cm}
@@ -92,7 +93,7 @@ Ubuntu 16.04 LTS / Debian 8
 \begin{lstlisting}
 sudo apt update
 sudo apt upgrade                 
-sudo apt install git python-matplotlib python-scipy python-pyside python-requests python-pandas 
+sudo apt install git ipython python-matplotlib python-scipy python-pyside python-requests python-pandas 
 \end{lstlisting}
 \end{minipage} 
 \end{figure}
@@ -159,7 +160,7 @@ To speed up loading of data, copy the example riometer data (1.5 GB) to the /dat
 
 \begin{lstlisting}
 sudo mkdir /data
-sudo wget -m -np -nH --cut-dirs=1 -P=/data http://www.riometer.net/example_data/2004
+sudo wget -m -np -nH --cut-dirs 1 -P /data -A *.txt http://www.riometer.net/example_data/2004
 \end{lstlisting}
 
 Create a directory for Quiet Day Curves (QDCs), and a group ({\it qdc}) for users that have permission to create and modify QDCs in that directory.
@@ -175,6 +176,12 @@ If required, add the current user to the {\it qdc} group. (The user will need to
 
 \begin{lstlisting}
 sudo usermod -aG qdc $USER
+\end{lstlisting}
+
+Begin an IPython session with the command
+
+\begin{lstlisting}
+ipython
 \end{lstlisting}
 
 It is helpful to see the logger output in IPython. This will indicate errors and failures to load data. To have log messages display on the screen run
