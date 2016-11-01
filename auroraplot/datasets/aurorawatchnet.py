@@ -499,7 +499,7 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': 'T',
             'sort': True,
-            },
+        },
         'realtime_baseline': {
             'channels': np.array(['H']),
             'path': (base_url +
@@ -518,8 +518,8 @@ default_data_types = {
             # Information for making the data files
             'qdc_fit_duration': np.timedelta64(10, 'D'),
             'realtime_qdc': True,
-            },
         },
+    },
     'MagQDC': {
         'qdc': {
             'channels': np.array(['H']),
@@ -530,8 +530,8 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,
-            },
         },
+    },
     'TemperatureData': {
         'realtime': {
             'channels': np.array(['Sensor temperature', 
@@ -543,8 +543,8 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': six.u('\N{DEGREE SIGN}C'),
             'sort': True,
-            },
         },
+    },
     'VoltageData': {
         'realtime': {
             'channels': np.array(['Supply voltage']),
@@ -555,9 +555,26 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(30000000, 'us'),
             'units': 'V',
             'sort': True,
-            },
         },
-    }
+    },
+    'AuroraWatchActivity': {
+        'default': 'realtime',
+        'realtime': {
+            'channels': np.array(['Activity']),
+            'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
+            'duration': np.timedelta64(1, 'Y'),
+            'load_converter': ap.data._generic_load_converter,
+            'save_converter': ap.data._generic_save_converter,
+            'nominal_cadence': np.timedelta64(60, 'm'),
+            'units': 'T',
+            # Information for generic load/save
+            'constructor': ap.auroralactivity.AuroraWatchActivity,
+            'timestamp_method': 'YMDh',
+            'fmt': ['%04d', '%02d', '%02d', '%02d', '%.2f'],
+            'data_multiplier': 1000000000, # Store as nT values
+        }
+    },
+}
 
 
 for s in sites:
