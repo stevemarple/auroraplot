@@ -518,6 +518,7 @@ def parse_timedelta64(s, prec):
 def plot_dt64(x, y, axes=None, 
               # Our own options
               x_time_units=None, y_time_units=None, plot_func=plt.plot,
+              x_time_fmt=None, y_time_fmt=None,
               #
               **kwargs):
     if axes is None:
@@ -561,7 +562,7 @@ def plot_dt64(x, y, axes=None,
             ### TODO: Correct locator and formatter for timedelta64
             axes.xaxis.set_major_locator(Datetime64Locator())
             # if axis_data.type == np.datetime64:
-            axes.xaxis.set_major_formatter(Datetime64Formatter())
+            axes.xaxis.set_major_formatter(Datetime64Formatter(fmt=x_time_fmt))
 
             # plt.xticks(rotation=-25)
 
@@ -594,7 +595,7 @@ def plot_dt64(x, y, axes=None,
             ### TODO: Correct locator and formatter for timedelta64
             axes.yaxis.set_major_locator(Datetime64Locator())
             # if axis_data.type == np.datetime64:
-            axes.yaxis.set_major_formatter(Datetime64Formatter())
+            axes.yaxis.set_major_formatter(Datetime64Formatter(fmt=y_time_fmt))
 
             plt.yticks(rotation=-25)  
 
