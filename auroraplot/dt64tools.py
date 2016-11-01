@@ -579,8 +579,8 @@ def plot_dt64(x, y, axes=None,
             axis_data = axes.yaxis.dt64tools
             assert y.dtype.type == axis_data.type, 'Cannot add ' \
                 + y.dtype.type + ' to axis using ' + axis_data.type
-            assert time_units.indey(units) \
-                >= time_units.indey(axis_data.units), \
+            assert time_units.index(units) \
+                >= time_units.index(axis_data.units), \
                 'Cannot add time data with units ' + units + \
                 ' to existing plot using units ' + axis_data.units
         else:
