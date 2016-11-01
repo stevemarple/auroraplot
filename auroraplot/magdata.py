@@ -441,7 +441,6 @@ def stack_plot(data_array, offset, channel=None,
         y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) \
                  + (plot_count * offset)).flatten()
 
-        kwargs = {}
         try:
             kwargs['color'] = da[n].get_site_info('line_color')
         except Exception as e:
