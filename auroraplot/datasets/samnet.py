@@ -835,7 +835,7 @@ default_data_types = {
     'AuroraWatchActivity': {
         'realtime': {
             'channels': np.array(['Activity']),
-            'path': base_url + 'activity/aurorawatch/{site_lc}/%Y/{site_lc}_%Y%m.txt',
+            'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
             'duration': np.timedelta64(1, 'Y'),
             'load_converter': ap.data._generic_load_converter,
             'save_converter': ap.data._generic_save_converter,
