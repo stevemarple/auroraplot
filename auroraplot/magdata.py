@@ -331,6 +331,7 @@ def stack_plot(data_array, offset, channel=None,
                ylabel_fmt='{data:project}\n{data:site}',
                ylabel_color=None,
                add_legend=None,
+               colors=None,
                 **kwargs):
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
@@ -441,16 +442,31 @@ def stack_plot(data_array, offset, channel=None,
         y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) \
                  + (plot_count * offset)).flatten()
 
+        site_color = None
+        kwargs2 = copy.copy(kwargs)
         try:
-            kwargs['color'] = da[n].get_site_info('line_color')
+            site_color = da[n].get_site_info('line_color')
         except Exception as e:
             pass
+        if colors is not None:
+            try:
+                site_color = colors[n]
+            except Exception as e:
+                pass
+            
+        if site_color is not None:
+            kwargs2['color'] = site_color
+
         lh = dt64.plot_dt64(d.get_mean_sample_time(), 
                             y,
                             label=d.format_project_site(),
-                            **kwargs)
+                            **kwargs2)
         if ylabel_color == 'auto':
             tick_colors.append(lh[0].get_color())
+        elif isinstance(ylabel_color, six.string_types):
+            tick_colors.append(ylabel_color)
+        elif hasattr(ylabel_color, '__getitem__'):
+            tick_colors.append(ylabel_color[n])
         else:
             tick_colors.append(None)
         plot_count += 1
