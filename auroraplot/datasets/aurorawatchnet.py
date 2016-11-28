@@ -83,7 +83,7 @@ def load_awn_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            data = np.genfromtxt(uh, unpack=True)
+            data = np.genfromtxt(uh, unpack=True, invalid_raise=False)
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
