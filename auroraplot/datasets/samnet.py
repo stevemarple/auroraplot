@@ -18,6 +18,7 @@ import requests
 import numpy as np
 
 import auroraplot as ap
+import auroraplot.auroralactivity
 import auroraplot.data
 from auroraplot.magdata import MagData as MagData
 from auroraplot.temperaturedata import TemperatureData

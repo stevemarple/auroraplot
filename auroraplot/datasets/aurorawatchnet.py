@@ -16,6 +16,7 @@ except ImportError:
 import numpy as np
 
 import auroraplot as ap
+import auroraplot.auroralactivity
 import auroraplot.data
 import auroraplot.magdata
 import auroraplot.tools
