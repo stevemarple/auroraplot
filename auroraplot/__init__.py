@@ -47,6 +47,10 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+plot_datetime_units = os.getenv('AURORAPLOT_PLOT_DATETIME_UNITS')
+plot_datetime_epoch = os.getenv('AURORAPLOT_PLOT_DATETIME_EPOCH')
+plot_timedelta_units = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_UNITS')
+plot_timedelta_epoch = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_EPOCH')
 
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
