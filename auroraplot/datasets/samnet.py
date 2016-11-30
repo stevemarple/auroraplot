@@ -108,12 +108,9 @@ def load_new_samnet_data(file_name, archive_data,
             return float(x)/1e9
 
     try:
-        if file_name.startswith('/'):
-            fh = urlopen('file:' + file_name)
-            # Pass the file name instead of a file handle.
-            # fh = file_name
+        if os.path.exists(file_name):
+            fh = open(file_name)
         else:
-            # fh = urlopen(file_name)
             req = requests.get(file_name, stream=True)
             fh = req.raw
         try:

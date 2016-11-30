@@ -82,8 +82,8 @@ def load_bgs_sch_data(file_name,
         col_idx.append(data_type_info[data_type]['col_offset'] + 
                        chan_tup.index(c))
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+        if os.path.exists(file_name):
+            uh = open(file_name)
         else:
             uh = urlopen(file_name)
         try:

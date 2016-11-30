@@ -79,8 +79,8 @@ def load_awn_data(file_name, archive_data,
         col_idx.append(data_type_info[data_type]['col_offset'] + 
                        chan_tup.index(c))
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+        if os.path.exists(file_name):
+            uh = open(file_name)
         else:
             uh = urlopen(file_name)
         try:
