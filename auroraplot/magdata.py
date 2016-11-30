@@ -477,10 +477,7 @@ def stack_plot(data_array, offset, channel=None,
         st = start_time
     if end_time is not None:
         et = end_time
-    xlim = (dt64.dt64_to(st, ax.xaxis.dt64tools.units),
-            dt64.dt64_to(et, ax.xaxis.dt64tools.units))
-    ax.set_xlim(xlim)
-
+    dt64.xlim_dt64(xmin=st, xmax=et, ax=ax)
 
     if offset:
         # Round up to multiple of offset for aesthetic reasons.
