@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.6.3'
+__version__ = '0.6.4'
 __license__ = 'PSF'
 
 import copy
