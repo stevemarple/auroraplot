@@ -47,6 +47,10 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+# Don't warn about NaNs
+np.seterr(invalid='ignore')
+
 plot_datetime_units = os.getenv('AURORAPLOT_PLOT_DATETIME_UNITS')
 plot_datetime_epoch = os.getenv('AURORAPLOT_PLOT_DATETIME_EPOCH')
 plot_timedelta_units = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_UNITS')
