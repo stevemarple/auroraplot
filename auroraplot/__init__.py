@@ -721,7 +721,10 @@ def download_url(url, prefix=__name__, temporary_file=True):
             return None
         
         if temporary_file:
-            local_file = NamedTemporaryFile(prefix=prefix, 
+            # Have temporary file use the same suffix
+            suffix = os.path.splitext(url_parts.path)[1]
+            local_file = NamedTemporaryFile(prefix=prefix,
+                                            suffix=suffix,
                                             delete=False)
             logger.debug('saving to ' + local_file.name)
             shutil.copyfileobj(url_file, local_file)
