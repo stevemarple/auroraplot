@@ -749,8 +749,7 @@ class Data(object):
                                         x_time_units=time_units,
                                         label=channels[n], **kwargs)[0])
 
-            ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
-                        dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
+            dt64.xlim_dt64(xmin=start_time, xmax=end_time, ax=ax)
             
             if not need_legend:
                 # Lines plotted on different axes
