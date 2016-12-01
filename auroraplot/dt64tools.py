@@ -526,9 +526,9 @@ def t_to_axis_value(t, axis, units=None, epoch=None, fmt=None):
             >= time_units.index(axis_data.units), \
             'Cannot add time data with units ' + t_units + \
             ' to existing plot using units ' + axis_data.units
-        if axis_data.epoch is None and not isnat(np.min(t)):
+        if axis_data.epoch is None:
             # Set and save epoch
-            axis_data.epoch = dt64_to(np.min(t), axis_data.units).astype('int64')
+            axis_data.epoch = axis_data.type(0, units)
             axis.dt64tools = axis_data
 
     else:
@@ -546,10 +546,7 @@ def t_to_axis_value(t, axis, units=None, epoch=None, fmt=None):
             elif t.dtype.type == np.timedelta64 and ap.plot_timedelta_epoch:
                 epoch = ap.plot_timedelta_epoch
             else:
-                # epoch = t.dtype.type(0, units)
-                epoch = np.min(t)
-                if isnat(epoch):
-                    epoch = None
+                epoch = t.dtype.type(0, units)
 
 
         axis_data = Dt64ToolsData(units=units, 
