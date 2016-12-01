@@ -722,7 +722,7 @@ def download_url(url, prefix=__name__, temporary_file=True):
         
         if temporary_file:
             # Have temporary file use the same suffix
-            suffix = os.path.splitext(url_parts.path)[1]
+            suffix = ''.join(os.path.basename(url_parts.path).partition('.')[1:])
             local_file = NamedTemporaryFile(prefix=prefix,
                                             suffix=suffix,
                                             delete=False)
