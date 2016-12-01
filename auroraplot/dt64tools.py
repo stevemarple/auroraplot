@@ -702,10 +702,11 @@ class Datetime64Locator(Locator):
             first_tick = ceil(limits_dt64[0], tick_interval)
             last_tick = floor(limits_dt64[1], tick_interval)
             num = np.floor(((last_tick - first_tick) / 
-                            tick_interval) + 1).astype(int)
-            tick_locs = ((dt64_to(tick_interval, units).astype(int) 
+                            tick_interval) + 1).astype('int64')
+            tick_locs = ((dt64_to(tick_interval, units).astype('int64') 
                           * np.arange(num))
-                         + first_tick.astype(int)) - epoch
+                         + first_tick.astype('int64')) - epoch
+
             try:
                 return self.raise_if_exceeds(tick_locs)
             except RuntimeError as e:
