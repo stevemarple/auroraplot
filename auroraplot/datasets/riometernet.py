@@ -65,7 +65,6 @@ def load_rn_data(file_name, archive_data,
         try:
 
             data = ap.loadtxt(uh)
-
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
@@ -150,17 +149,34 @@ sites = {
                    'with the Sodankyla Geophysical Observatory."', 
         'line_color': [0, 0.6, 0],
         },
-
+    'rio-ice1': {
+        'location': 'Iceland',
+        'latitude': 69.05,
+        'longitude': 20.79,
+        'elevation': 0, # Estimate from google
+        'start_time': np.datetime64('2016-11-25T00:00Z'),
+        'end_time': None, # Still operational
+        'copyright': '',
+        'license': 'Data users are not entitled to distribute data to third '\
+		   'parties outside their own research teams without '\
+		   'requesting permission from the project PI.',
+        'attribution': '', 
+        'line_color': [0.6, 0, 0],
+        },
     }
 
-channels = np.arange(1,50).astype('str')
+
+channels = np.arange(1,4).astype('str')
+example_channels = np.arange(1,50).astype('str')
+
+
 default_data_types = {
     'RioPower': {
         'default': 'remote archive',
-        'local capture': {
+        'local realtime': {
             'channels': channels,
             'path': local_base_url + \
-		    'capture/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.txt',
+		    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
@@ -178,8 +194,39 @@ default_data_types = {
             'units': 'dBm',
             'sort': True,
             },
+         'local example archive': {
+            'channels': example_channels,
+            'path': local_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'aurorawatchnet',
+            'load_converter': load_rn_data,
+            'nominal_cadence': np.timedelta64(1000000, 'us'),
+            'units': 'dBm',
+            'sort': True,
+            },
+        'remote realtime': {
+            'channels': channels,
+            'path': remote_base_url + \
+		    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'aurorawatchnet',
+            'load_converter': load_rn_data,
+            'nominal_cadence': np.timedelta64(1000000, 'us'),
+            'units': 'dBm',
+            'sort': True,
+            },
         'remote archive': {
             'channels': channels,
+            'path': remote_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
+            'duration': np.timedelta64(24, 'h'),
+            'format': 'aurorawatchnet',
+            'load_converter': load_rn_data,
+            'nominal_cadence': np.timedelta64(1000000, 'us'),
+            'units': 'dBm',
+            'sort': True,
+            },
+        'remote example archive': {
+            'channels': example_channels,
             'path': remote_base_url + '%Y/%m/{site_lc}_%Y%m%d.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',

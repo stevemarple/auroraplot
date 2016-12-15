@@ -379,14 +379,14 @@ def loadtxt(uh):
     for faster loading of data .txt files. 
 
     '''
-    try:
+    try: 
         import pandas
-        data = pandas.read_csv(uh, sep='\t').values.T
+        data = pandas.read_csv(uh, sep='\s+', header=None).values.T.astype('float64')
     except:
-        try:
+        try: 
             import csv
-            data = np.array([l for l in csv.reader(uh,delimiter='\t')]
-                            ).astype('float64').T
+            data = np.array([l for l in csv.reader(uh,delimiter='\s+')]
+                                    ).astype('float64').T
         except:
             data = np.loadtxt(uh, unpack=True)
     return data
