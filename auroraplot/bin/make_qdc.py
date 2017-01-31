@@ -19,6 +19,7 @@ except:
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
+from auroraplot.tools import smart_open
 import auroraplot.magdata
 import auroraplot.datasets.aurorawatchnet
 import auroraplot.datasets.bgs_schools
@@ -55,6 +56,8 @@ parser.add_argument('--dry-run',
 parser.add_argument('-e', '--end-time',
                     help='End time',
                     metavar='DATETIME')
+parser.add_argument('--filename',
+                    help='Destination file')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -250,16 +253,20 @@ for n in range(len(project_list)):
                 mag_qdc = mag_data.make_qdc(smooth=args.smooth,
                                             plot_quiet_days=args.plot_quiet_days)
 
-                filename = dt64.strftime(t1, qdc_ad['path'])
-                p = os.path.dirname(filename)
-                if not os.path.isdir(p):
-                    os.makedirs(p)
+                if args.filename:
+                    filename = args.filename
+                else:
+                    filename = dt64.strftime(t1, qdc_ad['path'])
+
+                # Expand with project, site, time etc
+                filename = dt64.strftime(t1, filename)
                 if args.dry_run:
                     logger.info('Dry run, not saving QDC to ' + filename)
                 else:
-                    fmt = ['%d']
-                    fmt.extend(['%.3f'] * len(qdc_ad['channels']))
-                    mag_qdc.savetxt(filename, fmt=fmt)
+                    with smart_open(filename, 'w') as fh:
+                        fmt = ['%d']
+                        fmt.extend(['%.3f'] * len(qdc_ad['channels']))
+                        mag_qdc.savetxt(fh, fmt=fmt)
 
         finally:
             t1 = t2

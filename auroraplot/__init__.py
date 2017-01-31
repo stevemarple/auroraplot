@@ -2,7 +2,7 @@
 
 
 __author__ = 'Steve Marple'
-__version__ = '0.6.1'
+__version__ = '0.7.1'
 __license__ = 'PSF'
 
 import copy
@@ -47,6 +47,14 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+# Don't warn about NaNs
+np.seterr(invalid='ignore')
+
+plot_datetime_units = os.getenv('AURORAPLOT_PLOT_DATETIME_UNITS')
+plot_datetime_epoch = os.getenv('AURORAPLOT_PLOT_DATETIME_EPOCH')
+plot_timedelta_units = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_UNITS')
+plot_timedelta_epoch = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_EPOCH')
 
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
@@ -741,7 +749,10 @@ def download_url(url, prefix=__name__, temporary_file=True):
             return None
         
         if temporary_file:
-            local_file = NamedTemporaryFile(prefix=prefix, 
+            # Have temporary file use the same suffix
+            suffix = ''.join(os.path.basename(url_parts.path).partition('.')[1:])
+            local_file = NamedTemporaryFile(prefix=prefix,
+                                            suffix=suffix,
                                             delete=False)
             logger.debug('saving to ' + local_file.name)
             shutil.copyfileobj(url_file, local_file)

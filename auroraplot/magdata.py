@@ -331,6 +331,7 @@ def stack_plot(data_array, offset, channel=None,
                ylabel_fmt='{data:project}\n{data:site}',
                ylabel_color=None,
                add_legend=None,
+               colors=None,
                 **kwargs):
     '''
     Plot multiple MagData objects on a single axes. Magnetometer
@@ -441,17 +442,31 @@ def stack_plot(data_array, offset, channel=None,
         y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) \
                  + (plot_count * offset)).flatten()
 
-        kwargs = {}
+        site_color = None
+        kwargs2 = copy.copy(kwargs)
         try:
-            kwargs['color'] = da[n].get_site_info('line_color')
+            site_color = da[n].get_site_info('line_color')
         except Exception as e:
             pass
+        if colors is not None:
+            try:
+                site_color = colors[n]
+            except Exception as e:
+                pass
+            
+        if site_color is not None:
+            kwargs2['color'] = site_color
+
         lh = dt64.plot_dt64(d.get_mean_sample_time(), 
                             y,
                             label=d.format_project_site(),
-                            **kwargs)
+                            **kwargs2)
         if ylabel_color == 'auto':
             tick_colors.append(lh[0].get_color())
+        elif isinstance(ylabel_color, six.string_types):
+            tick_colors.append(ylabel_color)
+        elif hasattr(ylabel_color, '__getitem__'):
+            tick_colors.append(ylabel_color[n])
         else:
             tick_colors.append(None)
         plot_count += 1
@@ -462,10 +477,7 @@ def stack_plot(data_array, offset, channel=None,
         st = start_time
     if end_time is not None:
         et = end_time
-    xlim = (dt64.dt64_to(st, ax.xaxis.dt64tools.units),
-            dt64.dt64_to(et, ax.xaxis.dt64tools.units))
-    ax.set_xlim(xlim)
-
+    dt64.xlim_dt64(xmin=st, xmax=et, ax=ax)
 
     if offset:
         # Round up to multiple of offset for aesthetic reasons.
@@ -583,7 +595,11 @@ class MagData(Data):
         else:
             warnings.warn('Unknown units')
             a[1:] = self.data 
-        logger.info('saving to ' + filename)
+
+        logger.info('saving to %s',
+                    filename.name if isinstance(filename, file)
+                    else filename)
+
         kwargs = {}
         if fmt is not None:
             kwargs['fmt'] = fmt

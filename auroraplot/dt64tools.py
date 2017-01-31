@@ -2,9 +2,10 @@
 '''Tools for numpy.datetime64 and numpy.timedelta64 time classes'''
 
 import datetime
-import re
-import math
 import logging
+import math
+import os
+import re
 import six
 
 import numpy as np
@@ -14,8 +15,7 @@ import matplotlib.patches as patches
 from matplotlib.ticker import Locator
 from matplotlib.ticker import Formatter
 
-import copy
-
+import auroraplot as ap
 logger = logging.getLogger(__name__)
 
 time_label = 'Time'
@@ -529,9 +529,65 @@ def parse_timedelta64(s, prec):
     return astype(r, units=prec)
 
 
+def t_to_axis_value(t, axis, units=None, epoch=None, fmt=None):
+    t_units = get_units(t)
+    if hasattr(axis, 'dt64tools'):
+        # Axis already has our data
+        axis_data = axis.dt64tools
+        assert t.dtype.type == axis_data.type, 'Cannot add ' \
+            + t.dtype.type + ' to axis using ' + axis_data.type
+        assert time_units.index(t_units) \
+            >= time_units.index(axis_data.units), \
+            'Cannot add time data with units ' + t_units + \
+            ' to existing plot using units ' + axis_data.units
+        if axis_data.epoch is None:
+            # Set and save epoch
+            axis_data.epoch = axis_data.type(0, units)
+            axis.dt64tools = axis_data
+
+    else:
+        if units is None:
+            if t.dtype.type == np.datetime64 and ap.plot_datetime_units:
+                units = ap.plot_datetime_units
+            elif t.dtype.type == np.timedelta64 and ap.plot_timedelta_units:
+                units = ap.plot_timedelta_units
+            else:
+                units = t_units
+
+        if epoch is None:
+            if t.dtype.type == np.datetime64 and ap.plot_datetime_epoch:
+                epoch = ap.plot_datetime_epoch
+            elif t.dtype.type == np.timedelta64 and ap.plot_timedelta_epoch:
+                epoch = ap.plot_timedelta_epoch
+            else:
+                epoch = t.dtype.type(0, units)
+
+
+        axis_data = Dt64ToolsData(units=units, 
+                                  type=t.dtype.type,
+                                  epoch=dt64_to(epoch, units).astype('int64'))
+        axis.dt64tools = axis_data
+        # Set some default formatting
+        ### TODO: Correct locator and formatter for timedelta64
+        axis.set_major_locator(Datetime64Locator())
+        # if axis_data.type == np.datetime64:
+        axis.set_major_formatter(Datetime64Formatter(fmt=fmt))
+
+        # plt.xticks(rotation=-25)
+
+    # Transform x to suitable units
+    val = dt64_to(t, axis_data.units)
+
+    if axis_data.epoch is not None:
+        val -= axis_data.epoch
+    return val
+
+
 def plot_dt64(x, y, axes=None, 
               # Our own options
               x_time_units=None, y_time_units=None, plot_func=plt.plot,
+              x_time_fmt=None, y_time_fmt=None,
+              x_time_epoch=None, y_time_epoch=None,
               #
               **kwargs):
     if axes is None:
@@ -555,32 +611,7 @@ def plot_dt64(x, y, axes=None,
         units = get_units(x)
         assert units in time_units, 'Unknown units'
         assert units not in ['M', 'Y'], 'Time units cannot be month or year'
-        if hasattr(axes.xaxis, 'dt64tools'):
-            # Axis already has our data
-            axis_data = axes.xaxis.dt64tools
-            assert x.dtype.type == axis_data.type, 'Cannot add ' \
-                + x.dtype.type + ' to axis using ' + axis_data.type
-            assert time_units.index(units) \
-                >= time_units.index(axis_data.units), \
-                'Cannot add time data with units ' + units + \
-                ' to existing plot using units ' + axis_data.units
-        else:
-            if x_time_units is None:
-                x_time_units = units
-            axis_data = Dt64ToolsData(units=x_time_units, 
-                                      type=x.dtype.type)
-            axes.xaxis.dt64tools = axis_data
-
-            # Set some default formatting
-            ### TODO: Correct locator and formatter for timedelta64
-            axes.xaxis.set_major_locator(Datetime64Locator())
-            # if axis_data.type == np.datetime64:
-            axes.xaxis.set_major_formatter(Datetime64Formatter())
-
-            # plt.xticks(rotation=-25)
-
-        # Transform x to suitable units
-        xx = dt64_to(x, axis_data.units)
+        xx = t_to_axis_value(x, axes.xaxis, units=x_time_units, epoch=x_time_epoch, fmt=x_time_fmt)
     else:
         xx = x
 
@@ -588,32 +619,7 @@ def plot_dt64(x, y, axes=None,
         units = get_units(y)
         assert units in time_units, 'Unknown units'
         assert units not in ['M', 'Y'], 'Time units cannot be month or year'
-        if hasattr(axes.yaxis, 'dt64tools'):
-            # Axis already has our data
-            axis_data = axes.yaxis.dt64tools
-            assert y.dtype.type == axis_data.type, 'Cannot add ' \
-                + y.dtype.type + ' to axis using ' + axis_data.type
-            assert time_units.indey(units) \
-                >= time_units.indey(axis_data.units), \
-                'Cannot add time data with units ' + units + \
-                ' to existing plot using units ' + axis_data.units
-        else:
-            if y_time_units is None:
-                y_time_units = units
-            axis_data = Dt64ToolsData(units=y_time_units, 
-                                      type=y.dtype.type)
-            axes.yaxis.dt64tools = axis_data
-
-            # Set some default formatting
-            ### TODO: Correct locator and formatter for timedelta64
-            axes.yaxis.set_major_locator(Datetime64Locator())
-            # if axis_data.type == np.datetime64:
-            axes.yaxis.set_major_formatter(Datetime64Formatter())
-
-            plt.yticks(rotation=-25)  
-
-        # Transform y to suitable units
-        yy = dt64_to(y, axis_data.units)
+        yy = t_to_axis_value(y, axes.yaxis, units=y_time_units, epoch=y_time_epoch, fmt=y_time_fmt)
     else:
         yy = y
         
@@ -644,9 +650,9 @@ def xlim_dt64(xmin=None, xmax=None, ax=None):
     if ax is None:
         ax = plt.gca()
     if xmin is not None:
-        xmin = dt64_to(xmin, ax.xaxis.dt64tools.units)
+        xmin = t_to_axis_value(xmin, ax.xaxis)
     if xmax is not None:
-        xmax = dt64_to(xmax, ax.xaxis.dt64tools.units)
+        xmax = t_to_axis_value(xmax, ax.xaxis)
     return ax.set_xlim(xmin=xmin, xmax=xmax)
 
 
@@ -654,9 +660,9 @@ def ylim_dt64(ymin=None, ymax=None, ax=None):
     if ax is None:
         ax = plt.gca()
     if ymin is not None:
-        ymin = dt64_to(ymin, ax.yaxis.dt64tools.units)
+        ymin = t_to_axis_value(ymin, ax.yaxis)
     if ymax is not None:
-        ymax = dt64_to(ymax, ax.yaxis.dt64tools.units)
+        ymax = t_to_axis_value(ymax, ax.yaxis)
     return ax.set_ylim(ymin=ymin, ymax=ymax)
 
 
@@ -673,9 +679,10 @@ def highlight(ax, st, et, color='y', **kwargs):
                                    **kwargs))
 
 class Dt64ToolsData(object):
-    def __init__(self, units, type):
+    def __init__(self, units, type, epoch):
         self.units = units
         self.type = type
+        self.epoch = epoch
 
 class Datetime64Locator(Locator):
     '''Locator class for numpy.datetime64'''
@@ -689,13 +696,13 @@ class Datetime64Locator(Locator):
         if not hasattr(self.axis, 'dt64tools'):
             raise Exception('dt64tools data not found on axis')
         units = self.axis.dt64tools.units
+        epoch = self.axis.dt64tools.epoch
         limits = self.axis.get_view_interval()
-
         if np.diff(limits) < 1:
             logger.warn('limit for tick labels reached')
             return []
 
-        limits_dt64 = (limits.astype('m8[' + units + ']') + 
+        limits_dt64 = ((epoch+limits).astype('m8[' + units + ']') + 
                        self.axis.dt64tools.type(0, units))
 
         if self.interval is not None:
@@ -706,10 +713,11 @@ class Datetime64Locator(Locator):
             first_tick = ceil(limits_dt64[0], tick_interval)
             last_tick = floor(limits_dt64[1], tick_interval)
             num = np.floor(((last_tick - first_tick) / 
-                            tick_interval) + 1).astype(int)
-            tick_locs = ((dt64_to(tick_interval, units).astype(int) 
+                            tick_interval) + 1).astype('int64')
+            tick_locs = ((dt64_to(tick_interval, units).astype('int64') 
                           * np.arange(num))
-                         + first_tick.astype(int))
+                         + first_tick.astype('int64')) - epoch
+
             try:
                 return self.raise_if_exceeds(tick_locs)
             except RuntimeError as e:
@@ -887,7 +895,7 @@ class Datetime64Formatter(Formatter):
             raise Exception('Cannot find axis time units')
 
         units = self.axis.dt64tools.units
-
+        epoch = self.axis.dt64tools.epoch
         fmt = self.fmt
         if pos is None:
             # Showing cursor location
@@ -932,7 +940,9 @@ class Datetime64Formatter(Formatter):
                 f.append('%H')
             fmt = '\n'.join(f)
 
-        t = np.datetime64(int(x), units)
+        # t = np.datetime64(int(x), units)
+        #t = self.axis.dt64tools.type(int(x + epoch), units)
+        t = np.datetime64(int(x + epoch), units)
         r = strftime(t, fmt) 
         if pos == 1:
             self.axis.dt64tools.tick_fmt = fmt

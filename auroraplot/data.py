@@ -767,8 +767,7 @@ class Data(object):
                                         x_time_units=time_units,
                                         label=channels[n], **kwargs)[0])
 
-            ax.set_xlim(dt64.dt64_to(start_time, ax.xaxis.dt64tools.units),
-                        dt64.dt64_to(end_time, ax.xaxis.dt64tools.units))
+            dt64.xlim_dt64(xmin=start_time, xmax=end_time, ax=ax)
             
             if not need_legend:
                 # Lines plotted on different axes
@@ -1424,7 +1423,9 @@ class Data(object):
             if not os.path.exists(dir_name):
                 logger.debug('making directory %s', dir_name)
                 os.makedirs(dir_name)
-            logger.info('saving to %s', file_name)
+            logger.info('saving to %s',
+                        file_name.name if isinstance(file_name, file)
+                        else file_name)
             save_converter(d, file_name, ai)
 
 

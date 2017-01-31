@@ -82,8 +82,8 @@ def load_bgs_sch_data(file_name,
         col_idx.append(data_type_info[data_type]['col_offset'] + 
                        chan_tup.index(c))
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+        if os.path.exists(file_name):
+            uh = open(file_name)
         else:
             uh = urlopen(file_name)
         try:
@@ -355,6 +355,168 @@ sites = {
             },
         }, # LAN2
 
+    'ALE': { # Previously BGS7
+        'location': 'Alexandria, UK',
+        'latitude': Decimal('55.980'), 
+        'longitude': Decimal('-4.583'),
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-11-22T00:00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 750e-9, # Estimated
+        'k_index_filter': None,
+        'copyright': 'British Geological Survey.',
+        'license': cc3_by_nc_sa,
+        'attribution':  'British Geological Survey.',
+        'line_color': [0x60/255., 0x00/255., 0x00/255.],
+        'url': 'http://www.scottishschools.info/valeoflevenacademy/',
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs7/%Y/%m/bgs7_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'swap_H_E': True,                    
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs7/%Y/%m/bgs7_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'swap_H_E': True,                    
+                    'filter_function': remove_spikes,
+                    },
+                'realtime_baseline': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': (data_dir +
+                             '/baseline/realtime/bgs7/ale_%Y.txt'),
+                    'duration': np.timedelta64(1, 'Y'),
+                    'load_converter': ap.data._generic_load_converter,
+                    'save_converter': ap.data._generic_save_converter,
+                    'nominal_cadence': np.timedelta64(1, 'D'),
+                    'units': 'T',
+                    # Information for generic load/save 
+                    'constructor': ap.magdata.MagData,
+                    'sort': False,
+                    'timestamp_method': 'YMD',
+                    'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
+                    'data_multiplier': 1000000000, # Store as nT values
+                    # Information for making the data files
+                    'qdc_fit_duration': np.timedelta64(10, 'D'),
+                    'realtime_qdc': True,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/bgs7/qdc/%Y/bgs7_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/bgs7/%Y/%m/bgs7_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+    }, # ALE    
+    'BEN': { # Previously BGS6
+        'location': 'Isle of Benbecula, UK',
+        'latitude': Decimal('57.426'), 
+        'longitude': Decimal('-7.360'),
+        'elevation': np.nan,
+        'start_time': np.datetime64('2016-11-22T00:00:00Z'),
+        'end_time': None, # Still operational
+        'k_index_scale': 800e-9, # Estimated
+        'k_index_filter': None,
+        'copyright': 'British Geological Survey.',
+        'license': cc3_by_nc_sa,
+        'attribution':  'British Geological Survey.',
+        'line_color': [0xda/255., 0x25/255., 0x1d/255.],
+        'url': 'http://www.sgoillionacleit.org.uk/',
+        'data_types': {
+            'MagData': {
+                'default': 'realtime',
+                'raw': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/ben/%Y/%m/bgs6_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                'realtime': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/ben/%Y/%m/bgs6_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    'filter_function': remove_spikes,
+                    },
+                'realtime_baseline': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': (data_dir +
+                             '/baseline/realtime/ben/ben_%Y.txt'),
+                    'duration': np.timedelta64(1, 'Y'),
+                    'load_converter': ap.data._generic_load_converter,
+                    'save_converter': ap.data._generic_save_converter,
+                    'nominal_cadence': np.timedelta64(1, 'D'),
+                    'units': 'T',
+                    # Information for generic load/save 
+                    'constructor': ap.magdata.MagData,
+                    'sort': False,
+                    'timestamp_method': 'YMD',
+                    'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
+                    'data_multiplier': 1000000000, # Store as nT values
+                    # Information for making the data files
+                    'qdc_fit_duration': np.timedelta64(10, 'D'),
+                    'realtime_qdc': True,
+                    },
+                },
+            'MagQDC': {
+                'qdc': {
+                    'channels': np.array(['H', 'E', 'Z']),
+                    'path': data_dir + '/ben/qdc/%Y/bgs6_qdc_%Y%m.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet_qdc',
+                    'load_converter': ap.magdata.load_qdc_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': 'T',
+                    },
+                },
+            'TemperatureData': {
+                'realtime': {
+                    'channels': np.array(['Sensor temperature']),
+                    'path': data_dir + '/ben/%Y/%m/bgs6_%Y%m%d.csv',
+                    'duration': np.timedelta64(24, 'h'),
+                    'format': 'aurorawatchnet',
+                    'load_converter': load_bgs_sch_data,
+                    'nominal_cadence': np.timedelta64(10, 's'),
+                    'units': six.u('\N{DEGREE SIGN}C'),
+                    },
+                },
+            },
+    }, # BEN    
     'BRO': { # Formerly BGS8
         'location': 'Broxburn, UK',
         'latitude': Decimal('55.94'),

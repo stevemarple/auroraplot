@@ -18,6 +18,7 @@ import requests
 import numpy as np
 
 import auroraplot as ap
+import auroraplot.auroralactivity
 import auroraplot.data
 import auroraplot.auroralactivity
 from auroraplot.magdata import MagData as MagData
@@ -108,12 +109,9 @@ def load_new_samnet_data(file_name, archive_data,
             return float(x)/1e9
 
     try:
-        if file_name.startswith('/'):
-            fh = urlopen('file:' + file_name)
-            # Pass the file name instead of a file handle.
-            # fh = file_name
+        if os.path.exists(file_name):
+            fh = open(file_name)
         else:
-            # fh = urlopen(file_name)
             req = requests.get(file_name, stream=True)
             fh = req.raw
         try:
@@ -836,7 +834,7 @@ default_data_types = {
     'AuroraWatchActivity': {
         'realtime': {
             'channels': np.array(['Activity']),
-            'path': base_url + 'activity/aurorawatch/{site_lc}/%Y/{site_lc}_%Y%m.txt',
+            'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
             'duration': np.timedelta64(1, 'Y'),
             'load_converter': ap.data._generic_load_converter,
             'save_converter': ap.data._generic_save_converter,
