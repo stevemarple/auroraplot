@@ -50,7 +50,7 @@ def load_rn_data(file_name, archive_data,
             'data_check': check_rio_data,
             },
         }
-    
+
     assert data_type in data_type_info, 'Illegal data_type'
     chan_tup = tuple(archive_data['channels'])
     col_idx = []
@@ -138,9 +138,9 @@ sites = {
         'end_time': None, # Still operational
         'copyright': 'Lancaster University (UK).',
         'license': 'Data users are not entitled to distribute data to third '\
-		   'parties outside their own research teams without '\
-		   'requesting permission from the project PI '\
-	           '(Prof. F. Honary)',
+                   'parties outside their own research teams without '\
+                   'requesting permission from the project PI '\
+                   '(Prof. F. Honary)',
         'attribution': 'The acknowledgement on published papers should state:'\
                    '"The data originated from the Imaging Riometer for '\
                    'Ionospheric Studies (IRIS), operated by the Space Plasma '\
@@ -150,17 +150,18 @@ sites = {
         'line_color': [0, 0.6, 0],
         },
     'rio-ice1': {
-        'location': 'Iceland',
-        'latitude': 69.05,
-        'longitude': 20.79,
-        'elevation': 0, # Estimate from google
-        'start_time': np.datetime64('2016-11-25T00:00Z'),
+        'location': 'Karholl, Laugar, Iceland',
+        'latitude': 65.70605,
+        'longitude': -17.363167,
+        'elevation': 0,
+        'start_time': np.datetime64('2017-02-01T00:00Z'),
         'end_time': None, # Still operational
-        'copyright': '',
+        'copyright': 'Polar Research Institute of China',
         'license': 'Data users are not entitled to distribute data to third '\
-		   'parties outside their own research teams without '\
-		   'requesting permission from the project PI.',
-        'attribution': '', 
+                   'parties outside their own research teams without '\
+                   'requesting permission from the project Polar Research '\
+                   'Institute of China.',
+        'attribution': '',
         'line_color': [0.6, 0, 0],
         },
     }
@@ -176,7 +177,7 @@ default_data_types = {
         'local realtime': {
             'channels': channels,
             'path': local_base_url + \
-		    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
+                    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
@@ -207,7 +208,7 @@ default_data_types = {
         'remote realtime': {
             'channels': channels,
             'path': remote_base_url + \
-		    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
+                    'riometernet/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.rt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet',
             'load_converter': load_rn_data,
