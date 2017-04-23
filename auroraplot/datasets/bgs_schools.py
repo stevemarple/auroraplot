@@ -1,6 +1,7 @@
 import copy
 from decimal import Decimal
 import logging
+import numpy as np
 import os
 import traceback
 
@@ -13,7 +14,6 @@ except ImportError:
     from urlparse import urlparse
     from urllib import urlopen
 
-import requests
 import numpy as np
 
 import auroraplot as ap
@@ -25,17 +25,21 @@ logger = logging.getLogger(__name__)
 
 data_dir = 'http://aurorawatch.lancs.ac.uk/data/bgs_sch'
 
+
 def check_mag_data(data):
     data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
     return data
+
 
 def check_temperature(data):
     data[np.logical_or(data < -40, data > 100)] = np.nan
     return data
 
+
 def check_voltage(data):
     data[np.logical_or(data < 0, data > 10)] = np.nan
     return data
+
 
 def load_bgs_sch_data(file_name,
                       archive_data,
@@ -47,12 +51,12 @@ def load_bgs_sch_data(file_name,
                       end_time,
                       invalid_raise=False,
                       **kwargs):
-    '''Convert AuroraWatchNet data to match standard data type
+    """Convert AuroraWatchNet data to match standard data type
 
     data: MagData or other similar format data object
     archive: name of archive from which data was loaded
     archive_info: archive metadata
-    '''
+    """
 
     data_type_info = {
         'MagData': {
@@ -61,7 +65,7 @@ def load_bgs_sch_data(file_name,
             'scaling': 1e-9,
             'data_check': check_mag_data,
             },
-        'TemperatureData' : {
+        'TemperatureData': {
             'class': TemperatureData,
             'col_offset': 4,
             'scaling': 1,
@@ -95,31 +99,29 @@ def load_bgs_sch_data(file_name,
                                  unpack=True, 
                                  invalid_raise=invalid_raise, 
                                  **kw)
-            sample_start_time = ap.epoch64_us + \
-                (np.timedelta64(1000000, 'us') * data[0])
+            sample_start_time = ap.epoch64_us + (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
-            integration_interval = np.ones([len(channels), 
+            integration_interval = np.ones([len(channels),
                                             len(sample_start_time)],
-                                            dtype='m8[us]')
+                                           dtype='m8[us]')
             data = data[col_idx] * data_type_info[data_type]['scaling']
             if data_type == 'MagData' and archive_data.get('swap_H_E'):
-                data[[0,1]] = data[[1,0]]
+                data[[0, 1]] = data[[1, 0]]
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)
-            r = data_type_info[data_type]['class']( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            r = data_type_info[data_type]['class'](project=project,
+                                                   site=site,
+                                                   channels=channels,
+                                                   start_time=start_time,
+                                                   end_time=end_time,
+                                                   sample_start_time=sample_start_time,
+                                                   sample_end_time=sample_end_time,
+                                                   integration_interval=integration_interval,
+                                                   nominal_cadence=archive_data['nominal_cadence'],
+                                                   data=data,
+                                                   units=archive_data['units'],
+                                                   sort=True)
             return r
 
         except Exception as e:
@@ -137,7 +139,8 @@ def load_bgs_sch_data(file_name,
 
 def remove_spikes(md, **kwargs):
     return md.remove_spikes_chauvenet(savgol_window=np.timedelta64(5, 'm'),
-                                      chauvenet_window=np.array([89,79]).astype('timedelta64[s]'))
+                                      chauvenet_window=np.array([89, 79]).astype('timedelta64[s]'))
+
 
 def temperature_compensation(md, inplace=False, cadence=None, **kwargs):
     # Set cadence to reduce noise
@@ -184,28 +187,28 @@ sites = {
         'longitude': Decimal('-2.78'),
         'elevation': 27,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 650e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 650e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'Steve Marple.',
         'license': cc3_by_nc_sa,
-        'attribution':  'Space and Plasma Physics group, ' + \
-            'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, ' + \
+                       'Department of Physics, Lancaster University, UK.',
         'line_color': [1, 0, 0],
-        }, # BGS3
+    },  # BGS3
 
-    'LAN1': { # Formerly BGS4
+    'LAN1': {  # Formerly BGS4
         'location': 'Lancaster, UK',
         'latitude': Decimal('54.0'),
         'longitude': Decimal('-2.78'),
         'elevation': 27,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 650e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 650e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'Steve Marple/British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution': 'Operated by Steve Marple.', 
+        'attribution': 'Operated by Steve Marple.',
         'line_color': [0, 0.6, 0],
         'data_types': {
             'MagData': {
@@ -218,7 +221,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
@@ -228,7 +231,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -243,12 +246,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -258,8 +261,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -269,25 +272,25 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-        }, # LAN1
+        },
+    },  # LAN1
 
-    'LAN2': { # Formerly BGS5
+    'LAN2': {  # Formerly BGS5
         'location': 'Lancaster, UK',
         'latitude': Decimal('54.01'),
         'longitude': Decimal('-2.77'),
         'elevation': 93,
         'start_time': np.datetime64('2015-10-19T00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 650e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 650e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'Lancaster University.',
         'license': cc3_by_nc_sa,
-        'attribution':  'Space and Plasma Physics group, ' + \
-            'Department of Physics, Lancaster University, UK.',
-        'line_color': [0x7b/255., 0x03/255., 0x48/255.],
+        'attribution': 'Space and Plasma Physics group, ' + \
+                       'Department of Physics, Lancaster University, UK.',
+        'line_color': [0x7b / 255., 0x03 / 255., 0x48 / 255.],
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -299,7 +302,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/lan2/%Y/%m/lan2_%Y%m%d.csv',
@@ -309,7 +312,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -324,12 +327,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -339,8 +342,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -350,24 +353,24 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-        }, # LAN2
+        },
+    },  # LAN2
 
-    'ALE': { # Previously BGS7
+    'ALE': {  # Previously BGS7
         'location': 'Alexandria, UK',
-        'latitude': Decimal('55.980'), 
+        'latitude': Decimal('55.980'),
         'longitude': Decimal('-4.583'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-11-22T00:00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 750e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 750e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution':  'British Geological Survey.',
-        'line_color': [0x60/255., 0x00/255., 0x00/255.],
+        'attribution': 'British Geological Survey.',
+        'line_color': [0x60 / 255., 0x00 / 255., 0x00 / 255.],
         'url': 'http://www.scottishschools.info/valeoflevenacademy/',
         'data_types': {
             'MagData': {
@@ -380,8 +383,8 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    'swap_H_E': True,                    
-                    },
+                    'swap_H_E': True,
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/bgs7/%Y/%m/bgs7_%Y%m%d.csv',
@@ -390,9 +393,9 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    'swap_H_E': True,                    
+                    'swap_H_E': True,
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -407,12 +410,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -422,8 +425,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -433,23 +436,23 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-    }, # ALE    
-    'BEN': { # Previously BGS6
+        },
+    },  # ALE    
+    'BEN': {  # Previously BGS6
         'location': 'Isle of Benbecula, UK',
-        'latitude': Decimal('57.426'), 
+        'latitude': Decimal('57.426'),
         'longitude': Decimal('-7.360'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-11-22T00:00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 800e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 800e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution':  'British Geological Survey.',
-        'line_color': [0xda/255., 0x25/255., 0x1d/255.],
+        'attribution': 'British Geological Survey.',
+        'line_color': [0xda / 255., 0x25 / 255., 0x1d / 255.],
         'url': 'http://www.sgoillionacleit.org.uk/',
         'data_types': {
             'MagData': {
@@ -462,7 +465,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/ben/%Y/%m/bgs6_%Y%m%d.csv',
@@ -472,7 +475,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -487,12 +490,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -502,8 +505,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -513,23 +516,23 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-    }, # BEN    
-    'BRO': { # Formerly BGS8
+        },
+    },  # BEN    
+    'BRO': {  # Formerly BGS8
         'location': 'Broxburn, UK',
         'latitude': Decimal('55.94'),
         'longitude': Decimal('-3.47'),
         'elevation': 245,
         'start_time': np.datetime64('2016-06-02T00:00Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 750e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 750e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution':  'British Geological Survey.',
-        'line_color': [0x07/255., 0x0e/255., 0x68/255.],
+        'attribution': 'British Geological Survey.',
+        'line_color': [0x07 / 255., 0x0e / 255., 0x68 / 255.],
         'url': 'https://blogs.glowscotland.org.uk/wl/broxburnps/',
         'data_types': {
             'MagData': {
@@ -542,7 +545,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/bgs8/%Y/%m/bgs8_%Y%m%d.csv',
@@ -552,7 +555,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -567,12 +570,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -582,8 +585,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -593,24 +596,24 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-        }, # BRX
+        },
+    },  # BRX
 
-    'NOR': { # Previously BGS9
+    'NOR': {  # Previously BGS9
         'location': 'Norwich, UK',
         'latitude': Decimal('52.6316'),
         'longitude': Decimal('1.30042'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-08-16T12:30Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 580e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 580e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution':  'British Geological Survey.',
-        'line_color': [0x70/255., 0x00/255., 0x3b/255.],
+        'attribution': 'British Geological Survey.',
+        'line_color': [0x70 / 255., 0x00 / 255., 0x3b / 255.],
         'url': 'http://www.norwich-school.org.uk/',
         'data_types': {
             'MagData': {
@@ -623,7 +626,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/nor/%Y/%m/bgs9_%Y%m%d.csv',
@@ -634,7 +637,7 @@ sites = {
                     'units': 'T',
                     'filter_function': remove_spikes,
                     'swap_H_E': True,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -649,12 +652,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -664,8 +667,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -675,24 +678,24 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-        }, # NOR
+        },
+    },  # NOR
 
-    'OUN': { # Previously BGS10
+    'OUN': {  # Previously BGS10
         'location': 'Oundle, UK',
-        'latitude': Decimal('52.4809'), 
+        'latitude': Decimal('52.4809'),
         'longitude': Decimal('-0.46904'),
         'elevation': np.nan,
         'start_time': np.datetime64('2016-08-15T15:30Z'),
-        'end_time': None, # Still operational
-        'k_index_scale': 560e-9, # Estimated
+        'end_time': None,  # Still operational
+        'k_index_scale': 560e-9,  # Estimated
         'k_index_filter': None,
         'copyright': 'British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution':  'British Geological Survey.',
-        'line_color': [0x05/255., 0x31/255., 0x61/255.],
+        'attribution': 'British Geological Survey.',
+        'line_color': [0x05 / 255., 0x31 / 255., 0x61 / 255.],
         'url': 'http://www.oundleschool.org.uk/',
         'data_types': {
             'MagData': {
@@ -705,7 +708,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': data_dir + '/oun/%Y/%m/bgs10_%Y%m%d.csv',
@@ -715,7 +718,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'filter_function': remove_spikes,
-                    },
+                },
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
@@ -730,12 +733,12 @@ sites = {
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-                    'data_multiplier': 1000000000, # Store as nT values
+                    'data_multiplier': 1000000000,  # Store as nT values
                     # Information for making the data files
                     'qdc_fit_duration': np.timedelta64(10, 'D'),
                     'realtime_qdc': True,
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -745,8 +748,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
@@ -756,12 +759,12 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
             },
-        }, # OUN
+        },
+    },  # OUN
 
-    }
+}
 
 
 # Default values for all sites
@@ -770,7 +773,7 @@ defaults = {
     'activity_colors':  np.array([[0.2, 1.0, 0.2],  # green  
                                   [1.0, 1.0, 0.0],  # yellow
                                   [1.0, 0.6, 0.0],  # amber
-                                  [1.0, 0.0, 0.0]]), # red
+                                  [1.0, 0.0, 0.0]]),  # red
     'copyright': 'Copyright ???',
     'license': cc3_by_nc_sa,
     }
@@ -824,7 +827,7 @@ default_data_types = {
 
 for s in sites:
     sd = sites[s]
-    for key,val in defaults.items():
+    for key, val in defaults.items():
         if key not in sd:
             sd[key] = val
             
