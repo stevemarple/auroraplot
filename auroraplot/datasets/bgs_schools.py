@@ -765,7 +765,7 @@ sites = {
     },  # OUN
 
     'DUN': {  # Previously BGS2
-        'location': 'Dunedin, NZ',
+        'location': 'Dunedin, New Zealand',
         'latitude': Decimal('-45.8'),
         'longitude': Decimal('170.5'),
         'elevation': np.nan,
