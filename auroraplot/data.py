@@ -1350,5 +1350,20 @@ class Data(object):
         r = r.mark_missing_data(3*r.nominal_cadence)
         
         return r
-    
-        
+
+    def sliding_window(self, func, window, start_time=None, end_time=None):
+        if start_time is None:
+            start_time = self.start_time
+        if end_time is None:
+            end_time = self.end_time
+        w2 = window / 2
+        r = copy.deepcopy(self)
+        tidx = np.nonzero(np.logical_and(self.sample_start_time >= start_time, self.sample_end_time <= end_time))[0]
+        mst = self.get_mean_sample_time()
+        for i in tidx:
+            idx2 = np.nonzero(np.logical_and(self.sample_start_time >= mst[i] - w2,
+                                             self.sample_end_time <= mst[i] + w2))[0]
+            for j in range(self.data.shape[0]):
+                r.data[j][i] = func(self.data[j][idx2])
+        return r
+
