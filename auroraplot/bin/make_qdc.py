@@ -224,12 +224,9 @@ for n in range(len(project_list)):
         t2 = dt64.get_start_of_next_month(t1)
         try:
             if args.only_missing:
-                # To do: this ought to use a function which handles
-                # cases when path is a function
-                qdc_file_name = dt64.strftime(t1, qdc_ad['path'])
-                if os.path.exists(qdc_file_name):
-                    logger.info('skipping QDC generation file exists: %s',
-                                qdc_file_name)
+                mag_qdc = ap.magdata.load_qdc(project, site, t1)
+                if mag_qdc is not None and mag_qdc.data.size != 0 and not np.any(np.isnan(mag_qdc.data)):
+                    logger.info('QDC for %s/%s %s already exists', project, site, dt64.strftime(t1, '%Y-%m-%d'))
                     continue
 
             kwargs = {}
