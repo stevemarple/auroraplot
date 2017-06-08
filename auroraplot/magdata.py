@@ -779,9 +779,11 @@ class MagData(Data):
     
     def make_qdc(self, nquiet=5, channels=None, 
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 quiet_days_method=None, 
+                 quiet_days_method=None,
                  smooth=True,
-                 plot_quiet_days=False):
+                 plot_quiet_days=False,
+                 remove_nans_window=np.timedelta64(10, 'm'),
+                 remove_nans_func=np.nanmean):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
         if plot_quiet_days:
@@ -802,7 +804,7 @@ class MagData(Data):
             count[not_nan] += 1
 
         qdc_data /= count
-            
+
         qdc = MagQDC(project=self.project,
                      site=self.site,
                      channels=qd[0].channels,
@@ -812,10 +814,14 @@ class MagData(Data):
                      sample_end_time=sam_et,
                      integration_interval=None,
                      nominal_cadence=cadence,
-                      data=qdc_data,
+                     data=qdc_data,
                      units=self.units,
                      sort=False)
-        
+
+        if remove_nans_window and remove_nans_func and np.any(np.isnan(qdc.data)):
+            qdc_no_nans = qdc.sliding_window(remove_nans_func, remove_nans_window)
+            qdc = ap.data.first_non_nan([qdc, qdc_no_nans])
+
         if smooth:
             qdc.smooth(inplace=True)
 
