@@ -260,6 +260,23 @@ def _generic_save_converter(d, file_name, archive_data):
         np.savetxt(fh, data.T, delimiter='\t', fmt=archive_data['fmt'])
 
 
+def first_non_nan(data_list):
+    """
+    Return the first non-NaN data from a list of data objects.
+    :param data_list:
+    :return Data:
+    """
+    d = copy.copy(data_list)
+    r = copy.deepcopy(d.pop(0))
+    while len(d):
+        if not np.any(np.isnan(r.data)):
+            break
+        a = d.pop(0)
+        nans = np.isnan(r.data)
+        r.data[nans] = a.data[nans]
+    return r
+
+
 class Data(object):
     '''Base class for time-series data.'''
 
