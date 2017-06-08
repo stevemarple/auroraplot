@@ -63,6 +63,9 @@ parser.add_argument('--log-format',
                     # default='%(levelname)s:%(message)s',
                     help='Set format of log messages',
                     metavar='FORMAT')
+parser.add_argument('--missing-only',
+                    action='store_true',
+                    help='Only calculate values that are missing from the archive')
 parser.add_argument('--overwrite',
                     action='store_true',
                     help='Overwrite existing values')
@@ -188,6 +191,14 @@ for n in range(len(project_list)):
     for t1 in dt64.dt64_range(site_st, site_et, day):
         try:
             t2 = t1 + day
+
+            if args.missing_only:
+                data = ap.load_data(project, site, 'MagData', t1, t2, archive=bl_archive)
+                if data is not None and np.size(data.data) and np.all(np.isfinite(data.data)):
+                    logger.info('baseline data for %s/%s %s already exists', project, site,
+                                dt64.strftime(t1, '%Y-%m-%d'))
+                    continue
+
             # Calculate dates for data to be used for fitting
             md_mean_time = dt64.mean(t1, t2) + qdc_fit_offset
             md_st = md_mean_time - qdc_fit_duration/2
