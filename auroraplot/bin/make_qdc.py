@@ -3,8 +3,6 @@ import argparse
 from importlib import import_module
 import logging
 import os
-import os.path
-import sys
 import time
 
 import numpy as np
