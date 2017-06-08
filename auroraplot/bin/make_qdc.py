@@ -253,6 +253,9 @@ for n in range(len(project_list)):
                 mag_qdc = mag_data.make_qdc(smooth=args.smooth,
                                             plot_quiet_days=args.plot_quiet_days)
 
+                if args.plot_quiet_days:
+                    mag_qdc.plot(title='Final QDC')
+                    
                 if args.filename:
                     filename = args.filename
                 else:
