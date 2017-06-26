@@ -137,6 +137,9 @@ parser.add_argument('--dpi',
                     type=float,
                     default=80,
                     help='DPI when saving plot')
+parser.add_argument('--with-qdc',
+                    action='store_true',
+                    help='Plot QDC with magdata')
 
 plot_type = parser.add_mutually_exclusive_group(required=False)
 plot_type.add_argument('--stack-plot', 
@@ -353,6 +356,17 @@ if args.plot_type is None or args.plot_type == 'stack_plot':
     if len(mdl) == 1:
         # No point in using a stackplot for a single site
         mdl[0].plot(**plot_args)
+        if args.with_qdc:
+            qdc = ap.magdata.load_qdc(mdl[0].project, 
+                                      mdl[0].site,
+                                      dt64.mean(mdl[0].start_time, 
+                                                mdl[0].end_time),
+                                      channels=mdl[0].channels,
+                                      tries=args.qdc_tries)
+            # Align in time and fit to the baseline values
+            qdca = qdc.align(mdl[0], fit='realtime_baseline')
+            qdca.plot(figure=plt.gcf(), color='gray', zorder=-1)
+            
     else:
         # Create a stackplot.
         ap.magdata.stack_plot(mdl, 
