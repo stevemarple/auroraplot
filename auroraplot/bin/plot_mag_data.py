@@ -372,6 +372,7 @@ if args.plot_type is None or args.plot_type == 'stack_plot':
         ap.magdata.stack_plot(mdl, 
                               offset=args.offset * 1e-9,
                               channel=args.channels.split(),
+                              ylabel_color='auto',
                               add_legend=args.legend)
 else:
     # Every other plot type makes one figure per site
