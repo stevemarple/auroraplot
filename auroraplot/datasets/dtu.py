@@ -123,6 +123,8 @@ sites = {
 
 for s in sites:
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
+    sites[s]['start_time'] = None
+    sites[s]['end_time'] = None
 
 project = {
     'name': 'DTU Space Ground Magnetometer Network',
