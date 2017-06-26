@@ -511,7 +511,7 @@ sites = {
         'longitude': Decimal('-20.56'),
         'elevation': np.nan,
         'start_time': np.datetime64('1998-10-06T00:00:00+0000', 's'),
-        'end_time': None,
+        'end_time': np.datetime64('2011-05-19T00:00:00+0000', 's'),
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
