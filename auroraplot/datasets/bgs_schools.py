@@ -181,7 +181,7 @@ cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
     'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
-    'BIR1': {  # Previously BGS3 at Lancaster
+    'BHM1': {  # Previously BGS3 at Lancaster
         'location': 'Birmingham, UK',
         'latitude': Decimal('52.449967'),
         'longitude': Decimal('-1.928980'),
@@ -259,7 +259,7 @@ sites = {
                 },
             },
         },
-    },  # BIR1
+    },  # BHM1
 
     'LAN1': {  # Formerly BGS4
         'location': 'Lancaster, UK',
