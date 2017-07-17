@@ -27,7 +27,11 @@ data_dir = 'http://aurorawatch.lancs.ac.uk/data/bgs_sch'
 
 
 def check_mag_data(data):
-    data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
+    bad_data_mask = np.logical_or(data < -0.0001, data > 0.0001)
+    pc = (100.0 * np.count_nonzero(bad_data_mask)) / data.size
+    if pc > 1:
+        logger.warning('%.2f%% of data outside of expected range', pc)
+    data[bad_data_mask] = np.nan
     return data
 
 
