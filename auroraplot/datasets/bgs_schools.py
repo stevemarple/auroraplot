@@ -261,25 +261,25 @@ sites = {
         },
     },  # BHM1
 
-    'LAN1': {  # Formerly BGS4
-        'location': 'Lancaster, UK',
-        'latitude': Decimal('54.0'),
-        'longitude': Decimal('-2.78'),
+    'BHM2': {  # Formerly LAN1 and BGS4
+        'location': 'Birmingham, UK',
+        'latitude': Decimal('52.45'),
+        'longitude': Decimal('-1.92'),
         'elevation': 27,
-        'start_time': np.datetime64('2015-10-19T00:00Z'),
+        'start_time': np.datetime64('2017-07-10T00:00Z'),
         'end_time': None,  # Still operational
-        'k_index_scale': 650e-9,  # Estimated
+        'k_index_scale': 600e-9,  # Estimated
         'k_index_filter': None,
-        'copyright': 'Steve Marple/British Geological Survey.',
+        'copyright': 'King Edward VI High School for Girls/British Geological Survey.',
         'license': cc3_by_nc_sa,
-        'attribution': 'Operated by Steve Marple.',
+        'attribution': 'Operated by King Edward VI High School for Girls.',
         'line_color': [0, 0.6, 0],
         'data_types': {
             'MagData': {
                 'default': 'realtime',
                 'raw': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
+                    'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
@@ -288,7 +288,7 @@ sites = {
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
+                    'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
@@ -299,7 +299,7 @@ sites = {
                 'realtime_baseline': {
                     'channels': np.array(['H', 'E', 'Z']),
                     'path': (data_dir +
-                             '/baseline/realtime/lan1/lan1_%Y.txt'),
+                             '/baseline/realtime/bgs4/bgs4_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
                     'load_converter': ap.data._generic_load_converter,
                     'save_converter': ap.data._generic_save_converter,
@@ -319,7 +319,7 @@ sites = {
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(['H', 'E', 'Z']),
-                    'path': data_dir + '/lan1/qdc/%Y/lan1_qdc_%Y%m.csv',
+                    'path': data_dir + '/bgs4/qdc/%Y/bgs4_qdc_%Y%m.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet_qdc',
                     'load_converter': ap.magdata.load_qdc_data,
@@ -330,7 +330,7 @@ sites = {
             'TemperatureData': {
                 'realtime': {
                     'channels': np.array(['Sensor temperature']),
-                    'path': data_dir + '/lan1/%Y/%m/lan1_%Y%m%d.csv',
+                    'path': data_dir + '/bgs4/%Y/%m/bgs4_%Y%m%d.csv',
                     'duration': np.timedelta64(24, 'h'),
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
@@ -339,7 +339,7 @@ sites = {
                 },
             },
         },
-    },  # LAN1
+    },  # BHM2 (was BGS4)
 
     'LAN2': {  # Formerly BGS5
         'location': 'Lancaster, UK',
