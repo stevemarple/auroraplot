@@ -14,8 +14,11 @@ import time
 import numpy as np
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
+if os.name == 'posix' and ('DISPLAY' not in os.environ or not os.environ['DISPLAY']):
+    mpl.use('Agg')
 
+import matplotlib.pyplot as plt
+    
 try:
     # Try to force all times to be read as UTC
     os.environ['TZ'] = 'UTC'
