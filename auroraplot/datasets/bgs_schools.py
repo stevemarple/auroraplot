@@ -112,8 +112,14 @@ def load_bgs_sch_data(file_name,
             data = data[col_idx] * data_type_info[data_type]['scaling']
             if data_type == 'MagData' and archive_data.get('swap_H_E'):
                 data[[0, 1]] = data[[1, 0]]
-            if data_type_info[data_type]['data_check']:
-                data = data_type_info[data_type]['data_check'](data)
+            data_check = None
+            if 'data_check' in archive_data:
+                data_check = archive_data['data_check']
+            elif 'data_check' in data_type_info[data_type]:
+                data_check = data_type_info[data_type]['data_check']
+            if data_check is not None:
+                data = data_check(data)
+                
             r = data_type_info[data_type]['class'](project=project,
                                                    site=site,
                                                    channels=channels,
@@ -209,6 +215,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -289,6 +296,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -370,6 +378,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -452,6 +461,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
                     'swap_H_E': True,
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -533,6 +543,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -613,6 +624,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -694,6 +706,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -776,6 +789,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -857,6 +871,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -938,6 +953,7 @@ sites = {
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
+                    'data_check': None,
                 },
                 'realtime': {
                     'channels': np.array(['H', 'E', 'Z']),
@@ -1019,6 +1035,7 @@ default_data_types = {
             'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
+            'data_check': None,
             },
         'realtime': {
             'channels': np.array(['H', 'E', 'Z']),
