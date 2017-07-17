@@ -175,7 +175,7 @@ def temperature_compensation(md, inplace=False, cadence=None, **kwargs):
         r = md
     else:
         r = copy.deepcopy(md)
-    print(md_error)
+    logger.debug('temperature compensation error: %f' ,md_error)
     r.data -= md_error
     return r
 
