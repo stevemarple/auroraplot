@@ -188,6 +188,8 @@ for n in range(len(project_list)):
 
     logger.info('Processing %s/%s %s', project, site, dt64.
                 fmt_dt64_range(site_st, site_et))
+
+    last_data = None
     for t1 in dt64.dt64_range(site_st, site_et, day):
         try:
             t2 = t1 + day
@@ -204,11 +206,27 @@ for n in range(len(project_list)):
             md_st = md_mean_time - qdc_fit_duration/2
             md_et = md_st + qdc_fit_duration
 
-            md = ap.load_data(project, site, 'MagData', md_st, md_et,
-                              archive=md_archive)
-            if md is None or np.size(md.data) == 0:
-                logger.debug('no data')
+            if last_data is None or last_data.end_time != md_et - day:
+                # Load entire data block
+                md = ap.load_data(project, site, 'MagData', md_st, md_et, archive=md_archive)
+            else:
+                # Load the last day of data and concatenate
+                md = ap.load_data(project, site, 'MagData', md_et - day, md_et, archive=md_archive)
+                if md is None:
+                    md = last_data
+                    md.end_time = md_et
+                else:
+                    md = ap.concatenate([last_data, md]).extract(start_time=md_st)
+
+            if md is None:
+                logger.debug('no data (None)')
+                last_data = None
+            elif np.size(md.data) == 0:
+                logger.debug('no data (empty data array)')
                 continue
+
+            assert md.start_time == md_st and md.end_time == md_et, 'Bad magdata times'
+            last_data = md
 
             qdc = ap.magdata.load_qdc(project, site, t1, 
                                       tries=qdc_tries,
