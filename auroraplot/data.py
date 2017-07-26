@@ -25,37 +25,35 @@ import auroraplot as ap
 import auroraplot.tools
 import auroraplot.dt64tools as dt64
 
+
 logger = logging.getLogger(__name__)
 
+
 def leastsq_error(p, obj, ref, channel):
-    '''
+    """
     Error function used with Data.fit() for least squares error fitting.
-    '''
+    """
     adj, = p
-    err = obj.data[obj.get_channel_index(channel)[0]] \
-        - (ref.data[ref.get_channel_index(channel)[0]] + adj)
+    err = obj.data[obj.get_channel_index(channel)[0]] - (ref.data[ref.get_channel_index(channel)[0]] + adj)
     return np.nan_to_num(err)
 
 
 def _generic_load_converter(file_name, archive_data, 
                             project, site, data_type, channels, start_time, 
                             end_time, **kwargs):
-    '''A generic load converter.
+    """
+    A generic load converter.
 
     Expects the archive information to contain:
 
     constructor: Function reference to the class constructor
 
     timestamp_method: one of 'unixtime', 'offset0', 'offset1'
-    
-'''
-    
-    assert 'constructor' in archive_data, \
-        'archive data must indicate constructor to use'
-    assert archive_data['constructor'].__name__ == data_type, \
-        'data type does not match'
-    assert 'timestamp_method' in archive_data, \
-        'archive data must indicate the timestamp method used'
+    """
+
+    assert 'constructor' in archive_data, 'archive data must indicate constructor to use'
+    assert archive_data['constructor'].__name__ == data_type, 'data type does not match'
+    assert 'timestamp_method' in archive_data, 'archive data must indicate the timestamp method used'
     
     chan_tup = tuple(archive_data['channels'])
 
@@ -75,48 +73,34 @@ def _generic_load_converter(file_name, archive_data,
             sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
             if archive_data['timestamp_method'] == 'unixtime':
                 sst = np.round(data[0] / dt64.multipliers[sample_time_units])
-                sample_start_time = \
-                    sst.astype('datetime64[' + sample_time_units + ']')
+                sample_start_time = sst.astype('datetime64[' + sample_time_units + ']')
                 col_offset = 1                
             elif archive_data['timestamp_method'] == 'offset0':
-                sample_start_time = \
-                    ((data[0].astype('int64') 
-                      * archive_data['nominal_cadence'])
-                     + start_time)
+                sample_start_time = (data[0].astype('int64') * archive_data['nominal_cadence']) + start_time
                 col_offset = 1
             elif archive_data['timestamp_method'] == 'offset1':
-                sample_start_time = \
-                    (((data[0].astype('int64') - 1)
-                      * archive_data['nominal_cadence'])
-                     + start_time)
+                sample_start_time = ((data[0].astype('int64') - 1) * archive_data['nominal_cadence']) + start_time
                 col_offset = 1
 
-            elif archive_data['timestamp_method'] in (\
-                'Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
+            elif archive_data['timestamp_method'] in ('Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
                 col_offset = len(archive_data['timestamp_method'])
-                sample_start_time = \
-                    (data[0]-1970).astype('datetime64[Y]')
+                sample_start_time = (data[0]-1970).astype('datetime64[Y]')
                 for n in range(1, col_offset):
                     tu = archive_data['timestamp_method'][n]
                     if tu in ('M', 'D'):
                         # Cannot use add-assign here
-                        sample_start_time = sample_start_time + \
-                            (data[n]-1).astype('timedelta64[%s]' % tu)
+                        sample_start_time = sample_start_time + (data[n]-1).astype('timedelta64[%s]' % tu)
                     else:
                         # Cannot use add-assign here
-                        sample_start_time = sample_start_time + \
-                            data[n].astype('timedelta64[%s]' % tu)
+                        sample_start_time = sample_start_time + data[n].astype('timedelta64[%s]' % tu)
             elif archive_data['timestamp_method'].startswith('YMDhms.'):
-                tu = archive_data['timestamp_method'] \
-                    .replace('YMDhms.', '')
-                sample_start_time = \
-                    (data[0]-1970).astype('datetime64[Y]') + \
-                    (data[1]-1).astype('timedelta64[M]') + \
-                    (data[2]-1).astype('timedelta64[D]') + \
-                    data[3].astype('timedelta64[h]') + \
-                    data[4].astype('timedelta64[m]') + \
-                    np.round(data[5]/dt64.multipliers[tu]) \
-                    .astype('timedelta64[%s]' % tu)
+                tu = archive_data['timestamp_method'].replace('YMDhms.', '')
+                sample_start_time = (data[0] - 1970).astype('datetime64[Y]') + \
+                                    (data[1] - 1).astype('timedelta64[M]') + \
+                                    (data[2] - 1).astype('timedelta64[D]') + \
+                                    data[3].astype('timedelta64[h]') + \
+                                    data[4].astype('timedelta64[m]') + \
+                                    np.round(data[5] / dt64.multipliers[tu]).astype('timedelta64[%s]' % tu)
                 col_offset = 6              
             elif archive_data['timestamp_method'] in ('h', 'hm', 'hms'):
                 col_offset = len(archive_data['timestamp_method'])
@@ -124,15 +108,12 @@ def _generic_load_converter(file_name, archive_data,
                 for n in range(col_offset):
                     # Cannot use add-assign here
                     sample_start_time = sample_start_time + \
-                        data[n].astype('timedelta64[%s]' % 
-                                       archive_data['timestamp_method'][n])
+                                        (data[n].astype('timedelta64[%s]' % archive_data['timestamp_method'][n]))
 
             else:
                 raise ValueError('unknown value for timestamp_method')
 
-           
-            sample_end_time = \
-                sample_start_time + archive_data['nominal_cadence']
+            sample_end_time = sample_start_time + archive_data['nominal_cadence']
             integration_interval = np.tile(archive_data['nominal_cadence'],
                                            [np.size(channels), 
                                             np.size(sample_start_time)])
@@ -149,24 +130,22 @@ def _generic_load_converter(file_name, archive_data,
                 data /= archive_data['data_multiplier']
 
             if 'valid_range' in archive_data:
-                data[np.logical_or(data < archive_data['valid_range'][0],
-                                   data > archive_data['valid_range'][1])] \
-                                   = np.nan
+                data[np.logical_or(data < archive_data['valid_range'][0], data > archive_data['valid_range'][1])] \
+                    = np.nan
 
             tu = dt64.get_units(archive_data['nominal_cadence'])
-            r = archive_data['constructor']( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=dt64.astype(start_time, tu),
-                end_time=dt64.astype(end_time, tu),
-                sample_start_time=dt64.astype(sample_start_time, tu),
-                sample_end_time=dt64.astype(sample_end_time, tu),
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=archive_data.get('sort', False))
+            r = archive_data['constructor'](project=project,
+                                            site=site,
+                                            channels=channels,
+                                            start_time=dt64.astype(start_time, tu),
+                                            end_time=dt64.astype(end_time, tu),
+                                            sample_start_time=dt64.astype(sample_start_time, tu),
+                                            sample_end_time=dt64.astype(sample_end_time, tu),
+                                            integration_interval=integration_interval,
+                                            nominal_cadence=archive_data['nominal_cadence'],
+                                            data=data,
+                                            units=archive_data['units'],
+                                            sort=archive_data.get('sort', False))
             return r
 
         except Exception as e:
@@ -194,8 +173,7 @@ def _generic_save_converter(d, file_name, archive_data):
         raise ValueError('data shape incorrect for number of samples')
 
     # Force sample start time to be units of nominal_cadence (or better)
-    sst = d.sample_start_time \
-        + np.timedelta64(0, dt64.get_units(d.nominal_cadence))
+    sst = d.sample_start_time + np.timedelta64(0, dt64.get_units(d.nominal_cadence))
     
     if archive_data['timestamp_method'] == 'unixtime':
         # Force to day or better resolution
@@ -216,8 +194,7 @@ def _generic_save_converter(d, file_name, archive_data):
         data[0] = (sst - d.start_time) / d.nominal_cadence
         data[0] += 1
 
-    elif archive_data['timestamp_method'] in (\
-        'Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
+    elif archive_data['timestamp_method'] in ('Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
         col_offset = len(archive_data['timestamp_method'])
         data = np.empty([col_offset + np.size(d.channels),
                          np.size(d.sample_start_time)])
@@ -278,7 +255,9 @@ def first_non_nan(data_list):
 
 
 class Data(object):
-    '''Base class for time-series data.'''
+    """
+    Base class for time-series data.
+    """
 
     def __init__(self, 
                  project=None,
@@ -298,7 +277,7 @@ class Data(object):
         if isinstance(channels, six.string_types):
             self.channels = np.array([channels])
         elif channels is None:
-            self.channels = np.array([]).reshape([0,0])
+            self.channels = np.array([]).reshape([0, 0])
         else:
             self.channels = np.array(channels)
         self.start_time = start_time
@@ -307,7 +286,7 @@ class Data(object):
                                             [np.size(sample_start_time)])
         self.sample_end_time = np.reshape(sample_end_time,
                                           [np.size(sample_end_time)])
-        self.integration_interval=integration_interval
+        self.integration_interval = integration_interval
         self.nominal_cadence = nominal_cadence
         if data is None:
             self.data = np.tile(np.nan, [np.size(self.channels),
@@ -336,7 +315,7 @@ class Data(object):
                 '         end_time : ' + str(self.end_time) + '\n' +
                 'sample_start_time : ' + repr(self.sample_start_time) + '\n' + 
                 '  sample_end_time : ' + repr(self.sample_end_time) + '\n' + 
-                'integration intv. : ' + repr(self.integration_interval)+'\n'+
+                'integration intv. : ' + repr(self.integration_interval) + '\n' +
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
                 '             data : ' + repr(self.data) + '\n' + 
                 '            units : ' + str(units))
@@ -439,7 +418,7 @@ class Data(object):
         if conversion is None:
             r = str(r)
         elif conversion == 'a':
-            r = ascii(r) # Python3 only
+            r = ascii(r)  # Python3 only
         elif conversion == 'c':
             r = str(r).capitalize()
         elif conversion == 'l':
@@ -461,7 +440,6 @@ class Data(object):
 
         return r
 
-
     def data_description(self):
         return 'Data'
 
@@ -473,8 +451,7 @@ class Data(object):
                       'nominal_cadence',
                       'data', 'units'):
                 attr = getattr(self, n)
-                assert (attr is not None and 
-                        (not isinstance(attr, six.string_types) or attr != '')), \
+                assert (attr is not None and (not isinstance(attr, six.string_types) or attr != '')), \
                     n + ' not set'
 
             assert re.match('^[-A-Z0-9_]+$', self.project), 'Bad value for project'
@@ -483,29 +460,21 @@ class Data(object):
             num_channels = len(self.channels)
             num_samples = len(self.sample_start_time)
 
-            assert self.start_time <= self.end_time, \
-                'start_time must not be after end_time'
-            assert len(self.sample_end_time) == num_samples, \
-                'lengths of sample_start_time and sample_end_time differ'
+            assert self.start_time <= self.end_time, 'start_time must not be after end_time'
+            assert len(self.sample_end_time) == num_samples, 'lengths of sample_start_time and sample_end_time differ'
 
             if self.integration_interval is not None:
-                assert self.integration_interval.shape == \
-                    (num_channels, num_samples), \
+                assert self.integration_interval.shape == (num_channels, num_samples), \
                     'integration_interval incorrect shape'
-                assert self.data.shape == (num_channels, num_samples), \
-                    'data incorrect shape'
+                assert self.data.shape == (num_channels, num_samples), 'data incorrect shape'
 
-            assert (dt64.get_units(self.start_time) == 
-                    dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.start_time) == dt64.get_units(self.nominal_cadence)), \
                 'start_time units do not match cadence'
-            assert (dt64.get_units(self.end_time) == 
-                    dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.end_time) == dt64.get_units(self.nominal_cadence)), \
                 'end_time units do not match cadence'
-            assert (dt64.get_units(self.sample_start_time) == 
-                    dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.sample_start_time) == dt64.get_units(self.nominal_cadence)), \
                 'sample_start_time units do not match cadence'
-            assert (dt64.get_units(self.sample_end_time) == 
-                    dt64.get_units(self.nominal_cadence)), \
+            assert (dt64.get_units(self.sample_end_time) == dt64.get_units(self.nominal_cadence)), \
                 'sample_end_time units do not match cadence'
         except AssertionError as e:
             logger.debug(str(self))
@@ -514,22 +483,20 @@ class Data(object):
         
         return True
 
-
     def get_channel_index(self, channels):
-        '''
+        """
         Find the location of the listed channels in the objects channel list.
         
         channels: list of channels to find.
 
         return list of integers corresponding to location in the
         object's channels attribute.
-        '''
+        """
         chan_tup = tuple(self.channels)
         cidx = []
         for c in np.array(channels).flatten():
             cidx.append(chan_tup.index(c))
         return cidx
-
 
     def get_site_info(self, info=None):
         return ap.get_site_info(self.project, self.site, info)
@@ -540,11 +507,9 @@ class Data(object):
     def get_mean_sample_time(self):
         return dt64.mean(self.sample_start_time, self.sample_end_time)
 
-
     def pickle(self, filename):
         with open(filename, 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
-
 
     def extract(self, start_time=None, end_time=None, channels=None, 
                 inplace=False, 
@@ -637,7 +602,6 @@ class Data(object):
         r.data = r.data[:, idx]
         return r
 
-
     def split(self, interval):
         r = []
         t1 = self.start_time
@@ -660,7 +624,6 @@ class Data(object):
         s.append(dt64.fmt_dt64_range(start_time or self.start_time, 
                                      end_time or self.end_time))
         return '\n'.join(s)
-
 
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
              units_prefix=None, title=None, 
@@ -702,7 +665,6 @@ class Data(object):
                 plt.figure(figure.number)
             else:
                 plt.figure(figure)
-        
 
         if subplot is not None:
             subplot2 = copy.copy(subplot)
@@ -794,7 +756,6 @@ class Data(object):
 
         return r
 
-
     def get_cadence(self):
         if len(self.sample_start_time) < 2:
             return None
@@ -811,17 +772,15 @@ class Data(object):
         
         return sstd[0]
 
-        
     def set_cadence(self, cadence, ignore_nan=True,
                     offset_interval=None, inplace=False,
                     aggregate=None):
         tu = dt64.get_units(cadence)
 
         if offset_interval is None:
-            offset_interval = \
-                np.timedelta64(0, tu)
+            offset_interval = np.timedelta64(0, tu)
         if aggregate is None:
-            aggregate=scipy.average
+            aggregate = scipy.average
 
         if cadence > self.nominal_cadence:
             sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
@@ -857,13 +816,12 @@ class Data(object):
                     if self.integration_interval is not None:
                         # Update integration_interval
                         if len(tidx2) != 0:
-                            integ_intv[cn,sn] = \
-                                np.sum(self.integration_interval[cn, tidx2])
+                            integ_intv[cn, sn] = np.sum(self.integration_interval[cn, tidx2])
                         
                     if len(tidx2) != 0:
                         # Update data. 
                         if self.integration_interval is None:
-                            d[cn,sn] = aggregate(self.data[cn, tidx2])
+                            d[cn, sn] = aggregate(self.data[cn, tidx2])
 
                         else:
                             # Weight the mean according to
@@ -871,13 +829,12 @@ class Data(object):
                             weights = self.integration_interval[cn, tidx2]
                             weights[dt64.isnat(weights)] = 0
                             try:
-                                d[cn,sn] = aggregate(self.data[cn, tidx2], 
+                                d[cn, sn] = aggregate(self.data[cn, tidx2],
                                                      weights=weights)
                             except TypeError as e:
                                 keep_integ_intv = False
                                 d[cn,sn] = aggregate(self.data[cn, tidx2])
 
-                                
             if inplace:
                 r = self
             else:
@@ -917,9 +874,8 @@ class Data(object):
         r.assert_valid()
         return r
 
-        
     # TODO: fix inplace option which does not work
-    def mark_missing_data(self, cadence=None, # inplace=False
+    def mark_missing_data(self, cadence=None,  # inplace=False
                           start_time=None, end_time=None):
         trim = False
         if cadence is None:
@@ -975,56 +931,51 @@ class Data(object):
         else:
             ii = np.zeros([num_channels, 1]).astype(r.integration_interval.dtype)
 
-
         # Check for missing data at start
         if np.size(r.sample_start_time):
             if r.sample_start_time[0] - start_time > cadence:
                 # Insert at start of list to avoid requiring a sort
-                obj_list.insert(0, 
-                                type(self)(
-                        project=r.project,
-                        site=r.site,
-                        channels=r.channels,
-                        start_time=start_time,
-                        end_time=r.sample_start_time[0],
-                        sample_start_time=np.array([start_time]),
-                        sample_end_time=r.sample_start_time[:1],
-                        integration_interval=ii,
-                        nominal_cadence=r.nominal_cadence,
-                        data=np.ones([num_channels, 1]) * ap.NaN,
-                        units=r.units,
-                        sort=False))
+                obj_list.insert(0, type(self)(project=r.project,
+                                              site=r.site,
+                                              channels=r.channels,
+                                              start_time=start_time,
+                                              end_time=r.sample_start_time[0],
+                                              sample_start_time=np.array([start_time]),
+                                              sample_end_time=r.sample_start_time[:1],
+                                              integration_interval=ii,
+                                              nominal_cadence=r.nominal_cadence,
+                                              data=np.ones([num_channels, 1]) * ap.NaN,
+                                              units=r.units,
+                                              sort=False))
 
             # Check for missing data at end
             if end_time - r.sample_end_time[-1] > cadence:
-                obj_list.append(type(self)(
-                            project=r.project,
-                            site=r.site,
-                            channels=r.channels,
-                            start_time=r.sample_end_time[-1],
-                            end_time=end_time,
-                            sample_start_time=r.sample_end_time[-1:],
-                            sample_end_time=np.array([end_time]),
-                            integration_interval=ii,
-                            nominal_cadence=r.nominal_cadence,
-                            data=np.ones([num_channels, 1]) * ap.NaN,
-                            units=r.units,
-                            sort=False))
+                obj_list.append(type(self)(project=r.project,
+                                           site=r.site,
+                                           channels=r.channels,
+                                           start_time=r.sample_end_time[-1],
+                                           end_time=end_time,
+                                           sample_start_time=r.sample_end_time[-1:],
+                                           sample_end_time=np.array([end_time]),
+                                           integration_interval=ii,
+                                           nominal_cadence=r.nominal_cadence,
+                                           data=np.ones([num_channels, 1]) * ap.NaN,
+                                           units=r.units,
+                                           sort=False))
         else:
             # No data at all
-            obj_list.append(type(self)(
-                            project=r.project,
-                            site=r.site,
-                            channels=r.channels,
-                            start_time=start_time,
-                            end_time=end_time,
-                            sample_start_time=np.array([start_time]),
-                            sample_end_time=np.array([end_time]),
-                            integration_interval=ii,
-                            nominal_cadence=r.nominal_cadence,
-                            data=np.ones([num_channels, 1]) * ap.NaN,
-                            units=r.units,
-                            sort=False))
+            obj_list.append(type(self)(project=r.project,
+                                       site=r.site,
+                                       channels=r.channels,
+                                       start_time=start_time,
+                                       end_time=end_time,
+                                       sample_start_time=np.array([start_time]),
+                                       sample_end_time=np.array([end_time]),
+                                       integration_interval=ii,
+                                       nominal_cadence=r.nominal_cadence,
+                                       data=np.ones([num_channels, 1]) * ap.NaN,
+                                       units=r.units,
+                                       sort=False))
     
         if len(obj_list) == 1:
             r = obj_list[0]
@@ -1079,10 +1030,9 @@ class Data(object):
         r.nominal_cadence = cadence
         return r
 
-
     def least_squares_fit(self, ref, err_func=leastsq_error, 
                           inplace=False, full_output=False, plot_fit=False):
-        '''
+        """
         Fit a dataset to a reference dataset by applying an offset to
         find the least-squared error. Uses scipy.optimize.leastsq()
 
@@ -1098,7 +1048,7 @@ class Data(object):
 
         Returns self (or a copy if 'inplace' is False) with an
             adjustment applied for best fit.
-        '''
+        """
 
         # See http://www.tau.ac.il/~kineret/amit/scipy_tutorial/ for
         # helpful tutorial on using leastsq().
@@ -1131,12 +1081,10 @@ class Data(object):
             lh = r.plot()
             ref.plot(axes=lh[0].axes)
 
-
         if full_output:
             return (r, errors, fit_info)
         else:
             return r
-
 
     def minimise_sign_error_fit(self, ref, inplace=False, full_output=False, 
                                 plot_fit=False, **kwargs):
@@ -1161,19 +1109,17 @@ class Data(object):
                 ax = plt.gca()
                 self.plot(axes=ax, label='Data')
 
-            r.data[r.get_channel_index(c)], err, fi = ap.tools.fit_data(\
-                self.data[self.get_channel_index(c)[0]],
-                ref.data[ref.get_channel_index(c)[0]],
-                err_func=ap.tools.minimise_sign_error,
-                full_output=True,
-                **kwargs)
+            r.data[r.get_channel_index(c)], err, fi = ap.tools.fit_data(self.data[self.get_channel_index(c)[0]],
+                                                                        ref.data[ref.get_channel_index(c)[0]],
+                                                                        err_func=ap.tools.minimise_sign_error,
+                                                                        full_output=True,
+                                                                        **kwargs)
             errors.append(err)
             fit_info.append(fi)
 
             if plot_fit:
                 r.plot(axes=ax, label='Fitted data')
-                lh = plt.legend(loc='best', 
-                                fancybox=True)
+                lh = plt.legend(loc='best', fancybox=True)
                 lh.get_frame().set_alpha(0.6)
 
         if full_output:
@@ -1181,15 +1127,13 @@ class Data(object):
         else:
             return r
 
-
     def save(self,
              archive=None,
              path=None,
              merge=None,
              overwrite=True,
              save_converter=None):
-        assert ((archive is not None and path is None) or 
-                (archive is None and path is not None)), \
+        assert ((archive is not None and path is None) or (archive is None and path is not None)), \
             'archive or path must be defined (and not both)'
 
         an, ai = ap.get_archive_info(self.project,
@@ -1201,8 +1145,7 @@ class Data(object):
 
         if path is None:
             # Save to a default location
-            assert save_converter is None, \
-                'Cannot set save_converter when saving to default location'
+            assert save_converter is None, 'Cannot set save_converter when saving to default location'
             save_converter = ai['save_converter']
             path = ai['path']
             duration = ai['duration']
@@ -1247,11 +1190,11 @@ class Data(object):
                         else file_name)
             save_converter(d, file_name, ai)
 
-
     def set_time_units(self, units, inplace=False):
-        '''Set time units of start/end times and cadence.
+        """Set time units of start/end times and cadence.
 
-        The units cannot be larger than any units in use'''
+        The units cannot be larger than any units in use
+        """
 
         if inplace:
             r = self
@@ -1270,7 +1213,6 @@ class Data(object):
                                  units, a)
             setattr(r, a, t2)
         return r
-        
 
     def chauvenet_criterion(self, window, inplace=False, want_outliers=False):
 
@@ -1308,7 +1250,6 @@ class Data(object):
         r.data = data
         return r
 
-        
     def remove_spikes_chauvenet(self,
                                 inplace=False,
                                 want_outliers=False,
@@ -1321,14 +1262,12 @@ class Data(object):
         BGS Schools magnetometer network (most likely by a drop in supply
         voltage). This function removes most of the spikes."""
 
-
         # Regularly space the data prior to Savitzky Golay smoothing
         self2 = self.space_regularly(self.nominal_cadence,
                                      missing_cadence=self.nominal_cadence * 4)
 
         # Smooth the regularly-spaced data
         window_length = 2 * int(savgol_window / (2 * self.nominal_cadence)) + 1
-        #self2.data = scipy.signal.savgol_filter(self2.data, window_length, 3)
         for n in range(self2.data.shape[0]):
             self2.data[n] = ap.tools.savitzky_golay(self2.data[n], 
                                                     window_length, 3)
@@ -1346,7 +1285,7 @@ class Data(object):
                                                  want_outliers=True)
 
         if link_channels:
-            for n in range(1,outliers.shape[0]):
+            for n in range(1, outliers.shape[0]):
                 outliers[0] = np.logical_or(outliers[0], outliers[n])
                 outliers[1:] = outliers[0]
 
@@ -1362,7 +1301,7 @@ class Data(object):
         good_data = np.logical_not(outliers[0])
         r.sample_start_time = r.sample_start_time[good_data]
         r.sample_end_time = r.sample_end_time[good_data]
-        r.integration_interval = r.integration_interval[:,good_data]
+        r.integration_interval = r.integration_interval[:, good_data]
         r.data = r.data[:,good_data]
         r = r.mark_missing_data(3*r.nominal_cadence)
         
@@ -1383,4 +1322,3 @@ class Data(object):
             for j in range(self.data.shape[0]):
                 r.data[j][i] = func(self.data[j][idx2])
         return r
-
