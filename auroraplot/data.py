@@ -931,7 +931,7 @@ class Data(object):
         if end_time is None:
             end_time = self.end_time
         elif end_time < self.end_time:
-            trim = true
+            trim = True
             
         if trim:
             r = self.extract(start_time=start_time, end_time=end_time)
