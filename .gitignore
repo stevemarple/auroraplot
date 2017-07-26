@@ -1,7 +1,11 @@
 *.py[cod]
+__pycache__
+*~
+*.swp
 
 # C extensions
 *.so
+*.o
 
 # Packages
 *.egg

@@ -192,15 +192,14 @@ def get_time_of_day(t):
     return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
 
 def _get_tt(a, attr):
-    aa = np.array(a) # Handle all array-like possibilities
-    aaf = aa.flatten() 
-    r = np.zeros_like(aaf, dtype=int)
-    for n in range(aaf.size):
-        r[n] = getattr(aaf[n].tolist().timetuple(), attr)
-    if aa.shape == ():
-        return int(r[0])
+    aa = np.array(a) # Handle all array-like possibilities, and copies
+    orig_shape = aa.shape
+    aa = aa.flatten().astype('object')
+    aa = np.array([getattr(a1.timetuple(),attr) for a1 in aa])
+    if orig_shape == ():
+        return int(aa[0])
     else:
-        return r.reshape(aa.shape).astype('int64')
+        return aa.reshape(orig_shape).astype('int64')
 
 def get_year(a):
     '''Return year'''
@@ -236,24 +235,28 @@ def get_second(a):
     '''Return second of day'''
     return _get_tt(a, 'tm_sec')
 
-def get_start_of_month(a):
-    a = np.array(a)
-    af = a.flatten() # Handle all array-like possibilities
-    for n in range(af.size):
-        d = af[n].tolist()
-        som = datetime.date(d.year, d.month, 1)
-        af[n] = np.datetime64(som).astype(a.dtype)
-    if a.shape == ():
-        return af[0]
+def get_start_of_month(a, offset=0):
+    '''Returns the start of the month, with an offset of *offset* months.'''
+    aa = np.array(a) # Handle all array-like possibilities, and copies
+    orig_shape = aa.shape
+    orig_dtype = aa.dtype
+    aa = aa.flatten().astype('object')
+    yr = np.array([a1.year for a1 in aa])
+    mo = np.array([a1.month for a1 in aa]) + offset
+    yr += (np.floor((mo-1)/12)).astype('int')
+    mo = ((mo-1)%12 + 1).astype('int')
+    aa = np.array([datetime.date(yr[n], mo[n], 1)
+                   for n in range(len(yr))]).astype(orig_dtype)
+    if orig_shape == ():
+        return aa[0]
     else:
-        return af.reshape(a.shape)
+        return aa.reshape(orig_shape)
 
 def get_start_of_previous_month(a):
-    return get_start_of_month(get_start_of_month(a) - np.timedelta64(1, 'D'))
+    return get_start_of_month(a, offset = -1)
         
 def get_start_of_next_month(a):
-    return get_start_of_month(get_start_of_month(a) 
-                              + np.timedelta64(32, 'D'))
+    return get_start_of_month(a, offset = 1)
 
 def mean(*a):
     return _aggregate(*a, func=np.mean)
@@ -284,39 +287,50 @@ def _aggregate(*a, **kwargs):
             assert isinstance(b.dtype.type(), a0.dtype.type), \
                 'Arrays must hold the same data type'
             tmp += b.astype(d).astype('int64')
-        return (tmp / len(a)).astype(d)
 
-def _round_to_func(dt, td, func, func_name):
+        good_d = d
+        good_s = 1
+        for new_tu in time_units[time_units.index(tu)::-1]:
+            new_d = get_time_type(a0) + '[' + new_tu + ']'
+            new_s = np.array([1]).astype(d).astype(new_d).astype('int64')
+            if (any( tmp > (np.iinfo(np.int64).max/new_s) )
+                or any( tmp < (np.iinfo(np.int64).min/new_s) )):
+                break
+            good_d = new_d
+            good_s = new_s
+            if all( (tmp*good_s) % len(a) == 0):
+                break
+        return ( (tmp*good_s) / len(a)).astype(good_d)
+
+def _round_to_func(t, td, func, func_name):
+    t0 = np.datetime64('1900')
     td_units = get_units(td)
+    t_is_datetime = t.dtype.char == 'M'
+    if td_units is smallest_unit([get_units(t),td_units]):
+        t = t.astype(t.dtype.char+'8['+td_units+']')
+    if t_is_datetime:
+        t = t - t0
     if td_units in ('M', 'Y'):
-        if func_name not in ('ceil', 'floor'):
-            # round(), and possibly other unknown functions, must
-            # evaluate the days, hours, etc to decide whether to round
-            # up or down.
+        if not t_is_datetime:
+            raise Exception('Cannot round a time delta to non-fixed units.')
+        if func_name not in ('ceil', 'floor','round'):
+            # unknown functions must evaluate the days, hours, etc 
+            # to decide whether to round up or down.
             raise Exception('Cannot use ' + func_name 
                             + ' with units of ' + td_units)
-        # Convert the datetime to units of month or year. Discard parts
-        # smaller than this, for floor() they can be ignored
-        ret_type = dt.dtype.char + '8[' + td_units + ']'
-        dt2 = dt.astype(ret_type)
+        ft = np.floor(t.astype('m8['+td_units+']')/td)*td
+        round_up = False
         if func_name == 'ceil':
-            # Parts smaller than month or year matter for ceil so
-            # round up by one month or year where they were discarded
-            if len(dt2.shape):
-                dt2[dt2 - dt < 0] += np.timedelta64(1, td_units)
-            elif dt2 < dt:
-                dt2 += np.timedelta64(1, td_units)
-        dt2f = dt2.astype('float')
-        tdf = td.astype('float')
-        r = (func(dt2f / tdf) * tdf).astype('int64').astype(ret_type)
-        return r
-
-    u = smallest_unit([get_units(dt), get_units(td)])
-    dti = dt64_to(dt, u)
-    tdi = dt64_to(td, u)
-    ret_type = dt.dtype.char + '8[' + u + ']'
-    return (func(float(dti) / tdi) * tdi).astype('int64').astype(ret_type)
-
+            round_up = (t+t0) > (ft+t0)
+        if func_name == 'round':
+            round_up = ((t+t0)-(ft+t0)) > \
+                       (((ft+td)+t0)-(t+t0))
+        r = ft + np.array(round_up).astype('int')*td            
+    else:
+        if td_units != get_units(t):
+            td = td.astype('m8['+get_units(t)+']')
+        r = td * func(t.astype('float64')/td.astype('float64'))
+    return r + t0 if t_is_datetime else r
 
 def round(dt, td):
     '''
@@ -1106,3 +1120,80 @@ def _strftime_td64(td, fstr, customspec=None):
         i += 1
 
     return s
+
+
+def solar_day_in_sidereal_hours():
+    '''
+    For Jan 1 2000, accurate to ~0.1s per century.
+    '''
+    # This is the value for 2000, will be 24.06570982583508 in 2100.
+    return 24.06570982441908
+
+def get_sidereal_day(t,lon,time_units='us',sidereal_units=True):
+    '''
+    Convert numpy.datetime64 array to the sidereal day
+    including fraction, from epoch near 2000-01-01 given by
+    http://aa.usno.navy.mil/faq/docs/GAST.php 
+
+    Usage:
+    day = get_sidereal_day(t,lon)
+
+    day = number of sidereal days since.
+    t = UTC numpy.datetime64 or array of numpy.datetime64
+    lon = longitude or array of longitudes
+
+    optional: time_units = 'us' (return in microseconds)
+              sidereal_units = True (return 0 < t < 24 sidereal hours)
+    '''
+
+    t = np.array(t)
+    lon = np.array(lon)
+    if np.size(t)>1 and np.size(lon)>1 and np.shape(t)!=np.shape(lon):
+        logger.error("Input array lengths do not match")
+        return np.nan
+
+    time_type = ''.join(['m8[',time_units,']'])
+    one_day = np.timedelta64(1,'D').astype(time_type)
+
+    # Calculation from http://aa.usno.navy.mil/faq/docs/GAST.php
+    # D is days (with fraction) from 12 UT Jan 1, 2000.
+    # although datetimes are integers, dividing them gives float
+    D = (t-np.datetime64('2000-01-01T12:00:00Z')).astype(time_type) / one_day
+    sdsh = solar_day_in_sidereal_hours() 
+    # Greenwich mean sidereal time
+    GMST = 18.697374558 + sdsh * D
+    return (GMST + lon / 15.0) / 24.0
+
+def get_sidereal_time(t,lon,time_units='us',sidereal_units=True,
+                      time_of_day = True):
+    '''
+    Convert numpy.datetime64 array to numpy.timedelta64 representing
+    the sidereal time of day, in solar time units or sidereal time units.
+
+    Usage:
+    tod = get_sidereal_time_of_day(t,lon)
+
+    tod = sidereal time of day (numpy timedelta64)
+    t = UTC numpy.datetime64 or array of numpy.datetime64
+    lon = longitude or array of longitudes
+
+    optional: time_units = 'us' (return in microseconds)
+              sidereal_units = True (return 0 < t < 24 sidereal hours)
+              time_of_day = returns time of day instead of time since
+                            2000 epoch. (default True)
+    '''
+
+    sdsh = solar_day_in_sidereal_hours() 
+    time_type = ''.join(['m8[',time_units,']'])
+    one_day = np.timedelta64(1,'D').astype(time_type).astype('int64')
+    fday = get_sidereal_day(t,lon,time_units=time_units)
+    if time_of_day:
+        fday -= np.floor(fday)
+    if sidereal_units:
+        if time_of_day:
+            # Make sure rounding errors cannot cause it to return >= one_day
+            return ((fday * one_day) % one_day).astype(time_type)
+        else:
+            return ((fday * one_day)).astype(time_type)
+    else:
+        return ((fday * 24.0) / sdsh) * one_day

@@ -69,7 +69,7 @@ def _generic_load_converter(file_name, archive_data,
             for s in ('comments', 'delimiter', 'converters', 'skiprows'):
                 if s in archive_data:
                     kwargs[s] = archive_data[s]
-                      
+
             data = np.loadtxt(uh, unpack=True, **kwargs)
 
             sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
@@ -166,7 +166,8 @@ def _generic_load_converter(file_name, archive_data,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
                 units=archive_data['units'],
-                sort=archive_data.get('sort', False))
+                sort=archive_data.get('sort', False),
+                processing=[])
             return r
 
         except Exception as e:
@@ -292,7 +293,9 @@ class Data(object):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=False):
+                 sort=False,
+                 processing=[]):
+
         self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
@@ -321,6 +324,9 @@ class Data(object):
         if sort:
             self.sort(inplace=True)
 
+        self.processing = copy.copy(processing)
+ 
+
     def __repr__(self):
         units = self.units
         if units == u'\N{DEGREE SIGN}C':
@@ -339,7 +345,8 @@ class Data(object):
                 'integration intv. : ' + repr(self.integration_interval)+'\n'+
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
                 '             data : ' + repr(self.data) + '\n' + 
-                '            units : ' + str(units))
+                '            units : ' + str(units) + '\n' +
+                '       processing : ' + repr(self.processing) )
 
     def __format__(self, fmt):
         """Custom format for Data auroraplot.data.Data objects.
@@ -573,7 +580,7 @@ class Data(object):
                 start_time = self.start_time
             if end_time is None:
                 end_time = self.end_time
-
+    
             if straddle_boundary:
                 tidx = (self.sample_end_time > start_time) & \
                     (self.sample_start_time < end_time)
@@ -666,6 +673,7 @@ class Data(object):
              units_prefix=None, title=None, 
              # Our own options
              start_time=None, end_time=None, time_units=None, add_legend=None,
+             step_plot=False,
              **kwargs):
 
         def bracket_units(units):
@@ -743,20 +751,30 @@ class Data(object):
             if axes is not None:
                 ax = plt.axes(axes2[n])
             elif subplot is not None:
-                ax = plt.subplot(subplot2[n], sharex=first_axes)
+                if hasattr(subplot2[n],'__iter__'):
+                    ax = plt.subplot(subplot2[n][0],subplot2[n][1],
+                                     subplot2[n][2],sharex=first_axes)
+                else:
+                    ax = plt.subplot(subplot2[n], sharex=first_axes)
             else:
                 ax = plt.gca()
             ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter(useOffset=False))
             cidx = chan_tup.index(channels[n])
             u = ap.str_units(np.nanmax(np.abs(self.data[cidx])), self.units, 
                              prefix=units_prefix, ascii=False, wantstr=False)
-            xdata = dt64.mean(self.sample_start_time, self.sample_end_time)
+            
             if u['mul'] == 1:
                 # Can avoid a copy
                 ydata = self.data[cidx]
             else:
                 ydata = self.data[cidx] / u['mul']
 
+            if not step_plot:
+                xdata = dt64.mean(self.sample_start_time,self.sample_end_time)
+            else:
+                xdata = np.vstack((self.sample_start_time,self.sample_end_time)).flatten('F')
+                ydata = np.vstack((ydata,ydata)).flatten('F')
+                
             if 'label' in kwargs:
                 r.append(dt64.plot_dt64(xdata, ydata,
                                         x_time_units=time_units,
@@ -813,8 +831,8 @@ class Data(object):
 
         
     def set_cadence(self, cadence, ignore_nan=True,
-                    offset_interval=None, inplace=False,
-                    aggregate=None):
+                    offset_interval=None, inplace=False, fast=True,
+                    aggregate=None,use_fallback=False):
         tu = dt64.get_units(cadence)
 
         if offset_interval is None:
@@ -822,16 +840,32 @@ class Data(object):
                 np.timedelta64(0, tu)
         if aggregate is None:
             aggregate=scipy.average
+        else:
+            use_fallback = True # aggregate not supported by fast method
 
-        if cadence > self.nominal_cadence:
-            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
-                                           + offset_interval, 
-                                           self.end_time, 
-                                           cadence),
-                                 time_type=self.start_time,
-                                 units=tu)
-            sam_et = sam_st + cadence
+        import os
+        tsint_so_file = os.path.dirname(__file__) + '/tsintegrate.so'
 
+        try:
+            from numpy.ctypeslib import ndpointer
+            import ctypes
+            ctsint = ctypes.cdll.LoadLibrary(tsint_so_file)
+        except:
+            use_fallback = True
+            logger.info('Fast integration library (%s) unavailable, '
+                        'using fallback', tsint_so_file)
+            
+
+        sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
+                                       + offset_interval, 
+                                       self.end_time, 
+                                       cadence),
+                             time_type=self.start_time,
+                             units=tu)
+        sam_et = sam_st + cadence
+        if not use_fallback:
+            r = self.resample_data(sam_st,sam_et,inplace=inplace)
+        elif cadence > self.nominal_cadence:
             sample_time = dt64.mean(self.sample_start_time, 
                                     self.sample_end_time)
             d = np.ones([len(self.channels), len(sam_st)]) * ap.NaN
@@ -849,7 +883,8 @@ class Data(object):
                                                sample_time <= sam_et[sn]))[0]
                 for cn in range(len(self.channels)):
                     if ignore_nan:
-                        notnanidx = np.where(np.logical_not(np.isnan(self.data[cn, tidx])))[0]
+                        notnanidx = np.where(np.logical_not(
+                                            np.isnan(self.data[cn, tidx])))[0]
                         tidx2 = tidx[notnanidx]
                     else:
                         tidx2 = tidx
@@ -898,6 +933,7 @@ class Data(object):
                 r.integration_interval = None
             r.nominal_cadence = cadence.copy()
             r.data = d
+            r.processing.append('resample') 
 
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
@@ -913,8 +949,157 @@ class Data(object):
                       'sample_start_time', 'sample_end_time',
                       'nominal_cadence'):
                 setattr(r, k, dt64.astype(getattr(r, k), units=tu))
-        
         r.assert_valid()
+        return r
+
+
+    def resample_data(self,sample_start_time,sample_end_time,
+                      alt_sample_start_time = None,
+                      alt_sample_end_time = None,
+                      channels = None,
+                      inplace=False):
+        '''
+        Resample data.
+
+        Usage:
+        r = resample_data(sample_start_time,sample_end_time,...)
+
+        Optional inputs:
+            inplace : (default False) Change the input (self) object itself.
+            alt_sample_start_time : (default None) Alternative data sample
+            alt_sample_end_time   :             start/end times to use instead
+                                                of self.sample_start_time, etc
+                                                useful if using different time
+                                                basis, eg sidereal time.
+            channels : (default None (all channels)) Return an object including
+                                                only the listed channels.
+        '''
+                      
+
+        sample_start_time = np.array(sample_start_time).flatten()
+        sample_end_time = np.array(sample_end_time).flatten()
+
+        if sample_start_time.size != sample_end_time.size:
+            logger.error('sample_start_time and sample_end_time '
+                         'are different sizes')
+            return
+
+        if channels is None:
+            channels = copy.copy(self.channels)
+        channels = [c for c in self.channels if c in channels]
+        cidx = self.get_channel_index(channels)
+        if inplace:
+            r = self
+            r.channels = r.channels[cidx]
+            r.data = r.data[cidx]
+            if r.integration_interval is not None:
+                r.integration_interval = r.integration_interval[cidx]
+        else:
+            r = copy.copy(self)
+            for k in (set(self.__dict__.keys())
+                      - set(['channels','data','integration_interval'])):
+                setattr(r, k, copy.deepcopy(getattr(self, k)))
+            r.channels = copy.copy(self.channels[cidx])
+            r.data = copy.copy(self.data[cidx])
+            if r.integration_interval is not None:
+                r.integration_interval = copy.copy(r.integration_interval[cidx])
+
+        import os
+        tsint_so_file = os.path.dirname(__file__) + '/tsintegrate.so'
+
+        try:
+            from numpy.ctypeslib import ndpointer
+            import ctypes
+            ctsint = ctypes.cdll.LoadLibrary(tsint_so_file)
+        except:
+            logger.error('Fast integration library (%s) unavailable',
+                        tsint_so_file)
+            return r
+
+        class OutStruct(ctypes.Structure):
+            _fields_ = [("data", ctypes.POINTER(ctypes.c_double)),
+                        ("weight", ctypes.POINTER(ctypes.c_double))]
+
+        if alt_sample_start_time is None:
+            sam_st = r.sample_start_time
+        else:
+            sam_st = alt_sample_start_time
+        if alt_sample_end_time is None:
+            sam_et = r.sample_end_time
+        else:
+            sam_et = alt_sample_end_time
+
+        nnew = sample_start_time.size
+        nold = sam_st.size
+        nchan = len(r.channels)
+            
+        if r.integration_interval is not None:
+            assert not np.any(dt64.isnat(r.integration_interval)), \
+                'integration_interval must not contain NaT'
+        else:
+            r.integration_interval = np.ones([nchan,nold])\
+                                        *r.nominal_cadence
+        # weights units
+        wu = dt64.get_units(r.integration_interval)
+        # integration/resampling units
+        iu = dt64.smallest_unit((sam_st,sam_et,
+                                 sample_start_time,
+                                 sample_end_time))
+        ius = 'M8['+iu+']'
+        
+        output_p = ctypes.POINTER(OutStruct)
+        ctsint.tsIntegrate.restype= ctypes.POINTER(OutStruct)
+        ctsint.tsIntegrate.argtypes = [ctypes.c_int64,
+                            ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_int64,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                            ndpointer(dtype=ctypes.c_double,shape=(nold,)),
+                            ctypes.c_int64,
+                            ndpointer(dtype=ctypes.c_int64,shape=(nnew,)),
+                            ndpointer(dtype=ctypes.c_int64,shape=(nnew,))]
+        
+        new_data = np.zeros([nchan,nnew])
+        new_weight = np.zeros([nchan,nnew])
+
+        # C code doesn't want NaN, but zero integration interval is same thing
+        r.integration_interval[np.isnan(r.data)] = 0
+        r.data[np.isnan(r.data)] = 0
+
+        for cn in range(nchan):
+            output_p = ctsint.tsIntegrate(np.int64(nold),
+                  sam_st.astype(ius).astype('int64'),
+                  sam_et.astype(ius).astype('int64'),
+                  r.data[cn,:].astype('float64'),
+                  r.integration_interval[cn,:].\
+                                     astype('int64').astype('float64'),
+                  np.int64(nnew),
+                  sample_start_time.astype(ius).astype('int64'),
+                  sample_end_time.astype(ius).astype('int64'))
+            new_weight[cn,:] = np.fromiter(output_p.contents.weight,
+                                        dtype=np.float64,count=nnew).copy()
+            new_data[cn,:] = np.fromiter(output_p.contents.data,
+                                         dtype=np.float64,count=nnew).copy()
+            ctsint.freemem()
+            non_zero_weight = (new_weight[cn,:]!=0.0)
+            new_data[cn,non_zero_weight] = new_data[cn,non_zero_weight]\
+                                           /new_weight[cn,non_zero_weight]
+        new_data[new_weight==0.0] = np.NaN
+
+        r.start_time = np.min(sample_start_time)
+        r.end_time = np.max(sample_end_time)
+        r.sample_start_time = sample_start_time
+        r.sample_end_time = sample_end_time
+        r.integration_interval = dt64.astype(new_weight,
+                                             time_type=r.integration_interval,
+                                             units=wu)
+        if sample_start_time.size > 1:
+            r.nominal_cadence = np.median(np.diff(sample_start_time))
+        else:
+            r.nominal_cadence = None
+        r.data = new_data
+
+        r.processing.append('resample') 
+
         return r
 
         
@@ -1186,8 +1371,10 @@ class Data(object):
              archive=None,
              path=None,
              merge=None,
-             overwrite=True,
-             save_converter=None):
+	     overwrite=True,
+             save_converter=None,
+             duration=None,
+             time=None):
         assert ((archive is not None and path is None) or 
                 (archive is None and path is not None)), \
             'archive or path must be defined (and not both)'
@@ -1196,31 +1383,42 @@ class Data(object):
                                      self.site,
                                      self.__class__.__name__,
                                      archive=archive)
-        if merge is None:
-            merge = path is None
 
-        if path is None:
-            # Save to a default location
-            assert save_converter is None, \
-                'Cannot set save_converter when saving to default location'
-            save_converter = ai['save_converter']
-            path = ai['path']
+        if duration is None:
             duration = ai['duration']
+
+        if save_converter is None:
+            save_converter = ai['save_converter']
+        if time is None:
+            multiple_files = True
             t = dt64.dt64_range(dt64.floor(self.start_time, duration),
                                 dt64.ceil(self.end_time, duration),
                                 duration)
         else:
-            # Save to single file
-            t = [self.start_time]
-            duration = self.end_time - self.start_time
+            multiple_files = False
+            t = [dt64.floor(time, duration)]
+
+        if path is None:
+            path = ai['path']
+            # Save to a default location
+        else: # by convention make one file if path specified
+            multiple_files = False
 
         if save_converter is None:
             raise Exception('Cannot save, save_converter not defined')
+
+        if merge is None:
+            merge = multiple_files
+
         for t1 in t:
             t2 = t1 + duration
             file_name = dt64.strftime(t1, path)
-            d = self.extract(t1, t2)
-            d.set_time_units(ai['nominal_cadence'], inplace=True)
+            if multiple_files:
+                d = self.extract(t1, t2)
+                d.set_time_units(ai['nominal_cadence'], inplace=True)
+            else:
+                d = self.set_time_units(ai['nominal_cadence'], inplace=False)
+                
             if merge:
                 # Load existing data and merge before saving
                 tmp = ap.load_data(self.project,

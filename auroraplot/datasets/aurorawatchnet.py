@@ -28,6 +28,7 @@ from auroraplot.voltagedata import VoltageData
 logger = logging.getLogger(__name__)
 
 base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
+#base_url = '/data/aurorawatchnet/'
 
 def check_mag_data(data):
     data[np.logical_or(data < -0.0001, data > 0.0001)] = np.nan
@@ -84,7 +85,8 @@ def load_awn_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            data = np.genfromtxt(uh, unpack=True, invalid_raise=False)
+            data = ap.loadtxt(uh)
+            #data = np.genfromtxt(uh, unpack=True, invalid_raise=False)
             sample_start_time = ap.epoch64_us + \
                 (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates

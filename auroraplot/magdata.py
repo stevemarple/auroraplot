@@ -579,6 +579,7 @@ class MagData(Data):
                       data=data,
                       units=units,
                       sort=sort)
+        self.load_qdc = load_qdc
 
     def data_description(self):
         return 'Magnetic field'
@@ -891,31 +892,36 @@ class MagQDC(MagData):
     
     def align(self, ref, fit=None, **fit_kwargs):
         day = np.timedelta64(24, 'h')
-        if isinstance(ref, MagData):
-            r = copy.deepcopy(ref)
-            interp_times = ref.get_mean_sample_time()
+        if isinstance(ref, RioData):
+            sample_start_time = copy.copy(ref.sample_start_time)
+            sample_end_time = copy.copy(ref.sample_end_time)
+            nominal_cadence = copy.copy(ref.nominal_cadence)
         else:
             # ref parameter must contain sample timestamps
-            assert not fit, 'Cannot fit without reference data'
-            ta = np.sort(np.array(ref).flatten())
-            if len(ta) >= 2:
+            assert str(np.array(ref).dtype).startswith('datetime'),\
+                   'Cannot fit without reference data/times'
+            sample_start_time = np.sort(np.array(ref).flatten())
+            sample_end_time = copy.copy(sample_start_time)
+            if len(sample_start_time) >= 2:
                 # Guess the nominal cadence
-                nc = np.median(np.diff(ta))
+                nominal_cadence = np.median(np.diff(sample_start_time))
             else:
-                nc = None
-            r = MagData(project=self.project,
-                        site=self.site,
-                        channels=copy.copy(self.channels),
-                        start_time=ta[0],
-                        end_time=ta[-1],
-                        sample_start_time=ta,
-                        sample_end_time=copy.copy(ta),
-                        integration_interval=None,
-                        nominal_cadence=nc,
-                        data=None,
-                        units=self.units,
-                        sort=False)
-            interp_times = ta
+                nominal_cadence = None
+        start_time = sample_start_time[0]
+        end_time = sample_end_time[-1]
+        r = RioData(project=self.project,
+                    site=self.site,
+                    channels=copy.copy(self.channels),
+                    start_time=start_time,
+                    end_time=end_time,
+                    sample_start_time=sample_start_time,
+                    sample_end_time=sample_end_time,
+                    integration_interval=None,
+                    nominal_cadence=nominal_cadence,
+                    data=None,
+                    units=self.units,
+                    sort=False)
+        interp_times = r.get_mean_sample_time()
 
         # Create array with room for additional entries at start and end
         xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')

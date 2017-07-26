@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="images">
+    <file>icons/plot_22.png</file>
+    <file>icons/auroraplot_128.png</file>
+    <file>icons/auroraplot_256.png</file>
+    <file>icons/auroraplot_32.png</file>
+    <file>icons/dataviewer_128.png</file>
+    <file>icons/dataviewer_256.png</file>
+    <file>icons/dataviewer_32.png</file>
+    <file>icons/qdccreator_32.png</file>
+    <file>icons/qdccreator_128.png</file>
+    <file>icons/qdccreator_256.png</file>
+  </qresource>
+</RCC>
