@@ -902,7 +902,7 @@ class Data(object):
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
         else:
-            if offset_interval != 0:
+            if offset_interval != np.timedelta64(0, tu):
                 raise ValueError('cannot set offset_interval for same cadence')
             if inplace:
                 r = self
