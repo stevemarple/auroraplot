@@ -92,7 +92,7 @@ parser.add_argument('-c', '--channels',
                     help='Stack plot data channel(s)')
 parser.add_argument('--dataset',
                     nargs='*',
-                    help='Import additional datset',
+                    help='Import additional data set',
                     metavar='MODULE')
 parser.add_argument('--list-sites',
                     action='store_true',
