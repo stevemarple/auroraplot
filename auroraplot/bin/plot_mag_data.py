@@ -193,24 +193,33 @@ mpl.rcParams['legend.numpoints'] = 1
 
 
 if args.list_sites:
-    ps_list = ['Projects/sites available:']
+    ps_list = []
     for p in sorted(ap.projects):
         ps_list.append('  ' + p + ':')
-        first = True
+        firstOnLine = True
         slist = []
-        for site in sorted(ap.projects[p]):
-            if first:
+        s = ''
+        for site in sorted(ap.projects[p]['sites']):
+            if firstOnLine:
                 s = '      ' + site
-                first = False
+                firstOnLine = False
             else:
                 s += ', ' + site
             if len(s) > 60:
                 slist.append(s)
                 s = ''
-                first = True
-        slist.append(s)
-        ps_list.append(',\n'.join(slist))
-    print('\n'.join(ps_list))
+                firstOnLine = True
+        if s:
+            slist.append(s)
+        if slist:
+            ps_list.append(',\n'.join(slist))
+        else:
+            ps_list.append('none')
+    print('Projects/sites available:')
+    if ps_list:
+        print('\n'.join(ps_list))
+    else:
+        print('none')
     sys.exit(0)
 
 # Set timezone appropriately to get intended np.datetime64 behaviour.
