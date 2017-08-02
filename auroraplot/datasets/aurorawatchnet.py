@@ -480,6 +480,22 @@ sites = {
     }
 
 
+    'SUM': {
+        'location': 'Sumburgh Head, UK',
+        'latitude': Decimal('59.853'),
+        'longitude': Decimal('-1.276'),
+        'elevation': 248,
+        'start_time': np.datetime64('2013-11-10T00:00Z'),
+        'end_time': None,  # Still operational
+        'k_index_scale': 1000e-9,  # From BGS Monthly Magnetic Bulletin value for Lerwick
+        'license': cc3_by_nc_sa,
+        'copyright': 'Lancaster University.',
+        'attribution': 'Space and Plasma Physics group, ' + \
+                       'Department of Physics, Lancaster University, UK.',
+        'description': 'Raspberry Pi magnetometer system. ',
+        'line_color': [0, 0x65/255., 0xCC/255.], # Blue from Shetland flag
+    },  # SUM
+}
 
 # Set activity color/thresholds unless already set.
 default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
@@ -611,8 +627,7 @@ for s in sites:
     if 'k_index_filter' not in sites[s]:
          sites[s]['k_index_filter'] = k_index_filter_battery
 
-
-for s in ('LAN1', 'EXE', 'SID', 'TEST1'):
+for s in ('LAN1', 'EXE', 'SID', 'SUM', 'TEST1'):
     for dt in ('MagData', 'MagQDC'):
         for an in sites[s]['data_types'][dt]:
             ai = sites[s]['data_types'][dt][an]
