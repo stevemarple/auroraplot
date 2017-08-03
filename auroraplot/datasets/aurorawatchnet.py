@@ -260,7 +260,7 @@ sites = {
         'longitude': -2.78,
         'elevation': 27,
         'start_time': np.datetime64('2013-11-10T00:00Z'),
-        'end_time': None,  # Still operational
+        'end_time': np.datetime64('2017-08-03T00:00Z'),
         'k_index_scale': 650e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
