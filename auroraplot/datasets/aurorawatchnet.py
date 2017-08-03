@@ -495,7 +495,7 @@ sites = {
         'copyright': 'Lancaster University.',
         'attribution': 'Space and Plasma Physics group, ' + \
                        'Department of Physics, Lancaster University, UK.',
-        'description': 'Raspberry Pi magnetometer system.',
+        'description': 'Raspberry Pi magnetometer system, hosted by the Shetland Amenity Trust. Made possible through funding from Gradconsult.',
         'line_color': [0, 0x65/255., 0xCC/255.], # Blue from Shetland flag
     },  # SUM
 }
