@@ -69,9 +69,9 @@ parser.add_argument('--only-missing',
                     default=False,
                     action='store_true',
                     help='Create only if QDC file is missing')
-parser.add_argument('--plot-quiet-days',
+parser.add_argument('--plot',
                     action='store_true',
-                    help='Plot the quiet days')
+                    help='Plot intermediate results and final QDC')
 parser.add_argument('--post-aggregate',
                     default='scipy.average',
                     help='Aggregate function used for setting post-load cadence')
@@ -245,12 +245,8 @@ for n in range(len(project_list)):
                                          aggregate=post_agg_func,
                                          inplace=True)
 
-                mag_qdc = mag_data.make_qdc(smooth=args.smooth,
-                                            plot_quiet_days=args.plot_quiet_days)
+                mag_qdc = mag_data.make_qdc(smooth=args.smooth, plot=args.plot)
 
-                if args.plot_quiet_days:
-                    mag_qdc.plot(title='Final QDC')
-                    
                 if args.filename:
                     filename = args.filename
                 else:

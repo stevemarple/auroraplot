@@ -777,18 +777,30 @@ class MagData(Data):
         return r
         
     
-    def make_qdc(self, nquiet=5, channels=None, 
+    def make_qdc(self, nquiet=5, channels=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  quiet_days_method=None,
                  smooth=True,
-                 plot_quiet_days=False,
+                 plot=False,
                  remove_nans_window=np.timedelta64(10, 'm'),
                  remove_nans_func=np.nanmean):
         qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
                                  cadence=cadence, method=quiet_days_method)
-        if plot_quiet_days:
+        axes = None
+        if plot:
             for q in qd:
-                q.plot()
+                qst = q.start_time
+                # To overlay quiet days use the interval from the start of each quiet day otherwise the
+                # lines are spread over time and do not overlay.
+                q = copy.deepcopy(q)
+                q.start_time = q.start_time - qst
+                q.end_time = q.end_time - qst
+                q.sample_start_time = q.sample_start_time - qst
+                q.sample_end_time = q.sample_end_time - qst
+                q.plot(title='Quiet days', axes=axes, label=dt64.strftime(qst, '%Y-%m-%d'))
+                axes = plt.gcf().get_axes()
+            for ax in axes:
+                ax.legend(loc='upper left', fontsize='small')
             
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
@@ -822,8 +834,17 @@ class MagData(Data):
             qdc_no_nans = qdc.sliding_window(remove_nans_func, remove_nans_window)
             qdc = ap.data.first_non_nan([qdc, qdc_no_nans])
 
+        final_fig = None
         if smooth:
+            if plot:
+                qdc.plot(title='Final QDC', label='Unsmoothed QDC')
+                final_fig = plt.gcf()
             qdc.smooth(inplace=True)
+
+        if plot:
+            qdc.plot(title='Final QDC', figure=final_fig, label='Final QDC')
+            for ax in plt.gcf().get_axes():
+                ax.legend(loc='upper left', fontsize='small')
 
         return qdc
 
