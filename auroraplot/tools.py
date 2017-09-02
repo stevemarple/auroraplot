@@ -331,16 +331,14 @@ def sgolay_filt(data, window_size, order):
     return r
 
 
-def change_load_data_paths(project, 
-                           replace, 
-                           site_list=None, 
-                           data_type_list=None,
-                           archive_list=None):
-    '''Helper function for changing paths used when loading data
+def walk_data_archives(callback, project,
+                       site_list=None,
+                       data_type_list=None,
+                       archive_list=None):
+    '''Walk through a project's data archives
 
-    change_load_data_paths is intended to be called from within
-    auroraplot_custom.py to alter the paths used when loading data,
-    for instance to modify the URLs to local file paths
+    The callback function is called once for each data archive, with the parameters
+    project, site, data type, archive name and archive data.
     '''
 
     if site_list is None:
@@ -366,17 +364,57 @@ def change_load_data_paths(project,
                 a_list = archive_list
 
             for archive in a_list:
-                av = dtv[archive]
                 if archive == 'default':
                     continue
-                if not hasattr(av['path'], '__call__'):
-                    orig_archive = 'original_' + archive
-                    if orig_archive not in dtv:
-                        # Keep a copy of the original
-                        dtv[orig_archive] = copy.deepcopy(av)
-                    av['path'] = replace(av['path'], project, site,
-                                         data_type, archive)
-        
+                callback(project, site, data_type, archive, dtv[archive])
+
+
+def change_load_data_paths(project,
+                           replace,
+                           site_list=None,
+                           data_type_list=None,
+                           archive_list=None,
+                           load_converter=None,
+                           cache_dir=None):
+    '''Helper function for changing paths used when loading data
+
+    change_load_data_paths is intended to be called from within
+    auroraplot_custom.py to alter the paths used when loading data,
+    for instance to modify the URLs to local file paths
+    '''
+    def callback(project, site, data_type, archive, archive_data):
+        orig_archive = 'original_' + archive
+        if orig_archive not in ap.projects[project]['sites'][site]['data_types'][data_type]:
+            # Keep a copy of the original
+            ap.projects[project]['sites'][site]['data_types'][data_type][orig_archive] = copy.deepcopy(archive_data)
+        if not hasattr(archive_data['path'], '__call__'):
+            archive_data['path'] = replace(archive_data['path'], project, site, data_type, archive)
+
+    walk_data_archives(callback,
+                       project,
+                       site_list=site_list,
+                       data_type_list=data_type_list,
+                       archive_list=archive_list)
+
+def cache_data_files(cache_dir, project,
+                     site_list=None,
+                     data_type_list=None,
+                     archive_list=None):
+    '''Helper function for caching data locally
+
+    cache_data_files is intended to be called from within
+    auroraplot_custom.py to alter the paths used when loading data.
+    '''
+
+    def callback(project, site, data_type, archive, archive_data):
+        archive_data['cache_dir'] = os.path.join(cache_dir, project, site)
+
+    walk_data_archives(callback,
+                       project,
+                       site_list=site_list,
+                       data_type_list=data_type_list,
+                       archive_list=archive_list)
+
 
 def lookup_module_name(s):
     last_dot = s.rindex('.')
