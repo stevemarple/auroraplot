@@ -35,6 +35,7 @@ import os
 from tempfile import NamedTemporaryFile
 
 import auroraplot.dt64tools as dt64
+from auroraplot.tools import smart_open
 
 try:
     from numpy import nanmean
@@ -394,7 +395,9 @@ def load_data(project,
               raise_all=False,
               cadence=None,
               aggregate=None,
-              filter_function=None):
+              filter_function=None,
+              use_cache=None,
+              now=None):
     '''Load data. 
     project: name of the project (upper case)
 
@@ -485,10 +488,37 @@ def load_data(project,
 
         url_parts = urlparse(file_name)
         if url_parts.scheme in ('ftp', 'http', 'https'):
-            file_name = download_url(file_name)
+            if ad.get('cache_dir'):
+                if now is None:
+                    now = np.datetime64('now', 's')
+                dtd = ad.get('data_transfer_delay', np.timedelta64(0, 's'))
+                if use_cache is None:
+                    if end_time + dtd < now:
+                        use_cache = True  # OK to try fetching from the cache
+                    else:
+                        logger.debug('data too new to cache')
+
+                cache_filename = os.path.normpath(os.path.join(ad['cache_dir'],
+                                                               file_name.replace(':', '/')))
+                logger.debug('cache file: ' + cache_filename)
+                if use_cache:
+                    if os.path.exists(cache_filename):
+                        file_name = cache_filename
+                        logger.debug('cache hit')
+                    else:
+                        file_name = download_url(file_name, dest=cache_filename)
+                else:
+                    # Download but discard after use
+                    file_name = download_url(file_name)
+                    temp_file_name = file_name
+            else:
+                # No cache so discard after use
+                file_name = download_url(file_name)
+                temp_file_name = file_name
+
             if file_name is None:
                 continue
-            temp_file_name = file_name
+
         elif url_parts.scheme == 'file':
             file_name = url_parts.path
             
@@ -507,6 +537,8 @@ def load_data(project,
                 with gzip.open(file_name, 'rb') as gzip_file:
                     shutil.copyfileobj(gzip_file, gunzipped_file)
                 gunzipped_file.close()
+            except KeyboardInterrupt:
+                raise
             except Exception as e:
                 if gunzipped_file:
                     gunzipped_file.close()
@@ -541,6 +573,8 @@ def load_data(project,
                                     aggregate=aggregate,
                                     inplace=True)
                 data.append(tmp)
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             if raise_all:
                 raise
@@ -688,7 +722,7 @@ def parse_archive_selection(selection, defaults={}):
     return r
 
 
-def download_url(url, prefix=__name__, temporary_file=True):
+def download_url(url, prefix=__name__, temporary_file=True, dest=None):
     logger.info('downloading ' + url)
     # For selected schemes attempt to insert authentication
     # data from .netrc
@@ -723,7 +757,12 @@ def download_url(url, prefix=__name__, temporary_file=True):
         if http_result and http_result != 200:
             logger.info('could not access %s (%s)', url, http_result)
             return None
-        
+
+        if dest:
+            with smart_open(dest, 'w') as dest_file:
+                shutil.copyfileobj(url_file, dest_file)
+            return dest
+
         if temporary_file:
             # Have temporary file use the same suffix
             suffix = ''.join(os.path.basename(url_parts.path).partition('.')[1:])
@@ -754,6 +793,8 @@ except ImportError as e:
     # No custom module
     logger.debug('auroraplot_custom.py not found')
     auroraplot_custom = {}
+except KeyboardInterrupt:
+    raise
 except Exception as e:
     # Error loading custom module
     logger.error('Could not load custom module:' + str(e))
