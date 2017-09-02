@@ -547,9 +547,19 @@ default_data_types = {
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
             'load_converter': ap.magdata.load_qdc_data,
+            'save_converter': ap.data._generic_save_converter,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,
+            # Information for generic load/save
+            'constructor': ap.magdata.MagQDC,
+            'timestamp_method': 's',
+            'fmt': ['%d', '%.3f'],
+            'delimiter': ' ',
+            'data_multiplier': 1000000000,  # Store as nT values
+            # Information for making the data files
+            'qdc_fit_duration': np.timedelta64(10, 'D'),
+            'realtime_qdc': True,
         },
     },
     'TemperatureData': {
@@ -636,6 +646,8 @@ for s in ('LAN1', 'EXE', 'SID', 'SUM', 'TEST1'):
             if isinstance(ai, six.string_types):
                 continue
             ai['channels'] = np.array(['H', 'E', 'Z'])
+            if dt == 'MagQDC':
+                ai['fmt'] = ['%d'] + ['%.3f'] * len(ai['channels'])
 
     sites[s]['data_types']['MagData']['realtime_baseline']['fmt'] = \
         ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f']
