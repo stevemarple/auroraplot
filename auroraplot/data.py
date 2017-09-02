@@ -183,8 +183,17 @@ def _generic_save_converter(d, file_name, archive_data):
                          np.size(d.sample_start_time)])
         data[0] = sst.astype('float') * dt64.multipliers[dt64.get_units(sst)]
 
+    elif archive_data['timestamp_method'] == 's':
+        # Works for either numpy.datetime64 or numpy.timedelta64
+        col_offset = 1
+        data = np.empty([col_offset + np.size(d.channels),
+                         np.size(d.sample_start_time)])
+        data[0] = dt64.astype(d.sample_start_time, 's').astype('int')
+
     elif archive_data['timestamp_method'] == 'offset0':
         col_offset = 1
+        data = np.empty([col_offset + np.size(d.channels),
+                         np.size(d.sample_start_time)])
         data[0] = (sst - d.start_time) / d.nominal_cadence
 
     elif archive_data['timestamp_method'] == 'offset1':
