@@ -55,7 +55,7 @@ parser.add_argument('-e', '--end-time',
                     help='End time',
                     metavar='DATETIME')
 parser.add_argument('--filename',
-                    help='Destination file')
+                    help='Destination file (strftime format string)')
 parser.add_argument('--log-level', 
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
@@ -255,12 +255,17 @@ for n in range(len(project_list)):
                 # Expand with project, site, time etc
                 filename = dt64.strftime(t1, filename)
                 if args.dry_run:
-                    logger.info('Dry run, not saving QDC to ' + filename)
+                    logger.info('Dry run, not saving QDC to ' + dt64.strftime(t1, filename))
                 else:
-                    with smart_open(filename, 'w') as fh:
-                        fmt = ['%d']
-                        fmt.extend(['%.3f'] * len(qdc_ad['channels']))
-                        mag_qdc.savetxt(fh, fmt=fmt)
+                    if 'save_converter' in qdc_ad:
+                        # Use a dedicated save method and format if present
+                        mag_qdc.save(archive=qdc_archive, path=filename)
+                    else:
+                        # For compatibility fall back to savetxt method
+                        with smart_open(dt64.strftime(t1, filename), 'w') as fh:
+                            fmt = ['%d']
+                            fmt.extend(['%.3f'] * len(qdc_ad['channels']))
+                            mag_qdc.savetxt(fh, fmt=fmt)
 
         finally:
             t1 = t2
