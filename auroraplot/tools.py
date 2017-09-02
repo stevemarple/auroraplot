@@ -14,11 +14,11 @@ class NthLargest(object):
     Class to calculate the Nth largest value from a numpy array-like
     value. If 'smallest' is True then calculate the Nth smallest.
     '''
-        
+
     def __init__(self, n, smallest=False):
         self.n = n
         self.smallest = smallest
-        
+
     def __call__(self, a, weights=None):
         '''
         Calculate the largest (or smallest value). An optional
@@ -33,13 +33,13 @@ class NthLargest(object):
         else:
             # Want largest first, so change sign
             b = -af
-            
+
         idx = b.argsort()
 
         if np.max(self.n) >= af.size:
             return np.nan
         return np.mean(af[idx[self.n]])
-    
+
 
 class smart_open:
     """Smarter way to open files for writing.
@@ -68,10 +68,10 @@ class smart_open:
 
     """
 
-    def __init__(self, 
-                 filename, 
-                 mode='r', 
-                 temp_ext='.tmp', 
+    def __init__(self,
+                 filename,
+                 mode='r',
+                 temp_ext='.tmp',
                  delete_temp_on_error=True):
         self.filename = filename
         self.mode = mode
@@ -86,21 +86,21 @@ class smart_open:
 
     def __enter__(self):
         d = os.path.dirname(self.filename)
-        if (not os.path.exists(d) and 
-            ('w' in self.mode or 'x' in self.mode 
+        if (not os.path.exists(d) and
+            ('w' in self.mode or 'x' in self.mode
              or 'a' in self.mode or '+' in self.mode)):
             logger.debug('creating directory %s', d)
             os.makedirs(d)
         self.file = open(self.filename + self.temp_ext, self.mode)
         return self.file
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         if self.file is not None:
             if not self.file.closed:
                 self.file.close()
             if self.file.name != self.filename:
                 if exc_type is None:
-                    logger.debug('renaming %s to %s', 
+                    logger.debug('renaming %s to %s',
                                  self.file.name, self.filename)
                     os.rename(self.file.name, self.filename)
                 elif self.delete_temp_on_error:
@@ -134,14 +134,14 @@ def minimise_sign_error(a, b):
         # Close enough, especially when total number is odd
         imbalance = 0
     return imbalance , True
-    
-def fit_data(data, ref_data, err_func=None, tolerance=None, 
+
+def fit_data(data, ref_data, err_func=None, tolerance=None,
              max_iterations=50, full_output=False, plot_fit=False):
 
     # Assume datasets are aligned in time already
     assert not np.all(np.logical_or(np.isnan(data), np.isnan(ref_data))), \
         'No common samples which are not NaN'
-    
+
     # Calculate initial starting values to iterate between
     e = data - ref_data
     data1 = data - np.nanmin(e); # upper limit
@@ -163,9 +163,9 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
         iterations += 1
         difference = data1[non_nan_idx] - data2[non_nan_idx]
         test_data = data1 - 0.5 * difference
-        
+
         test_error, has_sign = err_func(test_data, ref_data)
-        
+
         if test_error == 0:
             # On target!
             break
@@ -189,9 +189,9 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
             if not has_sign:
                 # Compute the direction to move in, indicate this by
                 # setting the sign of test_error accordingly
-                test_error2, tmp = err_func(test_data + 0.5*tolerance, 
+                test_error2, tmp = err_func(test_data + 0.5*tolerance,
                                             ref_data)
-                
+
                 if test_error > test_error2:
                     test_error = -test_error # Too low
                 elif test_error < test_error2:
@@ -202,7 +202,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                     # bigger step size, say for 10 times. Seems
                     # unlikely.
                     raise Exception('Cannot find direction to iterate')
-                
+
             if test_error > 0:
                 # Too high, go halfway between test_data and data2
                 data1 = test_data
@@ -210,28 +210,28 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
             else:
                 data2 = test_data
                 e2 = test_error
-            
+
         if iterations >= max_iterations:
             mesg = ('No solution after %(max_iterations)d iterations, ' +
-                    'tolerance: %(tolerance)g, ' + 
+                    'tolerance: %(tolerance)g, ' +
                     'difference: %(difference)g, ') % locals()
             raise Exception(mesg)
-        
-        
+
+
     if full_output:
         stats = {'iterations': iterations,
                  'error': data[non_nan_idx] - test_data[non_nan_idx],
                  'tolerance': tolerance,
                  'difference': difference,
                  }
-        
+
         return test_data, data[non_nan_idx] - test_data[non_nan_idx], \
             stats
     else:
         return test_data
 
-    
-    
+
+
 # Savitzky-Golay filter, from Scipy cookbook,
 # http://wiki.scipy.org/Cookbook/SavitzkyGolay
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
@@ -359,7 +359,7 @@ def change_load_data_paths(project,
             dtv_keys = list(dtv.keys())
             if len(dtv_keys) == 1 and dtv_keys[0] != 'default':
                 dtv['default'] = dtv_keys[0]
-                
+
             if archive_list is None:
                 a_list = dtv_keys
             else:
@@ -386,4 +386,4 @@ def lookup_module_name(s):
 
 
 
-    
+
