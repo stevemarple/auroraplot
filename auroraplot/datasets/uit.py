@@ -664,11 +664,17 @@ sites = {
 for s in sites:
     site_lc = s.lower()
     fdict = dict(project_lc='uit', site_lc=s.lower())
-    sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
+
     if 'start_time' not in sites[s]:
         sites[s]['start_time'] = None
     if 'end_time' not in sites[s]:
         sites[s]['end_time'] = None
+
+    for an in sites[s]['data_types']['MagData']:
+        if 'data_transfer_delay' not in sites[s]['data_types']['MagData'][an]:
+            sites[s]['data_types']['MagData'][an]['data_transfer_delay'] = np.timedelta64(5, 'm')
+
+    sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
 
     sites[s]['data_types']['MagData']['realtime_baseline'] = {
         'channels': np.array(['X', 'Y', 'Z']),
