@@ -39,8 +39,8 @@ def leastsq_error(p, obj, ref, channel):
 
 
 def _generic_load_converter(file_name, archive_data, 
-                            project, site, data_type, channels, start_time, 
-                            end_time, **kwargs):
+                            project, site, data_type, start_time,
+                            end_time, archive, channels, **kwargs):
     """
     A generic load converter.
 

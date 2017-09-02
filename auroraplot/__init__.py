@@ -531,8 +531,8 @@ def load_data(project,
                                        data_type=data_type, 
                                        start_time=t, 
                                        end_time=t2, 
-                                       archive=archive,
                                        channels=channels,
+                                       archive=archive,
                                        path=path,
                                        raise_all=raise_all)
             if tmp is not None:
