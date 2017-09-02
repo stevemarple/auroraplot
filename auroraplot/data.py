@@ -1148,20 +1148,22 @@ class Data(object):
              merge=None,
              overwrite=True,
              save_converter=None):
-        assert ((archive is not None and path is None) or (archive is None and path is not None)), \
-            'archive or path must be defined (and not both)'
+        assert archive is not None or path is not None, 'archive or path must be defined'
 
         an, ai = ap.get_archive_info(self.project,
                                      self.site,
                                      self.__class__.__name__,
                                      archive=archive)
+        if save_converter is None:
+            save_converter = ai['save_converter']
+            if save_converter is None:
+                raise Exception('Cannot save, save_converter not defined')
+
         if merge is None:
             merge = path is None
 
         if path is None:
             # Save to a default location
-            assert save_converter is None, 'Cannot set save_converter when saving to default location'
-            save_converter = ai['save_converter']
             path = ai['path']
             duration = ai['duration']
             t = dt64.dt64_range(dt64.floor(self.start_time, duration),
@@ -1172,8 +1174,7 @@ class Data(object):
             t = [self.start_time]
             duration = self.end_time - self.start_time
 
-        if save_converter is None:
-            raise Exception('Cannot save, save_converter not defined')
+
         for t1 in t:
             t2 = t1 + duration
             file_name = dt64.strftime(t1, path)
