@@ -10,7 +10,6 @@ import auroraplot.dt64tools as dt64
 import auroraplot.magdata
 from auroraplot.magdata import MagData
 
-
 logger = logging.getLogger(__name__)
 
 # Set the UIT password if possible
@@ -663,9 +662,53 @@ sites = {
 
 
 for s in sites:
+    site_lc = s.lower()
+    fdict = dict(project_lc='uit', site_lc=s.lower())
     sites[s]['data_types']['MagData']['default'] = 'xyz_10s'
-    sites[s]['start_time'] = None
-    sites[s]['end_time'] = None
+    if 'start_time' not in sites[s]:
+        sites[s]['start_time'] = None
+    if 'end_time' not in sites[s]:
+        sites[s]['end_time'] = None
+
+    sites[s]['data_types']['MagData']['realtime_baseline'] = {
+        'channels': np.array(['X', 'Y', 'Z']),
+        'path': '/data/uit/baseline/realtime_baseline/{site_lc}/{site_lc}_%Y.txt'.format(**fdict),
+        'duration': np.timedelta64(1, 'Y'),
+        'load_converter': ap.data._generic_load_converter,
+        'save_converter': ap.data._generic_save_converter,
+        'nominal_cadence': np.timedelta64(1, 'D'),
+        'units': 'T',
+        # Information for generic load/save
+        'constructor': ap.magdata.MagData,
+        'sort': False,
+        'timestamp_method': 'YMD',
+        'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
+        'data_multiplier': 1000000000,  # Store as nT values
+#        # Information for making the data files
+        'qdc_fit_duration': np.timedelta64(10, 'D'),
+        'realtime_qdc': True,
+    }
+
+    sites[s]['data_types']['MagQDC'] = {}
+    sites[s]['data_types']['MagQDC']['qdc_xyz_10s'] = {
+        'channels': np.array(['X', 'Y', 'Z']),
+        'path': '/data/uit/qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt'.format(**fdict),
+        'duration': np.timedelta64(24, 'h'),
+        'format': 'aurorawatchnet_qdc',
+        'load_converter': ap.magdata.load_qdc_data,
+        'save_converter': ap.data._generic_save_converter,
+        'nominal_cadence': np.timedelta64(5, 's'),
+        'units': 'T',
+        'sort': False,
+        # Information for generic load/save
+        'constructor': ap.magdata.MagQDC,
+        'timestamp_method': 's',
+        'fmt': ['%d', '%.3f', '%.3f', '%.3f'],
+        'delimiter': ' ',
+        'data_multiplier': 1000000000,  # Store as nT values
+    }
+    sites[s]['data_types']['MagQDC']['default'] = 'qdc_xyz_10s'
+
     
 project = {
     'name': 'Tromsø Geophysical Observatory Magnetometer Network',
