@@ -242,8 +242,14 @@ def _generic_save_converter(d, file_name, archive_data):
     else:
         data[col_offset:] = d.data
 
+    if 'delimiter' in archive_data:
+        delimiter = archive_data['delimiter']
+    elif os.path.splitext(file_name)[1].lower() == '.csv':
+        delimiter = ','
+    else:
+        delimiter = '\t'
     with ap.tools.smart_open(file_name, 'w') as fh:
-        np.savetxt(fh, data.T, delimiter='\t', fmt=archive_data['fmt'])
+        np.savetxt(fh, data.T, delimiter=delimiter, fmt=archive_data['fmt'])
 
 
 def first_non_nan(data_list):
