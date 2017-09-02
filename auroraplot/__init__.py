@@ -493,15 +493,17 @@ def load_data(project,
                     now = np.datetime64('now', 's')
                 dtd = ad.get('data_transfer_delay', np.timedelta64(0, 's'))
                 if use_cache is None:
-                    if end_time + dtd < now:
-                        use_cache = True  # OK to try fetching from the cache
+                    if t2 + dtd < now:
+                        uc = True  # OK to try fetching from the cache
                     else:
+                        uc = False
                         logger.debug('data too new to cache')
-
+                else:
+                    uc = use_cache
                 cache_filename = os.path.normpath(os.path.join(ad['cache_dir'],
                                                                file_name.replace(':', '/')))
                 logger.debug('cache file: ' + cache_filename)
-                if use_cache:
+                if uc:
                     if os.path.exists(cache_filename):
                         file_name = cache_filename
                         logger.debug('cache hit')
