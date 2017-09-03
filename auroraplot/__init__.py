@@ -228,38 +228,38 @@ def get_projects():
 
 def get_project_info(project, info=None):
     if project not in projects:
-        raise Exception('Unknown project (%s)' % project)
+        raise KeyError('Unknown project (%s)' % project)
     if info is None:
         return projects[project]
     elif info not in projects[project]:
-        raise Exception('Unknown info (%s)' % info)
+        raise KeyError('Unknown info (%s)' % info)
     else:
         return projects[project][info]
 
 def get_sites(project):
     if project not in projects:
-        raise Exception('Unknown project (%s)' % project)
+        raise KeyError('Unknown project (%s)' % project)
     return projects[project]['sites'].keys()
 
 def has_site_info(project, site, info):
     # Sanity checking
     if project not in projects:
-        raise Exception('Unknown project (%s)' % project)
+        raise KeyError('Unknown project (%s)' % project)
     elif site not in projects[project]['sites']:
-        raise Exception('Unknown site (%s)' % site)
+        raise KeyError('Unknown site (%s)' % site)
     return info in projects[project]['sites'][site]
 
 
 def get_site_info(project, site, info=None):
     # Sanity checking
     if project not in projects:
-        raise Exception('Unknown project (%s)' % project)
+        raise KeyError('Unknown project (%s)' % project)
     elif site not in projects[project]['sites']:
-        raise Exception('Unknown site (%s)' % site)
+        raise KeyError('Unknown site (%s)' % site)
     if info is None:
         return projects[project]['sites'][site]
     elif info not in projects[project]['sites'][site]:
-        raise Exception('Unknown info (%s)' % info)
+        raise KeyError('Unknown info (%s)' % info)
     else:
         return projects[project]['sites'][site][info]
 
@@ -279,7 +279,7 @@ def get_archives(project, site, data_type):
     
     site_info = get_site_info(project, site)
     if data_type not in site_info['data_types']:
-        raise ValueError('Unknown data_type (%s)' % data_type)
+        raise KeyError('Unknown data_type (%s)' % data_type)
 
     archive_names = []
     default_name = ''
