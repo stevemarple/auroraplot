@@ -3,11 +3,9 @@
 # Plot magnetometer data from one or more sites.
 
 import argparse
-import copy
 from importlib import import_module
 import logging
 import os 
-import re
 import sys
 import time
 
@@ -38,15 +36,19 @@ import auroraplot.datasets.intermagnet
 import auroraplot.datasets.bgs_schools
 
 
-
 # For each project set the archive from which data is loaded. DTU and
 # UIT are switched to hz_10s when AWN and SAMNET are
 # included.
-default_archive_selection = [['AWN', 'realtime'], 
-                             ['DTU', 'xyz_10s'],
-                             ['UIT', 'xyz_10s'],
-                             ['INTERMAGNET', 'preliminary'],
-                             ]
+default_archive_selection = [
+    ['AWN', 'realtime'],
+    ['DTU', 'xyz_10s'],
+    ['UIT', 'xyz_10s'],
+    ['INTERMAGNET', 'preliminary'],
+]
+default_baseline_archive_selection = [
+    ['AWN', 'realtime_baseline'],
+    ['BGS_SCH', 'realtime_baseline'],
+]
 
 # Define command line arguments
 parser = \
@@ -68,6 +70,11 @@ parser.add_argument('--aurorawatch-activity',
                     action='store_const',
                     const='aurorawatch_activity',
                     help='Make AuroraWatch activity plot(s)')
+parser.add_argument('--baseline-archive',
+                    action='append',
+                    nargs=2,
+                    help='Select baseline data archive used for project or site',
+                    metavar=('PROJECT[/SITE]', 'ARCHIVE'))
 parser.add_argument('--cadence', 
                     help='Set cadence (used when loading data)')
 parser.add_argument('-s', '--start-time', 
@@ -121,6 +128,11 @@ parser.add_argument('--offset',
 parser.add_argument('--plot-function',
                     help='Name of matplotlib plot function',
                     metavar='FUNCTION_NAME')
+parser.add_argument('--qdc-archive',
+                    action='append',
+                    nargs=2,
+                    help='Select QDC data archive used for project or site',
+                    metavar=('PROJECT[/SITE]', 'ARCHIVE'))
 parser.add_argument('--qdc-tries', 
                     default=2,
                     type=int,
@@ -140,6 +152,9 @@ parser.add_argument('--dpi',
                     type=float,
                     default=80,
                     help='DPI when saving plot')
+parser.add_argument('--with-baseline',
+                    action='store_true',
+                    help='Plot baseline with magdata')
 parser.add_argument('--with-qdc',
                     action='store_true',
                     help='Plot QDC with magdata')
@@ -166,12 +181,9 @@ plot_type.add_argument('--voltage-plot',
                        const='voltage_plot',
                        help='Make voltage plot(s)')
 
-
 parser.add_argument('project_site',
                     nargs='*',
                     metavar="PROJECT/SITE")
-
-
 
 args = parser.parse_args()
 if __name__ == '__main__':
@@ -226,6 +238,8 @@ if args.list_sites:
 try:
     os.environ['TZ'] = 'UTC'
     time.tzset()
+except KeyboardInterrupt:
+    raise
 except Exception as e:
     # Cannot use tzset on windows
     logger.warn('Could not set time zone to UTC')
@@ -289,10 +303,16 @@ if ('UIT' in project_list or 'DTU' in project_list) \
 
 # Get the default archives
 archive = ap.parse_archive_selection(default_archive_selection)
+qdc_archive = ap.parse_archive_selection([])
+baseline_archive = ap.parse_archive_selection(default_baseline_archive_selection)
 
 # Process --archive options
 if args.archive:
     archive = ap.parse_archive_selection(args.archive, defaults=archive)
+if args.qdc_archive:
+    qdc_archive = ap.parse_archive_selection(args.qdc_archive, defaults=qdc_archive)
+if args.baseline_archive:
+    baseline_archive = ap.parse_archive_selection(args.baseline_archive, defaults=baseline_archive)
 
 if args.plot_type == 'temp_plot':
     data_type = 'TemperatureData'
@@ -348,8 +368,7 @@ for n in range(len(project_list)):
         md = None
     # If result is None then no data available so ignore those
     # results.
-    if (md is not None and md.data.size 
-        and np.any(np.isfinite(md.data))):
+    if (md is not None and md.data.size and np.any(np.isfinite(md.data))):
         md = md.mark_missing_data(cadence=3*md.nominal_cadence)
         if post_cadence:
             md.set_cadence(post_cadence, aggregate=post_agg_func, inplace=True)
@@ -369,16 +388,34 @@ if args.plot_type is None or args.plot_type == 'stack_plot':
         # No point in using a stackplot for a single site
         mdl[0].plot(**plot_args)
         if args.with_qdc:
+            if mdl[0].project in qdc_archive and mdl[0].site in qdc_archive[mdl[0].project]:
+                a = qdc_archive[mdl[0].project][mdl[0].site]
+            else:
+                a = None
             qdc = ap.magdata.load_qdc(mdl[0].project, 
                                       mdl[0].site,
-                                      dt64.mean(mdl[0].start_time, 
-                                                mdl[0].end_time),
+                                      dt64.mean(mdl[0].start_time, mdl[0].end_time),
+                                      archive=a,
                                       channels=mdl[0].channels,
                                       tries=args.qdc_tries)
             # Align in time and fit to the baseline values
             qdca = qdc.align(mdl[0], fit='realtime_baseline')
             qdca.plot(figure=plt.gcf(), color='gray', zorder=-1)
-            
+
+        if args.with_baseline:
+            bl = ap.load_data(mdl[0].project,
+                              mdl[0].site,
+                              'MagData',
+                              mdl[0].start_time,
+                              mdl[0].end_time + np.timedelta64(1, 'D'),
+                              archive=baseline_archive[mdl[0].project][mdl[0].site],
+                              channels=mdl[0].channels)
+            if bl is None:
+                logger.info('Cannot plot baseline')
+            else:
+                bl.plot(figure=plt.gcf(), end_time=mdl[0].end_time, color='red', zorder=-2,
+                        plot_func=plt.step, where='post')
+
     else:
         # Create a stackplot.
         ap.magdata.stack_plot(mdl, 
@@ -397,6 +434,8 @@ else:
                                                     md.end_time),
                                           channels=md.channels,
                                           tries=args.qdc_tries)
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 qdc = None
             k_cadence = dt64.parse_timedelta64(args.k_index_cadence, 's')
@@ -415,8 +454,7 @@ for fn in plt.get_fignums():
         ax.xaxis.set_major_locator(dt64.Datetime64Locator(maxticks=9))
 
         # Have axis labelled with date or time, as appropriate. Indicate UT.
-        ax.xaxis.set_major_formatter( \
-            dt64.Datetime64Formatter(autolabel='%s (UT)'))
+        ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
         h_color_n = 0
         for h_st, h_et in highlight_t:
             if h_color_n >= len(args.highlight_color):
@@ -434,4 +472,3 @@ if args.save_filename:
 
 # Make figure(s) visible.
 plt.show()
-
