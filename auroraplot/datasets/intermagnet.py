@@ -466,6 +466,14 @@ sites = {
         'sensor_orientation': 'HDZF',
         'copyright': 'United States Geological Survey (USGS)',
         },
+    'NUR': {
+        'location': 'Nurmijarvi, Finland',
+        'latitude': 60.51,
+        'longitude': 24.66,
+        'elevation': 105,
+        'reported': 'XYZF',
+        'copyright': 'Finnish Meteorological Institute',
+        },
     'NVS': {
         'location': 'Novosibirsk, Russia',
         'latitude': 54.800,
