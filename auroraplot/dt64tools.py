@@ -557,7 +557,7 @@ def t_to_axis_value(t, axis, units=None, epoch=None, fmt=None):
         ### TODO: Correct locator and formatter for timedelta64
         axis.set_major_locator(Datetime64Locator())
         # if axis_data.type == np.datetime64:
-        axis.set_major_formatter(Datetime64Formatter(fmt=fmt))
+        axis.set_major_formatter(Datetime64Formatter(fmt=fmt, data_type=t.dtype.type))
 
         # plt.xticks(rotation=-25)
 
@@ -856,7 +856,7 @@ class Datetime64Locator(Locator):
 
 
 class Datetime64Formatter(Formatter):
-    def __init__(self, fmt=None, autolabel=None):
+    def __init__(self, fmt=None, autolabel=None, data_type=np.datetime64):
         '''
         Format ticks with date/time as appropriate. 
 
@@ -872,6 +872,7 @@ class Datetime64Formatter(Formatter):
 
         self.fmt = fmt
         self.autolabel = autolabel
+        self.data_type = data_type
 
     
     def __call__(self, x, pos=None):
@@ -885,7 +886,11 @@ class Datetime64Formatter(Formatter):
         fmt = self.fmt
         if pos is None:
             # Showing cursor location
-            fmt = '%Y-%m-%dT%H:%M:%SZ'
+            if fmt is None:
+                if self.data_type == np.timedelta64:
+                    fmt = '%d %H:%M:%S'
+                else:
+                    fmt = '%Y-%m-%dT%H:%M:%SZ'
         elif fmt is None:
             xadi = self.axis.get_data_interval()
             if np.all(np.isfinite(xadi)):
@@ -926,9 +931,7 @@ class Datetime64Formatter(Formatter):
                 f.append('%H')
             fmt = '\n'.join(f)
 
-        # t = np.datetime64(int(x), units)
-        #t = self.axis.dt64tools.type(int(x + epoch), units)
-        t = np.datetime64(int(x + epoch), units)
+        t = self.data_type(int(x + epoch), units)
         r = strftime(t, fmt) 
         if pos == 1:
             self.axis.dt64tools.tick_fmt = fmt
@@ -1083,15 +1086,15 @@ def _strftime_td64(td, fstr, customspec=None):
                 s += '%'
                 
             elif fstr[i] == 'd': # number of whole days
-                s += '{0:d}'.format(td2.days)
+                s += '{0:d}'.format(int(td2.days))
             elif fstr[i] == 'H': # hour [hh]
-                s += '{0:02d}'.format(td2.seconds/3600)
+                s += '{0:02d}'.format(int(td2.seconds/3600))
             elif fstr[i] == 'M': #
-                s += '{0:02d}'.format(np.mod(td2.seconds/60, 60))
+                s += '{0:02d}'.format(int(np.mod(td2.seconds/60, 60)))
             elif fstr[i] == 's': # total number of seconds
-                s += '{0:d}'.format(td2.total_seconds())
+                s += '{0:d}'.format(int(td2.total_seconds()))
             elif fstr[i] == 'S': # seconds [ss]
-                s += '{0:02d}'.format(np.mod(td2.seconds, 60))
+                s += '{0:02d}'.format(int(np.mod(td2.seconds, 60)))
             # extension
             elif fstr[i] == '#': # milliseconds
                 # Use np.round to get rounding to even number
