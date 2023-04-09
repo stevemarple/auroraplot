@@ -396,15 +396,8 @@ class KIndex(Data):
         is_valid = np.isfinite(self.data[0])
         col = np.zeros([self.data.shape[-1], 3])
         col[:] = np.array([0.2, 1.0, 0.2]) # Green
-
-        [0.2, 1.0, 0.2],  # green  
-            #                         [1.0, 1.0, 0.0],  # yellow
-            #                         [1.0, 0.6, 0.0],  # amber
-            #                         [1.0, 0.0, 0.0]
-
-        # col[self.data[0][is_valid] >= 4] = np.array([1.0, 1.0, 0.0]) # Yellow
-        col[self.data[0][is_valid] >= 4] = np.array([1.0, 0.6, 0.0]) # Amber
-        col[self.data[0][is_valid] >= 5] = np.array([1.0, 0.0, 0.0]) # Red
+        col[np.logical_and(is_valid, self.data[0] >= 4)] = np.array([1.0, 0.6, 0.0])  # Amber
+        col[np.logical_and(is_valid, self.data[0] >= 5)] = np.array([1.0, 0.0, 0.0])  # Red
         return col
 
 
