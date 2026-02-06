@@ -761,7 +761,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
             return None
 
         if dest:
-            with smart_open(dest, 'w') as dest_file:
+            with smart_open(dest, 'wb') as dest_file:
                 shutil.copyfileobj(url_file, dest_file)
             return dest
 

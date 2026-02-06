@@ -1,4 +1,5 @@
 import copy
+import functools
 import logging
 import re
 
@@ -24,6 +25,9 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
+if six.PY3:
+    def cmp(a, b):
+        return (a > b) - (a < b)
 
 def load_iaga_2000(file_name):
     try:
@@ -380,16 +384,24 @@ def stack_plot(data_array, offset, channel=None,
         channel = channel[0]
 
     if sort:
-        da = sorted(list(da), 
-                    cmp=lambda a,b: (cmp(a.get_site_info('latitude'), 
-                                         b.get_site_info('latitude')) or 
-                                     cmp(b.project, a.project) or 
-                                     cmp(b.site, a.site)))
+        if six.PY3:
+            da = sorted(list(da),
+                        key=functools.cmp_to_key(lambda a, b: (cmp(a.get_site_info('latitude'),
+                                                                   b.get_site_info('latitude')) or
+                                                               cmp(b.project, a.project) or
+                                                               cmp(b.site, a.site))))
+        else:
+            da = sorted(list(da),
+                        cmp=lambda a, b: (cmp(a.get_site_info('latitude'),
+                                              b.get_site_info('latitude')) or
+                                          cmp(b.project, a.project) or
+                                          cmp(b.site, a.site)))
 
     r = []
     fig = plt.figure()
     ax = plt.subplot(1, 1, 1)
-    ax.hold(True)
+    if six.PY2:
+        ax.hold(True)
     tick_labels = []
     st = da[0].start_time
     et = da[0].end_time

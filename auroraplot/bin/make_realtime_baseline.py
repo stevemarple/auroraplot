@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -11,8 +11,7 @@ import traceback
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-if not os.environ.has_key('TZ') or \
-   os.environ['TZ'] not in ('UTC', 'UT', 'GMT'):
+if os.environ.get('TZ', None) not in ('UTC', 'UT', 'GMT'):
     try:
         # Try to force all times to be read as UTC
         os.environ['TZ'] = 'UTC'
