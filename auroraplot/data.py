@@ -1077,7 +1077,7 @@ integration intv. : {self.integration_interval!r}
             adjustment applied for best fit.
         """
 
-        # See http://www.tau.ac.il/~kineret/amit/scipy_tutorial/ for
+        # See https://www.tau.ac.il/~kineret/amit/scipy_tutorial/ for
         # helpful tutorial on using leastsq().
         import scipy.optimize
 

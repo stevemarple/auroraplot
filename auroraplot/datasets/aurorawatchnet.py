@@ -20,7 +20,7 @@ from auroraplot.voltagedata import VoltageData
 
 logger = logging.getLogger(__name__)
 
-base_url = 'http://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
+base_url = 'https://aurorawatch.lancs.ac.uk/data/aurorawatchnet/'
 
 
 def check_mag_data(data):
@@ -149,7 +149,7 @@ def remove_spikes(md, **kwargs):
                                       chauvenet_window=np.array([89, 79]).astype('timedelta64[s]'))
 
 
-cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
+cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
     'LAN1': {
@@ -398,11 +398,11 @@ sites = {
         'elevation': 82,
         'start_time': np.datetime64('2014-01-01T00:00:00+0000'),
         'end_time': None,  # Still operational
-        'url': 'http://www.cumbernauld-weather.co.uk/',  # Provisional
+        'url': 'https://www.cumbernauld-weather.co.uk/',  # Provisional
         'k_index_scale': 750e-9,  # Estimated, based on BGS Eskdalemuir site
         'license': cc3_by_nc_sa,
         'copyright': 'Cumbernauld Weather.',
-        'attribution': 'Cumbernauld Weather, http://www.cumbernauld-weather.co.uk/',
+        'attribution': 'Cumbernauld Weather, https://www.cumbernauld-weather.co.uk/',
         'line_color': [0.3, 0.3, 1],
         'data_types': {
             'MagData': {
@@ -430,10 +430,10 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2014-11-13T00:00:00+0000'),
         'end_time': None,  # Still operational
-        'url': 'http://www.metoffice.gov.uk/',  # Provisional
+        'url': 'https://www.metoffice.gov.uk/',  # Provisional
         'k_index_scale': 500e-9,  # Estimated, based on BGS Hartland site
         'k_index_filter': None,
-        'license': 'This work is licensed under the Open Government Licence (OGL). To view a copy of this licence, visit http://www.nationalarchives.gov.uk/doc/open-government-licence',
+        'license': 'This work is licensed under the Open Government Licence (OGL). To view a copy of this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence',
         'copyright': u'\xa9 Crown Copyright, Met Office',
         'attribution': 'Please use the following attribution statements on any copies/reproductions etc: "© Crown Copyright, Met Office" (or "© British Crown Copyright, Met Office" where the reproduction is published outside of the UK)',
         'line_color': [186.0 / 255, 216.0 / 255, 10.0 / 255],
@@ -447,7 +447,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2016-07-15T00:00:00+0000'),
         'end_time': None,  # Still operational
-        'url': 'http://www.exeter.ac.uk/',  # Provisional
+        'url': 'https://www.exeter.ac.uk/',  # Provisional
         'k_index_scale': 500e-9,  # Estimated, based on BGS Hartland site
         'k_index_filter': None,
         'license': cc3_by_nc_sa,
@@ -627,7 +627,7 @@ for s in ('LAN1', 'EXE', 'SID', 'SUM', 'TEST1'):
 project = {
     'name': 'AuroraWatch Magnetometer Network',
     'abbreviation': 'AWN',
-    'url': 'http://aurorawatch.lancs.ac.uk/project-info/aurorawatchnet/',
+    'url': 'https://aurorawatch.lancs.ac.uk/project-info/aurorawatchnet/',
     'sites': sites,
 }
 

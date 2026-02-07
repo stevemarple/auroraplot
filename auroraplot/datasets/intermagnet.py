@@ -694,7 +694,7 @@ for sa in sites:
 project = {
     'name': 'International Real-time Magnetic Observatory Network',
     'abbreviation': 'INTERMAGNET',
-    'url': 'http://www.intermagnet.org/',
+    'url': 'https://www.intermagnet.org/',
     'sites': sites,
 }
         

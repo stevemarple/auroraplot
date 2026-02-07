@@ -17,7 +17,7 @@ from auroraplot.voltagedata import VoltageData
 
 logger = logging.getLogger(__name__)
 
-base_url = 'http://spears.lancs.ac.uk/data/samnet/'
+base_url = 'https://spears.lancs.ac.uk/data/samnet/'
 
 sam_channels = ['H', 'E', 'Z']
 
@@ -858,7 +858,7 @@ for s in sites:
 project = {
     'name': 'Sub-Auroral Magnetometer Network',
     'abbreviation': 'SAMNET',
-    'url': 'http://aurorawatch.lancs.ac.uk/project-info/samnet/',
+    'url': 'https://aurorawatch.lancs.ac.uk/project-info/samnet/',
     'sites': sites,
 }
 

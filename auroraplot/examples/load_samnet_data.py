@@ -3,7 +3,7 @@
 # Demonstrate loading SAMNET data from the data archive at Lancaster.
 # This example assumes you have an STP user account with permission to
 # access SAMNET data, available on request, see
-# http://spears.lancs.ac.uk/data/
+# https://spears.lancs.ac.uk/data/
 #
 # You can avoid entering your username/password each session by
 # entering those details into a .netrc file in your home directory
