@@ -5,14 +5,8 @@ import numpy as np
 import os
 import traceback
 
-# Python 2/3 compatibility
-import six
-try:
-    from urllib.request import urlopen
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlopen
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -264,7 +258,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -345,7 +339,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -426,7 +420,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -510,7 +504,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -591,7 +585,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -672,7 +666,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -755,7 +749,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -837,7 +831,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -919,7 +913,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -1001,7 +995,7 @@ sites = {
                     'format': 'aurorawatchnet',
                     'load_converter': load_bgs_sch_data,
                     'nominal_cadence': np.timedelta64(10, 's'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
         },
@@ -1063,7 +1057,7 @@ default_data_types = {
             'format': 'aurorawatchnet',
             'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
-            'units': six.u('\N{DEGREE SIGN}C'),
+            'units': '\N{DEGREE SIGN}C',
         },
     },
 }

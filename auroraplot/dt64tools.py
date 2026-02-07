@@ -6,7 +6,6 @@ import logging
 import math
 import os
 import re
-import six
 
 import numpy as np
 import matplotlib
@@ -66,7 +65,7 @@ def smallest_unit(a):
     for u in a:
         if u is None:
             continue
-        elif isinstance(u, six.string_types):
+        elif isinstance(u, str):
             pass
         else:
             u = get_units(u)
@@ -85,11 +84,11 @@ def smallest_unit(a):
 def astype(t, units=None, time_type=None):
     if units is None:
         units = get_units(t)
-    elif not isinstance(units, six.string_types):
+    elif not isinstance(units, str):
         units = get_units(units)
     if time_type is None:
         time_type = get_time_type(t)
-    elif not isinstance(time_type, six.string_types):
+    elif not isinstance(time_type, str):
         time_type = get_time_type(time_type)
     return t.astype(time_type + '[' + units + ']')
 
