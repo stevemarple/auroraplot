@@ -1,3 +1,4 @@
+import copy
 import logging
 import numpy as np
 
@@ -5,8 +6,9 @@ from auroraplot.data import Data
 
 logger = logging.getLogger(__name__)
 
+
 class TemperatureData(Data):
-    '''Class to manipulate and display temperature data.'''
+    """Class to manipulate and display temperature data."""
     def __init__(self,
                  project=None,
                  site=None,
@@ -67,4 +69,3 @@ class TemperatureData(Data):
         else:
             raise Exception('Unknown units')
         return r
-
