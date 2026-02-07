@@ -4,6 +4,7 @@ import os
 import pickle
 import six
 import traceback
+from typing import List, Union
 from warnings import warn
 
 if six.PY3:
@@ -299,7 +300,8 @@ class Data(object):
                  nominal_cadence=None,
                  data=None,
                  units=None,
-                 sort=False):
+                 sort=False,
+                 processing=None):
         self.project = project
         self.site = site
         if isinstance(channels, six.string_types):
@@ -327,6 +329,8 @@ class Data(object):
             sort = np.size(self.data) != 0
         if sort:
             self.sort(inplace=True)
+        self.processing = []
+        self.add_processing(processing)
 
     def __repr__(self):
         units = self.units
@@ -335,18 +339,20 @@ class Data(object):
         elif units == u'\N{DEGREE SIGN}':
             units = 'degrees'
 
-        return (type(self).__name__ + ':\n' +
-                '          project : ' + str(self.project) + '\n' +
-                '             site : ' + str(self.site) + '\n' +
-                '         channels : ' + str(self.channels) + '\n' +
-                '       start_time : ' + str(self.start_time) + '\n' +
-                '         end_time : ' + str(self.end_time) + '\n' +
-                'sample_start_time : ' + repr(self.sample_start_time) + '\n' +
-                '  sample_end_time : ' + repr(self.sample_end_time) + '\n' +
-                'integration intv. : ' + repr(self.integration_interval) + '\n' +
-                '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
-                '             data : ' + repr(self.data) + '\n' +
-                '            units : ' + str(units))
+        return f"""{type(self).__name__}
+          project : {self.project}
+             site : {self.site}
+         channels : {self.channels}
+       start_time : {self.start_time}
+         end_time : {self.end_time}
+sample_start_time : {self.sample_start_time!r}
+  sample_end_time : {self.sample_end_time!r}
+integration intv. : {self.integration_interval!r}
+   nominal cadence: {self.nominal_cadence}
+             data : {self.data!r}
+            units : {units}
+            processing : {self.processing}
+"""
 
     def __format__(self, fmt):
         """Custom format for Data auroraplot.data.Data objects.
@@ -883,6 +889,7 @@ class Data(object):
                 r.integration_interval = None
             r.nominal_cadence = cadence.copy()
             r.data = d
+            r.add_processing(f'Cadence set to {cadence}')
 
         elif cadence < self.nominal_cadence:
             raise Exception('Interpolation to reduce cadence not implemented')
@@ -1348,3 +1355,10 @@ class Data(object):
             for j in range(self.data.shape[0]):
                 r.data[j][i] = func(self.data[j][idx2])
         return r
+
+    def add_processing(self: auroraplot.data.Data, processing: Union[str, List[str]]):
+        if processing:
+            if isinstance(processing, str):
+                self.processing.append(processing)
+            else:
+                self.processing.extend(processing)
