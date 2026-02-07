@@ -24,7 +24,7 @@ for f in ('.uit_password', 'uit_password.txt'):
             finally:
                 fh.close()
         except:
-            logger.warn('Could not read UIT data access password')
+            logger.warning('Could not read UIT data access password')
             raise
 
 path_fstr = 'http://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=%%Y&month=%%m&day=%%d&res=%(uit_res)s&pwd=%(uit_password)s&format=iagaUnix&comps=%(uit_comp)s&getdata=+Get+Data+'
