@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
     
 class AuroraWatchActivity(Data):
-    '''
+    """
     Class to manipulate and display geomagnetic activity as way used
     by AuroraWatch UK.
-    '''
+    """
 
     color_names = ('green', 'yellow', 'amber', 'red')
 
@@ -76,7 +76,7 @@ class AuroraWatchActivity(Data):
                 if 'D' in magdata.channels:
                     input_channels.append('D')
                 elif 'E' in magdata.channels:
-                    input_channels.append('E') # IAGA notation for D when in nT
+                    input_channels.append('E')  # IAGA notation for D when in nT
                 elif 'Y' in magdata.channels:
                     input_channels.append('Y')
             
@@ -95,25 +95,23 @@ class AuroraWatchActivity(Data):
             disturbance.data = np.abs(magdata.data[cidx] -
                                       aligned.data[cidx])
             disturbance.set_cadence(cadence,
-                                    inplace= True, 
+                                    inplace=True,
                                     aggregate=nth_largest)
             data = disturbance.data.copy()
 
             if range_:
                 range_high = magdata.extract(channels=input_channels)
                 range_high.set_cadence(cadence,
-                                       inplace= True, 
+                                       inplace=True,
                                        aggregate=nth_largest)
                 nth_smallest = ap.tools.NthLargest(n, smallest=True)
                 range_low = magdata.extract(channels=input_channels)
                 range_low.set_cadence(cadence,
-                                      inplace= True, 
+                                      inplace=True,
                                       aggregate=nth_smallest)
                 hourly_range = copy.deepcopy(range_high)
                 hourly_range.data = range_high.data - range_low.data
-                assert np.all(hourly_range.sample_start_time ==
-                              disturbance.sample_start_time), \
-                              'sample start times differ'
+                assert np.all(hourly_range.sample_start_time == disturbance.sample_start_time), 'sample start times differ'
                 data = np.vstack([data, hourly_range.data])              
                 
             self.project = magdata.project
@@ -137,14 +135,14 @@ class AuroraWatchActivity(Data):
             if self.nominal_cadence <= np.timedelta64(5, 's'):
                 # Throw away ~30 seconds
                 n = int(np.timedelta64(30, 's') / self.nominal_cadence)
-             # elif self.nominal_cadence < np.timedelta64(2, 'm'):
+            # elif self.nominal_cadence < np.timedelta64(2, 'm'):
             else:
                 # Throw away up to 2.5 minutes
                 n = int(np.timedelta64(150, 's') / self.nominal_cadence)
 
             nth_largest = ap.tools.NthLargest(n)
             self.set_cadence(np.timedelta64(60, 'm'),
-                             inplace= True, aggregate=nth_largest)
+                             inplace=True, aggregate=nth_largest)
 
         if thresholds is None:
             self.thresholds = self.get_site_info('activity_thresholds')
@@ -154,8 +152,6 @@ class AuroraWatchActivity(Data):
             self.colors = self.get_site_info('activity_colors')
         else:
             self.colors = colors
-
-
 
     def data_description(self):
         return 'Geomagnetic activity'
@@ -175,11 +171,11 @@ class AuroraWatchActivity(Data):
         return col
             
     def get_level(self):
-        '''Return numerical level
+        """Return numerical level
 
         Values return the indices in the thresholds, with -1 indicating
         missing data.
-        '''
+        """
 
         r = np.zeros(self.data.shape, dtype=int)
         data = self.data.copy()
@@ -190,7 +186,6 @@ class AuroraWatchActivity(Data):
             r[data >= self.thresholds[n]] = n
         return r
 
-    
     def get_status(self):
         """Return list of levels by name.
 
@@ -200,12 +195,11 @@ class AuroraWatchActivity(Data):
         level = self.get_level()
         r = []
         for n in range(level.shape[1]):
-            if level[0,n] < 0:
+            if level[0, n] < 0:
                 r.append(self.color_names[0])
             else:
-                r.append(self.color_names[level[0,n]])
+                r.append(self.color_names[level[0, n]])
         return r
-
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, units_prefix=None, title=None, 
@@ -231,7 +225,7 @@ class AuroraWatchActivity(Data):
                 kwargs['color'] = self.get_color()
 
             if 'edgecolor' not in kwargs:
-                kwargs['edgecolor'] = np.tile(0.6, (1,3))
+                kwargs['edgecolor'] = np.tile(0.6, (1, 3))
 
             if 'linewidth' not in kwargs:
                 kwargs['linewidth'] = 0.5
@@ -263,7 +257,7 @@ class AuroraWatchActivity(Data):
                 if y >= ymax:
                     new_ylim_top = y*1.05
                 axes.plot(axes.xaxis.get_view_interval(), 
-                          self.thresholds[[n,n]] / mul, 
+                          self.thresholds[[n, n]] / mul,
                           color=self.colors[n], 
                           linestyle='-',
                           linewidth=2,
@@ -273,9 +267,9 @@ class AuroraWatchActivity(Data):
 
 
 class KIndex(Data):
-    '''
+    """
     Class to represent the geomagnetic K index.
-    '''
+    """
 
     def __init__(self,
                  project=None,
@@ -346,12 +340,10 @@ class KIndex(Data):
             if nth is None:
                 if magdata.nominal_cadence <= np.timedelta64(5, 's'):
                     # Throw away ~30 seconds
-                    nth = int(np.timedelta64(30, 's') \
-                                  / magdata.nominal_cadence)
+                    nth = int(np.timedelta64(30, 's') / magdata.nominal_cadence)
                 else:
                     # Throw away up to 2.5 minutes
-                    nth = int(np.timedelta64(150, 's') \
-                                  / magdata.nominal_cadence)
+                    nth = int(np.timedelta64(150, 's') / magdata.nominal_cadence)
 
             nth_largest = ap.tools.NthLargest(nth)
             nth_smallest = ap.tools.NthLargest(nth, smallest=True)
@@ -382,24 +374,20 @@ class KIndex(Data):
                                         0.08, 0.14, 0.24, 0.40,
                                         0.66, 1.00]) * scale
 
-
             for i in range(1, len(self.thresholds)):
                 self.data[np.nonzero(self.range >= self.thresholds[i])] = i
 
-
     def data_description(self):
         return 'K index'
-
 
     def get_color(self):
         assert self.data.shape[0] == 1, 'Can only get color for single channel'
         is_valid = np.isfinite(self.data[0])
         col = np.zeros([self.data.shape[-1], 3])
-        col[:] = np.array([0.2, 1.0, 0.2]) # Green
+        col[:] = np.array([0.2, 1.0, 0.2])  # Green
         col[np.logical_and(is_valid, self.data[0] >= 4)] = np.array([1.0, 0.6, 0.0])  # Amber
         col[np.logical_and(is_valid, self.data[0] >= 5)] = np.array([1.0, 0.0, 0.0])  # Red
         return col
-
 
     def plot(self, channels=None, figure=None, axes=None,
              subplot=None, title=None, bottom=-0.2,
@@ -438,7 +426,7 @@ class KIndex(Data):
                 kwargs['color'] = self.get_color()
 
             if 'edgecolor' not in kwargs:
-                kwargs['edgecolor'] = np.tile(0.6, (1,3))
+                kwargs['edgecolor'] = np.tile(0.6, (1, 3))
 
             if 'linewidth' not in kwargs:
                 kwargs['linewidth'] = 1

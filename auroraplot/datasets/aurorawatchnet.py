@@ -49,12 +49,12 @@ def check_voltage(data):
 def load_awn_data(file_name, archive_data,
                   project, site, data_type, channels, start_time,
                   end_time, **kwargs):
-    '''Convert AuroraWatchNet data to match standard data type
+    """Convert AuroraWatchNet data to match standard data type
 
     data: MagData or other similar format data object
     archive: name of archive from which data was loaded
     archive_info: archive metadata
-    '''
+    """
 
     data_type_info = {
         'MagData': {
@@ -90,8 +90,7 @@ def load_awn_data(file_name, archive_data,
             uh = urlopen(file_name)
         try:
             data = np.genfromtxt(uh, unpack=True, invalid_raise=False)
-            sample_start_time = ap.epoch64_us + \
-                                (np.timedelta64(1000000, 'us') * data[0])
+            sample_start_time = ap.epoch64_us + (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
             integration_interval = np.ones([len(channels),
@@ -100,19 +99,18 @@ def load_awn_data(file_name, archive_data,
             data = data[col_idx] * data_type_info[data_type]['scaling']
             if data_type_info[data_type]['data_check']:
                 data = data_type_info[data_type]['data_check'](data)
-            r = data_type_info[data_type]['class']( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time,
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            r = data_type_info[data_type]['class'](project=project,
+                                                   site=site,
+                                                   channels=channels,
+                                                   start_time=start_time,
+                                                   end_time=end_time,
+                                                   sample_start_time=sample_start_time,
+                                                   sample_end_time=sample_end_time,
+                                                   integration_interval=integration_interval,
+                                                   nominal_cadence=archive_data['nominal_cadence'],
+                                                   data=data,
+                                                   units=archive_data['units'],
+                                                   sort=True)
             return r
 
         except Exception as e:
@@ -129,9 +127,9 @@ def load_awn_data(file_name, archive_data,
 
 
 def k_index_filter_battery(mag_data):
-    '''Filter data for K index (battery-powered magnetometers).
+    """Filter data for K index (battery-powered magnetometers).
     
-    Battery-powered magnetometers have higher noise, filter to reduce.'''
+    Battery-powered magnetometers have higher noise, filter to reduce."""
     md_filt = ap.tools.sgolay_filt(mag_data,
                                    np.timedelta64(630, 's'), 3)
     md_filt.set_cadence(np.timedelta64(5, 'm'), inplace=True)
@@ -140,12 +138,12 @@ def k_index_filter_battery(mag_data):
 
 def load_bad_data(project, site, data_type, start_time, end_time,
                   archive=None, path=None, extension='.bad', **kwargs):
-    '''Load data from bad data files, usually those which end in .bad.
+    """Load data from bad data files, usually those which end in .bad.
 
     This function is a wrapper which calls aurorawatchnet.load_data()
     after appending an extension to the file names. The path cannot be
     a callable.
-    '''
+    """
     if path is None:
         ai = ap.get_archive_info(project, site, data_type, archive=archive)
         path = ai[1]['path'] + extension
@@ -159,10 +157,7 @@ def remove_spikes(md, **kwargs):
                                       chauvenet_window=np.array([89, 79]).astype('timedelta64[s]'))
 
 
-cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
-               'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
-               'To view a copy of this license, visit ' + \
-               'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
+cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
     'LAN1': {
@@ -234,8 +229,7 @@ sites = {
         'k_index_scale': 650e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [1, 0, 0],
     },  # LAN3
 
@@ -249,8 +243,7 @@ sites = {
         'k_index_scale': 650e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [186.0 / 255, 216.0 / 255, 10.0 / 255],
     },  # ORM
 
@@ -264,12 +257,11 @@ sites = {
         'k_index_scale': 650e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'description': (
-            'Test magnetometer system. ' +
-            '2013: battery-operated AuroraWatchNet magnetometer. ' +
-            '2016: Raspberry Pi magnetometer sytem operating outside with sensor buried for temperature stability.'),
+                'Test magnetometer system. ' +
+                '2013: battery-operated AuroraWatchNet magnetometer. ' +
+                '2016: Raspberry Pi magnetometer sytem operating outside with sensor buried for temperature stability.'),
         'line_color': [.1, .4, .1],
     },  # TEST1
 
@@ -283,8 +275,7 @@ sites = {
         'k_index_scale': 1000e-9,  # Estimated, based on BGS Lerwick site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # BRA
 
     'SAN': {
@@ -297,8 +288,7 @@ sites = {
         'k_index_scale': 950e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # SAN
 
     'TOB': {
@@ -311,8 +301,7 @@ sites = {
         'k_index_scale': 850e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # TOB
 
     'WHI': {
@@ -325,8 +314,7 @@ sites = {
         'k_index_scale': 680e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [.6, .6, .6],
     },  # WHI
 
@@ -340,8 +328,7 @@ sites = {
         'k_index_scale': 600e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # ALT
 
     'MAL': {
@@ -354,8 +341,7 @@ sites = {
         'k_index_scale': 600e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # MAL
 
     'ASH': {
@@ -368,8 +354,7 @@ sites = {
         'k_index_scale': 600e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # ASH
 
     'PEL': {
@@ -382,8 +367,7 @@ sites = {
         'k_index_scale': 580e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
     },  # PEL
 
     'BRE': {
@@ -396,8 +380,7 @@ sites = {
         'k_index_scale': 550e-9,  # Estimated
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [119.0 / 255, 11.0 / 255, 0],
     },  # BRE
 
@@ -411,8 +394,7 @@ sites = {
         'k_index_scale': 500e-9,  # Estimated, based on BGS Hartland site
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [64.0 / 255, 224.0 / 255, 208.0 / 255],
     },  # CAN
 
@@ -428,8 +410,7 @@ sites = {
         'k_index_scale': 750e-9,  # Estimated, based on BGS Eskdalemuir site
         'license': cc3_by_nc_sa,
         'copyright': 'Cumbernauld Weather.',
-        'attribution': 'Cumbernauld Weather, ' + \
-                       'http://www.cumbernauld-weather.co.uk/',
+        'attribution': 'Cumbernauld Weather, http://www.cumbernauld-weather.co.uk/',
         'line_color': [0.3, 0.3, 1],
         'data_types': {
             'MagData': {
@@ -462,7 +443,7 @@ sites = {
         'k_index_filter': None,
         'license': 'This work is licensed under the Open Government Licence (OGL). To view a copy of this licence, visit http://www.nationalarchives.gov.uk/doc/open-government-licence',
         'copyright': u'\xa9 Crown Copyright, Met Office',
-        'attribution': u'Please use the following attribution statements on any copies/reproductions etc: "\xa9 Crown Copyright, Met Office" (or "\xa9 British Crown Copyright, Met Office" where the reproduction is published outside of the UK)',
+        'attribution': 'Please use the following attribution statements on any copies/reproductions etc: "© Crown Copyright, Met Office" (or "© British Crown Copyright, Met Office" where the reproduction is published outside of the UK)',
         'line_color': [186.0 / 255, 216.0 / 255, 10.0 / 255],
     },  # EXE
 
@@ -493,10 +474,9 @@ sites = {
         'k_index_scale': 1000e-9,  # From BGS Monthly Magnetic Bulletin value for Lerwick
         'license': cc3_by_nc_sa,
         'copyright': 'Lancaster University.',
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'description': 'Raspberry Pi magnetometer system, hosted by the Shetland Amenity Trust. Made possible through funding from Gradconsult.',
-        'line_color': [0, 0x65/255., 0xCC/255.], # Blue from Shetland flag
+        'line_color': [0, 0x65 / 255., 0xCC / 255.],  # Blue from Shetland flag
     },  # SUM
 }
 

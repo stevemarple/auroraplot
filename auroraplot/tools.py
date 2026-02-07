@@ -9,24 +9,26 @@ import scipy.signal
 import auroraplot as ap
 
 logger = logging.getLogger(__name__)
+
+
 class NthLargest(object):
-    '''
+    """
     Class to calculate the Nth largest value from a numpy array-like
     value. If 'smallest' is True then calculate the Nth smallest.
-    '''
+    """
 
     def __init__(self, n, smallest=False):
         self.n = n
         self.smallest = smallest
 
     def __call__(self, a, weights=None):
-        '''
+        """
         Calculate the largest (or smallest value). An optional
         argument, 'weights', is accepted for compatibility with
         scipy.average but is ignored.
-        '''
+        """
         af = np.array(a).flatten()
-        af = af[np.logical_not(np.isnan(af))] # Remove Nans
+        af = af[np.logical_not(np.isnan(af))]  # Remove Nans
         if self.smallest:
             # Smallest first (standard sort order)
             b = af
@@ -76,8 +78,7 @@ class smart_open:
         self.filename = filename
         self.mode = mode
         # Modes which rely on an existing file should not change the name
-        if (temp_ext is None or 'r' in self.mode or 'x' in self.mode
-            or 'a' in self.mode or '+' in self.mode):
+        if temp_ext is None or 'r' in self.mode or 'x' in self.mode or 'a' in self.mode or '+' in self.mode:
             self.temp_ext = ''
         else:
             self.temp_ext = temp_ext
@@ -127,13 +128,15 @@ def least_squares_error(a, b):
     e = np.power(a - b, 2)
     return np.sum(e[np.isfinite(e)]), False
 
+
 def minimise_sign_error(a, b):
     e = np.sign(a - b)
     imbalance = np.sum(e[np.isfinite(e)])
     if abs(imbalance) <= 1:
         # Close enough, especially when total number is odd
         imbalance = 0
-    return imbalance , True
+    return imbalance, True
+
 
 def fit_data(data, ref_data, err_func=None, tolerance=None,
              max_iterations=50, full_output=False, plot_fit=False):
@@ -144,13 +147,12 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
 
     # Calculate initial starting values to iterate between
     e = data - ref_data
-    data1 = data - np.nanmin(e); # upper limit
-    data2 = data - np.nanmax(e); # lower limit
+    data1 = data - np.nanmin(e)  # upper limit
+    data2 = data - np.nanmax(e)  # lower limit
 
     # Compute initial errors
     e1, has_sign = err_func(data1, ref_data)
-    e2, tmp      = err_func(data2, ref_data)
-
+    e2, tmp = err_func(data2, ref_data)
 
     non_nan_idx = np.where(np.isfinite(data)[0])[0][0]
     if tolerance is None:
@@ -193,7 +195,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                                             ref_data)
 
                 if test_error > test_error2:
-                    test_error = -test_error # Too low
+                    test_error = -test_error  # Too low
                 elif test_error < test_error2:
                     # Too high, so leave test_error as positive
                     pass
@@ -217,7 +219,6 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                     'difference: %(difference)g, ') % locals()
             raise Exception(mesg)
 
-
     if full_output:
         stats = {'iterations': iterations,
                  'error': data[non_nan_idx] - test_data[non_nan_idx],
@@ -231,10 +232,9 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
         return test_data
 
 
-
-# Savitzky-Golay filter, from Scipy cookbook,
-# http://wiki.scipy.org/Cookbook/SavitzkyGolay
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
+    # Savitzky-Golay filter, from Scipy cookbook,
+    # http://wiki.scipy.org/Cookbook/SavitzkyGolay
     r"""Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and
@@ -294,21 +294,21 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         raise TypeError("window_size size must be a positive odd number")
     if window_size < order + 2:
         raise TypeError("window_size is too small for the polynomials order")
-    order_range = range(order+1)
-    half_window = (window_size -1) // 2
+    order_range = range(order + 1)
+    half_window = (window_size - 1) // 2
     # precompute coefficients
     b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
     m = np.linalg.pinv(b).A[deriv] * rate**deriv * factorial(deriv)
     # pad the signal at the extremes with
     # values taken from the signal itself
-    firstvals = y[0] - np.abs( y[1:half_window+1][::-1] - y[0] )
+    firstvals = y[0] - np.abs(y[1:half_window+1][::-1] - y[0])
     lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve( m[::-1], y, mode='valid')
+    return np.convolve(m[::-1], y, mode='valid')
 
 
 def sgolay_filt(data, window_size, order):
-    '''Filter auroraplot.data objects.
+    """Filter auroraplot.data objects.
 
     data: auroraplot.data object
 
@@ -319,12 +319,12 @@ def sgolay_filt(data, window_size, order):
     order: order of fit
     
     returns: modified auroraplot.data object
-    '''
+    """
     r = copy.deepcopy(data)
     if isinstance(window_size, np.timedelta64):
         window_size = int(window_size / data.nominal_cadence)
         if window_size % 2 == 0:
-            window_size -= 1 # Must be odd
+            window_size -= 1  # Must be odd
 
     for n in range(len(data.channels)):
         r.data[n] = savitzky_golay(data.data[n], window_size, order)
@@ -335,11 +335,11 @@ def walk_data_archives(callback, project,
                        site_list=None,
                        data_type_list=None,
                        archive_list=None):
-    '''Walk through a project's data archives
+    """Walk through a project's data archives
 
     The callback function is called once for each data archive, with the parameters
     project, site, data type, archive name and archive data.
-    '''
+    """
 
     if site_list is None:
         site_list = ap.get_sites(project)
@@ -376,12 +376,12 @@ def change_load_data_paths(project,
                            archive_list=None,
                            load_converter=None,
                            cache_dir=None):
-    '''Helper function for changing paths used when loading data
+    """Helper function for changing paths used when loading data
 
     change_load_data_paths is intended to be called from within
     auroraplot_custom.py to alter the paths used when loading data,
     for instance to modify the URLs to local file paths
-    '''
+    """
     def callback(project, site, data_type, archive, archive_data):
         orig_archive = 'original_' + archive
         if orig_archive not in ap.projects[project]['sites'][site]['data_types'][data_type]:
@@ -396,15 +396,16 @@ def change_load_data_paths(project,
                        data_type_list=data_type_list,
                        archive_list=archive_list)
 
+
 def cache_data_files(cache_dir, project,
                      site_list=None,
                      data_type_list=None,
                      archive_list=None):
-    '''Helper function for caching data locally
+    """Helper function for caching data locally
 
     cache_data_files is intended to be called from within
     auroraplot_custom.py to alter the paths used when loading data.
-    '''
+    """
 
     def callback(project, site, data_type, archive, archive_data):
         archive_data['cache_dir'] = os.path.join(cache_dir, project, site)
@@ -420,8 +421,4 @@ def lookup_module_name(s):
     last_dot = s.rindex('.')
     module = s[:last_dot]
     name = s[(last_dot+1):]
-    return (module, name)
-
-
-
-
+    return module, name

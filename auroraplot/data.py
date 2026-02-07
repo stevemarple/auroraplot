@@ -26,7 +26,6 @@ import auroraplot.tools
 from auroraplot.decorators import deprecated
 import auroraplot.dt64tools as dt64
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,8 +39,8 @@ def leastsq_error(p, obj, ref, channel):
 
 
 def generic_load_converter(file_name, archive_data,
-                            project, site, data_type, start_time,
-                            end_time, archive, channels, **kwargs):
+                           project, site, data_type, start_time,
+                           end_time, archive, channels, **kwargs):
     """
     A generic load converter.
 
@@ -85,23 +84,23 @@ def generic_load_converter(file_name, archive_data,
 
             elif archive_data['timestamp_method'] in ('Y', 'YM', 'YMD', 'YMDh', 'YMDhm', 'YMDhms'):
                 col_offset = len(archive_data['timestamp_method'])
-                sample_start_time = (data[0]-1970).astype('datetime64[Y]')
+                sample_start_time = (data[0] - 1970).astype('datetime64[Y]')
                 for n in range(1, col_offset):
                     tu = archive_data['timestamp_method'][n]
                     if tu in ('M', 'D'):
                         # Cannot use add-assign here
-                        sample_start_time = sample_start_time + (data[n]-1).astype('timedelta64[%s]' % tu)
+                        sample_start_time = sample_start_time + (data[n] - 1).astype('timedelta64[%s]' % tu)
                     else:
                         # Cannot use add-assign here
                         sample_start_time = sample_start_time + data[n].astype('timedelta64[%s]' % tu)
             elif archive_data['timestamp_method'].startswith('YMDhms.'):
                 tu = archive_data['timestamp_method'].replace('YMDhms.', '')
-                sample_start_time = (data[0] - 1970).astype('datetime64[Y]') + \
-                                    (data[1] - 1).astype('timedelta64[M]') + \
-                                    (data[2] - 1).astype('timedelta64[D]') + \
-                                    data[3].astype('timedelta64[h]') + \
-                                    data[4].astype('timedelta64[m]') + \
-                                    np.round(data[5] / dt64.multipliers[tu]).astype('timedelta64[%s]' % tu)
+                sample_start_time = ((data[0] - 1970).astype('datetime64[Y]') +
+                                     (data[1] - 1).astype('timedelta64[M]') +
+                                     (data[2] - 1).astype('timedelta64[D]') +
+                                     data[3].astype('timedelta64[h]') +
+                                     data[4].astype('timedelta64[m]') +
+                                     np.round(data[5] / dt64.multipliers[tu]).astype('timedelta64[%s]' % tu))
                 col_offset = 6
             elif archive_data['timestamp_method'] in ('h', 'hm', 'hms'):
                 col_offset = len(archive_data['timestamp_method'])
@@ -122,7 +121,6 @@ def generic_load_converter(file_name, archive_data,
             col_idx = []
             for c in channels:
                 col_idx.append(col_offset + chan_tup.index(c))
-
 
             data = np.reshape(data[col_idx],
                               [len(col_idx), np.size(sample_start_time)])
@@ -571,10 +569,10 @@ class Data(object):
 
             if straddle_boundary:
                 tidx = (self.sample_end_time > start_time) & \
-                    (self.sample_start_time < end_time)
+                       (self.sample_start_time < end_time)
             else:
                 tidx = (self.sample_start_time >= start_time) & \
-                    (self.sample_end_time <= end_time)
+                       (self.sample_end_time <= end_time)
 
             r.start_time = start_time
             r.end_time = end_time
@@ -626,7 +624,7 @@ class Data(object):
 
         # integration_interval may be None, or an array
         if self.integration_interval is not None \
-           and self.integration_interval.size:
+                and self.integration_interval.size:
             r.integration_interval = self.integration_interval[:, idx]
 
         r.data = r.data[:, idx]
@@ -670,7 +668,7 @@ class Data(object):
         if channels is None:
             channels = self.channels
         elif isinstance(channels, six.string_types):
-            channels=[channels]
+            channels = [channels]
         else:
             try:
                 iterator = iter(channels)
@@ -688,7 +686,7 @@ class Data(object):
                 assert len(axes2) == len(channels), \
                     'axes and channels must be same length'
         elif figure is None:
-            figure=plt.figure()
+            figure = plt.figure()
             new_figure = True
         else:
             if isinstance(figure, mpl.figure.Figure):
@@ -716,9 +714,9 @@ class Data(object):
         chan_tup = tuple(self.channels)
 
         # Label the Y axis with channel if possible
-        need_legend = not(len(channels) == 1 or
-                          (hasattr(axes, '__iter__') and len(axes) > 1) or
-                          (hasattr(subplot, '__iter__') and len(subplot) > 1))
+        need_legend = not (len(channels) == 1 or
+                           (hasattr(axes, '__iter__') and len(axes) > 1) or
+                           (hasattr(subplot, '__iter__') and len(subplot) > 1))
         if need_legend:
             # Precompute the units information (prefix, multiplier etc)
             # since it must be the same for all channels
@@ -860,10 +858,10 @@ class Data(object):
                             weights[dt64.isnat(weights)] = 0
                             try:
                                 d[cn, sn] = aggregate(self.data[cn, tidx2],
-                                                     weights=weights)
+                                                      weights=weights)
                             except TypeError as e:
                                 keep_integ_intv = False
-                                d[cn,sn] = aggregate(self.data[cn, tidx2])
+                                d[cn, sn] = aggregate(self.data[cn, tidx2])
 
             if inplace:
                 r = self
@@ -948,7 +946,7 @@ class Data(object):
                                  start_time=r.start_time,
                                  end_time=r.end_time,
                                  sample_start_time=r.sample_end_time[idx],
-                                 sample_end_time=r.sample_start_time[idx+1],
+                                 sample_end_time=r.sample_start_time[idx + 1],
                                  integration_interval=ii,
                                  nominal_cadence=r.nominal_cadence,
                                  data=data,
@@ -1112,7 +1110,7 @@ class Data(object):
             ref.plot(axes=lh[0].axes)
 
         if full_output:
-            return (r, errors, fit_info)
+            return r, errors, fit_info
         else:
             return r
 
@@ -1153,7 +1151,7 @@ class Data(object):
                 lh.get_frame().set_alpha(0.6)
 
         if full_output:
-            return (r, errors, fit_info)
+            return r, errors, fit_info
         else:
             return r
 
@@ -1188,7 +1186,6 @@ class Data(object):
             # Save to single file
             t = [self.start_time]
             duration = self.end_time - self.start_time
-
 
         for t1 in t:
             t2 = t1 + duration
@@ -1259,7 +1256,7 @@ class Data(object):
                         continue
                     mean = ap.nanmean(data[n, idx])
                     std = ap.nanstd(data[n, idx])
-                    criterion = 1.0 / (2*N)
+                    criterion = 1.0 / (2 * N)
                     d = np.abs(data[n, idx] - mean) / std
                     d /= 2.0 ** 0.5
                     prob = scipy.special.erfc(d)
@@ -1284,7 +1281,7 @@ class Data(object):
                                 want_outliers=False,
                                 link_channels=True,
                                 savgol_window=np.timedelta64(5, 'm'),
-                                chauvenet_window=np.array([89,79]).astype('timedelta64[s]')):
+                                chauvenet_window=np.array([89, 79]).astype('timedelta64[s]')):
         """Remove spikes.
 
         Cron jobs can cause spikes in the data from magnetometers in the
@@ -1331,8 +1328,8 @@ class Data(object):
         r.sample_start_time = r.sample_start_time[good_data]
         r.sample_end_time = r.sample_end_time[good_data]
         r.integration_interval = r.integration_interval[:, good_data]
-        r.data = r.data[:,good_data]
-        r = r.mark_missing_data(3*r.nominal_cadence)
+        r.data = r.data[:, good_data]
+        r = r.mark_missing_data(3 * r.nominal_cadence)
 
         return r
 

@@ -17,4 +17,3 @@ qdc.plot()
 plt.title('AWN / LAN1\nMagnetic field QDC\nSeptember 2013')
 
 plt.show()
-
