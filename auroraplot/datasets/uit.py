@@ -27,7 +27,7 @@ for f in ('.uit_password', 'uit_password.txt'):
             logger.warning('Could not read UIT data access password')
             raise
 
-path_fstr = 'http://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=%%Y&month=%%m&day=%%d&res=%(uit_res)s&pwd=%(uit_password)s&format=iagaUnix&comps=%(uit_comp)s&getdata=+Get+Data+'
+path_fstr = 'https://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=%%Y&month=%%m&day=%%d&res=%(uit_res)s&pwd=%(uit_password)s&format=iagaUnix&comps=%(uit_comp)s&getdata=+Get+Data+'
 
 
 def load_iaga_2000(file_name, archive_data,
@@ -73,7 +73,7 @@ def uit_path(t, project, site, data_type, archive, channels):
     if uit_password is None:
         raise Exception(__name__ + '.uit_password must be set, ' + 
                         'to obtain a password see ' + 
-                        'http://flux.phys.uit.no/div/DataAccess.html')
+                        'https://flux.phys.uit.no/div/DataAccess.html')
 
     # Expand the path format string with the specific UIT variables,
     # including password.
@@ -717,7 +717,7 @@ for s in sites:
 project = {
     'name': 'Tromsø Geophysical Observatory Magnetometer Network',
     'abbreviation': 'UIT',
-    'url': 'http://geo.phys.uit.no/',
+    'url': 'https://geo.phys.uit.no/',
     'sites': sites,
 }
 

@@ -17,7 +17,7 @@ from auroraplot.voltagedata import VoltageData
 
 logger = logging.getLogger(__name__)
 
-data_dir = 'http://aurorawatch.lancs.ac.uk/data/bgs_sch'
+data_dir = 'https://aurorawatch.lancs.ac.uk/data/bgs_sch'
 
 
 def check_mag_data(data):
@@ -180,7 +180,7 @@ def temperature_compensation(md, inplace=False, cadence=None, **kwargs):
     return r
 
 
-cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
+cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
     'BHM1': {  # Previously BGS3 at Lancaster
@@ -439,7 +439,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0x60 / 255., 0x00 / 255., 0x00 / 255.],
-        'url': 'http://www.scottishschools.info/valeoflevenacademy/',
+        'url': 'https://www.scottishschools.info/valeoflevenacademy/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -522,7 +522,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0xda / 255., 0x25 / 255., 0x1d / 255.],
-        'url': 'http://www.sgoillionacleit.org.uk/',
+        'url': 'https://www.sgoillionacleit.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -685,7 +685,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0x70 / 255., 0x00 / 255., 0x3b / 255.],
-        'url': 'http://www.norwich-school.org.uk/',
+        'url': 'https://www.norwich-school.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -768,7 +768,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0x05 / 255., 0x31 / 255., 0x61 / 255.],
-        'url': 'http://www.oundleschool.org.uk/',
+        'url': 'https://www.oundleschool.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -850,7 +850,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0x11 / 255., 0x41 / 255., 0x8c / 255.],
-        'url': 'http://www.otago.ac.nz/',
+        'url': 'https://www.otago.ac.nz/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -932,7 +932,7 @@ sites = {
         'license': cc3_by_nc_sa,
         'attribution': 'British Geological Survey.',
         'line_color': [0x73 / 255., 0x00 / 255., 0x28 / 255.],
-        'url': 'http://www.gildredgehouse.org.uk/',
+        'url': 'https://www.gildredgehouse.org.uk/',
         'data_types': {
             'MagData': {
                 'default': 'realtime',
@@ -1085,7 +1085,7 @@ for s in sites:
 project = {
     'name': 'BGS Schools Magnetometer Network',
     'abbreviation': 'BGS_SCH',
-    'url': 'http://aurorawatch.lancs.ac.uk/project-info/bgs-sch/',
+    'url': 'https://aurorawatch.lancs.ac.uk/project-info/bgs-sch/',
     'sites': sites,
 }
 

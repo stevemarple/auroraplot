@@ -42,7 +42,7 @@ def add_project_hook(project_name):
         # For data which matches this host's site convert all URLS to
         # local paths.
         make_data_local = lambda path, project, site, data_type, archive: path.replace(
-            'http://aurorawatch.lancs.ac.uk/data/', '/data/')
+            'https://aurorawatch.lancs.ac.uk/data/', '/data/')
 
         # Convert all URLS to local paths
         ap.tools.change_load_data_paths(project_name, make_data_local)
