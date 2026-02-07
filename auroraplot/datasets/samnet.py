@@ -345,7 +345,7 @@ sites = {
                     'channels': sam_channels,
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
-                    'load_converter': ap.data._generic_load_converter,
+                    'load_converter': ap.data.generic_load_converter,
 #                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
@@ -360,7 +360,7 @@ sites = {
                     'channels': sam_channels,
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
-                    'load_converter': ap.data._generic_load_converter,
+                    'load_converter': ap.data.generic_load_converter,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': 'T',
                     # Generic load/save information
@@ -575,7 +575,7 @@ sites = {
                     'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
-#                    'load_converter': ap.data._generic_load_converter,
+#                    'load_converter': ap.data.generic_load_converter,
                     'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
@@ -590,7 +590,7 @@ sites = {
                     'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.min',
                     'duration': np.timedelta64(24, 'h'),
-                    'load_converter': ap.data._generic_load_converter,
+                    'load_converter': ap.data.generic_load_converter,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': 'T',
                     # Generic load/save information
@@ -805,8 +805,8 @@ default_data_types = {
             'path': (base_url +
                      'baseline/realtime/{site_lc}/{site_lc}_%Y.txt'),
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data._generic_load_converter,
-            'save_converter': ap.data._generic_save_converter,
+            'load_converter': ap.data.generic_load_converter,
+            'save_converter': ap.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
             # Information for generic load/save 
@@ -835,8 +835,8 @@ default_data_types = {
             'channels': np.array(['Activity']),
             'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data._generic_load_converter,
-            'save_converter': ap.data._generic_save_converter,
+            'load_converter': ap.data.generic_load_converter,
+            'save_converter': ap.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(60, 'm'),
             'units': 'T',
             # Information for generic load/save
