@@ -2,19 +2,10 @@ import copy
 from decimal import Decimal
 import logging
 import os
-import traceback
-
-# Python 2/3 compatibility
-import six
-from six import iteritems
-try:
-    from urllib.request import urlopen
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlopen
-
 import requests
+import traceback
+from urllib.request import urlopen
+
 import numpy as np
 
 import auroraplot as ap
@@ -377,7 +368,7 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
             'VoltageData': {
@@ -607,7 +598,7 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
-                    'units': six.u('\N{DEGREE SIGN}C'),
+                    'units': '\N{DEGREE SIGN}C',
                 },
             },
             'VoltageData': {
@@ -845,7 +836,7 @@ for s in sites:
     for dt in default_data_types:
         if dt not in sdt:
             sdt[dt] = {}
-        for an, av in iteritems(default_data_types[dt]):
+        for an, av in default_data_types[dt].items():
             if an not in sdt[dt]:
                 sdt[dt][an] = \
                     copy.deepcopy(av)

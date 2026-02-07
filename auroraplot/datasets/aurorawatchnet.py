@@ -3,16 +3,8 @@ from decimal import Decimal
 import os
 import logging
 
-# Python 2/3 compatibility
-import six
-from six import iteritems
-
-try:
-    from urllib.request import urlopen
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlopen
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 import numpy as np
 
@@ -551,7 +543,7 @@ default_data_types = {
             'format': 'aurorawatchnet',
             'load_converter': load_awn_data,
             'nominal_cadence': np.timedelta64(30000000, 'us'),
-            'units': six.u('\N{DEGREE SIGN}C'),
+            'units': '\N{DEGREE SIGN}C',
             'sort': True,
         },
     },
@@ -597,7 +589,7 @@ for s in sites:
     for dt in default_data_types:
         if dt not in sdt:
             sdt[dt] = {}
-        for an, av in iteritems(default_data_types[dt]):
+        for an, av in default_data_types[dt].items():
             if an not in sdt[dt]:
                 sdt[dt][an] = \
                     copy.deepcopy(av)
@@ -623,7 +615,7 @@ for s in ('LAN1', 'EXE', 'SID', 'SUM', 'TEST1'):
     for dt in ('MagData', 'MagQDC'):
         for an in sites[s]['data_types'][dt]:
             ai = sites[s]['data_types'][dt][an]
-            if isinstance(ai, six.string_types):
+            if isinstance(ai, str):
                 continue
             ai['channels'] = np.array(['H', 'E', 'Z'])
             if dt == 'MagQDC':

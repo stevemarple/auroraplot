@@ -2,8 +2,6 @@ import logging
 import os
 import traceback
 
-# Python 2/3 compatibility
-import six
 import numpy as np
 
 import auroraplot as ap

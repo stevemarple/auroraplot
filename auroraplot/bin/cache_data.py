@@ -8,19 +8,11 @@ import numpy as np
 import shutil
 import traceback
 
-try:
-    # Python 3.x
-    from urllib.parse import quote
-    from urllib.parse import urlparse
-    from urllib.parse import urlunparse
-    from urllib.request import urlopen
+from urllib.parse import quote
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
+from urllib.request import urlopen
 
-except ImportError:
-    # Python 2.x
-    from urllib import quote
-    from urllib import urlopen
-    from urlparse import urlparse
-    from urlparse import urlunparse
 
 if not os.environ.has_key('TZ') or \
         os.environ['TZ'] not in ('UTC', 'UT', 'GMT'):

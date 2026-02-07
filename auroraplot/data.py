@@ -2,17 +2,10 @@ import copy
 import logging
 import os
 import pickle
-import six
 import traceback
 from typing import List, Union
+from urllib.request import urlopen
 from warnings import warn
-
-if six.PY3:
-    from urllib.request import urlopen
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
-    from urllib import urlopen
 
 import numpy as np
 import matplotlib as mpl
@@ -304,7 +297,7 @@ class Data(object):
                  processing=None):
         self.project = project
         self.site = site
-        if isinstance(channels, six.string_types):
+        if isinstance(channels, str):
             self.channels = np.array([channels])
         elif channels is None:
             self.channels = np.array([]).reshape([0, 0])
@@ -485,8 +478,7 @@ integration intv. : {self.integration_interval!r}
                       'nominal_cadence',
                       'data', 'units'):
                 attr = getattr(self, n)
-                assert (attr is not None and (not isinstance(attr, six.string_types) or attr != '')), \
-                    n + ' not set'
+                assert (attr is not None and (not isinstance(attr, str) or attr != '')), f'{n} not set'
 
             assert re.match('^[-A-Z0-9_]+$', self.project), 'Bad value for project'
             assert re.match('^[-A-Z0-9_]+$', self.site), 'Bad value for site'
@@ -673,7 +665,7 @@ integration intv. : {self.integration_interval!r}
 
         if channels is None:
             channels = self.channels
-        elif isinstance(channels, six.string_types):
+        elif isinstance(channels, str):
             channels = [channels]
         else:
             try:
@@ -1356,7 +1348,7 @@ integration intv. : {self.integration_interval!r}
                 r.data[j][i] = func(self.data[j][idx2])
         return r
 
-    def add_processing(self: auroraplot.data.Data, processing: Union[str, List[str]]):
+    def add_processing(self, processing: Union[str, List[str]]):
         if processing:
             if isinstance(processing, str):
                 self.processing.append(processing)

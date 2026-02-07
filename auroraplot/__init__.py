@@ -11,23 +11,12 @@ import logging
 import netrc
 import re
 import shutil
-import six
 import traceback
 import warnings
 
-try:
-    # Python 3.x
-    from urllib.parse import quote
-    from urllib.parse import urlparse
-    from urllib.parse import urlunparse
-    from urllib.request import urlopen
-
-except ImportError:
-    # Python 2.x
-    from urllib import quote
-    from urllib import urlopen
-    from urlparse import urlparse
-    from urlparse import urlunparse
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
+from urllib.request import urlopen
 
 import numpy as np
 import os
@@ -111,16 +100,14 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     wantstr: if true return the formatted string, else return dict of info
     """
 
-    is_degrees = unit in (six.u('deg'),
-                          six.u('degrees'),
-                          six.u('\N{DEGREE SIGN}'))
+    is_degrees = unit in ('deg', 'degrees', '\N{DEGREE SIGN}')
     prefixes = {'y': -24,  # yocto
                 'z': -21,  # zepto
                 'a': -18,  # atto
                 'f': -15,  # femto
                 'p': -12,  # pico
                 'n': -9,  # nano
-                six.u('\N{MICRO SIGN}'): -6,  # micro
+                '\N{MICRO SIGN}': -6,  # micro
                 'u': -6,  # micro
                 'm': -3,  # milli
                 'c': -2,  # centi
@@ -149,8 +136,7 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
             d['prefix'] = ''  # Do not calculate automatically
             d['mul'] = 1
             # prefix = ''
-    # elif unicode(unit) == six.u('\N{DEGREE SIGN}C'):
-    elif unit == six.u('\N{DEGREE SIGN}C'):
+    elif unit == '\N{DEGREE SIGN}C':
         # Don't calculate prefixes with degrees C
         if sep is None:
             d['sep'] = ' '
@@ -291,7 +277,7 @@ def get_archives(project, site, data_type):
     for akey in list(archives.keys()):
         if type(archives[akey]) == dict:
             archive_names.append(akey)
-        elif isinstance(archives[akey], six.string_types):
+        elif isinstance(archives[akey], str):
             default_name = archives[akey]
     return (archive_names, default_name)
 
@@ -349,8 +335,7 @@ def get_archive_info(project, site, data_type, archive=None):
             archive = list(site_info['data_types'][data_type].keys())[0]
         elif 'default' in site_info['data_types'][data_type]:
             # Use explicit default
-            if isinstance(site_info['data_types'][data_type]['default'],
-                          six.string_types):
+            if isinstance(site_info['data_types'][data_type]['default'], str):
                 archive = site_info['data_types'][data_type]['default']
             else:
                 archive = 'default'
@@ -439,7 +424,7 @@ def load_data(project,
         channels = ad['channels']
     else:
         # Could be as single channel name or a list of channels
-        if isinstance(channels, six.string_types):
+        if isinstance(channels, str):
             if channels not in ad['channels']:
                 raise Exception('Unknown channel')
         else:
