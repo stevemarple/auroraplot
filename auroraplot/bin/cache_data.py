@@ -171,6 +171,7 @@ for n in range(len(project_list)):
     logger.info('Processing %s/%s %s', project, site, dt64.
                 fmt_dt64_range(site_st, site_et))
     for t in dt64.dt64_range(site_st, site_et, src_ai['duration']):
+        file_name = None
         temp_file_name = None
         try:
             if hasattr(dest_path, '__call__'):
@@ -235,7 +236,8 @@ for n in range(len(project_list)):
         except Exception as e:
             if args.raise_all:
                 raise
-            logger.info('Could not cache ' + file_name)
+            if file_name is not None:
+                logger.info('Could not cache ' + file_name)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
 
