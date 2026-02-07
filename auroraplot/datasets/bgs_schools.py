@@ -232,8 +232,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/bgs3/bgs3_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -313,8 +313,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/bgs4/bgs4_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -395,8 +395,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/lan2/lan2_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -479,8 +479,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/bgs7/ale_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -560,8 +560,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/ben/ben_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -641,8 +641,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/bro/bro_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -724,8 +724,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/nor/nor_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -806,8 +806,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/oun/oun_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -888,8 +888,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/dun/oun_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save
@@ -970,8 +970,8 @@ sites = {
                     'path': (data_dir +
                              '/baseline/realtime/esb/oun_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save

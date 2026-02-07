@@ -206,8 +206,8 @@ sites = {
                     'path': (base_url +
                              'baseline/realtime/lan1/lan1_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data._generic_load_converter,
-                    'save_converter': ap.data._generic_save_converter,
+                    'load_converter': ap.data.generic_load_converter,
+                    'save_converter': ap.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
                     # Information for generic load/save 
@@ -525,8 +525,8 @@ default_data_types = {
             'path': (base_url +
                      'baseline/realtime/{site_lc}/{site_lc}_%Y.txt'),
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data._generic_load_converter,
-            'save_converter': ap.data._generic_save_converter,
+            'load_converter': ap.data.generic_load_converter,
+            'save_converter': ap.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
             # Information for generic load/save 
@@ -547,7 +547,7 @@ default_data_types = {
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
             'load_converter': ap.magdata.load_qdc_data,
-            'save_converter': ap.data._generic_save_converter,
+            'save_converter': ap.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,
@@ -593,8 +593,8 @@ default_data_types = {
             'channels': np.array(['Activity']),
             'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data._generic_load_converter,
-            'save_converter': ap.data._generic_save_converter,
+            'load_converter': ap.data.generic_load_converter,
+            'save_converter': ap.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(60, 'm'),
             'units': 'T',
             # Information for generic load/save
