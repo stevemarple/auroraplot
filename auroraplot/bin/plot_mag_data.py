@@ -242,7 +242,7 @@ except KeyboardInterrupt:
     raise
 except Exception as e:
     # Cannot use tzset on windows
-    logger.warn('Could not set time zone to UTC')
+    logger.warning('Could not set time zone to UTC')
 
 
 if args.dataset:
@@ -298,7 +298,7 @@ if 'AWN' in project_list or 'SAMNET' in project_list:
 # .uit_password from the user's home directory.
 if ('UIT' in project_list or 'DTU' in project_list) \
         and ap.datasets.uit.uit_password is None:
-    logger.warn('UIT password likely to be required but is not set')
+    logger.warning('UIT password likely to be required but is not set')
 
 
 # Get the default archives
