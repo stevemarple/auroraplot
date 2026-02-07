@@ -6,8 +6,9 @@ from auroraplot.data import Data
 
 logger = logging.getLogger(__name__)
 
+
 class VoltageData(Data):
-    '''Class to manipulate and display voltage data.'''
+    """Class to manipulate and display voltage data."""
     def __init__(self,
                  project=None,
                  site=None,

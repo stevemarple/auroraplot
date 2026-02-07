@@ -51,7 +51,7 @@ sites = {
                     },
                 }
             },
-        }, # BFE
+        },  # BFE
     'ROE': {
         'location': 'Rømø, Denmark',
         'latitude': 62.07,
@@ -84,7 +84,7 @@ sites = {
                     },
                 }
             },
-        }, # ROE    
+        },  # ROE
     'TDC': {
         'location': 'Tristan da Cunha',
         'latitude': -37.07,
@@ -117,7 +117,7 @@ sites = {
                     },
                 }
             },
-        }, # TDC
+        },  # TDC
     }
 
 
@@ -134,6 +134,3 @@ project = {
 }
 
 ap.add_project('DTU', project)
-
-
-

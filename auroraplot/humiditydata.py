@@ -5,8 +5,9 @@ from auroraplot.data import Data
 
 logger = logging.getLogger(__name__)
 
+
 class HumidityData(Data):
-    '''Class to manipulate and display humidity data.'''
+    """Class to manipulate and display humidity data."""
     def __init__(self,
                  project=None,
                  site=None,
@@ -36,4 +37,3 @@ class HumidityData(Data):
 
     def data_description(self):
         return 'Humidity'
-

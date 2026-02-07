@@ -50,4 +50,3 @@ for site in ap.projects['SAMNET']:
 ap.magdata.stack_plot(mdl, 400e-9, channel='H')
 plt.grid(True)
 plt.show()
-
