@@ -6,9 +6,7 @@ from urllib.request import urlopen
 
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
-from auroraplot.temperaturedata import TemperatureData
-from auroraplot.voltagedata import VoltageData
-from auroraplot.humiditydata import HumidityData
+
 
 # Borrow load functions
 import auroraplot.datasets.aurorawatchnet as awn
@@ -100,7 +98,7 @@ def load_temperature_data(file_name, archive_data,
                             data_cols=[5], **kwargs)
     else:
         a = None
-    
+
     if len(cidx_b):
         b = load_cloud_data(file_name, archive_data,
                             project, site, data_type,
@@ -124,7 +122,7 @@ def load_temperature_data(file_name, archive_data,
             # Bug in data recording process. Work around for now
             assert a.sample_start_time.size == b.sample_end_time.size, \
                 'Different length data sets'
-            
+
             # assert np.all(np.abs(a.sample_start_time - b.sample_start_time) \
             #                   <= np.timedelta64(1, 's'))
             # assert np.all(np.abs(a.sample_end_time - b.sample_end_time) \
@@ -134,13 +132,13 @@ def load_temperature_data(file_name, archive_data,
             # # -- end of hack --
 
             # # Find common sample times
-            # common_sample_start_time = np.intersect1d(a.sample_start_time, 
+            # common_sample_start_time = np.intersect1d(a.sample_start_time,
             #                                           b.sample_start_time)
 
             # # Find where they are located in a and b
-            # s_a_idx = np.nonzero(np.in1d(a.sample_start_time, 
+            # s_a_idx = np.nonzero(np.in1d(a.sample_start_time,
             #                              common_sample_start_time))[0]
-            # s_b_idx = np.nonzero(np.in1d(a.sample_start_time, 
+            # s_b_idx = np.nonzero(np.in1d(a.sample_start_time,
             #                              common_sample_start_time))[0]
             # assert np.all(a.sample_end_time[s_a_idx] \
             #                   == b.sample_end_time[s_b_idx]), \
@@ -148,7 +146,7 @@ def load_temperature_data(file_name, archive_data,
 
             # ns = common_sample_start_time.size
             ns = a.sample_start_time.size
-            
+
             r.data = np.zeros([a.channels.size + b.channels.size, ns])
             r_a_cidx = range(a.channels.size)
             r_b_cidx = range(a.channels.size, r.channels.size)
@@ -164,7 +162,7 @@ def load_temperature_data(file_name, archive_data,
                 dt64.dt64_to(a.integration_interval, integ_units)
             r.integration_interval[r_b_cidx] = \
                 dt64.dt64_to(b.integration_interval, integ_units)
-            return r            
+            return r
     else:
         return a
 
@@ -200,7 +198,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'V',
                     },
-                },        
+                },
             'HumidityData': {
                 'realtime': {
                     'channels': np.array(['Relative humidity']),
@@ -217,7 +215,7 @@ sites = {
         'end_time': None,  # Still operational
         'acknowledgement': {'short': 'Steve Marple.'},
         },
-    
+
     'LAN4': {
         'location': 'Lancaster, UK',
         'latitude': 54.0,
@@ -248,7 +246,7 @@ sites = {
                     'nominal_cadence': np.timedelta64(30, 's'),
                     'units': 'V',
                     },
-                },        
+                },
             'HumidityData': {
                 'realtime': {
                     'channels': np.array(['Relative humidity']),
@@ -265,14 +263,14 @@ sites = {
         'end_time': None,  # Still operational
         'acknowledgement': {'short': 'Steve Marple.'},
         },
-    
+
     }
 
-project = {
+project_data = {
     'name': 'UK cloud detection network',
     'abbreviation': 'CLOUDWATCH',
     'url': 'https://blog.stevemarple.co.uk/search/label/cloud%20detector',
     'sites': sites,
 }
 
-ap.add_project('CLOUDWATCH', project)
+ap.add_project('CLOUDWATCH', project_data)
