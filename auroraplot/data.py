@@ -276,6 +276,10 @@ def first_non_nan(data_list):
     return r
 
 
+class DataProcessingError(Exception):
+    pass
+
+
 class Data(object):
     """
     Base class for time-series data.
