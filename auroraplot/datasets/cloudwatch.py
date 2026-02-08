@@ -2,7 +2,8 @@ import copy
 import logging
 import os
 import numpy as np
-import urllib2
+from urllib.request import urlopen
+
 import auroraplot as ap
 import auroraplot.dt64tools as dt64
 from auroraplot.temperaturedata import TemperatureData
@@ -21,9 +22,9 @@ def load_cloud_data(file_name, archive_data,
     # data_type_info = { }
     try:
         if file_name.startswith('/'):
-            uh = urllib2.urlopen('file:' + file_name)
+            uh = urlopen('file:' + file_name)
         else:
-            uh = urllib2.urlopen(file_name)
+            uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = ap.epoch64_us + (np.timedelta64(1, 's') * data[0])
