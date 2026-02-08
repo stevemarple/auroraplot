@@ -15,15 +15,7 @@ from auroraplot.datasets import *  # noqa
 
 
 logger = logging.getLogger(__name__)
-if not os.environ.has_key('TZ') or \
-        os.environ['TZ'] not in ('UTC', 'UT', 'GMT'):
-    try:
-        # Try to force all times to be read as UTC
-        os.environ['TZ'] = 'UTC'
-        time.tzset()
-    except Exception as e:
-        logger.error(e)
-        pass
+ap.set_timezone()
 
 
 def parse_args() -> argparse.Namespace:

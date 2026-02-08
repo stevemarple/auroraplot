@@ -11,6 +11,7 @@ import logging
 import netrc
 import re
 import shutil
+import time
 import traceback
 import warnings
 
@@ -66,6 +67,16 @@ colors = ['b', 'g', 'r']
 # def copy_dict(d, *keys):
 #     """Make a copy of only the `keys` from dictionary `d`."""
 #     return {key: d[key] for key in keys}
+
+
+def set_timezone(timezone : str = 'UTC') -> None:
+    if 'TZ' not in os.environ or os.environ['TZ'] != timezone:
+        # Try to force all times to be read as UTC
+        try:
+            os.environ['TZ'] = timezone
+            time.tzset()
+        except Exception as e:
+            logger.error(e)
 
 
 def add_project(project_name, project_info):
