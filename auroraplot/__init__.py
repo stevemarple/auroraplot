@@ -781,15 +781,16 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
 # Initialise
 try:
     import auroraplot_custom
-except ImportError as e:
+except ImportError:
     # No custom module
     logger.debug('auroraplot_custom.py not found')
     auroraplot_custom = {}
 except KeyboardInterrupt:
     raise
-except Exception as e:
+except Exception as exc:
     # Error loading custom module
-    logger.error('Could not load custom module:' + str(e))
+    logger.exception('Could not load custom module')
+    logger.error('Could not load custom module:' + str(exc))
     auroraplot_custom = {}
 
 # Warn if timezone not GMT/UTC. Test by comparing two identical times,
