@@ -37,16 +37,16 @@ assert os.environ.get('TZ') == 'UTC', \
 parser = argparse.ArgumentParser(description\
                                      ='Make AuroraWatch quiet-day curve(s).')
 
-parser.add_argument('--aggregate', 
+parser.add_argument('--aggregate',
                     default='scipy.average',
                     help='Aggregate function used for setting cadence',
                     metavar='MODULE.NAME')
-parser.add_argument('-a', '--archive', 
+parser.add_argument('-a', '--archive',
                     action='append',
                     nargs=2,
                     help='Select data archive used for project or site',
                     metavar=('PROJECT[/SITE]', 'ARCHIVE'))
-parser.add_argument('--cadence', 
+parser.add_argument('--cadence',
                     help='Set cadence (used when loading data)')
 parser.add_argument('--dry-run',
                     action='store_true',
@@ -56,7 +56,7 @@ parser.add_argument('-e', '--end-time',
                     metavar='DATETIME')
 parser.add_argument('--filename',
                     help='Destination file (strftime format string)')
-parser.add_argument('--log-level', 
+parser.add_argument('--log-level',
                     choices=['debug', 'info', 'warning', 'error', 'critical'],
                     default='warning',
                     help='Control how much details is printed',
@@ -77,7 +77,7 @@ parser.add_argument('--post-aggregate',
                     help='Aggregate function used for setting post-load cadence')
 parser.add_argument('--post-cadence',
                     help='Set cadence (after loading data)')
-parser.add_argument('--qdc-archive', 
+parser.add_argument('--qdc-archive',
                     action='append',
                     nargs=2,
                     help='Target data archive for project or site',
@@ -88,11 +88,11 @@ parser.add_argument('--raise-all',
 parser.add_argument('-s', '--start-time',
                     help='Start time',
                     metavar='DATETIME')
-parser.add_argument('--smooth', 
+parser.add_argument('--smooth',
                     action='store_true',
                     default=True,
                     help='Smooth QDC using truncated Fourier series')
-parser.add_argument('--no-smooth', 
+parser.add_argument('--no-smooth',
                     dest='smooth',
                     action='store_false',
                     help='Do not smooth QDC using truncated Fourier series')
@@ -197,7 +197,7 @@ for n in range(len(project_list)):
             import_module('auroraplot.datasets.' + project.lower())
         except:
             pass
-    
+
     ax = None
 
     archive, ad = ap.get_archive_info(project, site, 'MagData', \
@@ -212,13 +212,13 @@ for n in range(len(project_list)):
         site_st = st
     else:
         site_st = dt64.floor(site_st, day)
-    
+
     site_et = ap.get_site_info(project, site, 'end_time')
     if site_et is None or site_et > et:
         site_et = et
     else:
         site_et = dt64.ceil(site_et, day)
-    
+
     t1 = dt64.get_start_of_month(site_st)
     while t1 < site_et:
         t2 = dt64.get_start_of_next_month(t1)
@@ -241,7 +241,7 @@ for n in range(len(project_list)):
             if mag_data is not None:
 
                 if post_cadence:
-                    mag_data.set_cadence(post_cadence, 
+                    mag_data.set_cadence(post_cadence,
                                          aggregate=post_agg_func,
                                          inplace=True)
 
