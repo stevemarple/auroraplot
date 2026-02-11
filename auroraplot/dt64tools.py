@@ -1,13 +1,18 @@
 # locator class for numpy.Datetime64
 """Tools for numpy.datetime64 and numpy.timedelta64 time classes"""
 
+import builtins
 import datetime
 import logging
 import math
 import os
 import re
+import unittest
+from typing import List, overload, Optional, Tuple, Union
 
+import numpy
 import numpy as np
+from numpy.typing import NDArray
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -15,6 +20,7 @@ from matplotlib.ticker import Locator
 from matplotlib.ticker import Formatter
 
 import auroraplot as ap
+from auroraplot.decorators import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +28,7 @@ time_label = 'Time'
 date_label = 'Date'
 
 epoch64_us = np.datetime64('1970-01-01T00:00:00Z', 'us')
+epoch64_day = np.datetime64('1970-01-01T00:00:00', 'D')
 
 time_units = ['as', 'fs', 'ps', 'ns', 'us', 'ms', 's', 'm', 'h',
               'D', 'W', 'M', 'Y']
@@ -46,17 +53,21 @@ log10_to_unit = {-18: 'as',
                  0: 's'}
 
 
+def wrap_day(ts: Union[np.timedelta64, np.ndarray]) -> Union[np.timedelta64, np.ndarray]:
+    """Wrap timedelta24 into 0 to 24 hours"""
+    return ts - np.floor((ts / np.timedelta64(1, 'D'))) * np.timedelta64(1, 'D')
+
+
 def get_time_type(t):
     s = t.dtype.name
     return s[:s.rindex('[')]
 
 
 def get_units(t):
-    #assert isinstance(t, (np.datetime64, np.timedelta64)), \
+    # assert isinstance(t, (np.datetime64, np.timedelta64)), \
     #    'Must be of type numpy.datetime64 or numpy.timedelta64'
-    match = re.search('\[(.*)\]', t.dtype.str)
-    assert match is not None, \
-        'Failed to parse units in numpy.datetime64 type: ' + str(t.dtype.str)
+    match = re.search(r'\[([^]]+)\]', t.dtype.str)
+    assert match is not None, f'Failed to parse units in numpy.datetime64 type: {t.dtype.str}'
     return match.groups()[0]
 
 
@@ -112,7 +123,7 @@ def match_units(a, inplace=False):
     return r
 
 
-def from_YMD(year, month, day):
+def from_ymd(year, month, day):
     ya = np.array(year)
     ma = np.array(month)
     da = np.array(day)
@@ -146,6 +157,36 @@ def from_YMD(year, month, day):
             d = daf[0]
         r[n] = np.datetime64(datetime.date(y, m, d))
     return r.reshape(r_shape)
+
+
+@deprecated(from_ymd)
+def from_YMD(year, month, day):  # noqa
+    return from_ymd(year, month, day)
+
+
+def from_hms(h: int, m: int, s: int, ms: int = None) -> np.timedelta64:
+    r = np.timedelta64(h, 'h') + np.timedelta64(m, 'm') + np.timedelta64(s, 's')
+    if ms is not None:
+        r += np.timedelta64(ms, 'ms')
+    return r
+
+
+def from_dhms(d: int, h: int, m: int, s: int, ms: int = None) -> np.timedelta64:
+    r = np.timedelta64(d, 'D') + np.timedelta64(h, 'h') + np.timedelta64(m, 'm') + np.timedelta64(s, 's')
+    if ms is not None:
+        r += np.timedelta64(ms, 'ms')
+    return r
+
+
+def to_dhms(ts: np.timedelta64) -> tuple[int, int, int, float]:
+    days = int(ts / np.timedelta64(1, 'D'))
+    ts -= np.timedelta64(days, 'D')
+    hours = int(ts / np.timedelta64(1, 'h'))
+    ts -= np.timedelta64(hours, 'h')
+    minutes = int(ts / np.timedelta64(1, 'm'))
+    ts -= np.timedelta64(minutes, 'm')
+    seconds = float(ts / np.timedelta64(1, 's'))
+    return days, hours, minutes, seconds
 
 
 def dt64_to(t, to_unit, returnfloat=False):
@@ -189,14 +230,16 @@ def get_utc_days(st, et):
         t1 = t2
 
 
-def get_date(t):
+def get_date(t: Union[np.datetime64, np.ndarray]) -> Union[np.datetime64, np.ndarray]:
     return t.astype('<M8[D]')
 
 
-def get_time_of_day(t):
-    td64_units = t.dtype.str.lower()  # timedelta64 equivalent units
-    d = np.timedelta64(24, 'h').astype(td64_units).astype('int64')
-    return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
+def get_time_of_day(t: Union[np.datetime64, np.ndarray]) -> Union[np.datetime64, np.ndarray]:
+    # td64_units = t.dtype.str.lower()  # timedelta64 equivalent units
+    # print(f'td64_units: {td64_units}')
+    # d = np.timedelta64(24, 'h').astype(td64_units).astype('int64')
+    # return np.mod(t.astype(td64_units).astype('int64'), d).astype(td64_units)
+    return t - get_date(t)
 
 
 def _get_tt(a, attr):
@@ -277,6 +320,27 @@ def get_start_of_next_month(a):
                               + np.timedelta64(32, 'D'))
 
 
+def is_leap_year(t: Union[numpy.datetime64, int]) -> bool:
+    if isinstance(t, numpy.datetime64):
+        if isnat(t):
+            raise ValueError('time is not valid')
+        return is_leap_year(get_year(t))
+    if isinstance(t, int):
+        if t % 4 != 0:
+            return False
+        if t % 400 == 0:
+            return True
+        if t % 100 == 0:
+            return False
+        return True
+    else:
+        raise TypeError(f'Expected numpy.datetime64 or integer, received {type(t).__name__} instead')
+
+
+def get_days_in_year(t: Union[numpy.datetime64, int]) -> int:
+    return 366 if is_leap_year(t) else 365
+
+
 def mean(*a):
     return _aggregate(*a, func=np.mean)
 
@@ -318,8 +382,7 @@ def _round_to_func(dt, td, func, func_name):
             # round(), and possibly other unknown functions, must
             # evaluate the days, hours, etc to decide whether to round
             # up or down.
-            raise Exception('Cannot use ' + func_name
-                            + ' with units of ' + td_units)
+            raise Exception(f'Cannot use {func_name} with units of {td_units}')
         # Convert the datetime to units of month or year. Discard parts
         # smaller than this, for floor() they can be ignored
         ret_type = dt.dtype.char + '8[' + td_units + ']'
@@ -348,10 +411,10 @@ def round(dt, td):
     Round numpy.datetime64 or numpy.timedelta64 to nearest interval.
 
     dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded.
-    
+
     td: numpy.timedelta64 interval to round to.
 
-    Returns: 
+    Returns:
     numpy.datetime64 or numpy.timedelta64 rounded to the
     nearest multiple of "td".
     """
@@ -364,10 +427,10 @@ def floor(dt, td):
     interval.
 
     dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded down.
-    
+
     td: numpy.timedelta64 interval to round down to.
 
-    Returns: 
+    Returns:
     numpy.datetime64 or numpy.timedelta64 rounded down the
     nearest multiple of "td".
     """
@@ -380,7 +443,7 @@ def ceil(dt, td):
     interval.
 
     dt: numpy.datetime64 (or numpy.timedelta64) value to be rounded up.
-    
+
     td: numpy.timedelta64 interval to round up to.
 
     Returns: numpy.datetime64 or numpy.timedelta64 rounded up the
@@ -415,7 +478,7 @@ def fmt_dt64_range(st, et):
     Return a string representing an interval defined by two
     numpy.datetime64 values, such as an interval of data defined by
     start and end times.
-    
+
     st: start time
 
     et: end time
@@ -435,22 +498,18 @@ def fmt_dt64_range(st, et):
         # minutes to get instantly recognisable values. Only includes
         # seconds if necessary.
         if get_second(st) or get_second(et):
-            strftime(st, '%Y-%m-%d %H:%M:%S - ') + \
-            strftime(et, '%H:%M:%S')
+            return strftime(st, '%Y-%m-%d %H:%M:%S - ') + strftime(et, '%H:%M:%S')
         else:
-            return strftime(st, '%Y-%m-%d %H:%M - ') + \
-                strftime(et, '%H:%M')
+            return strftime(st, '%Y-%m-%d %H:%M - ') + strftime(et, '%H:%M')
     elif st == floor(st, day) and et == st + day:
         # Entire day
         return strftime(st, '%Y-%m-%d')
     else:
         # Start and end time on different dates
         if get_second(st) or get_second(et):
-            return strftime(st, '%Y-%m-%d %H:%M:%S - ') + \
-                strftime(et, '%Y-%m-%d %H:%M:%S')
+            return strftime(st, '%Y-%m-%d %H:%M:%S - ') + strftime(et, '%Y-%m-%d %H:%M:%S')
         else:
-            return strftime(st, '%Y-%m-%d %H:%M - ') + \
-                strftime(et, '%Y-%m-%d %H:%M')
+            return strftime(st, '%Y-%m-%d %H:%M - ') + strftime(et, '%Y-%m-%d %H:%M')
 
 
 def _add_timezone(s, timezone='+0000'):
@@ -459,12 +518,12 @@ def _add_timezone(s, timezone='+0000'):
 
     The default timezone used is +0000 (UTC)
     """
-    if s.endswith('Z') or re.search('[+-]\d{2}(:?\d{2})?$', s):
+    if s.endswith('Z') or re.search(r'[+-]\d{2}(:?\d{2})?$', s):
         # Already has timezone indicator (+00, +0000, +00:00)
         return s
     else:
         # Default to UTC
-        return s + '+0000'
+        return s + timezone
 
 
 def parse_datetime64(s, prec, now=None, timezone='+0000'):
@@ -608,14 +667,14 @@ def plot_dt64(x, y, axes=None,
     try:
         if x.dtype.type in (np.datetime64, np.timedelta64):
             xdate = True
-    except:
+    except Exception:
         pass
 
     ydate = False
     try:
         if y.dtype.type in (np.datetime64, np.timedelta64):
             ydate = True
-    except:
+    except Exception:
         pass
 
     if xdate:
@@ -687,6 +746,193 @@ def highlight(ax, st, et, color='y', **kwargs):
     x2 = dt64_to(et, u)
     ax.add_patch(patches.Rectangle([x1, yl[0]], x2 - x1, yl[1] - yl[0],
                                    **kwargs))
+
+
+def get_ratio_solar_to_sidereal_day() -> float:
+    """Get the ratio of the duration of one solar day to one sidereal day"""
+    return 1.00273790935
+
+
+def get_sidereal_day(units: Union[str, np.datetime64, np.timedelta64] = 's') -> numpy.timedelta64:
+    """Get the length of a sideral day"""
+
+    if isinstance(units, (np.datetime64, np.timedelta64)):
+        units = get_units(units)
+    sd = (np.timedelta64(23, 'h')
+          + np.timedelta64(56, 'm')
+          + np.timedelta64(4, 's')
+          + np.timedelta64(100, 'ms'))
+    return sd.astype(np.timedelta64(0, units))
+
+
+def julian_date(t: Union[np.datetime64, np.ndarray]) -> Union[float, np.ndarray]:
+    """Convert to Julian date"""
+
+    # Julian date starts 12:00:00 1/1/4713 BC and is Julian day 0.
+    # A useful calculator between UTC and julian date can be found at
+    # http://www.fourmilab.ch/cgi-bin/uncgi/Earth
+
+    # 1970-01-01T00:00:00 UTC is Julian date 2440587.50000
+    epoch_in_jd = np.timedelta64(2440587, 'D') + np.timedelta64(12, 'h')
+    since_epoch = t - epoch64_day
+    return (epoch_in_jd + since_epoch) / np.timedelta64(1, 'D')
+
+
+@overload
+def gmst(t: np.datetime64) -> np.timedelta64:
+    pass
+
+
+@overload
+def gmst(t: NDArray[np.datetime64]) -> NDArray[np.timedelta64]:
+    pass
+
+
+def gmst(t):
+    """Get the Greenwich Mean Sidereal Time at 00:00 UT"""
+
+    # From "The Astronomical Almanac 1996, p B6, B7"
+    # t_u = interval of time, measured in Julian centuries of 36525 days of
+    # universal time (mean solar days), elapsed since the epoch 2000
+    # January 1d 12h UT
+
+    # Calculate t_u based at time at start of day
+    t_u = (julian_date(get_date(t)) - 2451545)/36525
+    ts = 24110.54841 + 8640184.812866 * t_u + (0.093104 * t_u**2) - (6.2e-6 * t_u**3)
+
+    if isinstance(t, np.datetime64):
+        return np.timedelta64(builtins.round(ts % 86400), 's')
+    else:
+        # Input was an array
+        ts += 0.5
+        ts %= 86400
+        return ts.astype('timedelta64[s]')
+
+
+@overload
+def utc_to_lmst(t: np.datetime64, longitude_deg: float) -> np.timedelta64:
+    pass
+
+@overload
+def utc_to_lmst(t: NDArray[np.datetime64], longitude_deg: Union[float, NDArray[np.float64]]) -> NDArray[np.timedelta64]:
+    pass
+
+def utc_to_lmst(t, longitude_deg):
+    """Convert a UTC time to the mean local sidereal time
+
+    When the longitude is East of the Greenwich meridian its value should be positive.
+    """
+    # From "The Astronomical Almanac 1996, p B6, B7"
+
+    # GMST at 00:00 UT
+    ts = gmst(t)
+    # Add the equivalent mean sidereal time from 0h to the time
+
+    gmst2 = wrap_day(gmst(t) + (get_time_of_day(t) + np.timedelta64(0, 'ms')) * get_ratio_solar_to_sidereal_day())
+
+    # milliseconds = (get_time_of_day(t) / np.timedelta64(1, 'ms')) * get_ratio_solar_to_sidereal_day()
+    # # ts = (ts / np.timedelta64(1, 'ms')) + milliseconds
+    # ts += np.timedelta64(round(milliseconds), 'ms')
+    # ts = wrap_day(ts)
+    # ts %= 86400  # Remove any extra days
+
+    # ts = wrap_day(ts + np.timedelta64(int(milliseconds + 0.5), 'ms'))
+
+    ### % gmst = Greenwich Mean Sidereal Time
+    # gmst2 = np.timedelta64(builtins.round(ts), 's')
+    # gmst2 = t2
+
+    # Local mean sidereal time
+
+    longitude_deg = ap.wrap_degrees(longitude_deg)
+
+    # time_diff = np.timedelta64(builtins.round(86_400_000.0 * longitude_deg / 360.0), 'ms')
+    time_diff = np.timedelta64(86_400_000, 'ms') * (longitude_deg / 360.0)
+    return wrap_day(gmst2 + time_diff)
+
+    # if ts < np.timedelta64(0, 's'):
+    #     ts += np.timedelta64(1, 'D')
+
+
+def lmst_to_utc(lmst: Union[np.timedelta64, np.ndarray], longitude_deg: Union[float, np.ndarray], d: Union[np.datetime64, np.ndarray]) -> Union[np.datetime64, np.ndarray]:
+    """Convert local mean sidereal time to in UTC"""
+
+    #  From "The Astronomical Almanac 1996, p B6, B7"
+    longitude_deg = ap.wrap_degrees(longitude_deg)
+
+    # Add west longitude (subtract east longitude)
+    # NB west longitude is negative!
+    t = lmst - (np.timedelta64(86400_000, 'ms') * (longitude_deg / 360))
+    t = wrap_day(t)
+
+    # Subtract Greenwich mean sidereal time at 0h UTC
+    t -= gmst(d)
+    t = wrap_day(t)
+
+    # Convert to the equivalent UTC interval
+    utc = t * (1 / get_ratio_solar_to_sidereal_day())
+    d_day = get_date(d)
+    d_next_day = d_day + np.timedelta64(1, 'D')
+    r = utc + d_day
+    if isinstance(r, np.ndarray):
+        idx = r < get_date(d)
+        r[idx] += get_sidereal_day('ms')
+        idx = r >= d_next_day
+        r[idx] -= get_sidereal_day('ms')
+    elif isinstance(r, np.datetime64):
+        if r < d_day:
+            r += get_sidereal_day('ms')
+        if r >= d_next_day:
+            r -= get_sidereal_day('ms')
+    else:
+        raise TypeError(f'Unexpected return type {type(r).__name__}')
+    return r
+
+
+def get_sidereal_time_offset(t: Union[np.datetime64, np.ndarray],
+                             longitude_deg: float,
+                             st: Optional[Union[np.datetime64, np.ndarray]] = None,
+                             units: str = 'ms') -> Union[Union[np.timedelta64, np.ndarray], Tuple[Union[np.timedelta64, np.ndarray], Union[int, np.ndarray]]]:
+    """Get the sidereal time offset from UTC"""
+
+    sidereal_day = get_sidereal_day(units)
+    sidereal_day_ms = get_sidereal_day('ms')
+    # On this day find out what time sidereal midnight is
+    midnight_sidt = lmst_to_utc(np.timedelta64(0, units), longitude_deg, t)
+
+    # If midnight is after time t then use the sidereal midnight from the previous day
+    if isinstance(t, np.datetime64):
+        if midnight_sidt > t:
+            midnight_sidt = lmst_to_utc(np.timedelta64(0, units), longitude_deg, t - sidereal_day)
+        r = t - midnight_sidt
+        if r >= get_sidereal_day('ms'):  # Use the best resolution for comparison
+            r -= sidereal_day
+        if r < np.timedelta64(0, units):
+            r += sidereal_day
+    elif isinstance(t, np.ndarray):
+        idx = midnight_sidt > t
+        if np.any(idx):
+            midnight_sidt[idx] = lmst_to_utc(np.timedelta64(0, units), longitude_deg, t[idx])
+        r = t - midnight_sidt
+        idx = r >= get_sidereal_day('ms')  # Use the best resolution for comparison
+        if np.any(idx):
+            r[idx] -= sidereal_day
+        idx = r < np.timedelta64(0, units)
+        if np.any(idx):
+            r[idx] += sidereal_day
+    else:
+        raise TypeError(f'Unexpected return type {type(t).__name__}')
+
+    if st is not None:
+        # Calculate in which sidereal day each sample falls; let the first day be zero.
+        sd = np.floor((t - st + get_sidereal_time_offset(st, longitude_deg)) / sidereal_day)
+        if isinstance(sd, np.ndarray):
+            sd = sd.astype(int)
+        else:
+            sd = int(sd)
+        return r, sd
+    else:
+        return r
 
 
 class Dt64ToolsData(object):
@@ -772,10 +1018,10 @@ class Datetime64Locator(Locator):
                 idx = (approx_ival >= intervals).tolist().index(False)
                 tick_interval = intervals[idx]
                 return intervals[idx]
-            except ValueError as e:
+            except ValueError:
                 # Not found, fall through and use 1s or larger interval
                 pass
-            except:
+            except Exception:
                 raise
 
         if approx_ival_s < 7 * 86400:  # < 3 weeks
@@ -844,7 +1090,7 @@ class Datetime64Locator(Locator):
                     som = np.array(som)
                     return dt64_to(som[idx], units).tolist()
 
-        # Use years. 
+        # Use years.
         approx_ival_y = approx_ival_s / (365.25 * 86400)
         # Begin the search for optimum interval earlier then may
         # be expected because the first tick is not always at the
@@ -866,13 +1112,13 @@ class Datetime64Locator(Locator):
                 st2_y = int(np.floor(get_year(st) / y) * y)
 
                 tick_years = list(range(st2_y, get_year(et) + 1, y))
-                if from_YMD(tick_years[0], 1, 1) < st:
+                if from_ymd(tick_years[0], 1, 1) < st:
                     tick_years.pop(0)
-                if from_YMD(tick_years[-1], 1, 1) > et:
+                if from_ymd(tick_years[-1], 1, 1) > et:
                     tick_years.pop()
                 if len(tick_years) <= self.maxticks:
                     # Success
-                    return dt64_to(from_YMD(tick_years, 1, 1), units).tolist()
+                    return dt64_to(from_ymd(tick_years, 1, 1), units).tolist()
             years *= 10
 
         raise Exception('Failed to compute correct yearly tick spacing')
@@ -881,12 +1127,12 @@ class Datetime64Locator(Locator):
 class Datetime64Formatter(Formatter):
     def __init__(self, fmt=None, autolabel=None, data_type=np.datetime64):
         """
-        Format ticks with date/time as appropriate. 
+        Format ticks with date/time as appropriate.
 
         fmt: Manually set the strftime format string.
 
-        autolabel: Label the axis. 
-        If False no labeling will occur. 
+        autolabel: Label the axis.
+        If False no labeling will occur.
         If True a axis label will be updated when the axis ticks are
         formatted.
         If None the axis label will be updated only if it is an empty
@@ -1053,7 +1299,7 @@ def _strftime_dt64(t, fstr, customspec=None):
             elif fstr[i] == 'M':  #
                 s += '{0:02d}'.format(int(get_minute(t)))
             elif fstr[i] == 'q':  # quarter (of year)
-                s += '{0:01d}'.format(int(get_month(t)) / 4 + 1)
+                s += '{0:01d}'.format(int(get_month(t)) // 4 + 1)
             elif fstr[i] == 's':  # seconds since unix epoch
                 s += '{0:d}'.format(int(dt64_to(t, 's')))
             elif fstr[i] == 'S':  # seconds [ss]
