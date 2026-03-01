@@ -485,7 +485,19 @@ def load_data(project,
                              data_type=data_type, archive=archive,
                              channels=channels)
         else:
-            file_name = dt64.strftime(t, path)
+            # Expand path with project, site, data_type, archive, and channels before passing to strftime(). Accept
+            # lower-cased versions too.
+            file_name = dt64.strftime(t, path.format(project=project,
+                                                     project_lc=project.lower(),
+                                                     site=site,
+                                                     site_lc=site.lower(),
+                                                     data_type=data_type,
+                                                     data_type_lc=data_type.lower(),
+                                                     archive=archive,
+                                                     archive_lc=archive.lower(),
+                                                     channels=channels,
+                                                     channels_lc=[c.lower() for c in channels]
+                                                     ))
 
         url_parts = urlparse(file_name)
         if url_parts.scheme in ('ftp', 'http', 'https'):
