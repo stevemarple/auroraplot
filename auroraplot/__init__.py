@@ -439,6 +439,7 @@ def load_data(project,
         if isinstance(channels, str):
             if channels not in ad['channels']:
                 raise Exception('Unknown channel')
+            channels = [channels]
         else:
             for c in channels:
                 if c not in ad['channels']:
