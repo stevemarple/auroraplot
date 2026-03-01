@@ -4,6 +4,7 @@ import numpy as np
 import unittest
 from typing import Union
 
+import auroraplot.dt64tools as dt64
 from auroraplot.dt64tools import (
     dt64_range,
     from_hms,
@@ -144,6 +145,15 @@ class TestDt64tools(unittest.TestCase):
             self.assertAlmostEqual(julian_date(t), expected)
 
         results_array = julian_date(self.test_dates_array)
+        for result, expected in zip(results_array, expected_list):
+            self.assertAlmostEqual(result, expected)
+
+    def test_get_unix_day_number(self):
+        expected_list = [0, 1, 9496, 11152, 11152, 21915]
+        for t, expected in zip(self.test_dates_list, expected_list):
+            self.assertAlmostEqual(dt64.get_unix_day_number(t), expected)
+
+        results_array = dt64.get_unix_day_number(self.test_dates_array)
         for result, expected in zip(results_array, expected_list):
             self.assertAlmostEqual(result, expected)
 

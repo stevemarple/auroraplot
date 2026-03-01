@@ -778,6 +778,11 @@ def julian_date(t: Union[np.datetime64, np.ndarray]) -> Union[float, np.ndarray]
     return (epoch_in_jd + since_epoch) / np.timedelta64(1, 'D')
 
 
+def get_unix_day_number(t: Union[np.datetime64, np.ndarray]) -> Union[int, np.ndarray]:
+    """Get the day number since the Unix epoch (1970-01-01)"""
+    return (t - epoch64_day) // np.timedelta64(1, 'D')
+
+
 @overload
 def gmst(t: np.datetime64) -> np.timedelta64:
     pass
