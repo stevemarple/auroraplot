@@ -26,34 +26,35 @@ from auroraplot.dt64tools import (
 
 class TestDt64tools(unittest.TestCase):
     test_dates_list = [
-        np.datetime64('1970-01-01'),
-        np.datetime64('1970-01-02'),
-        np.datetime64('1996-01-01'),
-        np.datetime64('2000-07-14'),
-        np.datetime64('2000-07-14T14:00:00'),
-        np.datetime64('2030-01-01T12:34:56'),
+        np.datetime64("1970-01-01"),
+        np.datetime64("1970-01-02"),
+        np.datetime64("1996-01-01"),
+        np.datetime64("2000-07-14"),
+        np.datetime64("2000-07-14T14:00:00"),
+        np.datetime64("2030-01-01T12:34:56"),
     ]
     test_dates_array = np.zeros_like(test_dates_list)
     test_dates_array[:] = test_dates_list
     test_timedeltas_list = [
-        np.timedelta64(1, 's'),
-        np.timedelta64(1, 'm') + np.timedelta64(10, 'ms'),
-        np.timedelta64(1, 'h') + np.timedelta64(5, 's'),
-        np.timedelta64(1, 'D') + np.timedelta64(12, 'h'),
+        np.timedelta64(1, "s"),
+        np.timedelta64(1, "m") + np.timedelta64(10, "ms"),
+        np.timedelta64(1, "h") + np.timedelta64(5, "s"),
+        np.timedelta64(1, "D") + np.timedelta64(12, "h"),
     ]
 
     @staticmethod
     def assertSimilarTimes(
-            a: Union[np.datetime64, np.timedelta64],
-            b: Union[np.datetime64, np.timedelta64],
-            tol=np.timedelta64(1, 's'),
-            msg: str = None) -> None:
+        a: Union[np.datetime64, np.timedelta64],
+        b: Union[np.datetime64, np.timedelta64],
+        tol=np.timedelta64(1, "s"),
+        msg: str = None,
+    ) -> None:
         # assert isinstance(a, type(b)) and isinstance(b, type(a)), f'types are different ({type(a).__name} and {type(b).__name})'
         diff = a - b if a > b else b - a
-        diff_str = strftime(diff, '%dD %Hh %Mm %S.%#s')
-        s = f'values are too different ({a} and {b} = {diff_str}.'
+        diff_str = strftime(diff, "%dD %Hh %Mm %S.%#s")
+        s = f"values are too different ({a} and {b} = {diff_str}."
         if msg is not None:
-            s += f' {msg}'
+            s += f" {msg}"
         if isinstance(diff, np.ndarray):
             assert (diff >= -tol).all() and (diff <= tol).all(), s
         else:
@@ -61,10 +62,10 @@ class TestDt64tools(unittest.TestCase):
 
     def test_wrap_day(self):
         hours_list = list(range(-32, 65, 8))
-        test_times_list = [np.timedelta64(h, 'h') for h in hours_list]
+        test_times_list = [np.timedelta64(h, "h") for h in hours_list]
         test_times_array = np.zeros_like(test_times_list)
         test_times_array[:] = test_times_list
-        expected_list = [np.timedelta64(h % 24, 'h') for h in hours_list]
+        expected_list = [np.timedelta64(h % 24, "h") for h in hours_list]
 
         for t, expected in zip(test_times_list, expected_list):
             self.assertEqual(wrap_day(t), expected)
@@ -75,12 +76,12 @@ class TestDt64tools(unittest.TestCase):
 
     def test_get_date(self):
         expected_list = [
-            np.datetime64('1970-01-01'),
-            np.datetime64('1970-01-02'),
-            np.datetime64('1996-01-01'),
-            np.datetime64('2000-07-14'),
-            np.datetime64('2000-07-14'),
-            np.datetime64('2030-01-01'),
+            np.datetime64("1970-01-01"),
+            np.datetime64("1970-01-02"),
+            np.datetime64("1996-01-01"),
+            np.datetime64("2000-07-14"),
+            np.datetime64("2000-07-14"),
+            np.datetime64("2030-01-01"),
         ]
         for t, expected in zip(self.test_dates_list, expected_list):
             self.assertEqual(get_date(t), expected)
@@ -108,16 +109,16 @@ class TestDt64tools(unittest.TestCase):
     def test_is_leap_year(self):
         for y in range(1890, 2108):
             if y % 4 or y in (1900, 2100):
-                self.assertFalse(is_leap_year(y), msg=f'Incorrect result for {y}')
+                self.assertFalse(is_leap_year(y), msg=f"Incorrect result for {y}")
             else:
-                self.assertTrue(is_leap_year(y), msg=f'Incorrect result for {y}')
+                self.assertTrue(is_leap_year(y), msg=f"Incorrect result for {y}")
 
     def test_get_days_in_year(self):
         for y in range(1890, 2108):
             if y % 4 != 0 or y in (1900, 2100):
-                self.assertEqual(get_days_in_year(y), 365, msg=f'Incorrect result for {y}')
+                self.assertEqual(get_days_in_year(y), 365, msg=f"Incorrect result for {y}")
             else:
-                self.assertEqual(get_days_in_year(y), 366, msg=f'Incorrect result for {y}')
+                self.assertEqual(get_days_in_year(y), 366, msg=f"Incorrect result for {y}")
 
     def test_to_dhms(self):
         expected_list = [
@@ -128,7 +129,7 @@ class TestDt64tools(unittest.TestCase):
         ]
         for ts, expected in zip(self.test_timedeltas_list, expected_list):
             for a, b in zip(to_dhms(ts), expected):
-                self.assertAlmostEqual(a, b, delta=0.000001, msg=f'Incorrect result for {ts}')
+                self.assertAlmostEqual(a, b, delta=0.000001, msg=f"Incorrect result for {ts}")
 
 
     def test_julian_date(self):
@@ -187,7 +188,7 @@ class TestDt64tools(unittest.TestCase):
             from_hms(13, 3, 26, ms=827),
         ]
         for t, lon, expected in zip(self.test_dates_list, longitude_list, expected_list):
-            self.assertSimilarTimes(utc_to_lmst(t, lon), expected, msg=f'Incorrect result for {t}')
+            self.assertSimilarTimes(utc_to_lmst(t, lon), expected, msg=f"Incorrect result for {t}")
 
         results_array = utc_to_lmst(self.test_dates_array, np.array(longitude_list))
         for result, expected in zip(results_array, expected_list):
@@ -206,16 +207,16 @@ class TestDt64tools(unittest.TestCase):
         date_list = [get_date(d) for d in self.test_dates_list]
         # date_list = self.test_dates_list
         expected_list = [
-            np.datetime64('1970-01-01T17:16:14.568'),
+            np.datetime64("1970-01-01T17:16:14.568"),
             # np.datetime64('1969-12-31T17:20:10.568'), # np.datetime64('1970-01-01T17:16:14.568'),
-            np.datetime64('1970-01-01T18:18:07.493') + get_sidereal_day(),
-            np.datetime64('1995-12-31T20:02:50.481') + get_sidereal_day(),
-            np.datetime64('2000-07-13T13:09:56.620') + get_sidereal_day(),
-            np.datetime64('2000-07-14T06:46:31.850'),
-            np.datetime64('2030-01-01T23:28:41.786'),
+            np.datetime64("1970-01-01T18:18:07.493") + get_sidereal_day(),
+            np.datetime64("1995-12-31T20:02:50.481") + get_sidereal_day(),
+            np.datetime64("2000-07-13T13:09:56.620") + get_sidereal_day(),
+            np.datetime64("2000-07-14T06:46:31.850"),
+            np.datetime64("2030-01-01T23:28:41.786"),
         ]
         for lmst, lon, d, expected in zip(lmst_list, longitude_list, date_list, expected_list):
-            self.assertSimilarTimes(lmst_to_utc(lmst, lon, d), expected, msg=f'Incorrect result for {lmst}')
+            self.assertSimilarTimes(lmst_to_utc(lmst, lon, d), expected, msg=f"Incorrect result for {lmst}")
 
         results_array = lmst_to_utc(np.array(lmst_list), np.array(longitude_list), np.array(self.test_dates_array))
         for result, expected in zip(results_array, expected_list):
@@ -223,9 +224,9 @@ class TestDt64tools(unittest.TestCase):
 
     def test_get_sidereal_time_offset(self):
         longitude_list = [0, 0, 20.79, 20.79, -94.08, -94.08]
-        t_offsets_start = np.timedelta64(0, 's')
-        t_offsets_end = np.timedelta64(1, 'D')
-        t_offsets_step = np.timedelta64(10, 'm')
+        t_offsets_start = np.timedelta64(0, "s")
+        t_offsets_end = np.timedelta64(1, "D")
+        t_offsets_step = np.timedelta64(10, "m")
         t_offsets = np.array(list(dt64_range(t_offsets_start, t_offsets_end, t_offsets_step)))
         expected_first_offset = [
             from_hms(6, 39, 49, ms=432),
@@ -243,14 +244,14 @@ class TestDt64tools(unittest.TestCase):
 
             self.assertSimilarTimes(sidt_offsets[0], efo)
             # All offsets should be 0 <= offset < sidereal day
-            self.assertTrue(np.all(sidt_offsets >= np.timedelta64(0, 's')))
-            self.assertTrue(np.all(sidt_offsets < get_sidereal_day('ms')))
+            self.assertTrue(np.all(sidt_offsets >= np.timedelta64(0, "s")))
+            self.assertTrue(np.all(sidt_offsets < get_sidereal_day("ms")))
 
             # The offsets should increase by t_offsets_step except when the day number increased
             expected_diff = np.diff(sidt_offsets)
-            expected_diff[np.diff(sid_day_num) < 0] = -get_sidereal_day('ms') + t_offsets_step
+            expected_diff[np.diff(sid_day_num) < 0] = -get_sidereal_day("ms") + t_offsets_step
             self.assertTrue(np.all(np.diff(sidt_offsets) == expected_diff))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
