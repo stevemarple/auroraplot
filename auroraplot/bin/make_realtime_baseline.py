@@ -20,52 +20,50 @@ auroraplot.set_timezone()
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Compute baseline values')
+    parser = argparse.ArgumentParser(description="Compute baseline values")
 
-    parser.add_argument('-a', '--archive',
-                        action='append',
-                        nargs=2,
-                        help='Source data archive for project or site',
-                        metavar=('PROJECT[/SITE]', 'ARCHIVE'))
-    parser.add_argument('--baseline-archive',
-                        action='append',
-                        nargs=2,
-                        help='Target data archive for project or site',
-                        metavar=('PROJECT[/SITE]', 'ARCHIVE'))
-    parser.add_argument('-s', '--start-time',
-                        default='today',
-                        help='Start time for data transfer (inclusive)',
-                        metavar='DATETIME')
-    parser.add_argument('-e', '--end-time',
-                        help='End time for data transfer (exclusive)',
-                        metavar='DATETIME')
-    parser.add_argument('--dataset',
-                        nargs='+',
-                        help='Import additional dataset(s)',
-                        metavar='MODULE')
-    parser.add_argument('--log-level',
-                        choices=['debug', 'info', 'warning', 'error', 'critical'],
-                        default='warning',
-                        help='Control how much detail is printed',
-                        metavar='LEVEL')
-    parser.add_argument('--log-format',
-                        # default='%(levelname)s:%(message)s',
-                        help='Set format of log messages',
-                        metavar='FORMAT')
-    parser.add_argument('--missing-only',
-                        action='store_true',
-                        help='Only calculate values that are missing from the archive')
-    parser.add_argument('--overwrite',
-                        action='store_true',
-                        help='Overwrite existing values')
-    parser.add_argument('--realtime-qdc',
-                        action='store_true',
-                        default=None,
-                        help='Use realtime selection for loading QDCs')
+    parser.add_argument(
+        "-a",
+        "--archive",
+        action="append",
+        nargs=2,
+        help="Source data archive for project or site",
+        metavar=("PROJECT[/SITE]", "ARCHIVE"),
+    )
+    parser.add_argument(
+        "--baseline-archive",
+        action="append",
+        nargs=2,
+        help="Target data archive for project or site",
+        metavar=("PROJECT[/SITE]", "ARCHIVE"),
+    )
+    parser.add_argument(
+        "-s", "--start-time", default="today", help="Start time for data transfer (inclusive)", metavar="DATETIME"
+    )
+    parser.add_argument("-e", "--end-time", help="End time for data transfer (exclusive)", metavar="DATETIME")
+    parser.add_argument("--dataset", nargs="+", help="Import additional dataset(s)", metavar="MODULE")
+    parser.add_argument(
+        "--log-level",
+        choices=["debug", "info", "warning", "error", "critical"],
+        default="warning",
+        help="Control how much detail is printed",
+        metavar="LEVEL",
+    )
+    parser.add_argument(
+        "--log-format",
+        # default='%(levelname)s:%(message)s',
+        help="Set format of log messages",
+        metavar="FORMAT",
+    )
+    parser.add_argument(
+        "--missing-only", action="store_true", help="Only calculate values that are missing from the archive"
+    )
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing values")
+    parser.add_argument(
+        "--realtime-qdc", action="store_true", default=None, help="Use realtime selection for loading QDCs"
+    )
 
-    parser.add_argument('project_site',
-                        nargs='+',
-                        metavar="PROJECT/SITE")
+    parser.add_argument("project_site", nargs="+", metavar="PROJECT/SITE")
 
     return parser.parse_args()
 
@@ -74,33 +72,33 @@ def main():
     args = parse_args()
     d = dict(level=getattr(logging, args.log_level.upper()))
     if args.log_format:
-        d['format'] = args.log_format
+        d["format"] = args.log_format
     logging.basicConfig(**d)
 
     if args.dataset:
         for ds in args.dataset:
-            new_module = 'auroraplot.datasets.' + ds
+            new_module = "auroraplot.datasets." + ds
             try:
                 __import__(new_module)
             except Exception as e:
-                logger.error('Could not import ' + new_module + ': ' + str(e))
+                logger.error("Could not import " + new_module + ": " + str(e))
                 return 1
 
     # Parse and process start and end times. If end time not given use
     # start time plus 1 day.
-    day = np.timedelta64(1, 'D')
-    st = dt64.parse_datetime64(args.start_time, 'D')
+    day = np.timedelta64(1, "D")
+    st = dt64.parse_datetime64(args.start_time, "D")
     if args.end_time is None:
         et = st + day
     else:
         try:
             # Parse as date
-            et = dt64.parse_datetime64(args.end_time, 'us')
+            et = dt64.parse_datetime64(args.end_time, "us")
         except ValueError:
             # Parse as a set of duration values
-            et = st + np.timedelta64(0, 'us')
+            et = st + np.timedelta64(0, "us")
             et_words = args.end_time.split()
-            assert len(et_words) % 2 == 0, 'Need even number of words'
+            assert len(et_words) % 2 == 0, "Need even number of words"
             for n in range(0, len(et_words), 2):
                 et += np.timedelta64(int(et_words[n]), et_words[n + 1])
 
@@ -129,23 +127,20 @@ def main():
         if project in baseline_archive and site in baseline_archive[project]:
             bl_archive = baseline_archive[project][site]
         else:
-            bl_archive = 'realtime_baseline'
+            bl_archive = "realtime_baseline"
 
-        an, ai = auroraplot.get_archive_info(project, site, 'MagData',
-                                             archive=bl_archive)
+        an, ai = auroraplot.get_archive_info(project, site, "MagData", archive=bl_archive)
 
-        if 'qdc_fit_duration' not in ai:
-            logger.error('no qdc_fit_duration found in %s archive for %s/%s',
-                         an, project, site)
+        if "qdc_fit_duration" not in ai:
+            logger.error("no qdc_fit_duration found in %s archive for %s/%s", an, project, site)
             continue
 
-        if 'realtime_qdc' not in ai:
-            logger.warning('realtime_qdc option not in %s archive for %s/%s',
-                           an, project, site)
+        if "realtime_qdc" not in ai:
+            logger.warning("realtime_qdc option not in %s archive for %s/%s", an, project, site)
 
-        qdc_fit_duration = ai['qdc_fit_duration']
-        qdc_fit_offset = ai.get('qdc_fit_offset', -qdc_fit_duration / 2 - 1.5 * day)
-        qdc_tries = ai.get('qdc_tries', 3)
+        qdc_fit_duration = ai["qdc_fit_duration"]
+        qdc_fit_offset = ai.get("qdc_fit_offset", -qdc_fit_duration / 2 - 1.5 * day)
+        qdc_tries = ai.get("qdc_tries", 3)
 
         # Get mag data archive to use for source data
         if project in archive and site in archive[project]:
@@ -154,20 +149,19 @@ def main():
             md_archive = None
 
         # Tune start/end times to avoid requesting data outside of the operational period
-        site_st = auroraplot.get_site_info(project, site, 'start_time')
+        site_st = auroraplot.get_site_info(project, site, "start_time")
         if site_st is None or site_st < st:
             site_st = st
         else:
             site_st = dt64.floor(site_st, day)
 
-        site_et = auroraplot.get_site_info(project, site, 'end_time')
+        site_et = auroraplot.get_site_info(project, site, "end_time")
         if site_et is None or site_et > et:
             site_et = et
         else:
             site_et = dt64.ceil(site_et, day)
 
-        logger.info('Processing %s/%s %s', project, site, dt64.
-                    fmt_dt64_range(site_st, site_et))
+        logger.info("Processing %s/%s %s", project, site, dt64.fmt_dt64_range(site_st, site_et))
 
         last_data = None
         for t1 in dt64.dt64_range(site_st, site_et, day):
@@ -175,10 +169,11 @@ def main():
                 t2 = t1 + day
 
                 if args.missing_only:
-                    data = auroraplot.load_data(project, site, 'MagData', t1, t2, archive=bl_archive)
+                    data = auroraplot.load_data(project, site, "MagData", t1, t2, archive=bl_archive)
                     if data is not None and np.size(data.data) and np.all(np.isfinite(data.data)):
-                        logger.info('baseline data for %s/%s %s already exists', project, site,
-                                    dt64.strftime(t1, '%Y-%m-%d'))
+                        logger.info(
+                            "baseline data for %s/%s %s already exists", project, site, dt64.strftime(t1, "%Y-%m-%d")
+                        )
                         continue
 
                 # Calculate dates for data to be used for fitting
@@ -188,10 +183,10 @@ def main():
 
                 if last_data is None or last_data.end_time != md_et - day:
                     # Load entire data block
-                    md = auroraplot.load_data(project, site, 'MagData', md_st, md_et, archive=md_archive)
+                    md = auroraplot.load_data(project, site, "MagData", md_st, md_et, archive=md_archive)
                 else:
                     # Load the last day of data and concatenate
-                    md = auroraplot.load_data(project, site, 'MagData', md_et - day, md_et, archive=md_archive)
+                    md = auroraplot.load_data(project, site, "MagData", md_et - day, md_et, archive=md_archive)
                     if md is None:
                         md = last_data
                         md.end_time = md_et
@@ -199,57 +194,58 @@ def main():
                         md = auroraplot.concatenate([last_data, md]).extract(start_time=md_st)
 
                 if md is None:
-                    logger.debug('no data (None)')
+                    logger.debug("no data (None)")
                     last_data = None
                 elif np.size(md.data) == 0:
-                    logger.debug('no data (empty data array)')
+                    logger.debug("no data (empty data array)")
                     continue
 
-                assert md.start_time == md_st and md.end_time == md_et, 'Bad magdata times'
+                assert md.start_time == md_st and md.end_time == md_et, "Bad magdata times"
                 last_data = md
 
-                qdc = load_mag_qdc(project, site, t1,
-                                   tries=qdc_tries,
-                                   realtime=ai['realtime_qdc'])
+                qdc = load_mag_qdc(project, site, t1, tries=qdc_tries, realtime=ai["realtime_qdc"])
                 if qdc is None or np.size(qdc.data) == 0:
-                    logger.debug('no QDC')
+                    logger.debug("no QDC")
                     continue
 
                 # Ensure each channel is zero-mean
                 for an in range(qdc.data.shape[0]):
                     qdc.data[an] -= auroraplot.nanmean(qdc.data[an])
 
-                fitted_qdc, errors, fit_info = qdc.align(md,
-                                                         fit=auroraplot.data.Data.minimise_sign_error_fit,
-                                                         full_output=True,
-                                                         tolerance=1e-12,
-                                                         )
+                fitted_qdc, errors, fit_info = qdc.align(
+                    md,
+                    fit=auroraplot.data.Data.minimise_sign_error_fit,
+                    full_output=True,
+                    tolerance=1e-12,
+                )
 
                 data = -np.reshape(errors, [len(errors), 1])
 
-                tu = dt64.smallest_unit([t1, t2, ai['nominal_cadence']])
+                tu = dt64.smallest_unit([t1, t2, ai["nominal_cadence"]])
                 t1a = dt64.astype(t1, units=tu)
                 t2a = dt64.astype(t2, units=tu)
-                cadence = dt64.astype(ai['nominal_cadence'], units=tu)
-                bl = MagData(project=project,
-                             site=site,
-                             channels=ai['channels'],
-                             start_time=t1a,
-                             end_time=t2a,
-                             sample_start_time=np.array([t1a]),
-                             sample_end_time=np.array([t2a]),
-                             nominal_cadence=cadence,
-                             data=data,
-                             units=ai['units'])
+                cadence = dt64.astype(ai["nominal_cadence"], units=tu)
+                bl = MagData(
+                    project=project,
+                    site=site,
+                    channels=ai["channels"],
+                    start_time=t1a,
+                    end_time=t2a,
+                    sample_start_time=np.array([t1a]),
+                    sample_end_time=np.array([t2a]),
+                    nominal_cadence=cadence,
+                    data=data,
+                    units=ai["units"],
+                )
                 bl.assert_valid()
                 bl.save(archive=bl_archive, merge=True, overwrite=args.overwrite)
             except Exception as e:
                 logger.error(e)
                 logger.debug(traceback.format_exc())
 
-    logger.info('Done')
+    logger.info("Done")
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

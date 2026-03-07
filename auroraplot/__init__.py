@@ -1,8 +1,8 @@
 """Analyse and plot space weather datasets."""
 
-__author__ = 'Steve Marple'
-__version__ = '0.7.1'
-__license__ = 'PSF'
+__author__ = "Steve Marple"
+__version__ = "0.7.1"
+__license__ = "PSF"
 
 import copy
 import gzip
@@ -39,21 +39,21 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # Don't warn about NaNs
-np.seterr(invalid='ignore')
+np.seterr(invalid="ignore")
 
-plot_datetime_units = os.getenv('AURORAPLOT_PLOT_DATETIME_UNITS')
-plot_datetime_epoch = os.getenv('AURORAPLOT_PLOT_DATETIME_EPOCH')
-plot_timedelta_units = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_UNITS')
-plot_timedelta_epoch = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_EPOCH')
+plot_datetime_units = os.getenv("AURORAPLOT_PLOT_DATETIME_UNITS")
+plot_datetime_epoch = os.getenv("AURORAPLOT_PLOT_DATETIME_EPOCH")
+plot_timedelta_units = os.getenv("AURORAPLOT_PLOT_TIMEDELTA_UNITS")
+plot_timedelta_epoch = os.getenv("AURORAPLOT_PLOT_TIMEDELTA_EPOCH")
 
-epoch64_us = np.datetime64('1970-01-01T00:00:00Z', 'us')
+epoch64_us = np.datetime64("1970-01-01T00:00:00Z", "us")
 
 projects = {}
 
-NaN = float('nan')
-NaT = np.timedelta64('NaT', 'us')
+NaN = float("nan")
+NaT = np.timedelta64("NaT", "us")
 
-colors = ['b', 'g', 'r']
+colors = ["b", "g", "r"]
 
 
 # def safe_eval(s):
@@ -62,7 +62,7 @@ colors = ['b', 'g', 'r']
 #     return eval(s, {'__builtins__': None}, {})
 
 
-#class Instrument(object):
+# class Instrument(object):
 #
 
 # def copy_dict(d, *keys):
@@ -70,11 +70,11 @@ colors = ['b', 'g', 'r']
 #     return {key: d[key] for key in keys}
 
 
-def set_timezone(timezone : str = 'UTC') -> None:
-    if 'TZ' not in os.environ or os.environ['TZ'] != timezone:
+def set_timezone(timezone: str = "UTC") -> None:
+    if "TZ" not in os.environ or os.environ["TZ"] != timezone:
         # Try to force all times to be read as UTC
         try:
-            os.environ['TZ'] = timezone
+            os.environ["TZ"] = timezone
             time.tzset()
         except Exception as e:
             logger.error(e)
@@ -94,13 +94,20 @@ def add_project(project_name, project_info):
     else:
         projects[project_name] = project_info
 
-    if hasattr(auroraplot_custom, 'add_project_hook'):
+    if hasattr(auroraplot_custom, "add_project_hook"):
         auroraplot_custom.add_project_hook(project_name=project_name)
 
 
-def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
-              fmt='%(adj)g%(sep)s%(prefix)s%(unit)s%(dir)s', ascii=True,
-              wantstr=True):
+def str_units(
+    val,
+    unit,
+    prefix=None,
+    sep=None,
+    degrees_dir=None,
+    fmt="%(adj)g%(sep)s%(prefix)s%(unit)s%(dir)s",
+    ascii=True,
+    wantstr=True,
+):
     """Return a string formatted with its units
     val: data value
     unit: SI or other unit
@@ -112,104 +119,101 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     wantstr: if true return the formatted string, else return dict of info
     """
 
-    is_degrees = unit in ('deg', 'degrees', '\N{DEGREE SIGN}')
-    prefixes = {'y': -24,  # yocto
-                'z': -21,  # zepto
-                'a': -18,  # atto
-                'f': -15,  # femto
-                'p': -12,  # pico
-                'n': -9,  # nano
-                '\N{MICRO SIGN}': -6,  # micro
-                'u': -6,  # micro
-                'm': -3,  # milli
-                'c': -2,  # centi
-                'd': -1,  # deci
-                '': 0,
-                'da': 1,  # deca
-                'h': 2,  # hecto
-                'k': 3,  # kilo
-                'M': 6,  # mega
-                'G': 9,  # giga
-                'T': 12,  # tera
-                'P': 15,  # peta
-                'E': 18,  # exa
-                'Z': 21,  # zetta
-                'Y': 24,  # yotta
-                }
+    is_degrees = unit in ("deg", "degrees", "\N{DEGREE SIGN}")
+    prefixes = {
+        "y": -24,  # yocto
+        "z": -21,  # zepto
+        "a": -18,  # atto
+        "f": -15,  # femto
+        "p": -12,  # pico
+        "n": -9,  # nano
+        "\N{MICRO SIGN}": -6,  # micro
+        "u": -6,  # micro
+        "m": -3,  # milli
+        "c": -2,  # centi
+        "d": -1,  # deci
+        "": 0,
+        "da": 1,  # deca
+        "h": 2,  # hecto
+        "k": 3,  # kilo
+        "M": 6,  # mega
+        "G": 9,  # giga
+        "T": 12,  # tera
+        "P": 15,  # peta
+        "E": 18,  # exa
+        "Z": 21,  # zetta
+        "Y": 24,  # yotta
+    }
 
-    d = {'sep': sep,
-         'prefix': prefix,
-         'unit': unit,
-         'val': val}
+    d = {"sep": sep, "prefix": prefix, "unit": unit, "val": val}
     if is_degrees:
         if sep is None:
-            d['sep'] = ''
+            d["sep"] = ""
         if prefix is None:
-            d['prefix'] = ''  # Do not calculate automatically
-            d['mul'] = 1
+            d["prefix"] = ""  # Do not calculate automatically
+            d["mul"] = 1
             # prefix = ''
-    elif unit == '\N{DEGREE SIGN}C':
+    elif unit == "\N{DEGREE SIGN}C":
         # Don't calculate prefixes with degrees C
         if sep is None:
-            d['sep'] = ' '
+            d["sep"] = " "
         if prefix is None:
-            d['prefix'] = ''  # Do not calculate automatically
-            d['mul'] = 1
+            d["prefix"] = ""  # Do not calculate automatically
+            d["mul"] = 1
     elif sep is None:
-        d['sep'] = ' '
+        d["sep"] = " "
 
-    if d['prefix'] is None:
-        if unit in ('', '%'):
+    if d["prefix"] is None:
+        if unit in ("", "%"):
             logmul = 0
         elif np.isfinite(val) and val != 0:
             log10_val = np.log10(val)
-            logmul = int(np.floor(np.abs(np.spacing(log10_val)) +
-                                  log10_val / 3.0) * 3)
+            logmul = int(np.floor(np.abs(np.spacing(log10_val)) + log10_val / 3.0) * 3)
         else:
             logmul = 1
 
         # Find matching prefix
         for k in prefixes:
             if prefixes[k] == logmul:
-                d['prefix'] = k
+                d["prefix"] = k
                 break
-        assert d['prefix'] is not None, 'prefix should not be None'
-        d['mul'] = 10 ** logmul
+        assert d["prefix"] is not None, "prefix should not be None"
+        d["mul"] = 10**logmul
 
     else:
-        d['mul'] = 10 ** prefixes[d['prefix']]
+        d["mul"] = 10 ** prefixes[d["prefix"]]
 
-    if ascii and d['mul'] >= 9e-07 and d['mul'] < 11e-7:
-        d['prefix'] = 'u'
+    if ascii and d["mul"] >= 9e-07 and d["mul"] < 11e-7:
+        d["prefix"] = "u"
 
-    if d['mul'] == 1:
-        d['adj'] = val
+    if d["mul"] == 1:
+        d["adj"] = val
     else:
-        d['adj'] = val / d['mul']
+        d["adj"] = val / d["mul"]
 
     if is_degrees and degrees_dir is not None:
         # include N/S or other direction indicator
         if val >= 0:
-            d['dir'] = degrees_dir[0]
+            d["dir"] = degrees_dir[0]
         else:
-            d['dir'] = degrees_dir[1]
-            d['adj'] = -d['adj']
+            d["dir"] = degrees_dir[1]
+            d["adj"] = -d["adj"]
     else:
-        d['dir'] = ''
+        d["dir"] = ""
 
     if wantstr:
         return fmt % d
     else:
-        d['fmt'] = fmt
-        d['str'] = fmt % d
-        d['fmtunit'] = d['prefix']
+        d["fmt"] = fmt
+        d["str"] = fmt % d
+        d["fmtunit"] = d["prefix"]
         if unit is not None:
-            d['fmtunit'] += unit
+            d["fmtunit"] += unit
         return d
 
 
 def format_project_site(project, site):
-    return project + ' / ' + site
+    return project + " / " + site
 
 
 def get_projects():
@@ -219,56 +223,56 @@ def get_projects():
     must match its abbreviation, any aliased entries are ignored."""
     r = []
     for p in projects:
-        if projects[p]['abbreviation'] == p:
+        if projects[p]["abbreviation"] == p:
             r.append(p)
     return r
 
 
 def get_project_info(project, info=None):
     if project not in projects:
-        raise KeyError('Unknown project (%s)' % project)
+        raise KeyError("Unknown project (%s)" % project)
     if info is None:
         return projects[project]
     elif info not in projects[project]:
-        raise KeyError('Unknown info (%s)' % info)
+        raise KeyError("Unknown info (%s)" % info)
     else:
         return projects[project][info]
 
 
 def get_sites(project):
     if project not in projects:
-        raise KeyError('Unknown project (%s)' % project)
-    return projects[project]['sites'].keys()
+        raise KeyError("Unknown project (%s)" % project)
+    return projects[project]["sites"].keys()
 
 
 def has_site_info(project, site, info):
     # Sanity checking
     if project not in projects:
-        raise KeyError('Unknown project (%s)' % project)
-    elif site not in projects[project]['sites']:
-        raise KeyError('Unknown site (%s)' % site)
-    return info in projects[project]['sites'][site]
+        raise KeyError("Unknown project (%s)" % project)
+    elif site not in projects[project]["sites"]:
+        raise KeyError("Unknown site (%s)" % site)
+    return info in projects[project]["sites"][site]
 
 
 def get_site_info(project, site, info=None):
     # Sanity checking
     if project not in projects:
-        raise KeyError('Unknown project (%s)' % project)
-    elif site not in projects[project]['sites']:
-        raise KeyError('Unknown site (%s)' % site)
+        raise KeyError("Unknown project (%s)" % project)
+    elif site not in projects[project]["sites"]:
+        raise KeyError("Unknown site (%s)" % site)
     if info is None:
-        return projects[project]['sites'][site]
-    elif info not in projects[project]['sites'][site]:
-        raise KeyError('Unknown info (%s)' % info)
+        return projects[project]["sites"][site]
+    elif info not in projects[project]["sites"][site]:
+        raise KeyError("Unknown info (%s)" % info)
     else:
-        return projects[project]['sites'][site][info]
+        return projects[project]["sites"][site][info]
 
 
 def get_data_types(project, site):
     """
     Returns a list of data_types for a particular project and site.
     """
-    return list(get_site_info(project, site)['data_types'].keys())
+    return list(get_site_info(project, site)["data_types"].keys())
 
 
 def get_archives(project, site, data_type):
@@ -280,12 +284,12 @@ def get_archives(project, site, data_type):
     """
 
     site_info = get_site_info(project, site)
-    if data_type not in site_info['data_types']:
-        raise KeyError('Unknown data_type (%s)' % data_type)
+    if data_type not in site_info["data_types"]:
+        raise KeyError("Unknown data_type (%s)" % data_type)
 
     archive_names = []
-    default_name = ''
-    archives = site_info['data_types'][data_type]
+    default_name = ""
+    archives = site_info["data_types"][data_type]
     for akey in list(archives.keys()):
         if type(archives[akey]) == dict:
             archive_names.append(akey)
@@ -334,42 +338,41 @@ def get_archive_info(project, site, data_type, archive=None):
     """
     # Sanity checking
     if project not in projects:
-        raise Exception('Unknown project (%s)' % project)
-    elif site not in projects[project]['sites']:
-        raise Exception('Unknown site (%s)' % site)
+        raise Exception("Unknown project (%s)" % project)
+    elif site not in projects[project]["sites"]:
+        raise Exception("Unknown site (%s)" % site)
     site_info = get_site_info(project, site)
-    if data_type not in site_info['data_types']:
-        raise ValueError('Unknown data_type (%s)' % data_type)
+    if data_type not in site_info["data_types"]:
+        raise ValueError("Unknown data_type (%s)" % data_type)
 
-    if archive is None or archive == 'default':
-        if len(site_info['data_types'][data_type]) == 1:
+    if archive is None or archive == "default":
+        if len(site_info["data_types"][data_type]) == 1:
             # Only one archive, so default is implicit
-            archive = list(site_info['data_types'][data_type].keys())[0]
-        elif 'default' in site_info['data_types'][data_type]:
+            archive = list(site_info["data_types"][data_type].keys())[0]
+        elif "default" in site_info["data_types"][data_type]:
             # Use explicit default
-            if isinstance(site_info['data_types'][data_type]['default'], str):
-                archive = site_info['data_types'][data_type]['default']
+            if isinstance(site_info["data_types"][data_type]["default"], str):
+                archive = site_info["data_types"][data_type]["default"]
             else:
-                archive = 'default'
+                archive = "default"
         else:
-            raise TypeError('archive must be specified (multiple choices and no default)')
+            raise TypeError("archive must be specified (multiple choices and no default)")
 
-    if archive not in site_info['data_types'][data_type]:
-        raise ValueError('Unknown archive (%s) for %s' \
-                         % (archive, format_project_site(project, site)))
+    if archive not in site_info["data_types"][data_type]:
+        raise ValueError("Unknown archive (%s) for %s" % (archive, format_project_site(project, site)))
 
     # archive data
-    return (archive, site_info['data_types'][data_type][archive])
+    return (archive, site_info["data_types"][data_type][archive])
 
 
 def is_operational(project, site, t1=None, t2=None, now=None):
     if now is None:
-        now = np.datetime64('now')
+        now = np.datetime64("now")
     if t1 is None and t2 is None:
         t1 = now
 
-    st = get_site_info(project, site, 'start_time')
-    et = get_site_info(project, site, 'end_time')
+    st = get_site_info(project, site, "start_time")
+    et = get_site_info(project, site, "end_time")
     if st is None and et is None:
         return True
     if et is None:
@@ -384,21 +387,23 @@ def is_operational(project, site, t1=None, t2=None, now=None):
     return False
 
 
-def load_data(project,
-              site,
-              data_type,
-              start_time,
-              end_time,
-              archive=None,
-              channels=None,
-              path=None,
-              load_function=None,
-              raise_all=False,
-              cadence=None,
-              aggregate=None,
-              filter_function=None,
-              use_cache=None,
-              now=None):
+def load_data(
+    project,
+    site,
+    data_type,
+    start_time,
+    end_time,
+    archive=None,
+    channels=None,
+    path=None,
+    load_function=None,
+    raise_all=False,
+    cadence=None,
+    aggregate=None,
+    filter_function=None,
+    use_cache=None,
+    now=None,
+):
     """Load data.
     project: name of the project (upper case)
 
@@ -426,100 +431,100 @@ def load_data(project,
         function reference, after validating the input parameters.
 
     """
-    archive, ad = get_archive_info(project, site, data_type,
-                                   archive=archive)
-    cad_units = dt64.get_units(ad['nominal_cadence'])
-    start_time = start_time.astype('datetime64[%s]' % cad_units)
-    end_time = end_time.astype('datetime64[%s]' % cad_units)
+    archive, ad = get_archive_info(project, site, data_type, archive=archive)
+    cad_units = dt64.get_units(ad["nominal_cadence"])
+    start_time = start_time.astype("datetime64[%s]" % cad_units)
+    end_time = end_time.astype("datetime64[%s]" % cad_units)
 
     if channels is None:
-        channels = ad['channels']
+        channels = ad["channels"]
     else:
         # Could be as single channel name or a list of channels
         if isinstance(channels, str):
-            if channels not in ad['channels']:
-                raise Exception('Unknown channel')
+            if channels not in ad["channels"]:
+                raise Exception("Unknown channel")
             channels = [channels]
         else:
             for c in channels:
-                if c not in ad['channels']:
-                    raise Exception('Unknown channel')
+                if c not in ad["channels"]:
+                    raise Exception("Unknown channel")
 
     if path is None:
-        path = ad['path']
+        path = ad["path"]
 
     if load_function is None:
-        load_function = ad.get('load_function')
+        load_function = ad.get("load_function")
 
     if filter_function is None:
-        filter_function = ad.get('filter_function')
+        filter_function = ad.get("filter_function")
 
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project,
-                             site,
-                             data_type,
-                             start_time,
-                             end_time,
-                             archive=archive,
-                             channels=channels,
-                             path=path,
-                             raise_all=raise_all,
-                             cadence=cadence,
-                             aggregate=aggregate,
-                             filter_function=filter_function)
+        return load_function(
+            project,
+            site,
+            data_type,
+            start_time,
+            end_time,
+            archive=archive,
+            channels=channels,
+            path=path,
+            raise_all=raise_all,
+            cadence=cadence,
+            aggregate=aggregate,
+            filter_function=filter_function,
+        )
 
     data = []
-    for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']),
-                             end_time,
-                             ad['duration']):
+    for t in dt64.dt64_range(dt64.floor(start_time, ad["duration"]), end_time, ad["duration"]):
         # A local copy of the file to be loaded, possibly an
         # uncompressed version.
         temp_file_name = None
 
-        t2 = t + ad['duration']
-        if hasattr(path, '__call__'):
+        t2 = t + ad["duration"]
+        if hasattr(path, "__call__"):
             # Function: call it with relevant information to get the path
-            file_name = path(t, project=project, site=site,
-                             data_type=data_type, archive=archive,
-                             channels=channels)
+            file_name = path(t, project=project, site=site, data_type=data_type, archive=archive, channels=channels)
         else:
             # Expand path with project, site, data_type, archive, and channels before passing to strftime(). Accept
             # lower-cased versions too.
-            file_name = dt64.strftime(t, path.format(project=project,
-                                                     project_lc=project.lower(),
-                                                     site=site,
-                                                     site_lc=site.lower(),
-                                                     data_type=data_type,
-                                                     data_type_lc=data_type.lower(),
-                                                     archive=archive,
-                                                     archive_lc=archive.lower(),
-                                                     channels=channels,
-                                                     channels_lc=[c.lower() for c in channels]
-                                                     ))
+            file_name = dt64.strftime(
+                t,
+                path.format(
+                    project=project,
+                    project_lc=project.lower(),
+                    site=site,
+                    site_lc=site.lower(),
+                    data_type=data_type,
+                    data_type_lc=data_type.lower(),
+                    archive=archive,
+                    archive_lc=archive.lower(),
+                    channels=channels,
+                    channels_lc=[c.lower() for c in channels],
+                ),
+            )
 
         url_parts = urlparse(file_name)
-        if url_parts.scheme in ('ftp', 'http', 'https'):
-            if ad.get('cache_dir'):
+        if url_parts.scheme in ("ftp", "http", "https"):
+            if ad.get("cache_dir"):
                 if now is None:
-                    now = np.datetime64('now', 's')
-                dtd = ad.get('data_transfer_delay', np.timedelta64(0, 's'))
+                    now = np.datetime64("now", "s")
+                dtd = ad.get("data_transfer_delay", np.timedelta64(0, "s"))
                 if use_cache is None:
                     if t2 + dtd < now:
                         uc = True  # OK to try fetching from the cache
                     else:
                         uc = False
-                        logger.debug('data too new to cache')
+                        logger.debug("data too new to cache")
                 else:
                     uc = use_cache
-                cache_filename = os.path.normpath(os.path.join(ad['cache_dir'],
-                                                               file_name.replace(':', '/')))
-                logger.debug('cache file: ' + cache_filename)
+                cache_filename = os.path.normpath(os.path.join(ad["cache_dir"], file_name.replace(":", "/")))
+                logger.debug("cache file: " + cache_filename)
                 if uc:
                     if os.path.exists(cache_filename):
                         file_name = cache_filename
-                        logger.debug('cache hit')
+                        logger.debug("cache hit")
                     else:
                         file_name = download_url(file_name, dest=cache_filename)
                 else:
@@ -534,22 +539,21 @@ def load_data(project,
             if file_name is None:
                 continue
 
-        elif url_parts.scheme == 'file':
+        elif url_parts.scheme == "file":
             file_name = url_parts.path
 
         if not os.path.exists(file_name):
-            logger.info('missing file %s', file_name)
+            logger.info("missing file %s", file_name)
             continue
 
         # Now only need to access local files
-        if os.path.splitext(url_parts.path)[1] in ('.gz', '.dgz'):
+        if os.path.splitext(url_parts.path)[1] in (".gz", ".dgz"):
             # Transparently uncompress
             gunzipped_file = None
             try:
-                logger.debug('unzipping %s', file_name)
-                gunzipped_file = NamedTemporaryFile(prefix=__name__,
-                                                    delete=False)
-                with gzip.open(file_name, 'rb') as gzip_file:
+                logger.debug("unzipping %s", file_name)
+                gunzipped_file = NamedTemporaryFile(prefix=__name__, delete=False)
+                with gzip.open(file_name, "rb") as gzip_file:
                     shutil.copyfileobj(gzip_file, gunzipped_file)
                 gunzipped_file.close()
             except KeyboardInterrupt:
@@ -562,64 +566,59 @@ def load_data(project,
                 continue
             finally:
                 if temp_file_name:
-                    logger.debug('deleting temporary file ' + temp_file_name)
+                    logger.debug("deleting temporary file " + temp_file_name)
                     os.unlink(temp_file_name)
 
             temp_file_name = gunzipped_file.name
             file_name = temp_file_name
 
-        logger.info('loading ' + file_name)
+        logger.info("loading " + file_name)
 
         try:
-            tmp = ad['load_converter'](file_name,
-                                       ad,
-                                       project=project,
-                                       site=site,
-                                       data_type=data_type,
-                                       start_time=t,
-                                       end_time=t2,
-                                       channels=channels,
-                                       archive=archive,
-                                       path=path,
-                                       raise_all=raise_all)
+            tmp = ad["load_converter"](
+                file_name,
+                ad,
+                project=project,
+                site=site,
+                data_type=data_type,
+                start_time=t,
+                end_time=t2,
+                channels=channels,
+                archive=archive,
+                path=path,
+                raise_all=raise_all,
+            )
             if tmp is not None:
-                if cadence is not None and cadence <= ad['duration']:
-                    tmp.set_cadence(cadence,
-                                    aggregate=aggregate,
-                                    inplace=True)
+                if cadence is not None and cadence <= ad["duration"]:
+                    tmp.set_cadence(cadence, aggregate=aggregate, inplace=True)
                 data.append(tmp)
         except KeyboardInterrupt:
             raise
         except Exception as e:
             if raise_all:
                 raise
-            logger.info('Could not load ' + file_name)
+            logger.info("Could not load " + file_name)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
 
         finally:
             if temp_file_name:
-                logger.debug('deleting temporary file ' + temp_file_name)
+                logger.debug("deleting temporary file " + temp_file_name)
                 os.unlink(temp_file_name)
 
     if len(data) == 0:
         return None
 
     r = concatenate(data, sort=False)
-    r.extract(inplace=True,
-              start_time=start_time,
-              end_time=end_time,
-              channels=channels)
+    r.extract(inplace=True, start_time=start_time, end_time=end_time, channels=channels)
 
-    if cadence is not None and cadence > ad['duration']:
+    if cadence is not None and cadence > ad["duration"]:
         # cadence too large to apply on results of loading each file,
         # apply to combined object
-        r.set_cadence(cadence,
-                      aggregate=aggregate,
-                      inplace=True)
+        r.set_cadence(cadence, aggregate=aggregate, inplace=True)
 
     if filter_function:
-        logger.debug('filtering with function %s', filter_function.__name__)
+        logger.debug("filtering with function %s", filter_function.__name__)
         r = filter_function(r)
 
     return r
@@ -639,11 +638,11 @@ def concatenate(objs, sort=False):
     data_list = []
     units = objs[0].units
     for a in objs:
-        assert (type(a) == obj_type)
-        assert (a.project == project)
-        assert (a.site == site)
-        assert (np.all(a.channels == channels))
-        assert (a.units == units)
+        assert type(a) == obj_type
+        assert a.project == project
+        assert a.site == site
+        assert np.all(a.channels == channels)
+        assert a.units == units
         start_time.append(a.start_time)
         end_time.append(a.end_time)
         sam_st_list.append(a.sample_start_time)
@@ -657,23 +656,24 @@ def concatenate(objs, sort=False):
         data_list.append(a.data)
 
     if integration_interval is not None:
-        integration_interval = \
-            np.concatenate(dt64.match_units(integration_interval), axis=1)
+        integration_interval = np.concatenate(dt64.match_units(integration_interval), axis=1)
 
     sample_start_time = np.concatenate(dt64.match_units(sam_st_list))
     sample_end_time = np.concatenate(dt64.match_units(sam_et_list))
-    return obj_type(project=project,
-                    site=site,
-                    channels=channels,
-                    start_time=np.min(start_time),
-                    end_time=np.max(end_time),
-                    sample_start_time=sample_start_time,
-                    sample_end_time=sample_end_time,
-                    integration_interval=integration_interval,
-                    nominal_cadence=np.max(cadence_list),
-                    data=np.concatenate(data_list, axis=1),
-                    units=units,
-                    sort=sort)
+    return obj_type(
+        project=project,
+        site=site,
+        channels=channels,
+        start_time=np.min(start_time),
+        end_time=np.max(end_time),
+        sample_start_time=sample_start_time,
+        sample_end_time=sample_end_time,
+        integration_interval=integration_interval,
+        nominal_cadence=np.max(cadence_list),
+        data=np.concatenate(data_list, axis=1),
+        units=units,
+        sort=sort,
+    )
 
 
 def parse_project_site_list(p_s_list, sort=False, wantdict=False):
@@ -682,18 +682,16 @@ def parse_project_site_list(p_s_list, sort=False, wantdict=False):
     site_list = []
     sites_found = {}
     for p_s in p_s_list:
-        m = re.match('^([a-z0-9_]+)(/([a-z0-9_]+))?$', p_s, re.IGNORECASE)
-        assert m is not None, \
-            'Not in form PROJECT or PROJECT/SITE'
+        m = re.match("^([a-z0-9_]+)(/([a-z0-9_]+))?$", p_s, re.IGNORECASE)
+        assert m is not None, "Not in form PROJECT or PROJECT/SITE"
         p = m.groups()[0].upper()
         if p not in projects:
             try:
-                logger.info('trying to import auroraplot.datasets.'
-                            + p.lower())
-                importlib.import_module('auroraplot.datasets.' + p.lower())
+                logger.info("trying to import auroraplot.datasets." + p.lower())
+                importlib.import_module("auroraplot.datasets." + p.lower())
             finally:
                 if p not in projects:
-                    raise Exception('Project %s is not known' % p)
+                    raise Exception("Project %s is not known" % p)
 
         if m.groups()[2] is None:
             # Given just 'PROJECT'
@@ -706,8 +704,7 @@ def parse_project_site_list(p_s_list, sort=False, wantdict=False):
         for s in sites:
             if s not in sites_found[p]:
                 # Not seen this project/site before
-                assert s in get_sites(p), \
-                    'Site %s/%s is not known' % (p, s)
+                assert s in get_sites(p), "Site %s/%s is not known" % (p, s)
                 sites_found[p][s] = True
                 project_list.append(p)
                 site_list.append(s)
@@ -738,12 +735,11 @@ def parse_archive_selection(selection, defaults={}):
 
 
 def download_url(url, prefix=__name__, temporary_file=True, dest=None):
-    logger.info('downloading ' + url)
+    logger.info("downloading " + url)
     # For selected schemes attempt to insert authentication
     # data from .netrc
     url_parts = urlparse(url)
-    if url_parts.scheme in ('ftp', 'http', 'https') \
-            and url_parts.netloc.find('@') == -1:
+    if url_parts.scheme in ("ftp", "http", "https") and url_parts.netloc.find("@") == -1:
         # No authentication so attempt to insert details from netrc
         auth = None
         try:
@@ -752,14 +748,14 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
         except IOError:
             pass  # File probably not found
         except netrc.NetrcParseError as e:
-            logger.warning(f'Ignoring netrc parse error: {e}')
+            logger.warning(f"Ignoring netrc parse error: {e}")
 
         if auth:
-            logger.debug('inserting authentication details into URL')
-            netloc = auth[0] + ':' + auth[2] + '@' + url_parts.hostname
+            logger.debug("inserting authentication details into URL")
+            netloc = auth[0] + ":" + auth[2] + "@" + url_parts.hostname
 
             if url_parts.port:
-                netloc += ':' + url_parts.port
+                netloc += ":" + url_parts.port
             url_parts2 = [url_parts[0], netloc]
             url_parts2.extend(url_parts[2:])
             url = urlunparse(url_parts2)
@@ -773,21 +769,19 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
         url_file = urlopen(url)
         http_result = url_file.getcode()
         if http_result and http_result != 200:
-            logger.info('could not access %s (%s)', url, http_result)
+            logger.info("could not access %s (%s)", url, http_result)
             return None
 
         if dest:
-            with smart_open(dest, 'wb') as dest_file:
+            with smart_open(dest, "wb") as dest_file:
                 shutil.copyfileobj(url_file, dest_file)
             return dest
 
         if temporary_file:
             # Have temporary file use the same suffix
-            suffix = ''.join(os.path.basename(url_parts.path).partition('.')[1:])
-            local_file = NamedTemporaryFile(prefix=prefix,
-                                            suffix=suffix,
-                                            delete=False)
-            logger.debug('saving to ' + local_file.name)
+            suffix = "".join(os.path.basename(url_parts.path).partition(".")[1:])
+            local_file = NamedTemporaryFile(prefix=prefix, suffix=suffix, delete=False)
+            logger.debug("saving to " + local_file.name)
             shutil.copyfileobj(url_file, local_file)
             local_file.close()
             return local_file.name
@@ -806,7 +800,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
 
 def wrap_degrees(angle_deg: Union[int, float, np.ndarray]) -> Union[float, np.ndarray]:
     """Wrap angle into 0 =< angle < 360"""
-    return (angle_deg - np.floor((angle_deg / 360)) * 360)
+    return angle_deg - np.floor((angle_deg / 360)) * 360
 
 
 def wrap_degrees_pm180(angle_deg: Union[int, float, np.ndarray]) -> Union[float, np.ndarray]:
@@ -819,26 +813,24 @@ try:
     import auroraplot_custom
 except ImportError:
     # No custom module
-    logger.debug('auroraplot_custom.py not found')
+    logger.debug("auroraplot_custom.py not found")
     auroraplot_custom = {}
 except KeyboardInterrupt:
     raise
 except Exception as exc:
     # Error loading custom module
-    logger.exception('Could not load custom module')
-    logger.error('Could not load custom module:' + str(exc))
+    logger.exception("Could not load custom module")
+    logger.error("Could not load custom module:" + str(exc))
     auroraplot_custom = {}
 
 # Warn if timezone not GMT/UTC. Test by comparing two identical times,
 # one with a timezone and one without. Repeat the test for a date six
 # months later since DST is in operation in July for N hemisphere and
 # January for S hemisphere.
-if (np.datetime64('2000-01-01T00:00:00') !=
-        np.datetime64('2000-01-01T00:00:00Z') or
-        np.datetime64('2000-07-01T00:00:00') !=
-        np.datetime64('2000-07-01T00:00:00Z')):
+if np.datetime64("2000-01-01T00:00:00") != np.datetime64("2000-01-01T00:00:00Z") or np.datetime64(
+    "2000-07-01T00:00:00"
+) != np.datetime64("2000-07-01T00:00:00Z"):
     # If this warning annoys you then set the timezone or use
     # warnings.filterwarnings() to ignore it.
-    message = 'Timezone is not UTC or GMT. Times defined without ' + \
-              'timezone information will use local timezone'
+    message = "Timezone is not UTC or GMT. Times defined without " + "timezone information will use local timezone"
     warnings.warn(message)

@@ -11,7 +11,7 @@ from auroraplot import wrap_degrees, wrap_degrees_pm180
 class TestDt64tools(unittest.TestCase):
     @staticmethod
     def get_angles(data_type) -> List:
-        a = [-720, -600, -480, -360, -240, -120, -180,  0, 120, 180, 240, 360, 480, 600, 720]
+        a = [-720, -600, -480, -360, -240, -120, -180, 0, 120, 180, 240, 360, 480, 600, 720]
         return [data_type(a) for a in a]
 
     def test_wrap_degrees(self):
