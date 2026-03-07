@@ -183,6 +183,21 @@ def to_dhms(ts: np.timedelta64) -> tuple[int, int, int, float]:
     return days, hours, minutes, seconds
 
 
+def to_ydhms(ts: np.timedelta64) -> tuple[int, int, int, int, float]:
+    if get_units(ts) == "Y":
+        return ts.astype("int"), 0, 0, 0, 0.0
+    else:
+        years = 0
+        days = int(ts / np.timedelta64(1, "D"))
+        ts -= np.timedelta64(days, "D")
+        hours = int(ts / np.timedelta64(1, "h"))
+        ts -= np.timedelta64(hours, "h")
+        minutes = int(ts / np.timedelta64(1, "m"))
+        ts -= np.timedelta64(minutes, "m")
+        seconds = float(ts / np.timedelta64(1, "s"))
+        return years, days, hours, minutes, seconds
+
+
 def dt64_to(t, to_unit, returnfloat=False):
     assert to_unit in time_units, "Unknown unit"
     assert to_unit in multipliers, "Only fixed value units supported"
@@ -205,6 +220,41 @@ def dt64_to(t, to_unit, returnfloat=False):
         else:
             # Possible loss of precision, no overflow
             return t.astype("int64") / int(np.round(to_mul / from_mul))
+
+
+def to_str(t: Union[np.datetime64, np.timedelta64]) -> str:
+    if isinstance(t, np.datetime64):
+        if get_units(t) in ["D", "W", "M", "Y"]:
+            return strftime(t, "%Y-%m-%d")
+        else:
+            return strftime(t, "%Y-%m-%dT%H:%M:%S")
+    elif isinstance(t, np.timedelta64):
+        zero = np.timedelta64(0, "Y" if get_units(t) == "Y" else "s")
+        if t < zero:
+            t = -t
+            sign = "-"
+        else:
+            sign = ""
+        r = []
+        y, d, h, m, s = to_ydhms(t)
+        if y:
+            r.append(f"{y}y")
+        if d:
+            r.append(f"{d}d")
+        if h:
+            r.append(f"{h}h")
+        if m:
+            r.append(f"{m}m")
+        if s:
+            # Only go down to ms precision
+            ms = int(1000 * s) - (1000 * int(s))
+            if ms:
+                r.append(f"{s:0.3f}s")
+            else:
+                r.append(f"{int(s)}s")
+        return sign + " ".join(r)
+    else:
+        raise TypeError("Unknown type")
 
 
 def isnat(x):
