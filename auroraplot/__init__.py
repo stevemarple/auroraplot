@@ -769,6 +769,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
     url_file = None
     local_file = None
     try:
+        logger.debug(f"Fetching URL {url}")
         url_file = urlopen(url)
         http_result = url_file.getcode()
         if http_result and http_result != 200:
