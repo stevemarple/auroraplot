@@ -12,7 +12,7 @@ def read(*parts):
     resulting file.  Assume UTF-8 encoding.
     """
     here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, *parts), 'rb', 'utf-8') as f:
+    with codecs.open(os.path.join(here, *parts), "rb", "utf-8") as f:
         return f.read()
 
 
@@ -22,43 +22,40 @@ def find_version(*file_paths):
     string inside.
     """
     version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-print('==================================')
-print(find_packages(exclude=['tests*']))
-print('==================================')
+
+print("==================================")
+print(find_packages(exclude=["tests*"]))
+print("==================================")
 
 setup(
-    name='auroraplot',
-    version=find_version('auroraplot/__init__.py'),
-    description='Analyse and plot space weather datasets.',
-    long_description=(read('README.rst') + '\n\n' +
-                      read('HISTORY.rst') + '\n\n' +
-                      read('AUTHORS.rst')),
-    url='https://github.com/stevemarple/auroraplot',
-    license='PSF',
-    author='Steve Marple',
-    author_email='s.marple@lancaster.ac.uk',
-    packages=find_packages(exclude=['tests*']),
-    install_requires=['matplotlib', 'numpy>=1.7', 'scipy', 'six'],
+    name="auroraplot",
+    version=find_version("auroraplot/__init__.py"),
+    description="Analyse and plot space weather datasets.",
+    long_description=(read("README.rst") + "\n\n" + read("HISTORY.rst") + "\n\n" + read("AUTHORS.rst")),
+    url="https://github.com/stevemarple/auroraplot",
+    license="PSF",
+    author="Steve Marple",
+    author_email="s.marple@lancaster.ac.uk",
+    packages=find_packages(exclude=["tests*"]),
+    install_requires=["matplotlib", "numpy>=1.7", "scipy", "six"],
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Education',
-        'Intended Audience :: Science/Research',
-        'Natural Language :: English',
-        'License :: OSI Approved :: Python Software Foundation License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Natural Language :: English",
+        "License :: OSI Approved :: Python Software Foundation License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.3",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    scripts=glob.glob('auroraplot/bin/*.py'),
+    scripts=glob.glob("auroraplot/bin/*.py"),
 )
-
