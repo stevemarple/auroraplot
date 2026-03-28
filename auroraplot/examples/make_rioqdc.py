@@ -96,7 +96,18 @@ def main():
     qdc = power_data.make_qdc(qdc_algorithm, cadence=qdc_cadence)
     print(qdc)
     pickle_save(qdc, save_dir / "qdc")
-    qdc.plot(channels=["50"], title="Fix me")
+
+    sgf_2h = auroraplot.filter.SavitzkyGolayFilter(
+        polyorder=3, window=np.timedelta64(7210, "s"), cadence=np.timedelta64(10, "s"), mode="wrap"
+    )
+    smoothed_qdc = sgf_2h(qdc)
+    print(smoothed_qdc)
+    pickle_save(smoothed_qdc, save_dir / "smoothed_qdc")
+
+    fh_qdc = plt.figure()
+    ah_qdc = fh_qdc.gca()
+    qdc.plot(channels=["50"], title="QDC comparison", axes=ah_qdc, label="Original")
+    smoothed_qdc.plot(channels=["50"], axes=ah_qdc, label="Savitzky-Golay filter 2h window", color="red")
     plt.show()
 
 
