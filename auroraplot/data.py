@@ -358,7 +358,7 @@ integration intv. : {self.integration_interval!r}
 
             'start_time', 'end_time': Output the start or end time
                 conforming to ISO8601 standard
-                ('%Y-%m-%dT%H:%M:%S+0000'). A custom format specifier
+                ('%Y-%m-%dT%H:%M:%S'). A custom format specifier
                 may be specified similar to the string format
                 function(), append a colon and then the format string
                 to 'start_time' or 'end_time' (e.g.,
@@ -414,7 +414,7 @@ integration intv. : {self.integration_interval!r}
                 if fmt2:
                     r = dt64.strftime(getattr(self, f), fmt2)
                 else:
-                    r = dt64.strftime(getattr(self, f), "%Y-%m-%dT%H:%M:%S+0000")
+                    r = dt64.strftime(getattr(self, f), "%Y-%m-%dT%H:%M:%S")
 
             elif f in ("project_lc", "site_lc"):
                 r = getattr(self, f.split("_")[0])

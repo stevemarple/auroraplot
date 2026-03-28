@@ -21,15 +21,15 @@ import auroraplot.datasets.samnet
 logging.basicConfig(level=getattr(logging, "WARN"))
 logger = logging.getLogger(__name__)
 
-st = np.datetime64("2010-01-01T00:00:00+0000")
-et = np.datetime64("2010-01-03T00:00:00+0000")
+st = np.datetime64("2010-01-01T00:00:00")
+et = np.datetime64("2010-01-03T00:00:00")
 
 mag_data = ap.load_data("SAMNET", "LAN1", "MagData", st, et, archive="5s")
 print(mag_data)
 
 
-st2 = np.datetime64("2013-03-17T00:00:00+0000")
-et2 = np.datetime64("2013-03-18T00:00:00+0000")
+st2 = np.datetime64("2013-03-17T00:00:00")
+et2 = np.datetime64("2013-03-18T00:00:00")
 
 # Load data from all SAMNET sites
 mdl = []

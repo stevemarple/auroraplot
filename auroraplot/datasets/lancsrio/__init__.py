@@ -37,8 +37,8 @@ sites = {
         "latitude": Decimal("69.1458"),
         "longitude": Decimal("16.0292"),
         "elevation": 10,  # Estimated
-        "start_time": np.datetime64("2006-01-17T00:00:00+0000", "s"),
-        "end_time": np.datetime64("2025-01-01T00:00:00+0000", "s"),
+        "start_time": np.datetime64("2006-01-17T00:00:00", "s"),
+        "end_time": np.datetime64("2025-01-01T00:00:00", "s"),
         "frequency": 38.2e6,
         "beams": make_channels_from_beam_count(50),  # 1-49: imaging beams; 50: widebeam
         "copyright": "Lancaster University",
@@ -51,7 +51,7 @@ sites = {
         "latitude": Decimal("69.1458"),
         "longitude": Decimal("16.0292"),
         "elevation": 10,  # Estimated
-        "start_time": np.datetime64("2025-10-01T00:00:00+0000", "s"),
+        "start_time": np.datetime64("2025-10-01T00:00:00", "s"),
         "end_time": None,
         "frequency": 30.0e6,
         "beams": make_channels_from_beam_count(1),  # Widebeam only
@@ -66,8 +66,8 @@ sites = {
         "latitude": 65.708105,
         "longitude": -17.369623,
         "elevation": 115,  # From site GNSS
-        "start_time": np.datetime64("2019-08-05T00:00:00+0000", "s"),
-        "end_time": None,  # np.datetime64('2026-01-01T00:00:00+0000', 's'),
+        "start_time": np.datetime64("2019-08-05T00:00:00", "s"),
+        "end_time": None,  # np.datetime64('2026-01-01T00:00:00', 's'),
         "frequency": 38.235e6,
         "beams": make_channels_from_beam_count(50),  # 1-49: imaging beams; 50: widebeam
         "copyright": "Lancaster University",
@@ -80,8 +80,8 @@ sites = {
         "latitude": Decimal("69.05"),
         "longitude": Decimal("20.79"),
         "elevation": 470,  # Estimated
-        "start_time": np.datetime64("1994-09-30T00:00:00+0000", "s"),
-        "end_time": np.datetime64("2026-01-01T00:00:00+0000", "s"),
+        "start_time": np.datetime64("1994-09-30T00:00:00", "s"),
+        "end_time": np.datetime64("2026-01-01T00:00:00", "s"),
         "frequency": 38.2e6,
         "beams": make_channels_from_beam_count(50),  # 1-49: imaging beams; 50: widebeam
         "copyright": "Lancaster University",

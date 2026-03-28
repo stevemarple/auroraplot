@@ -209,7 +209,7 @@ sites = {
                 },
             },
         },
-        "start_time": np.datetime64("2013-07-13T00:00Z"),
+        "start_time": np.datetime64("2013-07-13T00:00"),
         "end_time": None,  # Still operational
         "acknowledgement": {"short": "Steve Marple."},
     },
@@ -252,7 +252,7 @@ sites = {
                 },
             },
         },
-        "start_time": np.datetime64("2013-07-13T00:00Z"),
+        "start_time": np.datetime64("2013-07-13T00:00"),
         "end_time": None,  # Still operational
         "acknowledgement": {"short": "Steve Marple."},
     },

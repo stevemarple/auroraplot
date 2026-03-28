@@ -153,7 +153,7 @@ sites = {
         "latitude": 54.0,
         "longitude": -2.78,
         "elevation": 27,
-        "start_time": np.datetime64("2012-12-12T17:29Z"),
+        "start_time": np.datetime64("2012-12-12T17:29"),
         "end_time": None,  # Still operational
         "k_index_scale": 650e-9,  # Estimated
         "k_index_filter": None,
@@ -210,7 +210,7 @@ sites = {
         "latitude": 54.01,
         "longitude": -2.77,
         "elevation": 93,
-        "start_time": np.datetime64("2012-12-18T00:00Z"),
+        "start_time": np.datetime64("2012-12-18T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 650e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -223,8 +223,8 @@ sites = {
         "latitude": 53.569195,
         "longitude": -2.887264,
         "elevation": None,
-        "start_time": np.datetime64("2013-08-01T00:00Z"),
-        "end_time": np.datetime64("2017-04-14T00:00Z"),
+        "start_time": np.datetime64("2013-08-01T00:00"),
+        "end_time": np.datetime64("2017-04-14T00:00"),
         "k_index_scale": 650e-9,  # Estimated
         "license": cc3_by_nc_sa,
         "copyright": "Lancaster University.",
@@ -236,8 +236,8 @@ sites = {
         "latitude": 54.0,
         "longitude": -2.78,
         "elevation": 27,
-        "start_time": np.datetime64("2013-11-10T00:00Z"),
-        "end_time": np.datetime64("2017-08-03T00:00Z"),
+        "start_time": np.datetime64("2013-11-10T00:00"),
+        "end_time": np.datetime64("2017-08-03T00:00"),
         "k_index_scale": 650e-9,  # Estimated
         "license": cc3_by_nc_sa,
         "copyright": "Lancaster University.",
@@ -254,7 +254,7 @@ sites = {
         "latitude": 60.395869,
         "longitude": -1.351124000000027,
         "elevation": 11,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 1000e-9,  # Estimated, based on BGS Lerwick site
         "license": cc3_by_nc_sa,
@@ -266,7 +266,7 @@ sites = {
         "latitude": 59.25110830191925,
         "longitude": -2.5873320735991,
         "elevation": 16.366,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 950e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -278,7 +278,7 @@ sites = {
         "latitude": 56.62415194965067,
         "longitude": -6.068624798208475,
         "elevation": 43,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 850e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -290,7 +290,7 @@ sites = {
         "latitude": 54.543384,
         "longitude": -3.5610000000000355,
         "elevation": 132,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 680e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -303,7 +303,7 @@ sites = {
         "latitude": 53.381988,
         "longitude": -2.3597310000000107,
         "elevation": 68,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 600e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -315,7 +315,7 @@ sites = {
         "latitude": 53.029658,
         "longitude": -2.760221999999999,
         "elevation": 122,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 600e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -327,7 +327,7 @@ sites = {
         "latitude": 53.021899,
         "longitude": -1.7287959999999885,
         "elevation": 157,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 600e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -339,7 +339,7 @@ sites = {
         "latitude": 52.623806,
         "longitude": -1.9490200000000186,
         "elevation": 143,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 580e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -351,7 +351,7 @@ sites = {
         "latitude": 52.02851,
         "longitude": -3.2026879999999665,
         "elevation": 121,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 550e-9,  # Estimated
         "license": cc3_by_nc_sa,
@@ -364,7 +364,7 @@ sites = {
         "latitude": 51.260914,
         "longitude": 1.084820000000036,
         "elevation": 48,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 500e-9,  # Estimated, based on BGS Hartland site
         "license": cc3_by_nc_sa,
@@ -378,7 +378,7 @@ sites = {
         "latitude": 55 + (56.1 / 60),
         "longitude": -(4 + (2.2 / 60)),
         "elevation": 82,
-        "start_time": np.datetime64("2014-01-01T00:00:00+0000"),
+        "start_time": np.datetime64("2014-01-01T00:00:00"),
         "end_time": None,  # Still operational
         "url": "https://www.cumbernauld-weather.co.uk/",  # Provisional
         "k_index_scale": 750e-9,  # Estimated, based on BGS Eskdalemuir site
@@ -409,7 +409,7 @@ sites = {
         "latitude": 50.718414,
         "longitude": -3.537151,
         "elevation": np.nan,
-        "start_time": np.datetime64("2014-11-13T00:00:00+0000"),
+        "start_time": np.datetime64("2014-11-13T00:00:00"),
         "end_time": None,  # Still operational
         "url": "https://www.metoffice.gov.uk/",  # Provisional
         "k_index_scale": 500e-9,  # Estimated, based on BGS Hartland site
@@ -425,7 +425,7 @@ sites = {
         "latitude": Decimal("50.687911"),
         "longitude": Decimal("-3.219600"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2016-07-15T00:00:00+0000"),
+        "start_time": np.datetime64("2016-07-15T00:00:00"),
         "end_time": None,  # Still operational
         "url": "https://www.exeter.ac.uk/",  # Provisional
         "k_index_scale": 500e-9,  # Estimated, based on BGS Hartland site
@@ -440,7 +440,7 @@ sites = {
         "latitude": Decimal("59.853"),
         "longitude": Decimal("-1.276"),
         "elevation": 248,
-        "start_time": np.datetime64("2017-08-01T00:00Z"),
+        "start_time": np.datetime64("2017-08-01T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 1000e-9,  # From BGS Monthly Magnetic Bulletin value for Lerwick
         "license": cc3_by_nc_sa,

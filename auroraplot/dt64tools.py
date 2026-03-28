@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 time_label = "Time"
 date_label = "Date"
 
-epoch64_us = np.datetime64("1970-01-01T00:00:00Z", "us")
+epoch64_us = np.datetime64("1970-01-01T00:00:00", "us")
 epoch64_day = np.datetime64("1970-01-01T00:00:00", "D")
 
 time_units = ["as", "fs", "ps", "ns", "us", "ms", "s", "m", "h", "D", "W", "M", "Y"]

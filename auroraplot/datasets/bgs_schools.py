@@ -174,7 +174,7 @@ sites = {
         "latitude": Decimal("52.449967"),
         "longitude": Decimal("-1.928980"),
         "elevation": 27,
-        "start_time": np.datetime64("2017-07-10T00:00Z"),
+        "start_time": np.datetime64("2017-07-10T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 600e-9,  # Estimated
         "k_index_filter": None,
@@ -253,7 +253,7 @@ sites = {
         "latitude": Decimal("52.45"),
         "longitude": Decimal("-1.92"),
         "elevation": 27,
-        "start_time": np.datetime64("2017-07-10T00:00Z"),
+        "start_time": np.datetime64("2017-07-10T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 600e-9,  # Estimated
         "k_index_filter": None,
@@ -332,7 +332,7 @@ sites = {
         "latitude": Decimal("54.01"),
         "longitude": Decimal("-2.77"),
         "elevation": 93,
-        "start_time": np.datetime64("2015-10-19T00:00Z"),
+        "start_time": np.datetime64("2015-10-19T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 650e-9,  # Estimated
         "k_index_filter": None,
@@ -411,7 +411,7 @@ sites = {
         "latitude": Decimal("55.980"),
         "longitude": Decimal("-4.583"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2016-11-22T00:00:00Z"),
+        "start_time": np.datetime64("2016-11-22T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 750e-9,  # Estimated
         "k_index_filter": None,
@@ -493,7 +493,7 @@ sites = {
         "latitude": Decimal("57.426"),
         "longitude": Decimal("-7.360"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2016-11-22T00:00:00Z"),
+        "start_time": np.datetime64("2016-11-22T00:00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 800e-9,  # Estimated
         "k_index_filter": None,
@@ -573,7 +573,7 @@ sites = {
         "latitude": Decimal("55.94"),
         "longitude": Decimal("-3.47"),
         "elevation": 245,
-        "start_time": np.datetime64("2016-06-02T00:00Z"),
+        "start_time": np.datetime64("2016-06-02T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": 750e-9,  # Estimated
         "k_index_filter": None,
@@ -653,7 +653,7 @@ sites = {
         "latitude": Decimal("52.6316"),
         "longitude": Decimal("1.30042"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2016-08-16T12:30Z"),
+        "start_time": np.datetime64("2016-08-16T12:30"),
         "end_time": None,  # Still operational
         "k_index_scale": 580e-9,  # Estimated
         "k_index_filter": None,
@@ -734,7 +734,7 @@ sites = {
         "latitude": Decimal("52.4809"),
         "longitude": Decimal("-0.46904"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2016-08-15T15:30Z"),
+        "start_time": np.datetime64("2016-08-15T15:30"),
         "end_time": None,  # Still operational
         "k_index_scale": 560e-9,  # Estimated
         "k_index_filter": None,
@@ -814,7 +814,7 @@ sites = {
         "latitude": Decimal("-45.8"),
         "longitude": Decimal("170.5"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2017-04-20T00:00Z"),
+        "start_time": np.datetime64("2017-04-20T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": None,  # No idea!
         "k_index_filter": None,
@@ -894,7 +894,7 @@ sites = {
         "latitude": Decimal("50.768"),
         "longitude": Decimal("0.267"),
         "elevation": np.nan,
-        "start_time": np.datetime64("2017-04-20T00:00Z"),
+        "start_time": np.datetime64("2017-04-20T00:00"),
         "end_time": None,  # Still operational
         "k_index_scale": None,  # No idea!
         "k_index_filter": None,

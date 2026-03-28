@@ -10,7 +10,7 @@ import auroraplot.magdata
 import auroraplot.datasets.aurorawatchnet
 
 plt.close("all")
-t = np.datetime64("2013-09-01T00:00:00+0000")
+t = np.datetime64("2013-09-01T00:00:00")
 qdc = ap.magdata.load_qdc("AWN", "LAN1", t)
 
 qdc.plot()
