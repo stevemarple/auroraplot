@@ -1,0 +1,84 @@
+[project]
+name = "auroraplot"
+dynamic = ["version"]
+
+authors = [
+    { name = "Steve Marple", email = "stevemarple@gmail.com" },
+]
+description = "Analyze and plot space weather datasets"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy >= 2.4.2",
+    "requests >= 2.33.0",
+    "scipy >= 1.17.1",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+#[project.scripts]
+#ble-decoder = "locoaware.ble_decoder:main"
+#convert-device-id = "locoaware.convert_device_id:main"
+
+[project.urls]
+Homepage = "https://github.com/stevemarple/auroraplot"
+Issues = "https://github.com/stevemarple/auroraplot/issues"
+
+[build-system]
+requires = [
+    "hatchling >= 1.26",
+    "versioningit",
+]
+build-backend = "hatchling.build"
+
+[build.hooks.vcs]
+version-file = "src/auroraplot/_version.py"
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.hatch.build]
+artifacts = [
+    "src/auroraplot/_version.py",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "bin/*.py",
+    "src/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/auroraplot",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.versioningit]
+
+[tool.versioningit.vcs]
+match = [
+    "v*",
+]
+
+[tool.versioningit.write]
+file = "src/auroraplot/_version.py"
