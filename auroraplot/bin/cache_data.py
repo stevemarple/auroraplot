@@ -2,22 +2,16 @@
 
 import argparse
 import os
-import time
 import logging
 import numpy as np
 import shutil
+import sys
 import traceback
-
-from urllib.parse import quote
 from urllib.parse import urlparse
-from urllib.parse import urlunparse
-from urllib.request import urlopen
 
 import auroraplot as ap
-import auroraplot.magdata
 import auroraplot.dt64tools as dt64
-import auroraplot.datasets.aurorawatchnet
-import auroraplot.datasets.samnet
+from auroraplot.datasets import *  # noqa
 
 
 logger = logging.getLogger(__name__)
@@ -31,210 +25,211 @@ if not os.environ.has_key('TZ') or \
         logger.error(e)
         pass
 
-# Define command line arguments
-parser = \
-    argparse.ArgumentParser(description='Create/update local data cache')
 
-parser.add_argument('-a', '--archive',
-                    action='append',
-                    nargs=2,
-                    help='Source data archive for project or site',
-                    metavar=('PROJECT[/SITE]', 'ARCHIVE'))
-parser.add_argument('--dataset',
-                    nargs='+',
-                    help='Import additional dataset(s)',
-                    metavar='MODULE')
-parser.add_argument('-n', '--dry-run',
-                    action='store_true',
-                    help='Dry run, copy but do not save')
-parser.add_argument('-s', '--start-time',
-                    default='today',
-                    help='Start time for data transfer (inclusive)',
-                    metavar='DATETIME')
-parser.add_argument('-e', '--end-time',
-                    help='End time for data transfer (exclusive)',
-                    metavar='DATETIME')
-parser.add_argument('--overwrite',
-                    action='store_true',
-                    help='Overwrite existing files')
-parser.add_argument('--raise-all',
-                    action='store_true',
-                    help='Raise all exceptions, do not continue on error')
-parser.add_argument('--log-level',
-                    choices=['debug', 'info', 'warning', 'error', 'critical'],
-                    default='warning',
-                    help='Control how much detail is printed',
-                    metavar='LEVEL')
-parser.add_argument('--log-format',
-                    # default='%(levelname)s:%(message)s',
-                    help='Set format of log messages',
-                    metavar='FORMAT')
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Create/update local data cache')
 
-parser.add_argument('project_site',
-                    nargs='+',
-                    metavar="PROJECT/SITE")
+    parser.add_argument('-a', '--archive',
+                        action='append',
+                        nargs=2,
+                        help='Source data archive for project or site',
+                        metavar=('PROJECT[/SITE]', 'ARCHIVE'))
+    parser.add_argument('--dataset',
+                        nargs='+',
+                        help='Import additional dataset(s)',
+                        metavar='MODULE')
+    parser.add_argument('-n', '--dry-run',
+                        action='store_true',
+                        help='Dry run, copy but do not save')
+    parser.add_argument('-s', '--start-time',
+                        default='today',
+                        help='Start time for data transfer (inclusive)',
+                        metavar='DATETIME')
+    parser.add_argument('-e', '--end-time',
+                        help='End time for data transfer (exclusive)',
+                        metavar='DATETIME')
+    parser.add_argument('--overwrite',
+                        action='store_true',
+                        help='Overwrite existing files')
+    parser.add_argument('--raise-all',
+                        action='store_true',
+                        help='Raise all exceptions, do not continue on error')
+    parser.add_argument('--log-level',
+                        choices=['debug', 'info', 'warning', 'error', 'critical'],
+                        default='warning',
+                        help='Control how much detail is printed',
+                        metavar='LEVEL')
+    parser.add_argument('--log-format',
+                        # default='%(levelname)s:%(message)s',
+                        help='Set format of log messages',
+                        metavar='FORMAT')
 
-args = parser.parse_args()
-if __name__ == '__main__':
+    parser.add_argument('project_site',
+                        nargs='+',
+                        metavar="PROJECT/SITE")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
     d = dict(level=getattr(logging, args.log_level.upper()))
     if args.log_format:
         d['format'] = args.log_format
     logging.basicConfig(**d)
 
-if args.dataset:
-    for ds in args.dataset:
-        new_module = 'auroraplot.datasets.' + ds
-        try:
-            __import__(new_module)
-        except Exception as e:
-            logger.error('Could not import ' + new_module + ': ' + str(e))
-            raise
+    if args.dataset:
+        for ds in args.dataset:
+            new_module = 'auroraplot.datasets.' + ds
+            try:
+                __import__(new_module)
+            except Exception as e:
+                logger.error('Could not import ' + new_module + ': ' + str(e))
+                raise
 
-            # Parse and process start and end times. If end time not given use
-# start time plus 1 day.
-day = np.timedelta64(1, 'D')
-st = dt64.parse_datetime64(args.start_time, 'D')
-if args.end_time is None:
-    et = st + day
-else:
-    try:
-        # Parse as date
-        et = dt64.parse_datetime64(args.end_time, 'us')
-    except ValueError as e:
+                # Parse and process start and end times. If end time not given use
+    # start time plus 1 day.
+    day = np.timedelta64(1, 'D')
+    st = dt64.parse_datetime64(args.start_time, 'D')
+    if args.end_time is None:
+        et = st + day
+    else:
         try:
+            # Parse as date
+            et = dt64.parse_datetime64(args.end_time, 'us')
+        except ValueError:
             # Parse as a set of duration values
             et = st + np.timedelta64(0, 'us')
             et_words = args.end_time.split()
             assert len(et_words) % 2 == 0, 'Need even number of words'
             for n in range(0, len(et_words), 2):
-                et += np.timedelta64(float(et_words[n]), et_words[n + 1])
-        except:
-            raise
-    except:
-        raise
+                et += np.timedelta64(int(et_words[n]), et_words[n + 1])
 
-project_list, site_list = ap.parse_project_site_list(args.project_site)
+    project_list, site_list = ap.parse_project_site_list(args.project_site)
 
-# Process --archive options for source data
-if args.archive:
-    archive = ap.parse_archive_selection(args.archive)
-else:
-    archive = {}
-
-for n in range(len(project_list)):
-    project = project_list[n]
-    site = site_list[n]
-
-    # Get archive to use for data
-    if project in archive and site in archive[project]:
-        archive = archive[project][site]
+    # Process --archive options for source data
+    if args.archive:
+        archive = ap.parse_archive_selection(args.archive)
     else:
-        archive = None
+        archive = {}
 
-    dest_an, dest_ai = ap.get_archive_info(project, site, 'MagData',
-                                           archive=archive)
+    for n in range(len(project_list)):
+        project = project_list[n]
+        site = site_list[n]
 
-    src_an, src_ai = ap.get_archive_info(project, site, 'MagData',
-                                         archive='original_' + dest_an)
-    src_path = src_ai['path']
-    dest_path = dest_ai['path']
-    print('src_ai ' + src_an)
-    print(repr(src_ai))
-    print('dest_ai ' + dest_an)
-    print(repr(dest_ai))
+        # Get archive to use for data
+        if project in archive and site in archive[project]:
+            archive = archive[project][site]
+        else:
+            archive = None
 
-    # Tune start/end times to avoid requesting data outside of
-    # operational period
-    site_st = ap.get_site_info(project, site, 'start_time')
-    if site_st is None or site_st < st:
-        site_st = st
-    else:
-        site_st = dt64.floor(site_st, day)
-    site_st = dt64.floor(site_st, src_ai['duration'])
+        dest_an, dest_ai = ap.get_archive_info(project, site, 'MagData',
+                                               archive=archive)
 
-    site_et = ap.get_site_info(project, site, 'end_time')
-    if site_et is None or site_et > et:
-        site_et = et
-    else:
-        site_et = dt64.ceil(site_et, day)
-    site_et = dt64.ceil(site_et, src_ai['duration'])
+        src_an, src_ai = ap.get_archive_info(project, site, 'MagData',
+                                             archive='original_' + dest_an)
+        src_path = src_ai['path']
+        dest_path = dest_ai['path']
+        print('src_ai ' + src_an)
+        print(repr(src_ai))
+        print('dest_ai ' + dest_an)
+        print(repr(dest_ai))
 
-    logger.info('Processing %s/%s %s', project, site, dt64.
-                fmt_dt64_range(site_st, site_et))
-    for t in dt64.dt64_range(site_st, site_et, src_ai['duration']):
-        file_name = None
-        temp_file_name = None
-        try:
-            if hasattr(dest_path, '__call__'):
-                # Function: call it with relevant information to get
-                # the dest_path
-                dest_file_name = dest_path(t,
-                                           project=project,
-                                           site=site,
-                                           data_type=data_type,
-                                           archive=dest_an,
-                                           channels=channels)
-            else:
-                dest_file_name = dt64.strftime(t, dest_path)
+        # Tune start/end times to avoid requesting data outside of
+        # operational period
+        site_st = ap.get_site_info(project, site, 'start_time')
+        if site_st is None or site_st < st:
+            site_st = st
+        else:
+            site_st = dt64.floor(site_st, day)
+        site_st = dt64.floor(site_st, src_ai['duration'])
 
-            url_parts = urlparse(dest_file_name)
-            if url_parts.scheme in ('ftp', 'http', 'https'):
-                raise Exception('Cannot store to a remote location')
-            elif url_parts.scheme == 'file':
-                dest_file_name = url_parts.path
+        site_et = ap.get_site_info(project, site, 'end_time')
+        if site_et is None or site_et > et:
+            site_et = et
+        else:
+            site_et = dt64.ceil(site_et, day)
+        site_et = dt64.ceil(site_et, src_ai['duration'])
 
-            if os.path.exists(dest_file_name) and not args.overwrite:
-                logger.info('%s already exists', dest_file_name)
-                continue
+        logger.info('Processing %s/%s %s', project, site, dt64.
+                    fmt_dt64_range(site_st, site_et))
+        for t in dt64.dt64_range(site_st, site_et, src_ai['duration']):
+            file_name = None
+            temp_file_name = None
+            try:
+                if hasattr(dest_path, '__call__'):
+                    # Function: call it with relevant information to get
+                    # the dest_path
+                    dest_file_name = dest_path(t,
+                                               project=project,
+                                               site=site,
+                                               data_type=data_type,
+                                               archive=dest_an,
+                                               channels=channels)
+                else:
+                    dest_file_name = dt64.strftime(t, dest_path)
 
-            if hasattr(src_path, '__call__'):
-                # Function: call it with relevant information to get
-                # the src_path
-                file_name = src_path(t,
-                                     project=project,
-                                     site=site,
-                                     data_type=data_type,
-                                     archive=src_an,
-                                     channels=channels)
-            else:
-                file_name = dt64.strftime(t, src_path)
+                url_parts = urlparse(dest_file_name)
+                if url_parts.scheme in ('ftp', 'http', 'https'):
+                    raise Exception('Cannot store to a remote location')
+                elif url_parts.scheme == 'file':
+                    dest_file_name = url_parts.path
 
-            url_parts = urlparse(file_name)
-            if url_parts.scheme in ('ftp', 'http', 'https'):
-                file_name = ap.download_url(file_name)
-                if file_name is None:
+                if os.path.exists(dest_file_name) and not args.overwrite:
+                    logger.info('%s already exists', dest_file_name)
                     continue
-                temp_file_name = file_name
-            elif url_parts.scheme == 'file':
-                file_name = url_parts.path
 
-            if not os.path.exists(file_name):
-                logger.info('missing file %s', file_name)
-                continue
+                if hasattr(src_path, '__call__'):
+                    # Function: call it with relevant information to get
+                    # the src_path
+                    file_name = src_path(t,
+                                         project=project,
+                                         site=site,
+                                         data_type=data_type,
+                                         archive=src_an,
+                                         channels=channels)
+                else:
+                    file_name = dt64.strftime(t, src_path)
 
-            if os.path.exists(dest_file_name) and \
-                    os.path.samefile(file_name, dest_file_name):
-                raise Exception('Refusing to overwrite source file')
+                url_parts = urlparse(file_name)
+                if url_parts.scheme in ('ftp', 'http', 'https'):
+                    file_name = ap.download_url(file_name)
+                    if file_name is None:
+                        continue
+                    temp_file_name = file_name
+                elif url_parts.scheme == 'file':
+                    file_name = url_parts.path
 
-            logger.info('creating %s', dest_file_name)
-            if not args.dry_run:
-                d = os.path.dirname(dest_file_name)
-                if not os.path.exists(d):
-                    logger.debug('creating directory %s', d)
-                    os.makedirs(d)
-                shutil.copyfile(file_name, dest_file_name)
+                if not os.path.exists(file_name):
+                    logger.info('missing file %s', file_name)
+                    continue
 
-        except Exception as e:
-            if args.raise_all:
-                raise
-            if file_name is not None:
-                logger.info('Could not cache ' + file_name)
-            logger.debug(str(e))
-            logger.debug(traceback.format_exc())
+                if os.path.exists(dest_file_name) and \
+                        os.path.samefile(file_name, dest_file_name):
+                    raise Exception('Refusing to overwrite source file')
 
-        finally:
-            if temp_file_name:
-                logger.debug('deleting temporary file ' + temp_file_name)
-                os.unlink(temp_file_name)
+                logger.info('creating %s', dest_file_name)
+                if not args.dry_run:
+                    d = os.path.dirname(dest_file_name)
+                    if not os.path.exists(d):
+                        logger.debug('creating directory %s', d)
+                        os.makedirs(d)
+                    shutil.copyfile(file_name, dest_file_name)
 
-logger.info('Done')
+            except Exception as e:
+                if args.raise_all:
+                    raise
+                if file_name is not None:
+                    logger.info('Could not cache ' + file_name)
+                logger.debug(str(e))
+                logger.debug(traceback.format_exc())
+
+            finally:
+                if temp_file_name:
+                    logger.debug('deleting temporary file ' + temp_file_name)
+                    os.unlink(temp_file_name)
+
+    logger.info('Done')
+
+
+if __name__ == '__main__':
+    sys.exit(main())
