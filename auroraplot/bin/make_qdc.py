@@ -24,11 +24,7 @@ import auroraplot.datasets.bgs_schools
 import auroraplot.datasets.samnet
 
 logger = logging.getLogger(__name__)
-
-
-
-assert os.environ.get('TZ') == 'UTC', \
-    'TZ environment variable must be set to UTC'
+ap.set_timezone()
 
 
 # ==========================================================================
