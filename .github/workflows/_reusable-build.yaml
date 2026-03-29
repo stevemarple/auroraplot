@@ -1,0 +1,57 @@
+name: Reusable auroraplot build
+
+on:
+  workflow_call:
+    inputs:
+      publish_to_github:
+        description: 'Publish artifacts to GitHub'
+        type: boolean
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout repositories
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Create python virtual environment
+        run: |
+          python -m venv ~/venv.d/auroraplot
+          ~/venv.d/auroraplot/bin/pip install black[jupyter] build hatch hatchling versioningit
+          ~/venv.d/auroraplot/bin/pip install .
+
+      - name: Check code formatting with Black
+        run: ~/venv.d/auroraplot/bin/black --check --line-length 120 examples src tests
+
+      - name: Run tests
+        run: |
+          ~/venv.d/auroraplot/bin/python -m unittest discover -s tests
+
+      - name: Create packages
+        run: |
+          ~/venv.d/auroraplot/bin/python -m build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: Packages
+          path: |
+            dist/*
+
+      - name: Publish release
+        if: ${{ inputs.publish_to_github }}
+        run: |
+          # shellcheck disable=SC2046
+          gh release create "${GITHUB_REF_NAME}" -t "${GITHUB_REF_NAME}" --generate-notes "$(find dist -iname '*.tar.gz' -printf '%p#Python package (sdist)')" "$(find dist -iname '*.whl' -printf '%p#Python package (wheel)')"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
