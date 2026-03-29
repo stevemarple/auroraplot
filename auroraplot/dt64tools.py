@@ -554,29 +554,15 @@ def fmt_dt64_range(st, et):
             return strftime(st, "%Y-%m-%d %H:%M - ") + strftime(et, "%Y-%m-%d %H:%M")
 
 
-def _add_timezone(s, timezone="+0000"):
-    """
-    Add timezone if one is not present.
-
-    The default timezone used is +0000 (UTC)
-    """
-    if s.endswith("Z") or re.search(r"[+-]\d{2}(:?\d{2})?$", s):
-        # Already has timezone indicator (+00, +0000, +00:00)
-        return s
-    else:
-        # Default to UTC
-        return s + timezone
-
-
-def parse_datetime64(s, prec, now=None, timezone="+0000"):
+def parse_datetime64(s, precision, now=None):
     """
     Parse a numpy.datetime64() time, also accepting "yesterday",
-    "today", "now" and "tomorrow", with the result given to the
+    "today", "now", "tomorrow", and "overmorrow", with the result given to the
     specified precision.
 
     s: string to parse
 
-    prec: precision of the returned time. Must be hour ("h") or better.
+    precision: precision of the returned time. Must be hour ("h") or better.
 
     Returns: numpy.datetime64 value.
     """
@@ -589,19 +575,19 @@ def parse_datetime64(s, prec, now=None, timezone="+0000"):
 
     s = s.strip()
     if s.startswith("yesterday"):
-        t = floor(now, day) - day + parse_timedelta64(" ".join(s.split()[1:]), prec)
+        t = floor(now, day) - day + parse_timedelta64(" ".join(s.split()[1:]), precision)
     elif s.startswith("today"):
-        t = floor(now, day) + parse_timedelta64(" ".join(s.split()[1:]), prec)
+        t = floor(now, day) + parse_timedelta64(" ".join(s.split()[1:]), precision)
     elif s.startswith("now"):
-        t = now + parse_timedelta64(" ".join(s.split()[1:]), prec)
+        t = now + parse_timedelta64(" ".join(s.split()[1:]), precision)
     elif s.startswith("tomorrow"):
-        t = floor(now, day) + day + parse_timedelta64(" ".join(s.split()[1:]), prec)
+        t = floor(now, day) + day + parse_timedelta64(" ".join(s.split()[1:]), precision)
     elif s.startswith("overmorrow"):
-        t = floor(now, day) + 2 * day + parse_timedelta64(" ".join(s.split()[1:]), prec)
+        t = floor(now, day) + 2 * day + parse_timedelta64(" ".join(s.split()[1:]), precision)
     else:
-        t = np.datetime64(_add_timezone(s, timezone))
+        t = np.datetime64(s)
 
-    return astype(t, prec)
+    return astype(t, precision)
 
 
 def parse_timedelta64(s, prec):
