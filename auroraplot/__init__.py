@@ -14,6 +14,7 @@ import shutil
 import time
 import traceback
 import warnings
+from typing import Union
 
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
@@ -787,6 +788,16 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
             url_file.close()
 
     return None
+
+
+def wrap_degrees(angle_deg: Union[int, float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Wrap angle into 0 =< angle < 360"""
+    return (angle_deg - np.floor((angle_deg / 360)) * 360)
+
+
+def wrap_degrees_pm180(angle_deg: Union[int, float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Wrap angle into -180 < angle <= 180"""
+    return wrap_degrees(angle_deg + 180) - 180
 
 
 # Initialise
