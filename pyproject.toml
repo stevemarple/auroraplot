@@ -9,9 +9,11 @@ description = "Analyze and plot space weather datasets"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "matplotlib >= 3.6.3",
     "numpy >= 2.4.2",
     "requests >= 2.33.0",
     "scipy >= 1.17.1",
+    "urllib3 >= 1.26.12",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -20,9 +22,12 @@ classifiers = [
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
 
-#[project.scripts]
-#ble-decoder = "locoaware.ble_decoder:main"
-#convert-device-id = "locoaware.convert_device_id:main"
+[project.scripts]
+cache_data = "auroraplot.scripts.cache_data:main"
+make_qdc = "auroraplot.scripts.make_qdc:main"
+make_realtime_baseline = "auroraplot.scripts.make_realtime_baseline:main"
+plot_data = "auroraplot.scripts.plot_data:main"
+plot_mag_data = "auroraplot.scripts.plot_mag_data:main"
 
 [project.urls]
 Homepage = "https://github.com/stevemarple/auroraplot"
@@ -71,7 +76,7 @@ packages = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "README.md" = "doc/README.md"
-"examples" = "doc/examples"
+"examples" = "auroraplot/examples"
 
 [tool.hatch.version]
 source = "versioningit"
