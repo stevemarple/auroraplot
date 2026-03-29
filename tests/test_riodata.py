@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-import numpy as np
 
-import auroraplot.datasets.lancsrio
-import auroraplot.riodata
+import numpy as np
+from pathlib import Path
+import sys
 import unittest
+
+sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
+
+import auroraplot.datasets.lancsrio  # noqa
+import auroraplot.riodata  # noqa
 
 
 class TestRioData(unittest.TestCase):
@@ -23,7 +28,7 @@ class TestRioData(unittest.TestCase):
         expected_results = [
             # test date, expected start time, expected load start time, expected load end time.
             # If it seems odd that the load start time was before the instrument started operating that is because
-            # initially QDcs were created using 14 days of data (it was solar minimum). Only later did using 18 days
+            # initially QDcs were created using 14 days of data (it was solar minimum). Later using 18 days
             # become normal practice.
             [
                 np.datetime64("1994-09-02"),
