@@ -27,10 +27,10 @@ import auroraplot.datasets.dtu
 # For each project set the archive from which data is loaded 
 archives = {
     'AWN': 'realtime',
-#    'SAMNET': '5s',
+    #  'SAMNET': '5s',
     'DTU': 'hz_10s',
     'UIT': 'hz_10s',
-    }
+}
 
 # Define command line arguments
 parser = \
@@ -147,13 +147,11 @@ for n_s in n_s_list:
     kwargs = {}
     if project in archives:
         kwargs['archive'] = archives[project]
-    md = ap.load_data(project, site, 'MagData', st, et, **kwargs)
-                      # archive=archives[project])
+    md = ap.load_data(project, site, 'MagData', st, et, **kwargs)  # archive=archives[project])
     # Is result is None then no data available, so ignore those
     # results.
     qdc = None
-    if (md is not None and
-        'MagQDC' in ap.get_site_info(project, site, 'data_types')):
+    if md is not None and 'MagQDC' in ap.get_site_info(project, site, 'data_types'):
         md = md.mark_missing_data(cadence=2*md.nominal_cadence)
         qdc_info = ap.magdata.load_qdc(project, site, dt64.mean(st, et),
                                        tries=args.tries, full_output=True)
@@ -173,8 +171,7 @@ for n_s in n_s_list:
 
         # Have axis labelled with date or time, as
         # appropriate. Indicate UT.
-        ax.xaxis.set_major_formatter( \
-            dt64.Datetime64Formatter(autolabel='%s (UT)'))
+        ax.xaxis.set_major_formatter(dt64.Datetime64Formatter(autolabel='%s (UT)'))
 
         if qdc is None:
             ax.text(np.mean(ax.get_xlim()), np.mean(ax.get_ylim()), 
@@ -191,4 +188,3 @@ for n_s in n_s_list:
 
 # Make the figure(s) visible.
 plt.show()
-

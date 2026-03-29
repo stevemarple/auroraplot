@@ -1,6 +1,5 @@
 """Analyse and plot space weather datasets."""
 
-
 __author__ = 'Steve Marple'
 __version__ = '0.7.1'
 __license__ = 'PSF'
@@ -46,7 +45,6 @@ except ImportError:
     from scipy.stats import nanmedian
     from scipy.stats import nanstd
 
-
 logger = logging.getLogger(__name__)
 
 # Don't warn about NaNs
@@ -57,19 +55,19 @@ plot_datetime_epoch = os.getenv('AURORAPLOT_PLOT_DATETIME_EPOCH')
 plot_timedelta_units = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_UNITS')
 plot_timedelta_epoch = os.getenv('AURORAPLOT_PLOT_TIMEDELTA_EPOCH')
 
+epoch64_us = np.datetime64('1970-01-01T00:00:00Z', 'us')
 
-epoch64_us = np.datetime64('1970-01-01T00:00:00Z','us')
-
-projects = { }
+projects = {}
 
 NaN = float('nan')
 NaT = np.timedelta64('NaT', 'us')
 
 colors = ['b', 'g', 'r']
 
+
 # def safe_eval(s):
-#     '''Like eval but without allowing the user to access builtin
-#     functions or locals.'''
+#     """Like eval but without allowing the user to access builtin
+#     functions or locals."""
 #     return eval(s, {'__builtins__': None}, {})
 
 
@@ -77,24 +75,24 @@ colors = ['b', 'g', 'r']
 #
 
 # def copy_dict(d, *keys):
-#     '''Make a copy of only the `keys` from dictionary `d`.'''
+#     """Make a copy of only the `keys` from dictionary `d`."""
 #     return {key: d[key] for key in keys}
 
 
 def add_project(project_name, project_info):
-    '''
+    """
     Helper function for datasets to register project and site
     information. To allow local customisation of file location a call
     to the "add_project_hook" function in the auroraplot_custom module
     is loaded. This function, if it exists, should modify the
     registered site information to suit local policy.
-    '''
+    """
 
     if project_name in projects:
         projects[project_name].update(project_info)
     else:
         projects[project_name] = project_info
-        
+
     if hasattr(auroraplot_custom, 'add_project_hook'):
         auroraplot_custom.add_project_hook(project_name=project_name)
 
@@ -102,7 +100,7 @@ def add_project(project_name, project_info):
 def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
               fmt='%(adj)g%(sep)s%(prefix)s%(unit)s%(dir)s', ascii=True,
               wantstr=True):
-    '''Return a string formatted with its units
+    """Return a string formatted with its units
     val: data value
     unit: SI or other unit
     prefix: standard prefix to use with unit, or None for automatic selection
@@ -111,28 +109,28 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     fmt: format specifier
     ascii: if true use u as prefix for micro
     wantstr: if true return the formatted string, else return dict of info
-    '''
-    
-    is_degrees = unit in (six.u('deg'), 
-                          six.u('degrees'), 
+    """
+
+    is_degrees = unit in (six.u('deg'),
+                          six.u('degrees'),
                           six.u('\N{DEGREE SIGN}'))
-    prefixes = {'y': -24, # yocto
-                'z': -21, # zepto
-                'a': -18, # atto
-                'f': -15, # femto 
-                'p': -12, # pico
+    prefixes = {'y': -24,  # yocto
+                'z': -21,  # zepto
+                'a': -18,  # atto
+                'f': -15,  # femto
+                'p': -12,  # pico
                 'n': -9,  # nano
-                six.u('\N{MICRO SIGN}'): -6, # micro
+                six.u('\N{MICRO SIGN}'): -6,  # micro
                 'u': -6,  # micro
                 'm': -3,  # milli
                 'c': -2,  # centi
                 'd': -1,  # deci
                 '': 0,
                 'da': 1,  # deca
-                'h': 2,   # hecto
-                'k': 3,   # kilo
-                'M': 6,   # mega
-                'G': 9,   # giga
+                'h': 2,  # hecto
+                'k': 3,  # kilo
+                'M': 6,  # mega
+                'G': 9,  # giga
                 'T': 12,  # tera
                 'P': 15,  # peta
                 'E': 18,  # exa
@@ -148,7 +146,7 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         if sep is None:
             d['sep'] = ''
         if prefix is None:
-            d['prefix'] = '' # Do not calculate automatically
+            d['prefix'] = ''  # Do not calculate automatically
             d['mul'] = 1
             # prefix = ''
     # elif unicode(unit) == six.u('\N{DEGREE SIGN}C'):
@@ -157,8 +155,8 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
         if sep is None:
             d['sep'] = ' '
         if prefix is None:
-            d['prefix'] = '' # Do not calculate automatically
-            d['mul'] = 1   
+            d['prefix'] = ''  # Do not calculate automatically
+            d['mul'] = 1
     elif sep is None:
         d['sep'] = ' '
 
@@ -167,8 +165,8 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
             logmul = 0
         elif np.isfinite(val) and val != 0:
             log10_val = np.log10(val)
-            logmul = int(np.floor(np.abs(np.spacing(log10_val)) + 
-                                  (log10_val) / 3.0) * 3)
+            logmul = int(np.floor(np.abs(np.spacing(log10_val)) +
+                                  log10_val / 3.0) * 3)
         else:
             logmul = 1
 
@@ -194,7 +192,7 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
     if is_degrees and degrees_dir is not None:
         # include N/S or other direction indicator
         if val >= 0:
-            d['dir'] = degrees_dir[0] 
+            d['dir'] = degrees_dir[0]
         else:
             d['dir'] = degrees_dir[1]
             d['adj'] = -d['adj']
@@ -215,6 +213,7 @@ def str_units(val, unit, prefix=None, sep=None, degrees_dir=None,
 def format_project_site(project, site):
     return project + ' / ' + site
 
+
 def get_projects():
     """Return list of known projects.
 
@@ -226,6 +225,7 @@ def get_projects():
             r.append(p)
     return r
 
+
 def get_project_info(project, info=None):
     if project not in projects:
         raise KeyError('Unknown project (%s)' % project)
@@ -236,10 +236,12 @@ def get_project_info(project, info=None):
     else:
         return projects[project][info]
 
+
 def get_sites(project):
     if project not in projects:
         raise KeyError('Unknown project (%s)' % project)
     return projects[project]['sites'].keys()
+
 
 def has_site_info(project, site, info):
     # Sanity checking
@@ -263,11 +265,13 @@ def get_site_info(project, site, info=None):
     else:
         return projects[project]['sites'][site][info]
 
+
 def get_data_types(project, site):
     """
     Returns a list of data_types for a particular project and site.
     """
     return list(get_site_info(project, site)['data_types'].keys())
+
 
 def get_archives(project, site, data_type):
     """
@@ -276,7 +280,7 @@ def get_archives(project, site, data_type):
     Returns tuple containing a list of archive names, and a string
     naming the default archive.
     """
-    
+
     site_info = get_site_info(project, site)
     if data_type not in site_info['data_types']:
         raise KeyError('Unknown data_type (%s)' % data_type)
@@ -293,22 +297,22 @@ def get_archives(project, site, data_type):
 
 
 def get_archive_info(project, site, data_type, archive=None):
-    '''
+    """
     Get relevant details about a data archive
-    
+
     project: name of the project (upper case)
-    
+
     site: site abbreviation (upper case)
-    
+
     data_type: class name of the data type to be loaded
-    
-    The following optional parameters are recognised: 
-    
+
+    The following optional parameters are recognised:
+
     archive: name of the archive. Required if more than one archive is
         present and there is not an archive called "default".
 
 
-    Returns: 
+    Returns:
         A tuple containing the archive name and a dictionary of
         archive details. This includes the following keys:
 
@@ -319,7 +323,7 @@ def get_archive_info(project, site, data_type, archive=None):
         converter: function reference for converting a file into a
             single object of type data_type. Used by load_data(). Not
             required if load_function is included.
-    
+
         load_function: function reference used to load data. If not
             None then load_data() hands over the entire data loading
             process to this function.
@@ -329,7 +333,7 @@ def get_archive_info(project, site, data_type, archive=None):
             when plotting.
 
         format: name of the data file format (optional).
-    '''
+    """
     # Sanity checking
     if project not in projects:
         raise Exception('Unknown project (%s)' % project)
@@ -338,7 +342,7 @@ def get_archive_info(project, site, data_type, archive=None):
     site_info = get_site_info(project, site)
     if data_type not in site_info['data_types']:
         raise ValueError('Unknown data_type (%s)' % data_type)
-    
+
     if archive is None or archive == 'default':
         if len(site_info['data_types'][data_type]) == 1:
             # Only one archive, so default is implicit
@@ -355,10 +359,11 @@ def get_archive_info(project, site, data_type, archive=None):
 
     if archive not in site_info['data_types'][data_type]:
         raise ValueError('Unknown archive (%s) for %s' \
-                             % (archive, format_project_site(project, site)))
+                         % (archive, format_project_site(project, site)))
 
     # archive data
     return (archive, site_info['data_types'][data_type][archive])
+
 
 def is_operational(project, site, t1=None, t2=None, now=None):
     if now is None:
@@ -382,12 +387,11 @@ def is_operational(project, site, t1=None, t2=None, now=None):
     return False
 
 
-
-def load_data(project, 
-              site, 
-              data_type, 
-              start_time, 
-              end_time, 
+def load_data(project,
+              site,
+              data_type,
+              start_time,
+              end_time,
               archive=None,
               channels=None,
               path=None,
@@ -398,7 +402,7 @@ def load_data(project,
               filter_function=None,
               use_cache=None,
               now=None):
-    '''Load data. 
+    """Load data.
     project: name of the project (upper case)
 
     site: site abbreviation (upper case)
@@ -408,9 +412,9 @@ def load_data(project,
     start_time: start time (inclusive) of the data set
 
     end_time: end time (exclusive) of the data set
-    
-    The following optional parameters are recognised: 
-    
+
+    The following optional parameters are recognised:
+
     archive: name of the archive. Required if more than one archive is
         present and there is not an archive called "default".
 
@@ -423,9 +427,9 @@ def load_data(project,
 
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
-        
-    '''
-    archive, ad = get_archive_info(project, site, data_type, 
+
+    """
+    archive, ad = get_archive_info(project, site, data_type,
                                    archive=archive)
     cad_units = dt64.get_units(ad['nominal_cadence'])
     start_time = start_time.astype('datetime64[%s]' % cad_units)
@@ -451,14 +455,14 @@ def load_data(project,
 
     if filter_function is None:
         filter_function = ad.get('filter_function')
-        
+
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project, 
-                             site, 
-                             data_type, 
-                             start_time, 
+        return load_function(project,
+                             site,
+                             data_type,
+                             start_time,
                              end_time,
                              archive=archive,
                              channels=channels,
@@ -468,10 +472,9 @@ def load_data(project,
                              aggregate=aggregate,
                              filter_function=filter_function)
 
-
     data = []
-    for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']), 
-                             end_time, 
+    for t in dt64.dt64_range(dt64.floor(start_time, ad['duration']),
+                             end_time,
                              ad['duration']):
         # A local copy of the file to be loaded, possibly an
         # uncompressed version.
@@ -480,7 +483,7 @@ def load_data(project,
         t2 = t + ad['duration']
         if hasattr(path, '__call__'):
             # Function: call it with relevant information to get the path
-            file_name = path(t, project=project, site=site, 
+            file_name = path(t, project=project, site=site,
                              data_type=data_type, archive=archive,
                              channels=channels)
         else:
@@ -523,7 +526,7 @@ def load_data(project,
 
         elif url_parts.scheme == 'file':
             file_name = url_parts.path
-            
+
         if not os.path.exists(file_name):
             logger.info('missing file %s', file_name)
             continue
@@ -534,7 +537,7 @@ def load_data(project,
             gunzipped_file = None
             try:
                 logger.debug('unzipping %s', file_name)
-                gunzipped_file = NamedTemporaryFile(prefix=__name__, 
+                gunzipped_file = NamedTemporaryFile(prefix=__name__,
                                                     delete=False)
                 with gzip.open(file_name, 'rb') as gzip_file:
                     shutil.copyfileobj(gzip_file, gunzipped_file)
@@ -546,7 +549,7 @@ def load_data(project,
                     gunzipped_file.close()
                     os.unlink(gunzipped_file.name)
                     gunzipped_file = None
-                continue    
+                continue
             finally:
                 if temp_file_name:
                     logger.debug('deleting temporary file ' + temp_file_name)
@@ -554,24 +557,24 @@ def load_data(project,
 
             temp_file_name = gunzipped_file.name
             file_name = temp_file_name
-            
+
         logger.info('loading ' + file_name)
 
         try:
-            tmp = ad['load_converter'](file_name, 
+            tmp = ad['load_converter'](file_name,
                                        ad,
                                        project=project,
-                                       site=site, 
-                                       data_type=data_type, 
-                                       start_time=t, 
-                                       end_time=t2, 
+                                       site=site,
+                                       data_type=data_type,
+                                       start_time=t,
+                                       end_time=t2,
                                        channels=channels,
                                        archive=archive,
                                        path=path,
                                        raise_all=raise_all)
             if tmp is not None:
                 if cadence is not None and cadence <= ad['duration']:
-                    tmp.set_cadence(cadence, 
+                    tmp.set_cadence(cadence,
                                     aggregate=aggregate,
                                     inplace=True)
                 data.append(tmp)
@@ -593,15 +596,15 @@ def load_data(project,
         return None
 
     r = concatenate(data, sort=False)
-    r.extract(inplace=True, 
-              start_time=start_time, 
-              end_time=end_time, 
+    r.extract(inplace=True,
+              start_time=start_time,
+              end_time=end_time,
               channels=channels)
 
     if cadence is not None and cadence > ad['duration']:
         # cadence too large to apply on results of loading each file, 
         # apply to combined object
-        r.set_cadence(cadence, 
+        r.set_cadence(cadence,
                       aggregate=aggregate,
                       inplace=True)
 
@@ -619,18 +622,18 @@ def concatenate(objs, sort=False):
     channels = objs[0].channels
     start_time = []
     end_time = []
-    sam_st_list = [] # sample start times
-    sam_et_list = [] # sample start times
+    sam_st_list = []  # sample start times
+    sam_et_list = []  # sample start times
     integration_interval = []
     cadence_list = []
     data_list = []
     units = objs[0].units
     for a in objs:
-        assert(type(a) == obj_type)
-        assert(a.project == project)
-        assert(a.site == site)
-        assert(np.all(a.channels == channels))
-        assert(a.units == units)
+        assert (type(a) == obj_type)
+        assert (a.project == project)
+        assert (a.site == site)
+        assert (np.all(a.channels == channels))
+        assert (a.units == units)
         start_time.append(a.start_time)
         end_time.append(a.end_time)
         sam_st_list.append(a.sample_start_time)
@@ -646,7 +649,7 @@ def concatenate(objs, sort=False):
     if integration_interval is not None:
         integration_interval = \
             np.concatenate(dt64.match_units(integration_interval), axis=1)
-    
+
     sample_start_time = np.concatenate(dt64.match_units(sam_st_list))
     sample_end_time = np.concatenate(dt64.match_units(sam_et_list))
     return obj_type(project=project,
@@ -664,7 +667,7 @@ def concatenate(objs, sort=False):
 
 
 def parse_project_site_list(p_s_list, sort=False, wantdict=False):
-    '''Parse an array of strings to unique project/site lists'''
+    """Parse an array of strings to unique project/site lists"""
     project_list = []
     site_list = []
     sites_found = {}
@@ -675,7 +678,7 @@ def parse_project_site_list(p_s_list, sort=False, wantdict=False):
         p = m.groups()[0].upper()
         if p not in projects:
             try:
-                logger.info('trying to import auroraplot.datasets.' 
+                logger.info('trying to import auroraplot.datasets.'
                             + p.lower())
                 importlib.import_module('auroraplot.datasets.' + p.lower())
             finally:
@@ -687,7 +690,7 @@ def parse_project_site_list(p_s_list, sort=False, wantdict=False):
             sites = get_sites(p)
         else:
             sites = [m.groups()[2].upper()]
-        
+
         if p not in sites_found:
             sites_found[p] = {}
         for s in sites:
@@ -719,7 +722,7 @@ def parse_archive_selection(selection, defaults={}):
         p_list, s_list = parse_project_site_list([proj_site])
         for n in range(len(p_list)):
             if p_list[n] not in r:
-                r[p_list[n]] = { }
+                r[p_list[n]] = {}
             r[p_list[n]][s_list[n]] = arch
     return r
 
@@ -737,7 +740,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
             n = netrc.netrc()
             auth = n.authenticators(url_parts.hostname)
         except IOError:
-            pass # File probably not found
+            pass  # File probably not found
         except netrc.NetrcParseError as e:
             logger.warning(f'Ignoring netrc parse error: {e}')
 
@@ -778,7 +781,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
             local_file.close()
             return local_file.name
 
-    except:
+    except Exception:
         logger.debug(traceback.format_exc())
         if local_file:
             os.unlink(local_file.name)
@@ -786,7 +789,7 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
     finally:
         if url_file:
             url_file.close()
-            
+
     return None
 
 
@@ -808,12 +811,12 @@ except Exception as e:
 # one with a timezone and one without. Repeat the test for a date six
 # months later since DST is in operation in July for N hemisphere and
 # January for S hemisphere.
-if (np.datetime64('2000-01-01T00:00:00') != 
-    np.datetime64('2000-01-01T00:00:00Z') or 
-    np.datetime64('2000-07-01T00:00:00') != 
-    np.datetime64('2000-07-01T00:00:00Z')):
+if (np.datetime64('2000-01-01T00:00:00') !=
+        np.datetime64('2000-01-01T00:00:00Z') or
+        np.datetime64('2000-07-01T00:00:00') !=
+        np.datetime64('2000-07-01T00:00:00Z')):
     # If this warning annoys you then set the timezone or use
     # warnings.filterwarnings() to ignore it.
     message = 'Timezone is not UTC or GMT. Times defined without ' + \
-        'timezone information will use local timezone'
+              'timezone information will use local timezone'
     warnings.warn(message)

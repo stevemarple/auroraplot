@@ -30,9 +30,9 @@ for f in ('.uit_password', 'uit_password.txt'):
 path_fstr = 'http://flux.phys.uit.no/cgi-bin/mkascii.cgi?site=%(uit_site)s&year=%%Y&month=%%m&day=%%d&res=%(uit_res)s&pwd=%(uit_password)s&format=iagaUnix&comps=%(uit_comp)s&getdata=+Get+Data+'
 
 
-def load_iaga_2000(file_name, archive_data, 
-                      project, site, data_type, channels, start_time, 
-                      end_time, **kwargs):
+def load_iaga_2000(file_name, archive_data,
+                   project, site, data_type, channels, start_time,
+                   end_time, **kwargs):
     assert data_type == 'MagData', 'Illegal data_type'
     iaga = ap.magdata.load_iaga_2000(file_name)
     data = []
@@ -60,8 +60,7 @@ def load_iaga_2000(file_name, archive_data,
                 start_time=start_time,
                 end_time=end_time,
                 sample_start_time=iaga['sample_time'], 
-                sample_end_time=iaga['sample_time'] + \
-                    archive_data['nominal_cadence'],
+                sample_end_time=iaga['sample_time'] + archive_data['nominal_cadence'],
                 integration_interval=None,
                 nominal_cadence=archive_data['nominal_cadence'],
                 data=data,
@@ -84,6 +83,7 @@ def uit_path(t, project, site, data_type, archive, channels):
     fstr = path_fstr % d
     return dt64.strftime(t, fstr)
 
+
 sites = {
     'AMK': {
         'location': 'Ammassalik, Greenland',
@@ -102,7 +102,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'amk1f',
@@ -114,10 +114,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # AMK
+                },
+            }
+        },
+    },  # AMK
     'AND': {
         'location': 'Andenes, Norway',
         'latitude': 69.30,
@@ -135,7 +135,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'and1a',
@@ -147,10 +147,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # AND
+                },
+            }
+        },
+    },  # AND
     'BJN': {
         'location': 'Bjørnøya, Svalbard',
         'latitude': 74.50,
@@ -168,7 +168,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'bjn1a',
@@ -180,10 +180,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # BJN
+                },
+            }
+        },
+    },  # BJN
     'DOB': {
         'location': 'Dombås, Norway',
         'latitude': 62.07,
@@ -201,7 +201,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'dob1a',
@@ -213,10 +213,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # DOB
+                },
+            }
+        },
+    },  # DOB
     'DON': {
         'location': 'Dønna, Norway',
         'latitude': 66.11,
@@ -234,7 +234,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'don1a',
@@ -246,10 +246,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # DON
+                },
+            }
+        },
+    },  # DON
     'HOP': {
         'location': 'Hopen, Svalbard',
         'latitude': 76.51,
@@ -267,7 +267,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'hop1a',
@@ -279,10 +279,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # HOP
+                },
+            }
+        },
+    },  # HOP
     'JCK': {
         'location': 'Jäckvik, Sweden',
         'latitude': 66.40,
@@ -300,7 +300,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'jck1a',
@@ -312,10 +312,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # JCK
+                },
+            }
+        },
+    },  # JCK
     'KAR': {
         'location': 'Karmøy, Norway',
         'latitude': 59.21,
@@ -333,7 +333,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'kar1a',
@@ -345,10 +345,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # KAR
+                },
+            }
+        },
+    },  # KAR
     'LYR': {
         'location': 'Longyearbyen, Svalbard',
         'latitude': 78.2,
@@ -366,7 +366,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'lyr2a',
@@ -378,10 +378,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # LYR
+                },
+            }
+        },
+    },  # LYR
     'NAL': {
         'location': 'Ny Ålesund, Svalbard',
         'latitude': 78.92,
@@ -399,7 +399,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'nal1a',
@@ -411,10 +411,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # NAL
+                },
+            }
+        },
+    },  # NAL
     'NOR': {
         'location': 'Nordkapp, Norway',
         'latitude': 71.09,
@@ -435,7 +435,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'nor1a',
@@ -450,10 +450,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # NOR
+                },
+            }
+        },
+    },  # NOR
     'RVK': {
         'location': 'Rørvik, Norway',
         'latitude': 64.95,
@@ -471,7 +471,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'rvk1a',
@@ -483,10 +483,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # RVK
+                },
+            }
+        },
+    },  # RVK
     'SCO': {
         'location': 'Scoresbysund, Greenland',
         'latitude': 70.48,
@@ -504,7 +504,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'sco8f',
@@ -516,10 +516,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # SCO
+                },
+            }
+        },
+    },  # SCO
     'SOL': {
         'location': 'Solund, Norway',
         'latitude': 61.08,
@@ -540,7 +540,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'sol1a',
@@ -555,10 +555,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # SOL
+                },
+            }
+        },
+    },  # SOL
     'SOR': {
         'location': 'Sørøya, Norway',
         'latitude': 70.54,
@@ -576,7 +576,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'sor1a',
@@ -588,10 +588,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # SOR
+                },
+            }
+        },
+    },  # SOR
     'TDC': {
         'location': 'Tristan da Cunha',
         'latitude': -37.07,
@@ -609,7 +609,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'tdc4f',
@@ -621,10 +621,10 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # TDC
+                },
+            }
+        },
+    },  # TDC
     'TRO': {
         'location': 'Tromsø, Norway',
         'latitude': 69.66,
@@ -642,7 +642,7 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
+                },
                 'hz_10s': {
                     'channels': np.array(['H', 'Z']),
                     'uit_site': 'tro2a',
@@ -654,12 +654,11 @@ sites = {
                     'load_converter': load_iaga_2000,
                     'nominal_cadence': np.timedelta64(10, 's'),
                     'units': 'T',
-                    },
-                }
-            },
-        }, # TRO
-    }
-
+                },
+            }
+        },
+    },  # TRO
+}
 
 for s in sites:
     site_lc = s.lower()
@@ -690,7 +689,7 @@ for s in sites:
         'timestamp_method': 'YMD',
         'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
         'data_multiplier': 1000000000,  # Store as nT values
-#        # Information for making the data files
+        #        # Information for making the data files
         'qdc_fit_duration': np.timedelta64(10, 'D'),
         'realtime_qdc': True,
     }
@@ -715,7 +714,6 @@ for s in sites:
     }
     sites[s]['data_types']['MagQDC']['default'] = 'qdc_xyz_10s'
 
-    
 project = {
     'name': 'Tromsø Geophysical Observatory Magnetometer Network',
     'abbreviation': 'UIT',
@@ -724,6 +722,3 @@ project = {
 }
 
 ap.add_project('UIT', project)
-
-
-

@@ -15,9 +15,9 @@ import auroraplot.datasets.aurorawatchnet as awn
 data_dir = '/data/aurorawatchnet'
 
 
-def load_cloud_data(file_name, archive_data, 
-                       project, site, data_type, channels, start_time, 
-                       end_time, data_cols, **kwargs):
+def load_cloud_data(file_name, archive_data,
+                    project, site, data_type, channels, start_time,
+                    end_time, data_cols, **kwargs):
     # data_type_info = { }
     try:
         if file_name.startswith('/'):
@@ -26,29 +26,25 @@ def load_cloud_data(file_name, archive_data,
             uh = urllib2.urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = ap.epoch64_us + \
-                (np.timedelta64(1, 's') * data[0])
+            sample_start_time = ap.epoch64_us + (np.timedelta64(1, 's') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1, 's')
-            integration_interval = np.ones([len(channels), 
-                                            len(sample_start_time)],
-                                            dtype='m8[us]')
+            integration_interval = np.ones([len(channels), len(sample_start_time)], dtype='m8[us]')
             data = data[data_cols]
             # if data_type_info[data_type]['data_check']:
             #     data = data_type_info[data_type]['data_check'](data)
-            r = globals()[data_type]( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            r = globals()[data_type](project=project,
+                                     site=site,
+                                     channels=channels,
+                                     start_time=start_time,
+                                     end_time=end_time,
+                                     sample_start_time=sample_start_time,
+                                     sample_end_time=sample_end_time,
+                                     integration_interval=integration_interval,
+                                     nominal_cadence=archive_data['nominal_cadence'],
+                                     data=data,
+                                     units=archive_data['units'],
+                                     sort=True)
             return r
 
         except Exception as e:
@@ -65,18 +61,19 @@ def load_cloud_data(file_name, archive_data,
     return None
 
 
-def load_humidity_data(file_name, archive_data, 
-                          project, site, data_type, channels, start_time, 
-                          end_time, **kwargs):
-    return load_cloud_data(file_name, archive_data, 
-                              project, site, data_type, channels, 
-                              start_time, end_time, 
-                              data_cols=[4], **kwargs)
+def load_humidity_data(file_name, archive_data,
+                       project, site, data_type, channels, start_time,
+                       end_time, **kwargs):
+    return load_cloud_data(file_name, archive_data,
+                           project, site, data_type, channels,
+                           start_time, end_time,
+                           data_cols=[4], **kwargs)
 
-def load_temperature_data(file_name, archive_data, 
-                             project, site, data_type, channels, start_time, 
-                             end_time, **kwargs):
-    awn_channels = np.array(['Sensor temperature', # Mag sensor
+
+def load_temperature_data(file_name, archive_data,
+                          project, site, data_type, channels, start_time,
+                          end_time, **kwargs):
+    awn_channels = np.array(['Sensor temperature',  # Mag sensor
                              'System temperature'])
     extra_channels = np.array(['Detector temperature',
                                'Sky temperature',
@@ -90,27 +87,25 @@ def load_temperature_data(file_name, archive_data,
         elif channels[n] in extra_channels:
             cidx_b.append(n)
 
-
     assert len(cidx_a) + len(cidx_b) == chan_array.size
-    
 
     if len(cidx_a):
         awn_file_name = file_name.replace('_cloud.txt', '.txt')
         a = load_cloud_data(awn_file_name,
-                               archive_data, 
-                               project, site, data_type, 
-                               chan_array[cidx_a],
-                               start_time, end_time, 
-                               data_cols=[5], **kwargs)
+                            archive_data,
+                            project, site, data_type,
+                            chan_array[cidx_a],
+                            start_time, end_time,
+                            data_cols=[5], **kwargs)
     else:
         a = None
     
     if len(cidx_b):
-        b = load_cloud_data(file_name, archive_data, 
-                               project, site, data_type, 
-                               chan_array[cidx_b],
-                               start_time, end_time, 
-                               data_cols=[1,2,3], **kwargs)
+        b = load_cloud_data(file_name, archive_data,
+                            project, site, data_type,
+                            chan_array[cidx_b],
+                            start_time, end_time,
+                            data_cols=[1, 2, 3], **kwargs)
         if a is None:
             return b
         else:
@@ -172,6 +167,7 @@ def load_temperature_data(file_name, archive_data,
     else:
         return a
 
+
 sites = {
     'TEST2': {
         'location': 'Lancaster, UK',
@@ -217,7 +213,7 @@ sites = {
                 },
             },
         'start_time': np.datetime64('2013-07-13T00:00Z'),
-        'end_time': None, # Still operational
+        'end_time': None,  # Still operational
         'acknowledgement': {'short': 'Steve Marple.'},
         },
     
@@ -265,7 +261,7 @@ sites = {
                 },
             },
         'start_time': np.datetime64('2013-07-13T00:00Z'),
-        'end_time': None, # Still operational
+        'end_time': None,  # Still operational
         'acknowledgement': {'short': 'Steve Marple.'},
         },
     

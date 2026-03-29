@@ -30,50 +30,45 @@ base_url = 'http://spears.lancs.ac.uk/data/samnet/'
 
 sam_channels = ['H', 'E', 'Z']
 
-def load_samnet_data(file_name, archive_data, 
-                        project, site, data_type, channels, start_time, 
-                        end_time, **kwargs):
 
+def load_samnet_data(file_name, archive_data,
+                     project, site, data_type, channels, start_time,
+                     end_time, **kwargs):
     chan_tup = tuple(archive_data['channels'])
     col_idx = []
     for c in channels:
         col_idx.append(chan_tup.index(c))
-    nominal_cadence_s = (archive_data['nominal_cadence'] / 
+    nominal_cadence_s = (archive_data['nominal_cadence'] /
                          np.timedelta64(1000000, 'us'))
     try:
         try:
             conv = lambda s: (s.strip().startswith('9999.9') and np.nan) \
-                or float(s.strip())
+                             or float(s.strip())
             comments = ap.get_site_info(project, site, 'samnet_code')[0]
-            data = np.loadtxt(file_name, 
-                              unpack=True, 
+            data = np.loadtxt(file_name,
+                              unpack=True,
                               converters={0: conv, 1: conv, 2: conv},
                               comments=comments)
             # TODO: check correct settings for sample start/end time
             # for both 1s and 5s data. IIRC 1s is offset and 5s is
             # centred.
-            sample_start_time = np.arange(0, 86400, nominal_cadence_s)\
-                .astype('m8[s]') + start_time
-            sample_end_time = sample_start_time + \
-                archive_data['nominal_cadence']
-                
+            sample_start_time = np.arange(0, 86400, nominal_cadence_s).astype('m8[s]') + start_time
+            sample_end_time = sample_start_time + archive_data['nominal_cadence']
             data = data[col_idx] * 1e-9
-            integration_interval = np.ones_like(data) \
-                * archive_data['nominal_cadence']
+            integration_interval = np.ones_like(data) * archive_data['nominal_cadence']
 
-            r = MagData( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            r = MagData(project=project,
+                        site=site,
+                        channels=channels,
+                        start_time=start_time,
+                        end_time=end_time,
+                        sample_start_time=sample_start_time,
+                        sample_end_time=sample_end_time,
+                        integration_interval=integration_interval,
+                        nominal_cadence=archive_data['nominal_cadence'],
+                        data=data,
+                        units=archive_data['units'],
+                        sort=True)
             return r
 
         except Exception as e:
@@ -92,20 +87,20 @@ def load_samnet_data(file_name, archive_data,
     return None
 
 
-def load_new_samnet_data(file_name, archive_data, 
-                            project, site, data_type, channels, start_time, 
-                            end_time, **kwargs):
-    '''Convert new-style SAMNET data to match standard data type
+def load_new_samnet_data(file_name, archive_data,
+                         project, site, data_type, channels, start_time,
+                         end_time, **kwargs):
+    """Convert new-style SAMNET data to match standard data type
 
     archive: name of archive from which data was loaded
     archive_info: archive metadata
-    '''
+    """
 
     def to_tesla(x):
         if x == '9999999.999':
             return np.nan
         else:
-            return float(x)/1e9
+            return float(x) / 1e9
 
     try:
         if os.path.exists(file_name):
@@ -114,47 +109,43 @@ def load_new_samnet_data(file_name, archive_data,
             req = requests.get(file_name, stream=True)
             fh = req.raw
         try:
-            file_data = np.loadtxt(fh, unpack=True, 
+            file_data = np.loadtxt(fh, unpack=True,
                                    comments='%',
-                                   converters={3: to_tesla, 
-                                               4: to_tesla, 
+                                   converters={3: to_tesla,
+                                               4: to_tesla,
                                                5: to_tesla})
             assert np.all(file_data[0] >= 0) and np.all(file_data[0] < 24)
             assert np.all(file_data[1] >= 0) and np.all(file_data[1] < 60)
             assert np.all(file_data[2] >= 0) and np.all(file_data[2] < 60)
 
             data = file_data[3:]
-            sample_start_time = start_time + \
-                + file_data[0].astype('m8[h]') \
-                + file_data[1].astype('m8[m]') \
-                + file_data[2].astype('m8[s]') \
-                + np.timedelta64(0, 'us')
+            sample_start_time = (start_time +
+                                 file_data[0].astype('m8[h]') +
+                                 file_data[1].astype('m8[m]') +
+                                 file_data[2].astype('m8[s]') +
+                                 np.timedelta64(0, 'us'))
 
             # end time and integration interval are guesstimates
-            sample_end_time = sample_start_time \
-                + archive_data['nominal_cadence']
-            integration_interval = np.tile(archive_data['nominal_cadence'],
-                                           data.shape)
-            r = MagData( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            sample_end_time = sample_start_time + archive_data['nominal_cadence']
+            integration_interval = np.tile(archive_data['nominal_cadence'], data.shape)
+            r = MagData(project=project,
+                        site=site,
+                        channels=channels,
+                        start_time=start_time,
+                        end_time=end_time,
+                        sample_start_time=sample_start_time,
+                        sample_end_time=sample_end_time,
+                        integration_interval=integration_interval,
+                        nominal_cadence=archive_data['nominal_cadence'],
+                        data=data,
+                        units=archive_data['units'],
+                        sort=True)
             return r
 
         except Exception as e:
             logger.info('Could not read ' + file_name)
             logger.debug(str(e))
             logger.debug(traceback.format_exc())
-
 
         finally:
             fh.close()
@@ -166,11 +157,11 @@ def load_new_samnet_data(file_name, archive_data,
     return None
 
 
-def load_new_samnet_temp_volt_data(file_name, archive_data, 
-                                      project, site, data_type, 
-                                      channels, start_time, 
-                                      end_time, **kwargs):
-    '''Convert new-style SAMNET temperate/voltage data to standard type'''
+def load_new_samnet_temp_volt_data(file_name, archive_data,
+                                   project, site, data_type,
+                                   channels, start_time,
+                                   end_time, **kwargs):
+    """Convert new-style SAMNET temperate/voltage data to standard type"""
 
     def to_float(x):
         if x == '999999.99':
@@ -190,47 +181,44 @@ def load_new_samnet_temp_volt_data(file_name, archive_data,
         else:
             uh = urlopen(file_name)
         try:
-            file_data = np.loadtxt(uh, unpack=True, 
+            file_data = np.loadtxt(uh, unpack=True,
                                    comments='%',
-                                   converters={2: to_float, 
-                                               3: to_float, 
-                                               4: to_float, 
+                                   converters={2: to_float,
+                                               3: to_float,
+                                               4: to_float,
                                                5: to_float,
                                                6: to_float,
                                                7: to_cpu_temp})
             assert np.all(file_data[0] >= 0) and np.all(file_data[0] < 24)
             assert np.all(file_data[1] >= 0) and np.all(file_data[1] < 60)
-            
+
             if data_type == 'TemperatureData':
                 # Keep channel order same as for AuroraWatchNet
-                data = file_data[[3,2,4,7]]
+                data = file_data[[3, 2, 4, 7]]
                 class_type = TemperatureData
             elif data_type == 'VoltageData':
-                data = file_data[[5]] # aux not used
+                data = file_data[[5]]  # aux not used
                 class_type = VoltageData
-            sample_start_time = start_time + \
-                + file_data[0].astype('m8[h]') \
-                + file_data[1].astype('m8[m]') \
-                + np.timedelta64(0, 'us')
+            sample_start_time = (start_time +
+                                 file_data[0].astype('m8[h]') +
+                                 file_data[1].astype('m8[m]') +
+                                 np.timedelta64(0, 'us'))
 
             # end time and integration interval are guesstimates
-            sample_end_time = sample_start_time \
-                + archive_data['nominal_cadence']
-            integration_interval = np.tile(archive_data['nominal_cadence'],
-                                           data.shape)
-            r = class_type( \
-                project=project,
-                site=site,
-                channels=channels,
-                start_time=start_time,
-                end_time=end_time,
-                sample_start_time=sample_start_time, 
-                sample_end_time=sample_end_time,
-                integration_interval=integration_interval,
-                nominal_cadence=archive_data['nominal_cadence'],
-                data=data,
-                units=archive_data['units'],
-                sort=True)
+            sample_end_time = sample_start_time + archive_data['nominal_cadence']
+            integration_interval = np.tile(archive_data['nominal_cadence'], data.shape)
+            r = class_type(project=project,
+                           site=site,
+                           channels=channels,
+                           start_time=start_time,
+                           end_time=end_time,
+                           sample_start_time=sample_start_time,
+                           sample_end_time=sample_end_time,
+                           integration_interval=integration_interval,
+                           nominal_cadence=archive_data['nominal_cadence'],
+                           data=data,
+                           units=archive_data['units'],
+                           sort=True)
             return r
 
         except Exception as e:
@@ -248,11 +236,10 @@ def load_new_samnet_temp_volt_data(file_name, archive_data,
     return None
 
 
-
 def load_rt_data(file_name, archive_data,
-                    project, site, data_type, channels, start_time, 
-                    end_time, **kwargs):
-    assert(data_type == 'MagData')
+                 project, site, data_type, channels, start_time,
+                 end_time, **kwargs):
+    assert (data_type == 'MagData')
     try:
         chan_tup = tuple(archive_data['channels'])
         col_idx = []
@@ -266,22 +253,19 @@ def load_rt_data(file_name, archive_data,
 
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = start_time \
-                + (np.timedelta64(1000000, 'us') * data[0])
+            sample_start_time = start_time + (np.timedelta64(1000000, 'us') * data[0])
             sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
-            integration_interval = np.tile(1000000, [len(channels), 
-                                                 len(sample_start_time)],
-                                           dtype='m8[us]')
+            integration_interval = np.tile(1000000, [len(channels), len(sample_start_time)], dtype='m8[us]')
             r = MagData(project=project,
                         site=site,
                         channels=channels,
                         start_time=start_time,
                         end_time=end_time,
-                        sample_start_time=sample_start_time, 
+                        sample_start_time=sample_start_time,
                         sample_end_time=sample_end_time,
                         integration_interval=integration_interval,
                         nominal_cadence=archive_data['nominal_cadence'],
-                        data=data[col_idx]*1e-9,
+                        data=data[col_idx] * 1e-9,
                         units='T',
                         sort=True)
             return r
@@ -299,6 +283,7 @@ def load_rt_data(file_name, archive_data,
 
     return None
 
+
 sites = {
     'BOR1': {
         'location': 'Borok, CIS',
@@ -311,7 +296,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'bo',
-        },
+    },
     'CRK1': {
         'location': 'Crooktree, UK',
         'latitude': Decimal('57.09'),
@@ -319,12 +304,12 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2002-05-17T00:00:00+0000', 's'),
         'end_time': np.datetime64('2013-02-26T00:00:00+0000', 's'),
-        'k_index_scale': 800e-9, # Estimated
+        'k_index_scale': 800e-9,  # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'cr',
-        },
+    },
     'CRK2': {
         'location': 'Crooktree, UK',
         'latitude': Decimal('57.09'),
@@ -332,7 +317,7 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2015-08-18T00:00:00+0000', 's'),
         'end_time': None,
-        'k_index_scale': 800e-9, # Estimated
+        'k_index_scale': 800e-9,  # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -346,7 +331,7 @@ sites = {
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': ap.data.generic_load_converter,
-#                    'load_converter': load_new_samnet_data,
+                    #                    'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
                     # Generic load/save information
@@ -355,7 +340,7 @@ sites = {
                     'valid_range': (-10000e-9, 10000e-9),
                     'timestamp_method': 'hms',
                     'comments': '%',
-                    },
+                },
                 '1min': {
                     'channels': sam_channels,
                     'path': base_url + 'new/crk2/%Y/%m/%Y%m%d.min',
@@ -369,8 +354,8 @@ sites = {
                     'valid_range': (-10000e-9, 10000e-9),
                     'timestamp_method': 'hm',
                     'comments': '%',
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(sam_channels),
@@ -380,8 +365,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 '1min': {
                     'channels': np.array(['Sensor temperature',
@@ -393,8 +378,8 @@ sites = {
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
+            },
             'VoltageData': {
                 '1min': {
                     'channels': np.array(['Obsdaq voltage']),
@@ -402,11 +387,11 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
-                    'units': 'V',                    
-                    },
-                }
-            },
+                    'units': 'V',
+                },
+            }
         },
+    },
     'ESK1': {
         'location': 'Eskdalemuir, UK',
         'latitude': Decimal('55.32'),
@@ -414,7 +399,7 @@ sites = {
         'elevation': 245,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
-        'k_index_scale': 750e-9, # From BGS  Monthly Magnetic Bulletin
+        'k_index_scale': 750e-9,  # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -443,7 +428,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'fa',
-        },
+    },
     'GML1': {
         'location': 'Glenmore Lodge, UK',
         'latitude': Decimal('57.16'),
@@ -455,7 +440,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'gm',
-        },
+    },
     'HAD1': {
         'location': 'Hartland, UK',
         'latitude': Decimal('50.99'),
@@ -463,7 +448,7 @@ sites = {
         'elevation': 95,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
-        'k_index_scale': 500e-9, # From BGS  Monthly Magnetic Bulletin
+        'k_index_scale': 500e-9,  # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -492,7 +477,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ha',
-        },
+    },
     'HAN3': {
         'location': 'Hankasalmi, Finland',
         'latitude': Decimal('62.2539'),
@@ -504,7 +489,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ha',
-        },
+    },
     'HLL1': {
         'location': 'Hella, Iceland',
         'latitude': Decimal('63.77'),
@@ -516,7 +501,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'hl',
-        },
+    },
     'KIL1': {
         'location': 'Kilpisjarvi, Finland',
         'latitude': Decimal('69.02'),
@@ -528,7 +513,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by the Finnish Meteorological Institute.',
         'samnet_code': 'ki',
-        },
+    },
     'KVI1': {
         'location': 'Kvistaberg, Sweden',
         'latitude': Decimal('59.5'),
@@ -540,7 +525,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'kv',
-        },
+    },
     'LAN1': {
         'location': 'Lancaster, UK',
         'latitude': Decimal('54.01'),
@@ -548,13 +533,13 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2003-02-20T17:00:00+0000', 's'),
         'end_time': np.datetime64('2013-10-24T00:00:00+0000', 's'),
-        'k_index_scale': 650e-9, # Estimated
+        'k_index_scale': 650e-9,  # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'line_color': [1, 0, 0],
         'samnet_code': 'la',
-        },
+    },
     'LAN2': {
         'location': 'Lancaster, UK',
         'latitude': Decimal('54.01'),
@@ -562,11 +547,11 @@ sites = {
         'elevation': np.nan,
         'start_time': np.datetime64('2016-03-21T18:31:00+0000', 's'),
         'end_time': None,
-        'k_index_scale': 650e-9, # Estimated
+        'k_index_scale': 650e-9,  # Estimated
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
-        'line_color': [181/255., 18/255., 27/255.],
+        'line_color': [181 / 255., 18 / 255., 27 / 255.],
         'samnet_code': 'la',
         'data_types': {
             'MagData': {
@@ -575,7 +560,7 @@ sites = {
                     'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.txt',
                     'duration': np.timedelta64(24, 'h'),
-#                    'load_converter': ap.data.generic_load_converter,
+                    #                    'load_converter': ap.data.generic_load_converter,
                     'load_converter': load_new_samnet_data,
                     'nominal_cadence': np.timedelta64(1000000, 'us'),
                     'units': 'T',
@@ -585,7 +570,7 @@ sites = {
                     'valid_range': (-10000e-9, 10000e-9),
                     'timestamp_method': 'hms',
                     'comments': '%',
-                    },
+                },
                 '1min': {
                     'channels': sam_channels,
                     'path': base_url + 'new/lan2/%Y/%m/%Y%m%d.min',
@@ -599,8 +584,8 @@ sites = {
                     'valid_range': (-10000e-9, 10000e-9),
                     'timestamp_method': 'hm',
                     'comments': '%',
-                    },
                 },
+            },
             'MagQDC': {
                 'qdc': {
                     'channels': np.array(sam_channels),
@@ -610,8 +595,8 @@ sites = {
                     'load_converter': ap.magdata.load_qdc_data,
                     'nominal_cadence': np.timedelta64(5, 's'),
                     'units': 'T',
-                    },
                 },
+            },
             'TemperatureData': {
                 '1min': {
                     'channels': np.array(['Sensor temperature',
@@ -623,8 +608,8 @@ sites = {
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
                     'units': six.u('\N{DEGREE SIGN}C'),
-                    },
                 },
+            },
             'VoltageData': {
                 '1min': {
                     'channels': np.array(['Obsdaq voltage']),
@@ -632,11 +617,11 @@ sites = {
                     'duration': np.timedelta64(24, 'h'),
                     'load_converter': load_new_samnet_temp_volt_data,
                     'nominal_cadence': np.timedelta64(1, 'm'),
-                    'units': 'V',                    
-                    },
-                }
-            },
+                    'units': 'V',
+                },
+            }
         },
+    },
     'LER1': {
         'location': 'Lerwick, UK',
         'latitude': Decimal('60.13'),
@@ -644,7 +629,7 @@ sites = {
         'elevation': 85,
         'start_time': np.datetime64('2001-01-01T00:00:00+0000', 's'),
         'end_time': None,
-        'k_index_scale': 1000e-9, # From BGS  Monthly Magnetic Bulletin
+        'k_index_scale': 1000e-9,  # From BGS  Monthly Magnetic Bulletin
         'copyright': 'Lancaster University',
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
@@ -673,7 +658,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'ln',
-        },
+    },
     'NOR1': {
         'location': 'Nordli, Norway',
         'latitude': Decimal('64.37'),
@@ -685,7 +670,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'no',
-        },
+    },
     'NUR1': {
         'location': 'Nurmijarvi, Finland',
         'latitude': Decimal('60.51'),
@@ -697,7 +682,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'nu',
-        },
+    },
     'NUR3': {
         'location': 'Nurmijarvi, Finland',
         'latitude': Decimal('60.5'),
@@ -709,7 +694,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'nu',
-        },
+    },
     'OUJ2': {
         'location': 'Oulujarvi, Finland',
         'latitude': Decimal('64.52'),
@@ -721,7 +706,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'oj',
-        },
+    },
     'OUL1': {
         'location': 'Oulu, Finland',
         'latitude': Decimal('65.1'),
@@ -733,7 +718,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'ou',
-        },
+    },
     'UPS2': {
         'location': 'Uppsala, Sweden',
         'latitude': Decimal('59.9'),
@@ -745,7 +730,7 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University. Original data provided by Geological Survey of Sweden.',
         'samnet_code': 'up',
-        },
+    },
     'YOR1': {
         'location': 'York, UK',
         'latitude': Decimal('53.95'),
@@ -757,20 +742,16 @@ sites = {
         'license': 'Data users are not entitled to distribute data to third parties outside their own research teams without requesting permission from Prof. F. Honary. Similarly, SAMNET data should not become part of a distributed database without permission first being sought. Commercial use prohibited.',
         'attribution': 'The Sub-Auroral Magnetometer Network (SAMNET) is operated by the Space and Plasma Physics group, Department of Physics, Lancaster University.',
         'samnet_code': 'yo',
-        },
-    
-    }
+    },
 
-
+}
 
 # Set activity color/thresholds unless already set.
 default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
 default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green  
                                     [1.0, 1.0, 0.0],  # yellow
                                     [1.0, 0.6, 0.0],  # amber
-                                    [1.0, 0.0, 0.0]]) # red
-
-    
+                                    [1.0, 0.0, 0.0]])  # red
 
 default_data_types = {
     'MagData': {
@@ -813,7 +794,7 @@ default_data_types = {
             'constructor': ap.magdata.MagData,
             'timestamp_method': 'YMD',
             'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
-            'data_multiplier': 1000000000, # Store as nT values
+            'data_multiplier': 1000000000,  # Store as nT values
             # Information for making the data files
             'qdc_fit_duration': np.timedelta64(10, 'D'),
             'realtime_qdc': True,
@@ -843,14 +824,14 @@ default_data_types = {
             'constructor': ap.auroralactivity.AuroraWatchActivity,
             'timestamp_method': 'YMDh',
             'fmt': ['%04d', '%02d', '%02d', '%02d', '%.2f'],
-            'data_multiplier': 1000000000, # Store as nT values
+            'data_multiplier': 1000000000,  # Store as nT values
         }
     },
 }
 
 for s in sites:
     site_lc = s.lower()
-    sc = sites[s]['samnet_code'] # Two-letter lower-case abbreviation
+    sc = sites[s]['samnet_code']  # Two-letter lower-case abbreviation
 
     if 'line_color' not in sites[s]:
         sites[s]['line_color'] = [1, 0, 0]
@@ -864,7 +845,7 @@ for s in sites:
     for dt in default_data_types:
         if dt not in sdt:
             sdt[dt] = {}
-        for an,av in iteritems(default_data_types[dt]):
+        for an, av in iteritems(default_data_types[dt]):
             if an not in sdt[dt]:
                 sdt[dt][an] = \
                     copy.deepcopy(av)
@@ -876,8 +857,7 @@ for s in sites:
             elif sdt[dt] is None:
                 # None used as a placeholder to prevent automatic
                 # population, now clean up
-                del(sdt[dt])
-                    
+                del (sdt[dt])
 
     if 'activity_thresholds' not in sites[s]:
         sites[s]['activity_thresholds'] = default_activity_thresholds
@@ -892,4 +872,3 @@ project = {
 }
 
 ap.add_project('SAMNET', project)
-

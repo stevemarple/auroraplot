@@ -14,9 +14,8 @@ else:
 import auroraplot as ap
 
 
-
 def add_project_hook(project_name):
-    '''This function is used to customise the paths to data files when
+    """This function is used to customise the paths to data files when
     datasets are imported.
 
     When project_name is "AWN" /etc/awnet.ini defines the
@@ -24,7 +23,7 @@ def add_project_hook(project_name):
     filenames, eg for use on the AuroraWatchNet magnetometer data
     loggers.
 
-    '''
+    """
     if project_name == 'AWN':
         filename = '/etc/awnet.ini'
         if not os.path.exists(filename):
@@ -38,14 +37,12 @@ def add_project_hook(project_name):
             return
         
         if site not in ap.projects[project_name]:
-            return # Unknown site
+            return  # Unknown site
 
         # For data which matches this host's site convert all URLS to
         # local paths.
-        make_data_local = lambda path, project, site, data_type, archive :\
-                          path.replace('http://aurorawatch.lancs.ac.uk/data/',
-                                       '/data/')
+        make_data_local = lambda path, project, site, data_type, archive: path.replace(
+            'http://aurorawatch.lancs.ac.uk/data/', '/data/')
 
         # Convert all URLS to local paths
         ap.tools.change_load_data_paths(project_name, make_data_local)
-

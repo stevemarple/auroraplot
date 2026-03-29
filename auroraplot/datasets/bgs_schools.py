@@ -68,26 +68,26 @@ def load_bgs_sch_data(file_name,
             'col_offset': 1,
             'scaling': 1e-9,
             'data_check': check_mag_data,
-            },
+        },
         'TemperatureData': {
             'class': TemperatureData,
             'col_offset': 4,
             'scaling': 1,
             'data_check': check_temperature,
-            },
+        },
         'VoltageData': {
             'class': VoltageData,
             'col_offset': 6,
             'scaling': 1,
             'data_check': check_voltage,
-            },
-        }
-    
+        },
+    }
+
     assert data_type in data_type_info, 'Illegal data_type'
     chan_tup = tuple(archive_data['channels'])
     col_idx = []
     for c in channels:
-        col_idx.append(data_type_info[data_type]['col_offset'] + 
+        col_idx.append(data_type_info[data_type]['col_offset'] +
                        chan_tup.index(c))
     try:
         if os.path.exists(file_name):
@@ -99,9 +99,9 @@ def load_bgs_sch_data(file_name,
             if file_name.endswith('.csv'):
                 kw['delimiter'] = ','
 
-            data = np.genfromtxt(uh, 
-                                 unpack=True, 
-                                 invalid_raise=invalid_raise, 
+            data = np.genfromtxt(uh,
+                                 unpack=True,
+                                 invalid_raise=invalid_raise,
                                  **kw)
             sample_start_time = ap.epoch64_us + (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
@@ -119,7 +119,7 @@ def load_bgs_sch_data(file_name,
                 data_check = data_type_info[data_type]['data_check']
             if data_check is not None:
                 data = data_check(data)
-                
+
             r = data_type_info[data_type]['class'](project=project,
                                                    site=site,
                                                    channels=channels,
@@ -162,7 +162,7 @@ def temperature_compensation(md, inplace=False, cadence=None, **kwargs):
                       'TemperatureData',
                       md.start_time,
                       md.end_time,
-                      channels=['Sensor temperature'], 
+                      channels=['Sensor temperature'],
                       cadence=cad)
     # Resample
     td = td.interp(md.sample_start_time, md.sample_end_time)
@@ -175,20 +175,18 @@ def temperature_compensation(md, inplace=False, cadence=None, **kwargs):
     # for n in range(1, len(coeffs)):
     for n in range(len(coeffs)):
         md_error += np.power(temp_diff, n) * coeffs[n]
-        
+
     md_error[np.isnan(md_error)] = 0
     if inplace:
         r = md
     else:
         r = copy.deepcopy(md)
-    logger.debug('temperature compensation error: %f' ,md_error)
+    logger.debug('temperature compensation error: %f', md_error)
     r.data -= md_error
     return r
 
-cc3_by_nc_sa = 'This work is licensed under the Creative Commons ' + \
-    'Attribution-NonCommercial-ShareAlike 3.0 Unported License. ' + \
-    'To view a copy of this license, visit ' + \
-    'http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
+
+cc3_by_nc_sa = 'This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_GB.'
 
 sites = {
     'BHM1': {  # Previously BGS3 at Lancaster
@@ -203,8 +201,8 @@ sites = {
         'copyright': 'The University of Birmingham.',
         'license': cc3_by_nc_sa,
         'attribution': 'The University of Birmingham, UK.',
-        'line_color': [86/255., 146/255., 206/255.],
-                'data_types': {
+        'line_color': [86 / 255., 146 / 255., 206 / 255.],
+        'data_types': {
             'MagData': {
                 'default': 'realtime',
                 'raw': {
@@ -364,8 +362,7 @@ sites = {
         'k_index_filter': None,
         'copyright': 'Lancaster University.',
         'license': cc3_by_nc_sa,
-        'attribution': 'Space and Plasma Physics group, ' + \
-                       'Department of Physics, Lancaster University, UK.',
+        'attribution': 'Space and Plasma Physics group, Department of Physics, Lancaster University, UK.',
         'line_color': [0x7b / 255., 0x03 / 255., 0x48 / 255.],
         'data_types': {
             'MagData': {
@@ -1012,17 +1009,16 @@ sites = {
 
 }
 
-
 # Default values for all sites
 defaults = {
     'activity_thresholds': np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9,
-    'activity_colors':  np.array([[0.2, 1.0, 0.2],  # green  
-                                  [1.0, 1.0, 0.0],  # yellow
-                                  [1.0, 0.6, 0.0],  # amber
-                                  [1.0, 0.0, 0.0]]),  # red
+    'activity_colors': np.array([[0.2, 1.0, 0.2],  # green
+                                 [1.0, 1.0, 0.0],  # yellow
+                                 [1.0, 0.6, 0.0],  # amber
+                                 [1.0, 0.0, 0.0]]),  # red
     'copyright': 'Copyright ???',
     'license': cc3_by_nc_sa,
-    }
+}
 
 default_data_types = {
     'MagData': {
@@ -1036,7 +1032,7 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'data_check': None,
-            },
+        },
         'realtime': {
             'channels': np.array(['H', 'E', 'Z']),
             'path': data_dir + '/{site_lc}/%Y/%m/{site_lc}_%Y%m%d.csv',
@@ -1046,8 +1042,8 @@ default_data_types = {
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'filter_function': remove_spikes,
-            },
         },
+    },
     'MagQDC': {
         'qdc': {
             'channels': np.array(['H', 'E', 'Z']),
@@ -1057,8 +1053,8 @@ default_data_types = {
             'load_converter': ap.magdata.load_qdc_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
-            },
         },
+    },
     'TemperatureData': {
         'realtime': {
             'channels': np.array(['Sensor temperature']),
@@ -1068,16 +1064,16 @@ default_data_types = {
             'load_converter': load_bgs_sch_data,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': six.u('\N{DEGREE SIGN}C'),
-            },
         },
-    }
+    },
+}
 
 for s in sites:
     sd = sites[s]
     for key, val in defaults.items():
         if key not in sd:
             sd[key] = val
-            
+
     # Populate the data types
     if 'data_types' not in sd:
         sd['data_types'] = {}
@@ -1100,4 +1096,3 @@ project = {
 }
 
 ap.add_project('BGS_SCH', project)
-

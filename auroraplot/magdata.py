@@ -5,6 +5,7 @@ import re
 
 # Python 2/3 compatibility
 import six
+
 try:
     from urllib.request import urlopen
     from urllib.parse import urlparse
@@ -29,6 +30,7 @@ if six.PY3:
     def cmp(a, b):
         return (a > b) - (a < b)
 
+
 def load_iaga_2000(file_name):
     try:
         if file_name.startswith('/'):
@@ -40,7 +42,7 @@ def load_iaga_2000(file_name):
             lines = [a.rstrip().decode('ascii') for a in uh.readlines()]
             header = {}
             comments = []
-            
+
             # Parse header
             while lines[0][0] == ' ':
                 s = lines.pop(0)
@@ -54,7 +56,7 @@ def load_iaga_2000(file_name):
                     key = s[:24].strip()
                     value = s[24:-1].strip()
                     header[key] = value
-            
+
             # Parse data header and store column positions. 
             s = lines.pop(0)
             cols = s[:-1].split()
@@ -65,11 +67,11 @@ def load_iaga_2000(file_name):
             for n in range(1, len(cols)):
                 pos = s.find(cols[n])
                 col_pos.insert(n, [pos, 0])
-                col_pos[n-1][1] = pos
+                col_pos[n - 1][1] = pos
                 col_number[cols[n]] = n
                 data.insert(n, [])
             col_pos[-1][1] = len(s)
-            
+
             # Parse data. The most flexible and tolerant method is to
             # split the line into data columns using whitespace. This
             # approach allows files to be read where the data headers
@@ -102,19 +104,19 @@ def load_iaga_2000(file_name):
                 sample_time = []
                 for n in range(len(data[0])):
                     sample_time.append(np.datetime64(data[dn][n] + 'T' +
-                                                     data[tn][n] + 'Z')\
-                                           .astype('<M8[us]'))
+                                                     data[tn][n] + 'Z') \
+                                       .astype('<M8[us]'))
                 sample_time = np.array(sample_time)
             else:
                 sample_time = None
 
-            r = { 'header': header,
-                  'comments': comments,
-                  'data': data,
-                  'columns': cols,
-                  'column_number': col_number,
-                  'sample_time': sample_time
-                  }
+            r = {'header': header,
+                 'comments': comments,
+                 'data': data,
+                 'columns': cols,
+                 'column_number': col_number,
+                 'sample_time': sample_time
+                 }
             return r
 
         except Exception as e:
@@ -123,24 +125,24 @@ def load_iaga_2000(file_name):
 
         finally:
             uh.close()
-                
+
     except Exception as e:
         logger.info('Could not open ' + file_name)
         logger.debug(str(e))
     return None
 
 
-def load_qdc(project, 
-             site, 
-             time, 
-             archive=None, 
+def load_qdc(project,
+             site,
+             time,
+             archive=None,
              channels=None,
              path=None,
              tries=1,
              realtime=False,
              load_function=None,
              full_output=False):
-    '''Load quiet-day curve. 
+    """Load quiet-day curve.
     project: name of the project (upper case)
 
     site: site abbreviation (upper case)
@@ -166,10 +168,10 @@ def load_qdc(project,
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
         
-    '''
+    """
 
     data_type = 'MagQDC'
-    archive, ad = ap.get_archive_info(project, site, data_type, 
+    archive, ad = ap.get_archive_info(project, site, data_type,
                                       archive=archive)
     if channels is not None:
         # Ensure it is a 1D numpy array
@@ -188,14 +190,14 @@ def load_qdc(project,
 
     if tries is None:
         tries = 1
-       
+
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project, 
-                             site, 
-                             data_type, 
-                             time, 
+        return load_function(project,
+                             site,
+                             data_type,
+                             time,
                              archive=archive,
                              channels=channels,
                              path=path,
@@ -210,7 +212,7 @@ def load_qdc(project,
         # For realtime use the QDC for the month is (was) not
         # available, so use the previous month's QDC
         t = dt64.get_start_of_previous_month(t)
-        
+
         # Early in the month the previous motnh's QDC was probably not
         # computed, so use the month before that
         qdc_rollover_day = ad.get('qdc_rollover_day', 4)
@@ -221,7 +223,7 @@ def load_qdc(project,
         try:
             if hasattr(path, '__call__'):
                 # Function: call it with relevant information to get the path
-                file_name = path(t, project=project, site=site, 
+                file_name = path(t, project=project, site=site,
                                  data_type=data_type, archive=archive,
                                  channels=channels)
             else:
@@ -229,18 +231,18 @@ def load_qdc(project,
 
             logger.info('loading ' + file_name)
 
-            r = ad['load_converter'](file_name, 
+            r = ad['load_converter'](file_name,
                                      ad,
                                      project=project,
-                                     site=site, 
-                                     data_type=data_type, 
-                                     start_time=np.timedelta64(0, 'h'), 
+                                     site=site,
+                                     data_type=data_type,
+                                     start_time=np.timedelta64(0, 'h'),
                                      end_time=np.timedelta64(24, 'h'),
                                      archive=archive,
                                      channels=channels,
                                      path=path)
             if r is not None:
-                r.extract(inplace=True, 
+                r.extract(inplace=True,
                           channels=channels)
                 if full_output:
                     r2 = {'magqdc': r,
@@ -249,7 +251,7 @@ def load_qdc(project,
                     return r2
                 else:
                     return r
-                
+
         finally:
             # Go to start of previous month
             t = dt64.get_start_of_month(t - np.timedelta64(24, 'h'))
@@ -257,10 +259,10 @@ def load_qdc(project,
     return None
 
 
-def load_qdc_data(file_name, archive_data, 
-                  project, site, data_type, channels, start_time, 
+def load_qdc_data(file_name, archive_data,
+                  project, site, data_type, channels, start_time,
                   end_time, **kwargs):
-    '''Convert AuroraWatchNet QDC file to match standard data type.
+    """Convert AuroraWatchNet QDC file to match standard data type.
 
     This function can be used by datasets as the load_converter for
     MagQDC data. It is not intended to be called directly by user
@@ -268,7 +270,7 @@ def load_qdc_data(file_name, archive_data,
 
     archive: name of archive from which data was loaded
     archive_info: archive metadata
-    '''
+    """
 
     assert data_type == 'MagQDC', 'Illegal data_type'
     chan_tup = tuple(archive_data['channels'])
@@ -283,17 +285,16 @@ def load_qdc_data(file_name, archive_data,
         try:
             data = np.loadtxt(uh, unpack=True)
             sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
-            sample_end_time = sample_start_time \
-                + archive_data['nominal_cadence']
-            
+            sample_end_time = sample_start_time + archive_data['nominal_cadence']
+
             integration_interval = None
-            data = data[col_idx] * 1e-9 # Stored as nT
+            data = data[col_idx] * 1e-9  # Stored as nT
             r = MagQDC(project=project,
                        site=site,
                        channels=np.array(channels),
                        start_time=start_time,
                        end_time=end_time,
-                       sample_start_time=sample_start_time, 
+                       sample_start_time=sample_start_time,
                        sample_end_time=sample_end_time,
                        integration_interval=integration_interval,
                        nominal_cadence=archive_data['nominal_cadence'],
@@ -329,15 +330,15 @@ def _save_baseline_data(md, file_name, archive_data):
     np.savetxt(file_name, data.T, delimiter='\t', fmt=fmt)
 
 
-def stack_plot(data_array, offset, channel=None, 
+def stack_plot(data_array, offset, channel=None,
                start_time=None, end_time=None,
                sort=True, scale_bar=True,
                ylabel_fmt='{data:project}\n{data:site}',
                ylabel_color=None,
                add_legend=None,
                colors=None,
-                **kwargs):
-    '''
+               **kwargs):
+    """
     Plot multiple MagData objects on a single axes. Magnetometer
     stackplots have a distinct meaning and should not be confused with
     the matplotlib.stackplot which implements a different type of
@@ -370,13 +371,13 @@ def stack_plot(data_array, offset, channel=None,
 
     sort: Flag to indicate if datasets should be sorted by geographic
     latitude before plotting.
-    '''
+    """
 
     da = np.array(data_array).flatten()
-    
+
     for n in range(1, da.size):
         assert da[0].units == da[n].units, 'units differ'
-        
+
     if channel is None or len(channel) == 0:
         channel = da[0].channels[0]
     elif not isinstance(channel, six.string_types) and len(channel) == 1:
@@ -423,19 +424,19 @@ def stack_plot(data_array, offset, channel=None,
                     # Not found
                     continue
         ydiff[n] = my_max(da[n].data[cidx[n]]) - my_min(da[n].data[cidx[n]])
-        tick_labels.append(ylabel_fmt.format(data=da[n], 
+        tick_labels.append(ylabel_fmt.format(data=da[n],
                                              channel=da[n].channels[cidx[n]]))
 
     if len(da) == 2:
-        ydisturb = np.nanmin(ydiff) # Median would include any disturbance!
+        ydisturb = np.nanmin(ydiff)  # Median would include any disturbance!
     else:
         ydisturb = ap.nanmedian(ydiff)
 
     if offset == 'auto' or np.isnan(offset):
         # Compute sensible value for offset
-        y_test = ydisturb/2
+        y_test = ydisturb / 2
         offset_tries = (np.array([1, 2, 5, 10, 20]) *
-                             np.power(10.0, np.floor(np.log10(ydisturb/2))))
+                        np.power(10.0, np.floor(np.log10(ydisturb / 2))))
         offset = offset_tries[list(offset_tries >= y_test).index(True)]
 
     # Plot each data set
@@ -443,16 +444,16 @@ def stack_plot(data_array, offset, channel=None,
     tick_colors = []
     for n in range(len(da)):
         if cidx[n] == -1:
-            continue # Required channel not present
+            continue  # Required channel not present
 
         # Keep track of earliest and latest times, but only for
         # plotted datasets
         st = np.min([st, da[n].start_time])
         et = np.max([et, da[n].end_time])
 
-        d = da[n].mark_missing_data(cadence=da[n].nominal_cadence*2)
-        y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) \
-                 + (plot_count * offset)).flatten()
+        d = da[n].mark_missing_data(cadence=da[n].nominal_cadence * 2)
+        y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1)
+             + (plot_count * offset)).flatten()
 
         site_color = None
         kwargs2 = copy.copy(kwargs)
@@ -465,11 +466,11 @@ def stack_plot(data_array, offset, channel=None,
                 site_color = colors[n]
             except Exception as e:
                 pass
-            
+
         if site_color is not None:
             kwargs2['color'] = site_color
 
-        lh = dt64.plot_dt64(d.get_mean_sample_time(), 
+        lh = dt64.plot_dt64(d.get_mean_sample_time(),
                             y,
                             label=d.format_project_site(),
                             **kwargs2)
@@ -484,7 +485,6 @@ def stack_plot(data_array, offset, channel=None,
         plot_count += 1
         r.extend(lh)
 
-
     if start_time is not None:
         st = start_time
     if end_time is not None:
@@ -497,13 +497,13 @@ def stack_plot(data_array, offset, channel=None,
 
         ylim = ax.yaxis.get_data_interval()
         ylim[0] = max(np.floor(ylim[0] / offset) * offset, -ydisturb)
-        ylim[1] = min(np.ceil(ylim[1] / offset) * offset, 
+        ylim[1] = min(np.ceil(ylim[1] / offset) * offset,
                       (len(da) - 1) * offset + ydisturb)
 
         tick_labels2 = []
         tick_colors2 = []
-        yn_min = int(round(ylim[0]/offset))
-        yn_max = int(round(ylim[1]/offset))
+        yn_min = int(round(ylim[0] / offset))
+        yn_max = int(round(ylim[1] / offset))
         yn_nums = range(yn_min, yn_max + 1)
         for yn in yn_nums:
             if yn >= 0 and yn < len(da):
@@ -522,8 +522,8 @@ def stack_plot(data_array, offset, channel=None,
     if add_legend or (add_legend is None and offset == 0):
         leg = plt.legend(prop={'size': 'medium'})
         leg.get_frame().set_alpha(0.7)
-        
-    ax.set_title('\n'.join(['Magnetometer stackplot', 
+
+    ax.set_title('\n'.join(['Magnetometer stackplot',
                             dt64.fmt_dt64_range(st, et)]))
 
     if scale_bar:
@@ -532,28 +532,28 @@ def stack_plot(data_array, offset, channel=None,
         else:
             # Need method to compute the length of the bar
             scale_bar = False
-            
+
     if scale_bar:
-        draw_scale_marker(ax, offset/2, offset, 
+        draw_scale_marker(ax, offset / 2, offset,
                           text=ap.str_units(offset, da[0].units, 'n'))
 
     return r
 
 
-def draw_scale_marker(ax, y, length, 
-                      color='black', 
-                      linewidth=2, 
+def draw_scale_marker(ax, y, length,
+                      color='black',
+                      linewidth=2,
                       text=None):
     xrel = 0.1
     ends_len_2 = 0.01
     xlim = ax.get_xlim()
-    x = np.array((np.diff(xlim)* xrel + xlim[0]).repeat(2))
+    x = np.array((np.diff(xlim) * xrel + xlim[0]).repeat(2))
     x2 = x + np.diff(xlim) * np.array([-ends_len_2, ends_len_2])
-    y2 = np.array([y-length/2, y+length/2])
+    y2 = np.array([y - length / 2, y + length / 2])
     r = []
-    ax.plot(x, y2, color=color, linewidth=linewidth) # Main line
-    ax.plot(x2, y2[[0,0]], color=color, linewidth=linewidth) # Bottom bar
-    ax.plot(x2, y2[[1,1]], color=color, linewidth=linewidth) # Top bar
+    ax.plot(x, y2, color=color, linewidth=linewidth)  # Main line
+    ax.plot(x2, y2[[0, 0]], color=color, linewidth=linewidth)  # Bottom bar
+    ax.plot(x2, y2[[1, 1]], color=color, linewidth=linewidth)  # Top bar
     if text:
         t = ax.text(x2[1], y, text, color=color,
                     horizontalalignment='left',
@@ -562,8 +562,9 @@ def draw_scale_marker(ax, y, length,
 
     return r
 
+
 class MagData(Data):
-    '''Class to manipulate and display magnetometer data.'''
+    """Class to manipulate and display magnetometer data."""
 
     def __init__(self,
                  project=None,
@@ -571,8 +572,8 @@ class MagData(Data):
                  channels=None,
                  start_time=None,
                  end_time=None,
-                 sample_start_time=np.array([], dtype='datetime64[s]'), 
-                 sample_end_time=np.array([], dtype='datetime64[s]'), 
+                 sample_start_time=np.array([], dtype='datetime64[s]'),
+                 sample_end_time=np.array([], dtype='datetime64[s]'),
                  integration_interval=None,
                  nominal_cadence=None,
                  data=None,
@@ -595,9 +596,8 @@ class MagData(Data):
     def data_description(self):
         return 'Magnetic field'
 
-
     def savetxt(self, filename, fmt=None):
-        a = np.zeros([self.channels.size+1, self.data.shape[-1]],
+        a = np.zeros([self.channels.size + 1, self.data.shape[-1]],
                      dtype='float')
         a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
         if self.units == 'T':
@@ -605,7 +605,7 @@ class MagData(Data):
             a[1:] = self.data * 1e9
         else:
             warnings.warn('Unknown units')
-            a[1:] = self.data 
+            a[1:] = self.data
 
         logger.info('saving to %s',
                     filename.name if isinstance(filename, file)
@@ -614,11 +614,10 @@ class MagData(Data):
         kwargs = {}
         if fmt is not None:
             kwargs['fmt'] = fmt
-        np.savetxt(filename,  a.transpose(), **kwargs)
-
+        np.savetxt(filename, a.transpose(), **kwargs)
 
     def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, units_prefix=None, title=None, 
+             subplot=None, units_prefix=None, title=None,
              start_time=None, end_time=None, time_units=None, **kwargs):
         if channels is None:
             channels = self.channels
@@ -628,33 +627,31 @@ class MagData(Data):
         elif subplot is None:
             subplot2 = []
             for n in range(1, len(channels) + 1):
-                subplot2.append(len(channels)*100 + 10 + n)
+                subplot2.append(len(channels) * 100 + 10 + n)
         else:
-            subplot2=subplot
+            subplot2 = subplot
 
         if units_prefix is None and self.units == 'T':
             # Use nT for plotting
             units_prefix = 'n'
-        
+
         r = Data.plot(self, channels=channels, figure=figure, axes=axes,
                       subplot=subplot2, units_prefix=units_prefix,
-                      title=title, 
-                      start_time=start_time, end_time=end_time, 
+                      title=title,
+                      start_time=start_time, end_time=end_time,
                       time_units=time_units, **kwargs)
         return r
-
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
         self.plot(**kwargs)
         if qdc is not None:
-            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), 
+            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(),
                                                             **kwargs)
-
 
     def variometer_plot(self, channels=None, qdc=None, axes=None, **kwargs):
         if channels is None:
             channels = self.channels
-        
+
         colors = {'H': 'b', 'X': 'b',
                   'D': 'r', 'E': 'r', 'Y': 'r',
                   'Z': 'g'}
@@ -671,23 +668,21 @@ class MagData(Data):
             kwargs['zorder'] = -chan_num
             md.plot(channels=chan, **kwargs)
             kwargs['axes'] = plt.gca()
-         
 
             if qdc2 is not None:
                 qdc2.data[list(qdc2.channels).index(chan)] += adj
                 kwargs['alpha'] = 0.4
                 kwargs['zorder'] -= 0.5
-                qdc2.align(md).plot(channels=chan, label=chan + ' QDC', 
+                qdc2.align(md).plot(channels=chan, label=chan + ' QDC',
                                     **kwargs)
-            
+
         leg = plt.legend(prop={'size': 'medium'})
         leg.get_frame().set_alpha(0.7)
 
-
-    def get_quiet_days(self, nquiet=5, channels=None, 
+    def get_quiet_days(self, nquiet=5, channels=None,
                        cadence=np.timedelta64(5, 's').astype('m8[us]'),
                        method=None):
-        '''
+        """
         nquiet: number of quiet days
         
         channels: channels used in calculations. Defaults to first
@@ -698,8 +693,8 @@ class MagData(Data):
         returns: data from nquiet quietest days
 
         Adapted from algorithm originally developed by Andrew Senior.
-        '''
-        
+        """
+
         if channels is None:
             # Default to using H or X (ie first channel)
             cidx = [0]
@@ -728,9 +723,9 @@ class MagData(Data):
                 # Estimate daily activity based on RMS departure from
                 # monthly mean
                 daily_act[n] = \
-                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx] \
-                                                   .transpose() - 
-                                                   monthly_means)**2, axis=1)))
+                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx]
+                                                   .transpose() -
+                                                   monthly_means) ** 2, axis=1)))
 
         elif method == 'daily_mean':
             for n in range(num_days):
@@ -738,20 +733,20 @@ class MagData(Data):
                 # daily mean
                 daily_means = ap.nanmean(daily_data[n].data[cidx], axis=1)
                 daily_act[n] = \
-                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx] \
-                                                   .transpose() - \
-                                                   daily_means)**2, axis=1)))
-            
+                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx]
+                                                   .transpose() -
+                                                   daily_means) ** 2, axis=1)))
+
                 # Shift the data by the difference between the monthly
                 # and daily means
                 daily_data[n].data += (monthly_means - daily_means)
-            
+
         elif method == 'linear_fit':
             x = self.get_mean_sample_time().astype('m8[us]').astype('int64')
             fits = []
             for cn in range(len(cidx)):
                 fits.append(np.polyfit(x, self.data[cidx[cn]], 1))
-                
+
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # linear fit to dataset
@@ -759,19 +754,16 @@ class MagData(Data):
                     .astype('m8[us]').astype('int64')
                 tmp_act = np.zeros([1, len(cidx)])
                 for cn in range(len(cidx)):
-                    daily_y = fits[cn][0]*daily_x + fits[cn][1]
-                    tmp_act[cn] = ap.nanmean((daily_data[n].data[cidx[cn]]\
-                                              .transpose() - daily_y)**2)
-                    
+                    daily_y = fits[cn][0] * daily_x + fits[cn][1]
+                    tmp_act[cn] = ap.nanmean((daily_data[n].data[cidx[cn]]
+                                              .transpose() - daily_y) ** 2)
+
                     # Shift the data by the difference between the
                     # monthly mean and the fit.
                     daily_data[n].data[cidx[cn]] += \
                         (monthly_means[cn] - daily_y)
 
-
                 daily_act[n] = ap.nanmean(np.sqrt(ap.nanmean(tmp_act)))
-
-
 
         else:
             raise Exception('Unknown method')
@@ -787,8 +779,7 @@ class MagData(Data):
         for n in range(nquiet):
             r.append(daily_data[idx[n]])
         return r
-        
-    
+
     def make_qdc(self, nquiet=5, channels=None,
                  cadence=np.timedelta64(5, 's').astype('m8[us]'),
                  quiet_days_method=None,
@@ -813,12 +804,11 @@ class MagData(Data):
                 axes = plt.gcf().get_axes()
             for ax in axes:
                 ax.legend(loc='upper left', fontsize='small')
-            
+
         sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
                            np.timedelta64(24, 'h').astype('m8[us]'),
                            cadence)
         sam_et = sam_st + cadence
-
 
         qdc_data = np.zeros([len(qd[0].channels), len(sam_st)])
         count = np.zeros_like(qdc_data)
@@ -860,8 +850,10 @@ class MagData(Data):
 
         return qdc
 
+
 class MagQDC(MagData):
-    '''Class to load and manipulate magnetometer quiet-day curves (QDC).'''
+    """Class to load and manipulate magnetometer quiet-day curves (QDC)."""
+
     def __init__(self,
                  project=None,
                  site=None,
@@ -892,36 +884,33 @@ class MagQDC(MagData):
     def data_description(self):
         return 'Magnetic field QDC'
 
-
     def smooth(self, fit_order=5, inplace=False):
         if inplace:
             r = self
         else:
             r = copy.deepcopy(self)
-            
+
         coeffs = np.fft.fft(r.data)
-        coeffs[:, range(fit_order+1, coeffs.shape[1]-fit_order)] = 0
+        coeffs[:, range(fit_order + 1, coeffs.shape[1] - fit_order)] = 0
         r.data = np.fft.ifft(coeffs).real
         return r
 
-
     def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, units_prefix=None, title=None, 
+             subplot=None, units_prefix=None, title=None,
              start_time=None, end_time=None, time_units=None, **kwargs):
-        
+
         if start_time is None:
             start_time = self.start_time
         if end_time is None:
             end_time = self.end_time
 
         r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
-                      subplot=subplot, units_prefix=units_prefix,
-                      title=title, 
-                         start_time=start_time, end_time=end_time, 
+                         subplot=subplot, units_prefix=units_prefix,
+                         title=title,
+                         start_time=start_time, end_time=end_time,
                          time_units=time_units, **kwargs)
         return r
 
-    
     def align(self, ref, fit=None, **fit_kwargs):
         day = np.timedelta64(24, 'h')
         if isinstance(ref, MagData):
@@ -955,7 +944,7 @@ class MagQDC(MagData):
         xi[1:-1] = self.get_mean_sample_time().astype('m8[us]')
         yi = np.zeros([len(self.channels), self.data.shape[1] + 2],
                       dtype=self.data.dtype)
-        yi[:,1:-1] = self.data
+        yi[:, 1:-1] = self.data
         # Extend so that interpolation can happen correctly near midnight
         xi[0] = xi[-2] - day
         xi[-1] = xi[1] + day
@@ -963,7 +952,7 @@ class MagQDC(MagData):
         yi[:, -1] = yi[:, 1]
 
         xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
-        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi)\
+        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi) \
             (xo.astype('int64'))
 
         if fit:
@@ -980,7 +969,7 @@ class MagQDC(MagData):
                                       channels=r.channels,
                                       archive=fit)
                     if bl is None or bl.data.size == 0:
-                        raise Exception('No %s MagData for %s/%s %s' 
+                        raise Exception('No %s MagData for %s/%s %s'
                                         % (fit, self.project, self.site,
                                            str(d)))
                     r.data[:, d == dt64.get_date(r.sample_start_time)] \
@@ -988,4 +977,3 @@ class MagQDC(MagData):
             else:
                 raise ValueError('Unknown fit method %s' % repr(fit))
         return r
-        
