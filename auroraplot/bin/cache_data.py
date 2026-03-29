@@ -97,7 +97,7 @@ if args.dataset:
             __import__(new_module)
         except Exception as e:
             logger.error('Could not import ' + new_module + ': ' + str(e))
-            sys.exit(1)
+            raise
 
             # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
