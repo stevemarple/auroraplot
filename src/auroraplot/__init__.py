@@ -1,11 +1,11 @@
-"""Analyse and plot space weather datasets."""
+# -*- coding=utf-8 -*-
 
-__author__ = "Steve Marple"
-__license__ = "MIT"
+"""Analyse and plot space weather datasets."""
 
 import copy
 import gzip
 import importlib
+import importlib.metadata
 import logging
 from pathlib import Path
 import netrc
@@ -38,18 +38,23 @@ except ImportError:
 
 
 __package__ = "auroraplot"
+__license__ = "MIT"
+__author__ = "Steve Marple"
 
 try:
     # Obtain the version from the package manager; this is unlikely to work in a development environment.
     __version__ = importlib.metadata.version(__package__)
 except importlib.metadata.PackageNotFoundError:
-    # Obtain the version number from the file that should be shipped with the package. This won't work in a
+    # Obtain the version number from the file that should be shipped with the package. This may not work in a
     # development environment because the file is created on-the-fly when generating sdist and wheel packages.
     version_file = Path(__file__).with_name("_version.py")
     if version_file.exists():
-        __version__ = version_file.read_text().strip()
-    else:
-        __version__ = "0.0.0"
+        _ = version_file.read_text().strip()
+        m = re.search(r"^\s*__version__\s*=\s*[\'\"](.+?)[\'\"]", _)
+        if m:
+            __version__ = m.group(1)
+        else:
+            __version__ = _
 
 
 logger = logging.getLogger(__name__)
@@ -143,7 +148,7 @@ def str_units(
         "f": -15,  # femto
         "p": -12,  # pico
         "n": -9,  # nano
-        "\N{MICRO SIGN}": -6,  # micro
+        "µ": -6,  # micro
         "u": -6,  # micro
         "m": -3,  # milli
         "c": -2,  # centi
