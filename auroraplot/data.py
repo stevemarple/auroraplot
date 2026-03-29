@@ -859,8 +859,10 @@ integration intv. : {self.integration_interval!r}
         if offset_interval is None:
             offset_interval = np.timedelta64(0, tu)
         if aggregate is None:
-            aggregate = scipy.average
-
+            if hasattr(scipy, "average"):
+                aggregate = scipy.average
+            else:
+                aggregate = np.average
         if cadence > self.nominal_cadence:
             sam_st = dt64.astype(
                 np.arange(dt64.ceil(self.start_time, cadence) + offset_interval, self.end_time, cadence),
