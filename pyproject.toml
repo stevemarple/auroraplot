@@ -61,6 +61,7 @@ artifacts = [
 include = [
     "bin/*.py",
     "src/*",
+    "examples/*",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -69,6 +70,8 @@ packages = [
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
+"README.md" = "doc/README.md"
+"examples" = "doc/examples"
 
 [tool.hatch.version]
 source = "versioningit"
