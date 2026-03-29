@@ -711,7 +711,7 @@ class Datetime64Locator(Locator):
         epoch = self.axis.dt64tools.epoch
         limits = self.axis.get_view_interval()
         if np.diff(limits) < 1:
-            logger.warn('limit for tick labels reached')
+            logger.warning('limit for tick labels reached')
             return []
 
         limits_dt64 = ((epoch + limits).astype('m8[' + units + ']') +
@@ -1069,7 +1069,7 @@ def _strftime_dt64(t, fstr, customspec=None):
             elif fstr[i] == '#':  # milliseconds
                 s += '{0:03d}'.format(int(np.round(np.mod(dt64_to(t, 'ms', returnfloat=True), 1000))))
             else:
-                logger.warn('Unknown format specifier: ' + fstr[i])
+                logger.warning('Unknown format specifier: ' + fstr[i])
                 replacements.pop()
 
         else:
@@ -1121,7 +1121,7 @@ def _strftime_td64(td, fstr, customspec=None):
                 # Use np.round to get rounding to even number
                 s += '{0:03d}'.format(int(np.round(td2.microseconds / 1000.0)))
             else:
-                logger.warn('Unknown format specifier: ' + fstr[i])
+                logger.warning('Unknown format specifier: ' + fstr[i])
                 replacements.pop()
 
         else:
