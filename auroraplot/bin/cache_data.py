@@ -13,7 +13,14 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 from urllib.request import urlopen
 
+import auroraplot as ap
+import auroraplot.magdata
+import auroraplot.dt64tools as dt64
+import auroraplot.datasets.aurorawatchnet
+import auroraplot.datasets.samnet
 
+
+logger = logging.getLogger(__name__)
 if not os.environ.has_key('TZ') or \
         os.environ['TZ'] not in ('UTC', 'UT', 'GMT'):
     try:
@@ -23,12 +30,6 @@ if not os.environ.has_key('TZ') or \
     except Exception as e:
         logger.error(e)
         pass
-
-import auroraplot as ap
-import auroraplot.magdata
-import auroraplot.dt64tools as dt64
-import auroraplot.datasets.aurorawatchnet
-import auroraplot.datasets.samnet
 
 # Define command line arguments
 parser = \
@@ -79,8 +80,6 @@ if __name__ == '__main__':
     if args.log_format:
         d['format'] = args.log_format
     logging.basicConfig(**d)
-
-logger = logging.getLogger(__name__)
 
 if args.dataset:
     for ds in args.dataset:
