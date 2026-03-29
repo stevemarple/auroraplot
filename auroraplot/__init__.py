@@ -2,7 +2,7 @@
 
 __author__ = "Steve Marple"
 __version__ = "0.7.1"
-__license__ = "PSF"
+__license__ = "MIT"
 
 import copy
 import gzip
