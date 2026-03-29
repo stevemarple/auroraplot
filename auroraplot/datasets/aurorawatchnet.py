@@ -8,9 +8,10 @@ from urllib.parse import urlparse
 
 import numpy as np
 
-import auroraplot as ap
+import auroraplot
 import auroraplot.auroralactivity
 import auroraplot.data
+import auroraplot.dt64tools as dt64
 import auroraplot.magdata
 import auroraplot.tools
 from auroraplot.magdata import MagData
@@ -82,7 +83,7 @@ def load_awn_data(file_name, archive_data,
             uh = urlopen(file_name)
         try:
             data = np.genfromtxt(uh, unpack=True, invalid_raise=False)
-            sample_start_time = ap.epoch64_us + (np.timedelta64(1000000, 'us') * data[0])
+            sample_start_time = dt64.epoch64_us + (np.timedelta64(1000000, 'us') * data[0])
             # end time and integration interval are guesstimates
             sample_end_time = sample_start_time + np.timedelta64(1000000, 'us')
             integration_interval = np.ones([len(channels),
@@ -120,9 +121,9 @@ def load_awn_data(file_name, archive_data,
 
 def k_index_filter_battery(mag_data):
     """Filter data for K index (battery-powered magnetometers).
-    
+
     Battery-powered magnetometers have higher noise, filter to reduce."""
-    md_filt = ap.tools.sgolay_filt(mag_data,
+    md_filt = auroraplot.tools.sgolay_filt(mag_data,
                                    np.timedelta64(630, 's'), 3)
     md_filt.set_cadence(np.timedelta64(5, 'm'), inplace=True)
     return md_filt
@@ -137,10 +138,10 @@ def load_bad_data(project, site, data_type, start_time, end_time,
     a callable.
     """
     if path is None:
-        ai = ap.get_archive_info(project, site, data_type, archive=archive)
+        ai = auroraplot.get_archive_info(project, site, data_type, archive=archive)
         path = ai[1]['path'] + extension
 
-    return ap.load_data(project, site, data_type, start_time, end_time,
+    return auroraplot.load_data(project, site, data_type, start_time, end_time,
                         archive=ai[0], path=path, **kwargs)
 
 
@@ -193,12 +194,12 @@ sites = {
                     'path': (base_url +
                              'baseline/realtime/lan1/lan1_%Y.txt'),
                     'duration': np.timedelta64(1, 'Y'),
-                    'load_converter': ap.data.generic_load_converter,
-                    'save_converter': ap.data.generic_save_converter,
+                    'load_converter': auroraplot.data.generic_load_converter,
+                    'save_converter': auroraplot.data.generic_save_converter,
                     'nominal_cadence': np.timedelta64(1, 'D'),
                     'units': 'T',
-                    # Information for generic load/save 
-                    'constructor': ap.magdata.MagData,
+                    # Information for generic load/save
+                    'constructor': auroraplot.magdata.MagData,
                     'sort': False,
                     'timestamp_method': 'YMD',
                     'fmt': ['%04d', '%02d', '%02d', '%.2f', '%.2f', '%.2f'],
@@ -474,7 +475,7 @@ sites = {
 
 # Set activity color/thresholds unless already set.
 default_activity_thresholds = np.array([0.0, 50.0, 100.0, 200.0]) * 1e-9
-default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green  
+default_activity_colors = np.array([[0.2, 1.0, 0.2],  # green
                                     [1.0, 1.0, 0.0],  # yellow
                                     [1.0, 0.6, 0.0],  # amber
                                     [1.0, 0.0, 0.0]])  # red
@@ -497,12 +498,12 @@ default_data_types = {
             'path': (base_url +
                      'baseline/realtime/{site_lc}/{site_lc}_%Y.txt'),
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data.generic_load_converter,
-            'save_converter': ap.data.generic_save_converter,
+            'load_converter': auroraplot.data.generic_load_converter,
+            'save_converter': auroraplot.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(1, 'D'),
             'units': 'T',
-            # Information for generic load/save 
-            'constructor': ap.magdata.MagData,
+            # Information for generic load/save
+            'constructor': auroraplot.magdata.MagData,
             'sort': False,
             'timestamp_method': 'YMD',
             'fmt': ['%04d', '%02d', '%02d', '%.2f'],
@@ -518,13 +519,13 @@ default_data_types = {
             'path': base_url + 'qdc/{site_lc}/%Y/{site_lc}_qdc_%Y%m.txt',
             'duration': np.timedelta64(24, 'h'),
             'format': 'aurorawatchnet_qdc',
-            'load_converter': ap.magdata.load_qdc_data,
-            'save_converter': ap.data.generic_save_converter,
+            'load_converter': auroraplot.magdata.load_qdc_data,
+            'save_converter': auroraplot.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(5, 's'),
             'units': 'T',
             'sort': False,
             # Information for generic load/save
-            'constructor': ap.magdata.MagQDC,
+            'constructor': auroraplot.magdata.MagQDC,
             'timestamp_method': 's',
             'fmt': ['%d', '%.3f'],
             'delimiter': ' ',
@@ -565,12 +566,12 @@ default_data_types = {
             'channels': np.array(['Activity']),
             'path': base_url + 'activity/aurorawatch/{site_lc}/{site_lc}_%Y.txt',
             'duration': np.timedelta64(1, 'Y'),
-            'load_converter': ap.data.generic_load_converter,
-            'save_converter': ap.data.generic_save_converter,
+            'load_converter': auroraplot.data.generic_load_converter,
+            'save_converter': auroraplot.data.generic_save_converter,
             'nominal_cadence': np.timedelta64(60, 'm'),
             'units': 'T',
             # Information for generic load/save
-            'constructor': ap.auroralactivity.AuroraWatchActivity,
+            'constructor': auroraplot.auroralactivity.AuroraWatchActivity,
             'timestamp_method': 'YMDh',
             'fmt': ['%04d', '%02d', '%02d', '%02d', '%.2f'],
             'data_multiplier': 1000000000,  # Store as nT values
@@ -631,4 +632,4 @@ project = {
     'sites': sites,
 }
 
-ap.add_project('AWN', project)
+auroraplot.add_project('AWN', project)
