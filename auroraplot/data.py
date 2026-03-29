@@ -4,6 +4,7 @@ import os
 import pickle
 import six
 import traceback
+from warnings import warn
 
 if six.PY3:
     from urllib.request import urlopen
@@ -22,6 +23,7 @@ import scipy.special
 
 import auroraplot as ap
 import auroraplot.tools
+from auroraplot.decorators import deprecated
 import auroraplot.dt64tools as dt64
 
 
@@ -37,7 +39,7 @@ def leastsq_error(p, obj, ref, channel):
     return np.nan_to_num(err)
 
 
-def _generic_load_converter(file_name, archive_data, 
+def generic_load_converter(file_name, archive_data,
                             project, site, data_type, start_time,
                             end_time, archive, channels, **kwargs):
     """
@@ -53,7 +55,7 @@ def _generic_load_converter(file_name, archive_data,
     assert 'constructor' in archive_data, 'archive data must indicate constructor to use'
     assert archive_data['constructor'].__name__ == data_type, 'data type does not match'
     assert 'timestamp_method' in archive_data, 'archive data must indicate the timestamp method used'
-    
+
     chan_tup = tuple(archive_data['channels'])
 
     try:
@@ -66,14 +68,14 @@ def _generic_load_converter(file_name, archive_data,
             for s in ('comments', 'delimiter', 'converters', 'skiprows'):
                 if s in archive_data:
                     kwargs[s] = archive_data[s]
-                      
+
             data = np.loadtxt(uh, unpack=True, **kwargs)
 
             sample_time_units = dt64.get_units(archive_data['nominal_cadence'])
             if archive_data['timestamp_method'] == 'unixtime':
                 sst = np.round(data[0] / dt64.multipliers[sample_time_units])
                 sample_start_time = sst.astype('datetime64[' + sample_time_units + ']')
-                col_offset = 1                
+                col_offset = 1
             elif archive_data['timestamp_method'] == 'offset0':
                 sample_start_time = (data[0].astype('int64') * archive_data['nominal_cadence']) + start_time
                 col_offset = 1
@@ -100,7 +102,7 @@ def _generic_load_converter(file_name, archive_data,
                                     data[3].astype('timedelta64[h]') + \
                                     data[4].astype('timedelta64[m]') + \
                                     np.round(data[5] / dt64.multipliers[tu]).astype('timedelta64[%s]' % tu)
-                col_offset = 6              
+                col_offset = 6
             elif archive_data['timestamp_method'] in ('h', 'hm', 'hms'):
                 col_offset = len(archive_data['timestamp_method'])
                 sample_start_time = start_time
@@ -114,7 +116,7 @@ def _generic_load_converter(file_name, archive_data,
 
             sample_end_time = sample_start_time + archive_data['nominal_cadence']
             integration_interval = np.tile(archive_data['nominal_cadence'],
-                                           [np.size(channels), 
+                                           [np.size(channels),
                                             np.size(sample_start_time)])
 
             col_idx = []
@@ -124,7 +126,7 @@ def _generic_load_converter(file_name, archive_data,
 
             data = np.reshape(data[col_idx],
                               [len(col_idx), np.size(sample_start_time)])
-            
+
             if archive_data['data_multiplier']:
                 data /= archive_data['data_multiplier']
 
@@ -165,15 +167,24 @@ def _generic_load_converter(file_name, archive_data,
     return None
 
 
-def _generic_save_converter(d, file_name, archive_data):
+@deprecated(generic_load_converter)
+def _generic_load_converter(file_name, archive_data,
+                            project, site, data_type, start_time,
+                            end_time, archive, channels, **kwargs):
+    return generic_load_converter(file_name, archive_data,
+                                  project, site, data_type, start_time,
+                                  end_time, archive, channels, **kwargs)
+
+
+def generic_save_converter(d, file_name, archive_data):
     if d.data.shape[0] != np.size(d.channels):
-        raise ValueError('data shape incorrect for number of channels')      
+        raise ValueError('data shape incorrect for number of channels')
     if d.data.shape[1] != np.size(d.sample_start_time):
         raise ValueError('data shape incorrect for number of samples')
 
     # Force sample start time to be units of nominal_cadence (or better)
     sst = d.sample_start_time + np.timedelta64(0, dt64.get_units(d.nominal_cadence))
-    
+
     if archive_data['timestamp_method'] == 'unixtime':
         # Force to day or better resolution
         sst += np.timedelta64(0, 'D')
@@ -251,6 +262,11 @@ def _generic_save_converter(d, file_name, archive_data):
         np.savetxt(fh, data.T, delimiter=delimiter, fmt=archive_data['fmt'])
 
 
+@deprecated(generic_save_converter)
+def _generic_save_converter(d, file_name, archive_data):
+    return generic_save_converter(d, file_name, archive_data)
+
+
 def first_non_nan(data_list):
     """
     Return the first non-NaN data from a list of data objects.
@@ -273,15 +289,15 @@ class Data(object):
     Base class for time-series data.
     """
 
-    def __init__(self, 
+    def __init__(self,
                  project=None,
                  site=None,
                  channels=None,
                  start_time=None,
                  end_time=None,
-                 sample_start_time=np.array([], dtype='datetime64[s]'), 
-                 sample_end_time=np.array([], dtype='datetime64[s]'), 
-                 integration_interval=None, 
+                 sample_start_time=np.array([], dtype='datetime64[s]'),
+                 sample_end_time=np.array([], dtype='datetime64[s]'),
+                 integration_interval=None,
                  nominal_cadence=None,
                  data=None,
                  units=None,
@@ -307,7 +323,7 @@ class Data(object):
                                          np.size(self.sample_start_time)])
         else:
             self.data = data
-            
+
         self.units = units
         if sort is None:
             sort = np.size(self.data) != 0
@@ -327,11 +343,11 @@ class Data(object):
                 '         channels : ' + str(self.channels) + '\n' +
                 '       start_time : ' + str(self.start_time) + '\n' +
                 '         end_time : ' + str(self.end_time) + '\n' +
-                'sample_start_time : ' + repr(self.sample_start_time) + '\n' + 
-                '  sample_end_time : ' + repr(self.sample_end_time) + '\n' + 
+                'sample_start_time : ' + repr(self.sample_start_time) + '\n' +
+                '  sample_end_time : ' + repr(self.sample_end_time) + '\n' +
                 'integration intv. : ' + repr(self.integration_interval) + '\n' +
                 '   nominal cadence: ' + str(self.nominal_cadence) + '\n' +
-                '             data : ' + repr(self.data) + '\n' + 
+                '             data : ' + repr(self.data) + '\n' +
                 '            units : ' + str(units))
 
     def __format__(self, fmt):
@@ -341,7 +357,7 @@ class Data(object):
 
             '+': Format the start_time. The characters after '+' are
                 passed to auroraplot.dt64tools.strftime().
- 
+
             'start_time', 'end_time': Output the start or end time
                 conforming to ISO8601 standard
                 ('%Y-%m-%dT%H:%M:%S+0000'). A custom format specifier
@@ -364,7 +380,7 @@ class Data(object):
             'site:info': Output site information, info should be
                 replaced with the name of the site information to be
                 inserted, e.g., 'site:location'.
-                
+
             Field names which return string or numerical values can be
             appended by an optional format specifier which is passed
             to the str.format() function, e.g., 'site:elevation:.1f'.
@@ -393,14 +409,14 @@ class Data(object):
         else:
             # Cases below are of form 'field' or 'field:fmt2'
             # Use str.format() to do any additional format conversion
-            f, sep, fmt2 = fmt.partition(':') 
+            f, sep, fmt2 = fmt.partition(':')
 
             if f in ('start_time', 'end_time'):
                 # Custom formatting by strftime
                 if fmt2:
                     r = dt64.strftime(getattr(self, f), fmt2)
                 else:
-                    r = dt64.strftime(getattr(self, f), 
+                    r = dt64.strftime(getattr(self, f),
                                       '%Y-%m-%dT%H:%M:%S+0000')
 
             elif f in ('project_lc', 'site_lc'):
@@ -426,7 +442,7 @@ class Data(object):
                 else:
                     r = self.project
             else:
-                raise ValueError("Invalid format ('%s') for type '%s'" % 
+                raise ValueError("Invalid format ('%s') for type '%s'" %
                                  (fmt, self.__class__.__name__))
 
         if conversion is None:
@@ -450,7 +466,7 @@ class Data(object):
                              (fmt, self.__class__.__name__))
 
         if fmt2:
-            r = ('{0:%s}' % fmt2).format(r)        
+            r = ('{0:%s}' % fmt2).format(r)
 
         return r
 
@@ -460,7 +476,7 @@ class Data(object):
     def assert_valid(self):
         import re
         try:
-            for n in ('project', 'site', 'channels', 'start_time', 'end_time', 
+            for n in ('project', 'site', 'channels', 'start_time', 'end_time',
                       'sample_start_time', 'sample_end_time',
                       'nominal_cadence',
                       'data', 'units'):
@@ -494,13 +510,13 @@ class Data(object):
             logger.debug(str(self))
             logger.debug(traceback.format_exc())
             raise
-        
+
         return True
 
     def get_channel_index(self, channels):
         """
         Find the location of the listed channels in the objects channel list.
-        
+
         channels: list of channels to find.
 
         return list of integers corresponding to location in the
@@ -525,8 +541,8 @@ class Data(object):
         with open(filename, 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
-    def extract(self, start_time=None, end_time=None, channels=None, 
-                inplace=False, 
+    def extract(self, start_time=None, end_time=None, channels=None,
+                inplace=False,
                 straddle_boundary=False, trim_straddles=False):
         if start_time is not None:
             start_time = dt64.astype(start_time, units=self.nominal_cadence)
@@ -546,7 +562,7 @@ class Data(object):
             r.data = r.data[cidx, :]
             if r.integration_interval is not None:
                 r.integration_interval = r.integration_interval[cidx, :]
-            
+
         if start_time is not None or end_time is not None:
             if start_time is None:
                 start_time = self.start_time
@@ -566,7 +582,7 @@ class Data(object):
             r.sample_end_time = r.sample_end_time[tidx]
             if straddle_boundary and trim_straddles:
                 idx = r.sample_start_time < start_time
-                r.sample_start_time[idx] = start_time 
+                r.sample_start_time[idx] = start_time
                 r.sample_end_time[r.sample_end_time > end_time] \
                     = end_time
 
@@ -634,13 +650,13 @@ class Data(object):
             s.append(subtitle)
         else:
             s.append(self.data_description())
-            
-        s.append(dt64.fmt_dt64_range(start_time or self.start_time, 
+
+        s.append(dt64.fmt_dt64_range(start_time or self.start_time,
                                      end_time or self.end_time))
         return '\n'.join(s)
 
     def plot(self, channels=None, figure=None, axes=None, subplot=None,
-             units_prefix=None, title=None, 
+             units_prefix=None, title=None,
              # Our own options
              start_time=None, end_time=None, time_units=None, add_legend=None,
              **kwargs):
@@ -660,7 +676,7 @@ class Data(object):
                 iterator = iter(channels)
             except TypeError:
                 channels = [channels]
-        
+
         new_figure = False
         if axes is not None:
             axes2 = axes
@@ -709,7 +725,7 @@ class Data(object):
             allcidx = []
             for c in channels:
                 allcidx.append(chan_tup.index(c))
-                cu = ap.str_units(np.nanmax(np.abs(self.data[allcidx])), 
+                cu = ap.str_units(np.nanmax(np.abs(self.data[allcidx])),
                                   self.units, prefix=units_prefix,
                                   ascii=False, wantstr=False)
 
@@ -724,7 +740,7 @@ class Data(object):
                 ax = plt.gca()
             ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter(useOffset=False))
             cidx = chan_tup.index(channels[n])
-            u = ap.str_units(np.nanmax(np.abs(self.data[cidx])), self.units, 
+            u = ap.str_units(np.nanmax(np.abs(self.data[cidx])), self.units,
                              prefix=units_prefix, ascii=False, wantstr=False)
             xdata = dt64.mean(self.sample_start_time, self.sample_end_time)
             if u['mul'] == 1:
@@ -743,26 +759,26 @@ class Data(object):
                                         label=channels[n], **kwargs)[0])
 
             dt64.xlim_dt64(xmin=start_time, xmax=end_time, ax=ax)
-            
+
             if not need_legend:
                 # Lines plotted on different axes
                 plt.ylabel(self.channels[cidx] + bracket_units(u['fmtunit']))
-            
+
             if n == 0:
                 first_axes = ax
-                
+
         if add_legend or (add_legend is None and need_legend):
             lh = plt.legend(self.channels[allcidx], loc='best', fancybox=True)
             lh.get_frame().set_alpha(0.6)
             # Label Y axis
-            plt.ylabel(str(self.data_description()) + 
+            plt.ylabel(str(self.data_description()) +
                        bracket_units(cu['fmtunit']))
 
         if new_figure:
             # Add title
             plt.axes(first_axes)
             if title is None:
-                plt.title(self.make_title(start_time=start_time, 
+                plt.title(self.make_title(start_time=start_time,
                                           end_time=end_time))
             else:
                 plt.title(title)
@@ -783,7 +799,7 @@ class Data(object):
                 return None
             if sstd[0] != setd[0]:
                 return None
-        
+
         return sstd[0]
 
     def set_cadence(self, cadence, ignore_nan=True,
@@ -797,25 +813,25 @@ class Data(object):
             aggregate = scipy.average
 
         if cadence > self.nominal_cadence:
-            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence) 
-                                           + offset_interval, 
-                                           self.end_time, 
+            sam_st = dt64.astype(np.arange(dt64.ceil(self.start_time, cadence)
+                                           + offset_interval,
+                                           self.end_time,
                                            cadence),
                                  time_type=self.start_time,
                                  units=tu)
             sam_et = sam_st + cadence
 
-            sample_time = dt64.mean(self.sample_start_time, 
+            sample_time = dt64.mean(self.sample_start_time,
                                     self.sample_end_time)
             d = np.ones([len(self.channels), len(sam_st)]) * ap.NaN
             if self.integration_interval is not None:
                 assert not np.any(dt64.isnat(self.integration_interval)), \
                     'integration_interval must not contain NaT'
-                integ_intv = np.zeros([len(self.channels), len(sam_st)], 
+                integ_intv = np.zeros([len(self.channels), len(sam_st)],
                                       dtype=self.integration_interval.dtype)
             else:
                 integ_intv = None
-                
+
             keep_integ_intv = True
             for sn in range(len(sam_st)):
                 tidx = np.where(np.logical_and(sample_time >= sam_st[sn],
@@ -826,14 +842,14 @@ class Data(object):
                         tidx2 = tidx[notnanidx]
                     else:
                         tidx2 = tidx
-                    
+
                     if self.integration_interval is not None:
                         # Update integration_interval
                         if len(tidx2) != 0:
                             integ_intv[cn, sn] = np.sum(self.integration_interval[cn, tidx2])
-                        
+
                     if len(tidx2) != 0:
-                        # Update data. 
+                        # Update data.
                         if self.integration_interval is None:
                             d[cn, sn] = aggregate(self.data[cn, tidx2])
 
@@ -854,7 +870,7 @@ class Data(object):
             else:
                 r = copy.copy(self)
                 for k in (set(self.__dict__.keys())
-                          - set(['sample_start_time', 'sample_end_time', 
+                          - set(['sample_start_time', 'sample_end_time',
                                  'integration_interval', 'nominal_cadence',
                                  'data'])):
                     setattr(r, k, copy.deepcopy(getattr(self, k)))
@@ -880,11 +896,11 @@ class Data(object):
             else:
                 r = copy.deepcopy(self)
 
-            for k in ('start_time', 'end_time', 
+            for k in ('start_time', 'end_time',
                       'sample_start_time', 'sample_end_time',
                       'nominal_cadence'):
                 setattr(r, k, dt64.astype(getattr(r, k), units=tu))
-        
+
         r.assert_valid()
         return r
 
@@ -902,7 +918,7 @@ class Data(object):
             end_time = self.end_time
         elif end_time < self.end_time:
             trim = True
-            
+
         if trim:
             r = self.extract(start_time=start_time, end_time=end_time)
         # elif inplace:
@@ -911,10 +927,10 @@ class Data(object):
             r = copy.deepcopy(self)
 
         num_channels = len(r.channels)
-        sample_time = dt64.mean(r.sample_start_time, 
+        sample_time = dt64.mean(r.sample_start_time,
                                 r.sample_end_time)
         idx = np.where(np.diff(sample_time) > cadence)[0]
-        
+
         sort = False
         obj_list = [r]
 
@@ -925,7 +941,7 @@ class Data(object):
                 ii = None
             else:
                 ii = np.zeros([num_channels, len(idx)]).astype(r.integration_interval.dtype)
-                
+
             missing = type(self)(project=r.project,
                                  site=r.site,
                                  channels=r.channels,
@@ -990,7 +1006,7 @@ class Data(object):
                                        data=np.ones([num_channels, 1]) * ap.NaN,
                                        units=r.units,
                                        sort=False))
-    
+
         if len(obj_list) == 1:
             r = obj_list[0]
             if sort:
@@ -1044,14 +1060,14 @@ class Data(object):
         r.nominal_cadence = cadence
         return r
 
-    def least_squares_fit(self, ref, err_func=leastsq_error, 
+    def least_squares_fit(self, ref, err_func=leastsq_error,
                           inplace=False, full_output=False, plot_fit=False):
         """
         Fit a dataset to a reference dataset by applying an offset to
         find the least-squared error. Uses scipy.optimize.leastsq()
 
         ref: reference object, of instance Data.
-        
+
         err_func: reference to function which computes the errors. See
             leastsq_error() and sign_error(().
 
@@ -1072,7 +1088,7 @@ class Data(object):
             assert c in ref.channels, 'Channel not in reference object'
 
         # err_func = self._leastsq_residuals
-        
+
         if inplace:
             r = self
         else:
@@ -1084,7 +1100,7 @@ class Data(object):
         for c in self.channels:
             channel = self.channels[0]
             p0 = [0.0]
-            fi = scipy.optimize.leastsq(err_func, p0, 
+            fi = scipy.optimize.leastsq(err_func, p0,
                                         full_output=True,
                                         args=(self, ref, channel))
             errors.append(fi[0][0])
@@ -1100,9 +1116,9 @@ class Data(object):
         else:
             return r
 
-    def minimise_sign_error_fit(self, ref, inplace=False, full_output=False, 
+    def minimise_sign_error_fit(self, ref, inplace=False, full_output=False,
                                 plot_fit=False, **kwargs):
-        
+
         # There ought to be a way to do this with
         # scipy.optimize. Port existing Matlab code by Steve Marple.
         for c in self.channels:
@@ -1213,7 +1229,7 @@ class Data(object):
             r = self
         else:
             r = copy.deepcopy(self)
-            
+
         attr_list = ['start_time', 'end_time', 'nominal_cadence',
                      'sample_start_time', 'sample_end_time']
         if r.integration_interval is not None:
@@ -1250,7 +1266,7 @@ class Data(object):
                     outliers[n, idx] = (prob < criterion)
 
             r_outliers = np.logical_or(r_outliers, outliers)
-            
+
         data[r_outliers] = np.nan
 
         if want_outliers:
@@ -1282,7 +1298,7 @@ class Data(object):
         # Smooth the regularly-spaced data
         window_length = 2 * int(savgol_window / (2 * self.nominal_cadence)) + 1
         for n in range(self2.data.shape[0]):
-            self2.data[n] = ap.tools.savitzky_golay(self2.data[n], 
+            self2.data[n] = ap.tools.savitzky_golay(self2.data[n],
                                                     window_length, 3)
 
         # Interpolate the smoothed data back to the original sample times
@@ -1317,7 +1333,7 @@ class Data(object):
         r.integration_interval = r.integration_interval[:, good_data]
         r.data = r.data[:,good_data]
         r = r.mark_missing_data(3*r.nominal_cadence)
-        
+
         return r
 
     def sliding_window(self, func, window, start_time=None, end_time=None):
