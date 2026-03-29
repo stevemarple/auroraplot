@@ -1,11 +1,20 @@
 #!/usr/bin/env python
 
-from auroraplot.riodata.qdc_algorithms import get_algorithms, get_default_algorithm, QdcAlgorithmBase, UpperEnvelope
 from math import nan
 from numpy import arange, nan, ndarray
 from numpy.testing import assert_array_almost_equal
-from typing import List, Set
+from pathlib import Path
+import sys
 import unittest
+
+sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
+
+from auroraplot.riodata.qdc_algorithms import (
+    get_algorithms,
+    get_default_algorithm,
+    QdcAlgorithmBase,
+    UpperEnvelope,
+)  # noqa
 
 
 class TestRioDataQdcAlgorithms(unittest.TestCase):

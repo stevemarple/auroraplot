@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
-import unittest
-from typing import List, Union
-
 import numpy as np
+from pathlib import Path
+import sys
+from typing import List
+import unittest
 
-from auroraplot import wrap_degrees, wrap_degrees_pm180
+sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
+
+from auroraplot import wrap_degrees, wrap_degrees_pm180  # noqa
 
 
 class TestDt64tools(unittest.TestCase):

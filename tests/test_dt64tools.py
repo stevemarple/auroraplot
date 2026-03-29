@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 import numpy as np
-import unittest
+from pathlib import Path
+import sys
 from typing import Union
+import unittest
 
-import auroraplot.dt64tools as dt64
+sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
+
+import auroraplot.dt64tools as dt64  # noqa
 from auroraplot.dt64tools import (
     dt64_range,
     from_hms,
@@ -22,7 +26,7 @@ from auroraplot.dt64tools import (
     to_ydhms,
     utc_to_lmst,
     wrap_day,
-)
+)  # noqa
 
 
 class TestDt64tools(unittest.TestCase):
