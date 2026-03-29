@@ -119,7 +119,7 @@ def generic_load_converter(file_name, archive_data,
             data = np.reshape(data[col_idx],
                               [len(col_idx), np.size(sample_start_time)])
 
-            if archive_data['data_multiplier']:
+            if 'data_multiplier' in archive_data:
                 data /= archive_data['data_multiplier']
 
             if 'valid_range' in archive_data:
