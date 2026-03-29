@@ -1,0 +1,16 @@
+name: Release auroraplot Python packages
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/_reusable-build.yaml
+    with:
+      publish_to_github: true
