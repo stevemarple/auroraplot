@@ -46,7 +46,7 @@ plot_datetime_epoch = os.getenv("AURORAPLOT_PLOT_DATETIME_EPOCH")
 plot_timedelta_units = os.getenv("AURORAPLOT_PLOT_TIMEDELTA_UNITS")
 plot_timedelta_epoch = os.getenv("AURORAPLOT_PLOT_TIMEDELTA_EPOCH")
 
-epoch64_us = np.datetime64("1970-01-01T00:00:00Z", "us")
+epoch64_us = np.datetime64("1970-01-01T00:00:00", "us")
 
 projects = {}
 
@@ -827,9 +827,9 @@ except Exception as exc:
 # one with a timezone and one without. Repeat the test for a date six
 # months later since DST is in operation in July for N hemisphere and
 # January for S hemisphere.
-if np.datetime64("2000-01-01T00:00:00") != np.datetime64("2000-01-01T00:00:00Z") or np.datetime64(
+if np.datetime64("2000-01-01T00:00:00") != np.datetime64("2000-01-01T00:00:00") or np.datetime64(
     "2000-07-01T00:00:00"
-) != np.datetime64("2000-07-01T00:00:00Z"):
+) != np.datetime64("2000-07-01T00:00:00"):
     # If this warning annoys you then set the timezone or use
     # warnings.filterwarnings() to ignore it.
     message = "Timezone is not UTC or GMT. Times defined without " + "timezone information will use local timezone"
