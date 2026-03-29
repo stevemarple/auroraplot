@@ -608,7 +608,7 @@ def t_to_axis_value(t, axis, units=None, epoch=None, fmt=None):
     if hasattr(axis, 'dt64tools'):
         # Axis already has our data
         axis_data = axis.dt64tools
-        assert t.dtype.type == axis_data.type, 'Cannot add ' + t.dtype.type + ' to axis using ' + axis_data.type
+        assert t.dtype.type == axis_data.type, f"Cannot add {t.dtype.type} to axis using {axis_data.type}"
         assert time_units.index(t_units) >= time_units.index(
             axis_data.units), 'Cannot add time data with units ' + t_units + ' to existing plot using units ' + axis_data.units
         if axis_data.epoch is None:
