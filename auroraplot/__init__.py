@@ -587,7 +587,7 @@ def load_data(project,
               channels=channels)
 
     if cadence is not None and cadence > ad['duration']:
-        # cadence too large to apply on results of loading each file, 
+        # cadence too large to apply on results of loading each file,
         # apply to combined object
         r.set_cadence(cadence,
                       aggregate=aggregate,
