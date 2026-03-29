@@ -3,15 +3,8 @@ import functools
 import logging
 import re
 
-# Python 2/3 compatibility
-import six
-
-try:
-    from urllib.request import urlopen
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-    from urllib import urlopen
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 import numpy as np
 import numpy.fft
@@ -26,9 +19,8 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
-if six.PY3:
-    def cmp(a, b):
-        return (a > b) - (a < b)
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 def load_iaga_2000(file_name):
@@ -380,29 +372,20 @@ def stack_plot(data_array, offset, channel=None,
 
     if channel is None or len(channel) == 0:
         channel = da[0].channels[0]
-    elif not isinstance(channel, six.string_types) and len(channel) == 1:
+    elif not isinstance(channel, str) and len(channel) == 1:
         # Treat lists of single item as string
         channel = channel[0]
 
     if sort:
-        if six.PY3:
-            da = sorted(list(da),
-                        key=functools.cmp_to_key(lambda a, b: (cmp(a.get_site_info('latitude'),
-                                                                   b.get_site_info('latitude')) or
-                                                               cmp(b.project, a.project) or
-                                                               cmp(b.site, a.site))))
-        else:
-            da = sorted(list(da),
-                        cmp=lambda a, b: (cmp(a.get_site_info('latitude'),
-                                              b.get_site_info('latitude')) or
-                                          cmp(b.project, a.project) or
-                                          cmp(b.site, a.site)))
+        da = sorted(list(da),
+                    key=functools.cmp_to_key(lambda a, b: (cmp(a.get_site_info('latitude'),
+                                                               b.get_site_info('latitude')) or
+                                                           cmp(b.project, a.project) or
+                                                           cmp(b.site, a.site))))
 
     r = []
     fig = plt.figure()
     ax = plt.subplot(1, 1, 1)
-    if six.PY2:
-        ax.hold(True)
     tick_labels = []
     st = da[0].start_time
     et = da[0].end_time
@@ -413,7 +396,7 @@ def stack_plot(data_array, offset, channel=None,
     my_min = ap.tools.NthLargest(10, smallest=True)
     cidx = np.tile(-1, len(da))
     for n in range(len(da)):
-        if isinstance(channel, six.string_types):
+        if isinstance(channel, str):
             cidx[n] = da[n].get_channel_index(channel)[0]
         else:
             for c in channel:
@@ -476,7 +459,7 @@ def stack_plot(data_array, offset, channel=None,
                             **kwargs2)
         if ylabel_color == 'auto':
             tick_colors.append(lh[0].get_color())
-        elif isinstance(ylabel_color, six.string_types):
+        elif isinstance(ylabel_color, str):
             tick_colors.append(ylabel_color)
         elif hasattr(ylabel_color, '__getitem__'):
             tick_colors.append(ylabel_color[n])
