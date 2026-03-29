@@ -5,11 +5,10 @@ import pickle
 import six
 import traceback
 
-# Python 2/3 compatibility
-try:
+if six.PY3:
     from urllib.request import urlopen
     from urllib.parse import urlparse
-except ImportError:
+else:
     from urlparse import urlparse
     from urllib import urlopen
 
@@ -1201,9 +1200,7 @@ class Data(object):
             if not os.path.exists(dir_name):
                 logger.debug('making directory %s', dir_name)
                 os.makedirs(dir_name)
-            logger.info('saving to %s',
-                        file_name.name if isinstance(file_name, file)
-                        else file_name)
+            logger.info('saving to %s', file_name.name if hasattr(file_name, 'name') else file_name)
             save_converter(d, file_name, ai)
 
     def set_time_units(self, units, inplace=False):
