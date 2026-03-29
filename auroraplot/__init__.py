@@ -736,8 +736,10 @@ def download_url(url, prefix=__name__, temporary_file=True, dest=None):
         try:
             n = netrc.netrc()
             auth = n.authenticators(url_parts.hostname)
-        except IOError as e:
-            pass
+        except IOError:
+            pass # File probably not found
+        except netrc.NetrcParseError as e:
+            logger.warning(f'Ignoring netrc parse error: {e}')
 
         if auth:
             logger.debug('inserting authentication details into URL')
