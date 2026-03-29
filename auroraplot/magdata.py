@@ -19,29 +19,30 @@ import warnings
 
 logger = logging.getLogger(__name__)
 
+
 def cmp(a, b):
     return (a > b) - (a < b)
 
 
 def load_iaga_2000(file_name):
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+        if file_name.startswith("/"):
+            uh = urlopen("file:" + file_name)
         else:
             uh = urlopen(file_name)
 
         try:
-            lines = [a.rstrip().decode('ascii') for a in uh.readlines()]
+            lines = [a.rstrip().decode("ascii") for a in uh.readlines()]
             header = {}
             comments = []
 
             # Parse header
-            while lines[0][0] == ' ':
+            while lines[0][0] == " ":
                 s = lines.pop(0)
-                if s[1] == '#':
+                if s[1] == "#":
                     # Comment
                     c = s[2:-1].strip()
-                    if c != '':
+                    if c != "":
                         comments.append(c)
                 else:
                     # Header line
@@ -49,10 +50,12 @@ def load_iaga_2000(file_name):
                     value = s[24:-1].strip()
                     header[key] = value
 
-            # Parse data header and store column positions. 
+            # Parse data header and store column positions.
             s = lines.pop(0)
             cols = s[:-1].split()
-            col_pos = [[0, 0], ]
+            col_pos = [
+                [0, 0],
+            ]
             last_pos = len(s)
             data = [[]]
             col_number = {cols[0]: 0}
@@ -75,7 +78,7 @@ def load_iaga_2000(file_name):
             # each data column should start.
             for s in lines:
                 # Remove any trailing '|'
-                s = s.strip('|')
+                s = s.strip("|")
 
                 # Can the line be split correctly based on whitespace?
                 data_cols = s.split()
@@ -87,62 +90,63 @@ def load_iaga_2000(file_name):
                     # No, number of data columns differs so use
                     # position to determine data
                     for n in range(len(cols)):
-                        data[n].append(s[col_pos[n][0]:col_pos[n][1]].strip())
+                        data[n].append(s[col_pos[n][0] : col_pos[n][1]].strip())
 
             # Convert date and time
-            if 'DATE' in col_number and 'TIME' in col_number:
-                dn = col_number['DATE']
-                tn = col_number['TIME']
+            if "DATE" in col_number and "TIME" in col_number:
+                dn = col_number["DATE"]
+                tn = col_number["TIME"]
                 sample_time = []
                 for n in range(len(data[0])):
-                    sample_time.append(np.datetime64(data[dn][n] + 'T' +
-                                                     data[tn][n] + 'Z') \
-                                       .astype('<M8[us]'))
+                    sample_time.append(np.datetime64(data[dn][n] + "T" + data[tn][n] + "Z").astype("<M8[us]"))
                 sample_time = np.array(sample_time)
             else:
                 sample_time = None
 
-            r = {'header': header,
-                 'comments': comments,
-                 'data': data,
-                 'columns': cols,
-                 'column_number': col_number,
-                 'sample_time': sample_time
-                 }
+            r = {
+                "header": header,
+                "comments": comments,
+                "data": data,
+                "columns": cols,
+                "column_number": col_number,
+                "sample_time": sample_time,
+            }
             return r
 
         except Exception as e:
-            logger.info('Could not read ' + file_name)
+            logger.info("Could not read " + file_name)
             logger.debug(str(e))
 
         finally:
             uh.close()
 
     except Exception as e:
-        logger.info('Could not open ' + file_name)
+        logger.info("Could not open " + file_name)
         logger.debug(str(e))
     return None
 
 
-def load_qdc(project,
-             site,
-             time,
-             archive=None,
-             channels=None,
-             path=None,
-             tries=1,
-             realtime=False,
-             load_function=None,
-             full_output=False):
+def load_qdc(
+    project,
+    site,
+    time,
+    archive=None,
+    channels=None,
+    path=None,
+    tries=1,
+    realtime=False,
+    load_function=None,
+    full_output=False,
+):
     """Load quiet-day curve.
     project: name of the project (upper case)
 
     site: site abbreviation (upper case)
 
     time: a time within the quiet-day curve period
-    
-    The following optional parameters are recognised: 
-    
+
+    The following optional parameters are recognised:
+
     archive: name of the archive. Required if more than one archive is
         present and there is not an archive called "default".
 
@@ -151,7 +155,7 @@ def load_qdc(project,
     tries: The number of attempts to load a quiet-day curve. If >1 and
         the first attempt is not successful then an attempt will be
         made to load the previous QDC.
- 
+
     path: URL or file path, specified as a strftime format specifier.
         Alternatively can be a function reference which is passed the
         time and returns the filename. If given this overrides the
@@ -159,26 +163,25 @@ def load_qdc(project,
 
     load_function: Pass responsibility for loading the data to the given
         function reference, after validating the input parameters.
-        
+
     """
 
-    data_type = 'MagQDC'
-    archive, ad = ap.get_archive_info(project, site, data_type,
-                                      archive=archive)
+    data_type = "MagQDC"
+    archive, ad = ap.get_archive_info(project, site, data_type, archive=archive)
     if channels is not None:
         # Ensure it is a 1D numpy array
         channels = np.array(channels).flatten()
         for c in channels:
-            if c not in ad['channels']:
-                raise ValueError('Unknown channel (%s)' % str(c))
+            if c not in ad["channels"]:
+                raise ValueError("Unknown channel (%s)" % str(c))
     else:
-        channels = ad['channels']
+        channels = ad["channels"]
 
     if path is None:
-        path = ad['path']
+        path = ad["path"]
 
     if load_function is None:
-        load_function = ad.get('load_function', None)
+        load_function = ad.get("load_function", None)
 
     if tries is None:
         tries = 1
@@ -186,16 +189,18 @@ def load_qdc(project,
     if load_function:
         # Pass responsibility for loading to some other
         # function. Parameters have already been checked.
-        return load_function(project,
-                             site,
-                             data_type,
-                             time,
-                             archive=archive,
-                             channels=channels,
-                             path=path,
-                             tries=tries,
-                             realtime=realtime,
-                             full_output=full_output)
+        return load_function(
+            project,
+            site,
+            data_type,
+            time,
+            archive=archive,
+            channels=channels,
+            path=path,
+            tries=tries,
+            realtime=realtime,
+            full_output=full_output,
+        )
     data = []
 
     t = dt64.get_start_of_month(time)
@@ -207,53 +212,48 @@ def load_qdc(project,
 
         # Early in the month the previous motnh's QDC was probably not
         # computed, so use the month before that
-        qdc_rollover_day = ad.get('qdc_rollover_day', 4)
+        qdc_rollover_day = ad.get("qdc_rollover_day", 4)
         if dt64.get_day_of_month(time) < qdc_rollover_day:
             t = dt64.get_start_of_previous_month(t)
 
     for n in range(tries):
         try:
-            if hasattr(path, '__call__'):
+            if hasattr(path, "__call__"):
                 # Function: call it with relevant information to get the path
-                file_name = path(t, project=project, site=site,
-                                 data_type=data_type, archive=archive,
-                                 channels=channels)
+                file_name = path(t, project=project, site=site, data_type=data_type, archive=archive, channels=channels)
             else:
                 file_name = dt64.strftime(t, path)
 
-            logger.info('loading ' + file_name)
+            logger.info("loading " + file_name)
 
-            r = ad['load_converter'](file_name,
-                                     ad,
-                                     project=project,
-                                     site=site,
-                                     data_type=data_type,
-                                     start_time=np.timedelta64(0, 'h'),
-                                     end_time=np.timedelta64(24, 'h'),
-                                     archive=archive,
-                                     channels=channels,
-                                     path=path)
+            r = ad["load_converter"](
+                file_name,
+                ad,
+                project=project,
+                site=site,
+                data_type=data_type,
+                start_time=np.timedelta64(0, "h"),
+                end_time=np.timedelta64(24, "h"),
+                archive=archive,
+                channels=channels,
+                path=path,
+            )
             if r is not None:
-                r.extract(inplace=True,
-                          channels=channels)
+                r.extract(inplace=True, channels=channels)
                 if full_output:
-                    r2 = {'magqdc': r,
-                          'tries': n + 1,
-                          'maxtries': tries}
+                    r2 = {"magqdc": r, "tries": n + 1, "maxtries": tries}
                     return r2
                 else:
                     return r
 
         finally:
             # Go to start of previous month
-            t = dt64.get_start_of_month(t - np.timedelta64(24, 'h'))
+            t = dt64.get_start_of_month(t - np.timedelta64(24, "h"))
 
     return None
 
 
-def load_qdc_data(file_name, archive_data,
-                  project, site, data_type, channels, start_time,
-                  end_time, **kwargs):
+def load_qdc_data(file_name, archive_data, project, site, data_type, channels, start_time, end_time, **kwargs):
     """Convert AuroraWatchNet QDC file to match standard data type.
 
     This function can be used by datasets as the load_converter for
@@ -264,72 +264,78 @@ def load_qdc_data(file_name, archive_data,
     archive_info: archive metadata
     """
 
-    assert data_type == 'MagQDC', 'Illegal data_type'
-    chan_tup = tuple(archive_data['channels'])
+    assert data_type == "MagQDC", "Illegal data_type"
+    chan_tup = tuple(archive_data["channels"])
     col_idx = []
     for c in channels:
         col_idx.append(chan_tup.index(c) + 1)
     try:
-        if file_name.startswith('/'):
-            uh = urlopen('file:' + file_name)
+        if file_name.startswith("/"):
+            uh = urlopen("file:" + file_name)
         else:
             uh = urlopen(file_name)
         try:
             data = np.loadtxt(uh, unpack=True)
-            sample_start_time = (np.timedelta64(1000000, 'us') * data[0])
-            sample_end_time = sample_start_time + archive_data['nominal_cadence']
+            sample_start_time = np.timedelta64(1000000, "us") * data[0]
+            sample_end_time = sample_start_time + archive_data["nominal_cadence"]
 
             integration_interval = None
             data = data[col_idx] * 1e-9  # Stored as nT
-            r = MagQDC(project=project,
-                       site=site,
-                       channels=np.array(channels),
-                       start_time=start_time,
-                       end_time=end_time,
-                       sample_start_time=sample_start_time,
-                       sample_end_time=sample_end_time,
-                       integration_interval=integration_interval,
-                       nominal_cadence=archive_data['nominal_cadence'],
-                       data=data,
-                       units=archive_data['units'],
-                       sort=False)
+            r = MagQDC(
+                project=project,
+                site=site,
+                channels=np.array(channels),
+                start_time=start_time,
+                end_time=end_time,
+                sample_start_time=sample_start_time,
+                sample_end_time=sample_end_time,
+                integration_interval=integration_interval,
+                nominal_cadence=archive_data["nominal_cadence"],
+                data=data,
+                units=archive_data["units"],
+                sort=False,
+            )
             return r
 
         except Exception as e:
-            logger.info('Could not read ' + file_name)
+            logger.info("Could not read " + file_name)
             logger.debug(str(e))
 
         finally:
             uh.close()
     except Exception as e:
-        logger.info('Could not open ' + file_name)
+        logger.info("Could not open " + file_name)
         logger.debug(str(e))
     return None
 
 
 def _save_baseline_data(md, file_name, archive_data):
-    assert isinstance(md, MagData), 'Data is wrong type'
-    assert md.units == 'T', 'Data units incorrect'
-    assert md.data.shape[0] == np.size(md.channels), \
-        'data shape incorrect for number of channels'
-    assert md.data.shape[1] == np.size(md.sample_start_time), \
-        'data shape incorrect for number of samples'
+    assert isinstance(md, MagData), "Data is wrong type"
+    assert md.units == "T", "Data units incorrect"
+    assert md.data.shape[0] == np.size(md.channels), "data shape incorrect for number of channels"
+    assert md.data.shape[1] == np.size(md.sample_start_time), "data shape incorrect for number of samples"
     data = np.empty([1 + np.size(md.channels), np.size(md.sample_start_time)])
     data[0] = (md.sample_end_time - md.start_time) / md.nominal_cadence
     data[1:] = md.data * 1e9
-    fmt = ['%d']
-    fmt.extend(['%.2f'] * np.size(md.channels))
-    np.savetxt(file_name, data.T, delimiter='\t', fmt=fmt)
+    fmt = ["%d"]
+    fmt.extend(["%.2f"] * np.size(md.channels))
+    np.savetxt(file_name, data.T, delimiter="\t", fmt=fmt)
 
 
-def stack_plot(data_array, offset, channel=None,
-               start_time=None, end_time=None,
-               sort=True, scale_bar=True,
-               ylabel_fmt='{data:project}\n{data:site}',
-               ylabel_color=None,
-               add_legend=None,
-               colors=None,
-               **kwargs):
+def stack_plot(
+    data_array,
+    offset,
+    channel=None,
+    start_time=None,
+    end_time=None,
+    sort=True,
+    scale_bar=True,
+    ylabel_fmt="{data:project}\n{data:site}",
+    ylabel_color=None,
+    add_legend=None,
+    colors=None,
+    **kwargs,
+):
     """
     Plot multiple MagData objects on a single axes. Magnetometer
     stackplots have a distinct meaning and should not be confused with
@@ -340,13 +346,13 @@ def stack_plot(data_array, offset, channel=None,
     value) is displayed. Each object displayed offset from the
     previous. If "sort" is True then plots are ordered North (top) to
     South (bottom).
-    
+
     data_array: A sequence of MagData objects. All objects must use
         the same data units.
-    
+
     offset: The distance between each trace, given in the data units
         (usually tesla).
-       
+
     channel: The data channel to use. If None given defaults to the
         first channel in the first object of the data_array sequence.
         If channel is a string then plot only the selected channel,
@@ -357,7 +363,7 @@ def stack_plot(data_array, offset, channel=None,
 
     start_time: The start time for the x axis. If None then the
         earliest start time from all datasets.
- 
+
     end_time: The end time for the x axis. If None then the latest end
         time from all datasets.
 
@@ -368,7 +374,7 @@ def stack_plot(data_array, offset, channel=None,
     da = np.array(data_array).flatten()
 
     for n in range(1, da.size):
-        assert da[0].units == da[n].units, 'units differ'
+        assert da[0].units == da[n].units, "units differ"
 
     if channel is None or len(channel) == 0:
         channel = da[0].channels[0]
@@ -377,11 +383,16 @@ def stack_plot(data_array, offset, channel=None,
         channel = channel[0]
 
     if sort:
-        da = sorted(list(da),
-                    key=functools.cmp_to_key(lambda a, b: (cmp(a.get_site_info('latitude'),
-                                                               b.get_site_info('latitude')) or
-                                                           cmp(b.project, a.project) or
-                                                           cmp(b.site, a.site))))
+        da = sorted(
+            list(da),
+            key=functools.cmp_to_key(
+                lambda a, b: (
+                    cmp(a.get_site_info("latitude"), b.get_site_info("latitude"))
+                    or cmp(b.project, a.project)
+                    or cmp(b.site, a.site)
+                )
+            ),
+        )
 
     r = []
     fig = plt.figure()
@@ -407,19 +418,17 @@ def stack_plot(data_array, offset, channel=None,
                     # Not found
                     continue
         ydiff[n] = my_max(da[n].data[cidx[n]]) - my_min(da[n].data[cidx[n]])
-        tick_labels.append(ylabel_fmt.format(data=da[n],
-                                             channel=da[n].channels[cidx[n]]))
+        tick_labels.append(ylabel_fmt.format(data=da[n], channel=da[n].channels[cidx[n]]))
 
     if len(da) == 2:
         ydisturb = np.nanmin(ydiff)  # Median would include any disturbance!
     else:
         ydisturb = ap.nanmedian(ydiff)
 
-    if offset == 'auto' or np.isnan(offset):
+    if offset == "auto" or np.isnan(offset):
         # Compute sensible value for offset
         y_test = ydisturb / 2
-        offset_tries = (np.array([1, 2, 5, 10, 20]) *
-                        np.power(10.0, np.floor(np.log10(ydisturb / 2))))
+        offset_tries = np.array([1, 2, 5, 10, 20]) * np.power(10.0, np.floor(np.log10(ydisturb / 2)))
         offset = offset_tries[list(offset_tries >= y_test).index(True)]
 
     # Plot each data set
@@ -435,13 +444,12 @@ def stack_plot(data_array, offset, channel=None,
         et = np.max([et, da[n].end_time])
 
         d = da[n].mark_missing_data(cadence=da[n].nominal_cadence * 2)
-        y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1)
-             + (plot_count * offset)).flatten()
+        y = (d.data[cidx[n]] - ap.nanmedian(d.data[cidx[n]], axis=-1) + (plot_count * offset)).flatten()
 
         site_color = None
         kwargs2 = copy.copy(kwargs)
         try:
-            site_color = da[n].get_site_info('line_color')
+            site_color = da[n].get_site_info("line_color")
         except Exception as e:
             pass
         if colors is not None:
@@ -451,17 +459,14 @@ def stack_plot(data_array, offset, channel=None,
                 pass
 
         if site_color is not None:
-            kwargs2['color'] = site_color
+            kwargs2["color"] = site_color
 
-        lh = dt64.plot_dt64(d.get_mean_sample_time(),
-                            y,
-                            label=d.format_project_site(),
-                            **kwargs2)
-        if ylabel_color == 'auto':
+        lh = dt64.plot_dt64(d.get_mean_sample_time(), y, label=d.format_project_site(), **kwargs2)
+        if ylabel_color == "auto":
             tick_colors.append(lh[0].get_color())
         elif isinstance(ylabel_color, str):
             tick_colors.append(ylabel_color)
-        elif hasattr(ylabel_color, '__getitem__'):
+        elif hasattr(ylabel_color, "__getitem__"):
             tick_colors.append(ylabel_color[n])
         else:
             tick_colors.append(None)
@@ -480,8 +485,7 @@ def stack_plot(data_array, offset, channel=None,
 
         ylim = ax.yaxis.get_data_interval()
         ylim[0] = max(np.floor(ylim[0] / offset) * offset, -ydisturb)
-        ylim[1] = min(np.ceil(ylim[1] / offset) * offset,
-                      (len(da) - 1) * offset + ydisturb)
+        ylim[1] = min(np.ceil(ylim[1] / offset) * offset, (len(da) - 1) * offset + ydisturb)
 
         tick_labels2 = []
         tick_colors2 = []
@@ -493,21 +497,20 @@ def stack_plot(data_array, offset, channel=None,
                 tick_labels2.append(tick_labels[yn])
                 tick_colors2.append(tick_colors[yn])
             else:
-                tick_labels2.append('')
-                tick_colors2.append('k')
+                tick_labels2.append("")
+                tick_colors2.append("k")
 
         ax.yaxis.set_ticks(np.array(yn_nums) * offset)
         ax.yaxis.set_ticklabels(tick_labels2)
         for tl, c in zip(ax.yaxis.get_ticklabels(), tick_colors2):
-            if c is not None and c != '':
+            if c is not None and c != "":
                 tl.set_color(c)
 
     if add_legend or (add_legend is None and offset == 0):
-        leg = plt.legend(prop={'size': 'medium'})
+        leg = plt.legend(prop={"size": "medium"})
         leg.get_frame().set_alpha(0.7)
 
-    ax.set_title('\n'.join(['Magnetometer stackplot',
-                            dt64.fmt_dt64_range(st, et)]))
+    ax.set_title("\n".join(["Magnetometer stackplot", dt64.fmt_dt64_range(st, et)]))
 
     if scale_bar:
         if offset:
@@ -517,16 +520,12 @@ def stack_plot(data_array, offset, channel=None,
             scale_bar = False
 
     if scale_bar:
-        draw_scale_marker(ax, offset / 2, offset,
-                          text=ap.str_units(offset, da[0].units, 'n'))
+        draw_scale_marker(ax, offset / 2, offset, text=ap.str_units(offset, da[0].units, "n"))
 
     return r
 
 
-def draw_scale_marker(ax, y, length,
-                      color='black',
-                      linewidth=2,
-                      text=None):
+def draw_scale_marker(ax, y, length, color="black", linewidth=2, text=None):
     xrel = 0.1
     ends_len_2 = 0.01
     xlim = ax.get_xlim()
@@ -538,10 +537,8 @@ def draw_scale_marker(ax, y, length,
     ax.plot(x2, y2[[0, 0]], color=color, linewidth=linewidth)  # Bottom bar
     ax.plot(x2, y2[[1, 1]], color=color, linewidth=linewidth)  # Top bar
     if text:
-        t = ax.text(x2[1], y, text, color=color,
-                    horizontalalignment='left',
-                    verticalalignment='center')
-        t.set_bbox(dict(color='white', alpha=0.7))
+        t = ax.text(x2[1], y, text, color=color, horizontalalignment="left", verticalalignment="center")
+        t.set_bbox(dict(color="white", alpha=0.7))
 
     return r
 
@@ -549,59 +546,70 @@ def draw_scale_marker(ax, y, length,
 class MagData(Data):
     """Class to manipulate and display magnetometer data."""
 
-    def __init__(self,
-                 project=None,
-                 site=None,
-                 channels=None,
-                 start_time=None,
-                 end_time=None,
-                 sample_start_time=np.array([], dtype='datetime64[s]'),
-                 sample_end_time=np.array([], dtype='datetime64[s]'),
-                 integration_interval=None,
-                 nominal_cadence=None,
-                 data=None,
-                 units=None,
-                 sort=None):
-        Data.__init__(self,
-                      project=project,
-                      site=site,
-                      channels=channels,
-                      start_time=start_time,
-                      end_time=end_time,
-                      sample_start_time=sample_start_time,
-                      sample_end_time=sample_end_time,
-                      integration_interval=integration_interval,
-                      nominal_cadence=nominal_cadence,
-                      data=data,
-                      units=units,
-                      sort=sort)
+    def __init__(
+        self,
+        project=None,
+        site=None,
+        channels=None,
+        start_time=None,
+        end_time=None,
+        sample_start_time=np.array([], dtype="datetime64[s]"),
+        sample_end_time=np.array([], dtype="datetime64[s]"),
+        integration_interval=None,
+        nominal_cadence=None,
+        data=None,
+        units=None,
+        sort=None,
+    ):
+        Data.__init__(
+            self,
+            project=project,
+            site=site,
+            channels=channels,
+            start_time=start_time,
+            end_time=end_time,
+            sample_start_time=sample_start_time,
+            sample_end_time=sample_end_time,
+            integration_interval=integration_interval,
+            nominal_cadence=nominal_cadence,
+            data=data,
+            units=units,
+            sort=sort,
+        )
 
     def data_description(self):
-        return 'Magnetic field'
+        return "Magnetic field"
 
     def savetxt(self, filename, fmt=None):
-        a = np.zeros([self.channels.size + 1, self.data.shape[-1]],
-                     dtype='float')
-        a[0] = dt64.dt64_to(self.sample_start_time, 'us') / 1e6
-        if self.units == 'T':
+        a = np.zeros([self.channels.size + 1, self.data.shape[-1]], dtype="float")
+        a[0] = dt64.dt64_to(self.sample_start_time, "us") / 1e6
+        if self.units == "T":
             # Convert to nT
             a[1:] = self.data * 1e9
         else:
-            warnings.warn('Unknown units')
+            warnings.warn("Unknown units")
             a[1:] = self.data
 
-        logger.info('saving to %s',
-                    filename.name if isinstance(filename, file)
-                    else filename)
+        logger.info("saving to %s", filename.name if isinstance(filename, file) else filename)
 
         kwargs = {}
         if fmt is not None:
-            kwargs['fmt'] = fmt
+            kwargs["fmt"] = fmt
         np.savetxt(filename, a.transpose(), **kwargs)
 
-    def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, units_prefix=None, title=None,
-             start_time=None, end_time=None, time_units=None, **kwargs):
+    def plot(
+        self,
+        channels=None,
+        figure=None,
+        axes=None,
+        subplot=None,
+        units_prefix=None,
+        title=None,
+        start_time=None,
+        end_time=None,
+        time_units=None,
+        **kwargs,
+    ):
         if channels is None:
             channels = self.channels
 
@@ -614,31 +622,36 @@ class MagData(Data):
         else:
             subplot2 = subplot
 
-        if units_prefix is None and self.units == 'T':
+        if units_prefix is None and self.units == "T":
             # Use nT for plotting
-            units_prefix = 'n'
+            units_prefix = "n"
 
-        r = Data.plot(self, channels=channels, figure=figure, axes=axes,
-                      subplot=subplot2, units_prefix=units_prefix,
-                      title=title,
-                      start_time=start_time, end_time=end_time,
-                      time_units=time_units, **kwargs)
+        r = Data.plot(
+            self,
+            channels=channels,
+            figure=figure,
+            axes=axes,
+            subplot=subplot2,
+            units_prefix=units_prefix,
+            title=title,
+            start_time=start_time,
+            end_time=end_time,
+            time_units=time_units,
+            **kwargs,
+        )
         return r
 
     def plot_with_qdc(self, qdc, fit_err_func=None, **kwargs):
         self.plot(**kwargs)
         if qdc is not None:
-            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(),
-                                                            **kwargs)
+            qdc.align(self, fit_err_func=fit_err_func).plot(axes=plt.gca(), **kwargs)
 
     def variometer_plot(self, channels=None, qdc=None, axes=None, **kwargs):
         if channels is None:
             channels = self.channels
 
-        colors = {'H': 'b', 'X': 'b',
-                  'D': 'r', 'E': 'r', 'Y': 'r',
-                  'Z': 'g'}
-        kwargs['axes'] = axes
+        colors = {"H": "b", "X": "b", "D": "r", "E": "r", "Y": "r", "Z": "g"}
+        kwargs["axes"] = axes
         md = copy.deepcopy(self)
         qdc2 = copy.deepcopy(qdc)
         for chan in channels:
@@ -646,33 +659,30 @@ class MagData(Data):
             adj = -np.median(md.data[chan_num])
             md.data[chan_num] += adj
             if chan.upper() in colors:
-                kwargs['color'] = colors[chan.upper()]
-            kwargs['alpha'] = 1
-            kwargs['zorder'] = -chan_num
+                kwargs["color"] = colors[chan.upper()]
+            kwargs["alpha"] = 1
+            kwargs["zorder"] = -chan_num
             md.plot(channels=chan, **kwargs)
-            kwargs['axes'] = plt.gca()
+            kwargs["axes"] = plt.gca()
 
             if qdc2 is not None:
                 qdc2.data[list(qdc2.channels).index(chan)] += adj
-                kwargs['alpha'] = 0.4
-                kwargs['zorder'] -= 0.5
-                qdc2.align(md).plot(channels=chan, label=chan + ' QDC',
-                                    **kwargs)
+                kwargs["alpha"] = 0.4
+                kwargs["zorder"] -= 0.5
+                qdc2.align(md).plot(channels=chan, label=chan + " QDC", **kwargs)
 
-        leg = plt.legend(prop={'size': 'medium'})
+        leg = plt.legend(prop={"size": "medium"})
         leg.get_frame().set_alpha(0.7)
 
-    def get_quiet_days(self, nquiet=5, channels=None,
-                       cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                       method=None):
+    def get_quiet_days(self, nquiet=5, channels=None, cadence=np.timedelta64(5, "s").astype("m8[us]"), method=None):
         """
         nquiet: number of quiet days
-        
+
         channels: channels used in calculations. Defaults to first
         channel only
-        
+
         cadence: cadence used for calculation, and of the returned data
-                
+
         returns: data from nquiet quietest days
 
         Adapted from algorithm originally developed by Andrew Senior.
@@ -686,13 +696,12 @@ class MagData(Data):
             cidx = self.get_channel_index(channels)
 
         if method is None:
-            method = 'monthly_mean'
+            method = "monthly_mean"
 
-        day = np.timedelta64(24, 'h')
+        day = np.timedelta64(24, "h")
         st = dt64.floor(self.start_time, day)
         et = dt64.ceil(self.end_time, day)
-        s = self.space_regularly(cadence, start_time=st, end_time=et,
-                                 missing_cadence=self.nominal_cadence * 2)
+        s = self.space_regularly(cadence, start_time=st, end_time=et, missing_cadence=self.nominal_cadence * 2)
 
         num_days = int(np.round((et - st) / day))
         daily_data = s.split(day)
@@ -701,31 +710,29 @@ class MagData(Data):
         # Compute monthly mean for each selected channel
         monthly_means = ap.nanmean(s.data[cidx], axis=1)
 
-        if method == 'monthly_mean':
+        if method == "monthly_mean":
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # monthly mean
-                daily_act[n] = \
-                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx]
-                                                   .transpose() -
-                                                   monthly_means) ** 2, axis=1)))
+                daily_act[n] = ap.nanmean(
+                    np.sqrt(ap.nanmean((daily_data[n].data[cidx].transpose() - monthly_means) ** 2, axis=1))
+                )
 
-        elif method == 'daily_mean':
+        elif method == "daily_mean":
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # daily mean
                 daily_means = ap.nanmean(daily_data[n].data[cidx], axis=1)
-                daily_act[n] = \
-                    ap.nanmean(np.sqrt(ap.nanmean((daily_data[n].data[cidx]
-                                                   .transpose() -
-                                                   daily_means) ** 2, axis=1)))
+                daily_act[n] = ap.nanmean(
+                    np.sqrt(ap.nanmean((daily_data[n].data[cidx].transpose() - daily_means) ** 2, axis=1))
+                )
 
                 # Shift the data by the difference between the monthly
                 # and daily means
-                daily_data[n].data += (monthly_means - daily_means)
+                daily_data[n].data += monthly_means - daily_means
 
-        elif method == 'linear_fit':
-            x = self.get_mean_sample_time().astype('m8[us]').astype('int64')
+        elif method == "linear_fit":
+            x = self.get_mean_sample_time().astype("m8[us]").astype("int64")
             fits = []
             for cn in range(len(cidx)):
                 fits.append(np.polyfit(x, self.data[cidx[cn]], 1))
@@ -733,23 +740,20 @@ class MagData(Data):
             for n in range(num_days):
                 # Estimate daily activity based on RMS departure from
                 # linear fit to dataset
-                daily_x = daily_data[n].get_mean_sample_time() \
-                    .astype('m8[us]').astype('int64')
+                daily_x = daily_data[n].get_mean_sample_time().astype("m8[us]").astype("int64")
                 tmp_act = np.zeros([1, len(cidx)])
                 for cn in range(len(cidx)):
                     daily_y = fits[cn][0] * daily_x + fits[cn][1]
-                    tmp_act[cn] = ap.nanmean((daily_data[n].data[cidx[cn]]
-                                              .transpose() - daily_y) ** 2)
+                    tmp_act[cn] = ap.nanmean((daily_data[n].data[cidx[cn]].transpose() - daily_y) ** 2)
 
                     # Shift the data by the difference between the
                     # monthly mean and the fit.
-                    daily_data[n].data[cidx[cn]] += \
-                        (monthly_means[cn] - daily_y)
+                    daily_data[n].data[cidx[cn]] += monthly_means[cn] - daily_y
 
                 daily_act[n] = ap.nanmean(np.sqrt(ap.nanmean(tmp_act)))
 
         else:
-            raise Exception('Unknown method')
+            raise Exception("Unknown method")
 
         # Don't use days where more than 25% of data is missing
         for n in range(num_days):
@@ -763,15 +767,18 @@ class MagData(Data):
             r.append(daily_data[idx[n]])
         return r
 
-    def make_qdc(self, nquiet=5, channels=None,
-                 cadence=np.timedelta64(5, 's').astype('m8[us]'),
-                 quiet_days_method=None,
-                 smooth=True,
-                 plot=False,
-                 remove_nans_window=np.timedelta64(10, 'm'),
-                 remove_nans_func=np.nanmean):
-        qd = self.get_quiet_days(nquiet=nquiet, channels=channels,
-                                 cadence=cadence, method=quiet_days_method)
+    def make_qdc(
+        self,
+        nquiet=5,
+        channels=None,
+        cadence=np.timedelta64(5, "s").astype("m8[us]"),
+        quiet_days_method=None,
+        smooth=True,
+        plot=False,
+        remove_nans_window=np.timedelta64(10, "m"),
+        remove_nans_func=np.nanmean,
+    ):
+        qd = self.get_quiet_days(nquiet=nquiet, channels=channels, cadence=cadence, method=quiet_days_method)
         axes = None
         if plot:
             for q in qd:
@@ -783,14 +790,12 @@ class MagData(Data):
                 q.end_time = q.end_time - qst
                 q.sample_start_time = q.sample_start_time - qst
                 q.sample_end_time = q.sample_end_time - qst
-                q.plot(title='Quiet days', axes=axes, label=dt64.strftime(qst, '%Y-%m-%d'))
+                q.plot(title="Quiet days", axes=axes, label=dt64.strftime(qst, "%Y-%m-%d"))
                 axes = plt.gcf().get_axes()
             for ax in axes:
-                ax.legend(loc='upper left', fontsize='small')
+                ax.legend(loc="upper left", fontsize="small")
 
-        sam_st = np.arange(np.timedelta64(0, 's').astype('m8[us]'),
-                           np.timedelta64(24, 'h').astype('m8[us]'),
-                           cadence)
+        sam_st = np.arange(np.timedelta64(0, "s").astype("m8[us]"), np.timedelta64(24, "h").astype("m8[us]"), cadence)
         sam_et = sam_st + cadence
 
         qdc_data = np.zeros([len(qd[0].channels), len(sam_st)])
@@ -802,18 +807,20 @@ class MagData(Data):
 
         qdc_data /= count
 
-        qdc = MagQDC(project=self.project,
-                     site=self.site,
-                     channels=qd[0].channels,
-                     start_time=np.timedelta64(0, 'h'),
-                     end_time=np.timedelta64(24, 'h'),
-                     sample_start_time=sam_st,
-                     sample_end_time=sam_et,
-                     integration_interval=None,
-                     nominal_cadence=cadence,
-                     data=qdc_data,
-                     units=self.units,
-                     sort=False)
+        qdc = MagQDC(
+            project=self.project,
+            site=self.site,
+            channels=qd[0].channels,
+            start_time=np.timedelta64(0, "h"),
+            end_time=np.timedelta64(24, "h"),
+            sample_start_time=sam_st,
+            sample_end_time=sam_et,
+            integration_interval=None,
+            nominal_cadence=cadence,
+            data=qdc_data,
+            units=self.units,
+            sort=False,
+        )
 
         if remove_nans_window and remove_nans_func and np.any(np.isnan(qdc.data)):
             qdc_no_nans = qdc.sliding_window(remove_nans_func, remove_nans_window)
@@ -822,14 +829,14 @@ class MagData(Data):
         final_fig = None
         if smooth:
             if plot:
-                qdc.plot(title='Final QDC', label='Unsmoothed QDC')
+                qdc.plot(title="Final QDC", label="Unsmoothed QDC")
                 final_fig = plt.gcf()
             qdc.smooth(inplace=True)
 
         if plot:
-            qdc.plot(title='Final QDC', figure=final_fig, label='Final QDC')
+            qdc.plot(title="Final QDC", figure=final_fig, label="Final QDC")
             for ax in plt.gcf().get_axes():
-                ax.legend(loc='upper left', fontsize='small')
+                ax.legend(loc="upper left", fontsize="small")
 
         return qdc
 
@@ -837,35 +844,39 @@ class MagData(Data):
 class MagQDC(MagData):
     """Class to load and manipulate magnetometer quiet-day curves (QDC)."""
 
-    def __init__(self,
-                 project=None,
-                 site=None,
-                 channels=None,
-                 start_time=None,
-                 end_time=None,
-                 sample_start_time=np.array([]),
-                 sample_end_time=np.array([]),
-                 integration_interval=np.array([]),
-                 nominal_cadence=None,
-                 data=np.array([]),
-                 units=None,
-                 sort=None):
-        MagData.__init__(self,
-                         project=project,
-                         site=site,
-                         channels=channels,
-                         start_time=start_time,
-                         end_time=end_time,
-                         sample_start_time=sample_start_time,
-                         sample_end_time=sample_end_time,
-                         integration_interval=integration_interval,
-                         nominal_cadence=nominal_cadence,
-                         data=data,
-                         units=units,
-                         sort=sort)
+    def __init__(
+        self,
+        project=None,
+        site=None,
+        channels=None,
+        start_time=None,
+        end_time=None,
+        sample_start_time=np.array([]),
+        sample_end_time=np.array([]),
+        integration_interval=np.array([]),
+        nominal_cadence=None,
+        data=np.array([]),
+        units=None,
+        sort=None,
+    ):
+        MagData.__init__(
+            self,
+            project=project,
+            site=site,
+            channels=channels,
+            start_time=start_time,
+            end_time=end_time,
+            sample_start_time=sample_start_time,
+            sample_end_time=sample_end_time,
+            integration_interval=integration_interval,
+            nominal_cadence=nominal_cadence,
+            data=data,
+            units=units,
+            sort=sort,
+        )
 
     def data_description(self):
-        return 'Magnetic field QDC'
+        return "Magnetic field QDC"
 
     def smooth(self, fit_order=5, inplace=False):
         if inplace:
@@ -878,55 +889,74 @@ class MagQDC(MagData):
         r.data = np.fft.ifft(coeffs).real
         return r
 
-    def plot(self, channels=None, figure=None, axes=None,
-             subplot=None, units_prefix=None, title=None,
-             start_time=None, end_time=None, time_units=None, **kwargs):
+    def plot(
+        self,
+        channels=None,
+        figure=None,
+        axes=None,
+        subplot=None,
+        units_prefix=None,
+        title=None,
+        start_time=None,
+        end_time=None,
+        time_units=None,
+        **kwargs,
+    ):
 
         if start_time is None:
             start_time = self.start_time
         if end_time is None:
             end_time = self.end_time
 
-        r = MagData.plot(self, channels=channels, figure=figure, axes=axes,
-                         subplot=subplot, units_prefix=units_prefix,
-                         title=title,
-                         start_time=start_time, end_time=end_time,
-                         time_units=time_units, **kwargs)
+        r = MagData.plot(
+            self,
+            channels=channels,
+            figure=figure,
+            axes=axes,
+            subplot=subplot,
+            units_prefix=units_prefix,
+            title=title,
+            start_time=start_time,
+            end_time=end_time,
+            time_units=time_units,
+            **kwargs,
+        )
         return r
 
     def align(self, ref, fit=None, **fit_kwargs):
-        day = np.timedelta64(24, 'h')
+        day = np.timedelta64(24, "h")
         if isinstance(ref, MagData):
             r = copy.deepcopy(ref)
             interp_times = ref.get_mean_sample_time()
         else:
             # ref parameter must contain sample timestamps
-            assert not fit, 'Cannot fit without reference data'
+            assert not fit, "Cannot fit without reference data"
             ta = np.sort(np.array(ref).flatten())
             if len(ta) >= 2:
                 # Guess the nominal cadence
                 nc = np.median(np.diff(ta))
             else:
                 nc = None
-            r = MagData(project=self.project,
-                        site=self.site,
-                        channels=copy.copy(self.channels),
-                        start_time=ta[0],
-                        end_time=ta[-1],
-                        sample_start_time=ta,
-                        sample_end_time=copy.copy(ta),
-                        integration_interval=None,
-                        nominal_cadence=nc,
-                        data=None,
-                        units=self.units,
-                        sort=False)
+            r = MagData(
+                project=self.project,
+                site=self.site,
+                channels=copy.copy(self.channels),
+                start_time=ta[0],
+                end_time=ta[-1],
+                sample_start_time=ta,
+                sample_end_time=copy.copy(ta),
+                integration_interval=None,
+                nominal_cadence=nc,
+                data=None,
+                units=self.units,
+                sort=False,
+            )
             interp_times = ta
 
         # Create array with room for additional entries at start and end
-        xi = np.zeros([len(self.sample_start_time) + 2], dtype='m8[us]')
-        xi[1:-1] = self.get_mean_sample_time().astype('m8[us]')
-        yi = np.zeros([len(self.channels), self.data.shape[1] + 2],
-                      dtype=self.data.dtype)
+        xi = np.zeros([len(self.sample_start_time) + 2], dtype="m8[us]")
+        xi[1:-1] = self.get_mean_sample_time().astype("m8[us]")
+        yi = np.zeros([len(self.channels), self.data.shape[1] + 2], dtype=self.data.dtype)
         yi[:, 1:-1] = self.data
         # Extend so that interpolation can happen correctly near midnight
         xi[0] = xi[-2] - day
@@ -934,29 +964,24 @@ class MagQDC(MagData):
         yi[:, 0] = yi[:, -2]
         yi[:, -1] = yi[:, 1]
 
-        xo = dt64.get_time_of_day(interp_times).astype('m8[us]')
-        r.data = scipy.interpolate.interp1d(xi.astype('int64'), yi) \
-            (xo.astype('int64'))
+        xo = dt64.get_time_of_day(interp_times).astype("m8[us]")
+        r.data = scipy.interpolate.interp1d(xi.astype("int64"), yi)(xo.astype("int64"))
 
         if fit:
-            if hasattr(fit, '__call__'):
+            if hasattr(fit, "__call__"):
                 return fit(r, ref, inplace=True, **fit_kwargs)
-            elif fit in ('baseline', 'realtime_baseline'):
+            elif fit in ("baseline", "realtime_baseline"):
                 # QDC must be zero-mean for baseline adjustment,
                 # correct any offset
                 for n in range(r.data.shape[0]):
                     r.data[n] -= ap.nanmean(self.data[n])
                 for d in np.unique(dt64.get_date(r.sample_start_time)):
-                    bl = ap.load_data(r.project, r.site, 'MagData',
-                                      d, d + np.timedelta64(1, 'D'),
-                                      channels=r.channels,
-                                      archive=fit)
+                    bl = ap.load_data(
+                        r.project, r.site, "MagData", d, d + np.timedelta64(1, "D"), channels=r.channels, archive=fit
+                    )
                     if bl is None or bl.data.size == 0:
-                        raise Exception('No %s MagData for %s/%s %s'
-                                        % (fit, self.project, self.site,
-                                           str(d)))
-                    r.data[:, d == dt64.get_date(r.sample_start_time)] \
-                        += bl.data
+                        raise Exception("No %s MagData for %s/%s %s" % (fit, self.project, self.site, str(d)))
+                    r.data[:, d == dt64.get_date(r.sample_start_time)] += bl.data
             else:
-                raise ValueError('Unknown fit method %s' % repr(fit))
+                raise ValueError("Unknown fit method %s" % repr(fit))
         return r

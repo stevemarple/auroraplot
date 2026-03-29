@@ -53,5 +53,5 @@ class TestRioDataQdcAlgorithms(unittest.TestCase):
         assert_array_almost_equal(result, expected_qdc)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

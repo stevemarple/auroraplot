@@ -4,6 +4,7 @@
 
 import os.path
 import sys
+
 if sys.version_info[0] >= 3:
     import configparser
     from configparser import SafeConfigParser
@@ -24,25 +25,26 @@ def add_project_hook(project_name):
     loggers.
 
     """
-    if project_name == 'AWN':
-        filename = '/etc/awnet.ini'
+    if project_name == "AWN":
+        filename = "/etc/awnet.ini"
         if not os.path.exists(filename):
             return
         try:
             config = SafeConfigParser()
             config.read(filename)
-            site = config.get('magnetometer', 'site').upper()
+            site = config.get("magnetometer", "site").upper()
         except Exception as e:
-            print('Bad config file ' + filename + ': ' + str(e))
+            print("Bad config file " + filename + ": " + str(e))
             return
-        
+
         if site not in ap.projects[project_name]:
             return  # Unknown site
 
         # For data which matches this host's site convert all URLS to
         # local paths.
         make_data_local = lambda path, project, site, data_type, archive: path.replace(
-            'https://aurorawatch.lancs.ac.uk/data/', '/data/')
+            "https://aurorawatch.lancs.ac.uk/data/", "/data/"
+        )
 
         # Convert all URLS to local paths
         ap.tools.change_load_data_paths(project_name, make_data_local)

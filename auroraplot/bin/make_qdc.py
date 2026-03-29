@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 try:
     # Try to force all times to be read as UTC
-    os.environ['TZ'] = 'UTC'
+    os.environ["TZ"] = "UTC"
     time.tzset()
 except:
     pass
@@ -30,104 +30,85 @@ ap.set_timezone()
 # ==========================================================================
 
 # Parse command line options
-parser = argparse.ArgumentParser(description\
-                                     ='Make AuroraWatch quiet-day curve(s).')
+parser = argparse.ArgumentParser(description="Make AuroraWatch quiet-day curve(s).")
 
-parser.add_argument('--aggregate',
-                    default='scipy.average',
-                    help='Aggregate function used for setting cadence',
-                    metavar='MODULE.NAME')
-parser.add_argument('-a', '--archive',
-                    action='append',
-                    nargs=2,
-                    help='Select data archive used for project or site',
-                    metavar=('PROJECT[/SITE]', 'ARCHIVE'))
-parser.add_argument('--cadence',
-                    help='Set cadence (used when loading data)')
-parser.add_argument('--dry-run',
-                    action='store_true',
-                    help='Test, do not save quiet day curves')
-parser.add_argument('-e', '--end-time',
-                    help='End time',
-                    metavar='DATETIME')
-parser.add_argument('--filename',
-                    help='Destination file (strftime format string)')
-parser.add_argument('--log-level',
-                    choices=['debug', 'info', 'warning', 'error', 'critical'],
-                    default='warning',
-                    help='Control how much details is printed',
-                    metavar='LEVEL')
-parser.add_argument('--log-format',
-                    default='%(levelname)s:%(message)s',
-                    help='Set format of log messages',
-                    metavar='FORMAT')
-parser.add_argument('--only-missing',
-                    default=False,
-                    action='store_true',
-                    help='Create only if QDC file is missing')
-parser.add_argument('--plot',
-                    action='store_true',
-                    help='Plot intermediate results and final QDC')
-parser.add_argument('--post-aggregate',
-                    default='scipy.average',
-                    help='Aggregate function used for setting post-load cadence')
-parser.add_argument('--post-cadence',
-                    help='Set cadence (after loading data)')
-parser.add_argument('--qdc-archive',
-                    action='append',
-                    nargs=2,
-                    help='Target data archive for project or site',
-                    metavar=('PROJECT[/SITE]', 'QDC_ARCHIVE'))
-parser.add_argument('--raise-all',
-                    action='store_true',
-                    help='No exception handling')
-parser.add_argument('-s', '--start-time',
-                    help='Start time',
-                    metavar='DATETIME')
-parser.add_argument('--smooth',
-                    action='store_true',
-                    default=True,
-                    help='Smooth QDC using truncated Fourier series')
-parser.add_argument('--no-smooth',
-                    dest='smooth',
-                    action='store_false',
-                    help='Do not smooth QDC using truncated Fourier series')
+parser.add_argument(
+    "--aggregate", default="scipy.average", help="Aggregate function used for setting cadence", metavar="MODULE.NAME"
+)
+parser.add_argument(
+    "-a",
+    "--archive",
+    action="append",
+    nargs=2,
+    help="Select data archive used for project or site",
+    metavar=("PROJECT[/SITE]", "ARCHIVE"),
+)
+parser.add_argument("--cadence", help="Set cadence (used when loading data)")
+parser.add_argument("--dry-run", action="store_true", help="Test, do not save quiet day curves")
+parser.add_argument("-e", "--end-time", help="End time", metavar="DATETIME")
+parser.add_argument("--filename", help="Destination file (strftime format string)")
+parser.add_argument(
+    "--log-level",
+    choices=["debug", "info", "warning", "error", "critical"],
+    default="warning",
+    help="Control how much details is printed",
+    metavar="LEVEL",
+)
+parser.add_argument(
+    "--log-format", default="%(levelname)s:%(message)s", help="Set format of log messages", metavar="FORMAT"
+)
+parser.add_argument("--only-missing", default=False, action="store_true", help="Create only if QDC file is missing")
+parser.add_argument("--plot", action="store_true", help="Plot intermediate results and final QDC")
+parser.add_argument(
+    "--post-aggregate", default="scipy.average", help="Aggregate function used for setting post-load cadence"
+)
+parser.add_argument("--post-cadence", help="Set cadence (after loading data)")
+parser.add_argument(
+    "--qdc-archive",
+    action="append",
+    nargs=2,
+    help="Target data archive for project or site",
+    metavar=("PROJECT[/SITE]", "QDC_ARCHIVE"),
+)
+parser.add_argument("--raise-all", action="store_true", help="No exception handling")
+parser.add_argument("-s", "--start-time", help="Start time", metavar="DATETIME")
+parser.add_argument("--smooth", action="store_true", default=True, help="Smooth QDC using truncated Fourier series")
+parser.add_argument(
+    "--no-smooth", dest="smooth", action="store_false", help="Do not smooth QDC using truncated Fourier series"
+)
 
-parser.add_argument('project_site',
-                    nargs='+',
-                    metavar="PROJECT[/SITE]")
+parser.add_argument("project_site", nargs="+", metavar="PROJECT[/SITE]")
 
 args = parser.parse_args()
-if __name__ == '__main__':
-    logging.basicConfig(level=getattr(logging, args.log_level.upper()),
-                        format=args.log_format)
+if __name__ == "__main__":
+    logging.basicConfig(level=getattr(logging, args.log_level.upper()), format=args.log_format)
 
 
 # Parse and process start and end times. If end time not given use
 # start time plus 1 day.
-day = np.timedelta64(24, 'h')
-st = dt64.parse_datetime64(args.start_time, 'D')
+day = np.timedelta64(24, "h")
+st = dt64.parse_datetime64(args.start_time, "D")
 if args.end_time is None:
     et = st + day
 else:
     try:
         # Parse as date
-        et = dt64.parse_datetime64(args.end_time, 'D')
+        et = dt64.parse_datetime64(args.end_time, "D")
     except ValueError as e:
         try:
             # Parse as a set of duration values
             et = st
             et_words = args.end_time.split()
-            assert len(et_words) % 2 == 0, 'Need even number of words'
+            assert len(et_words) % 2 == 0, "Need even number of words"
             for n in range(0, len(et_words), 2):
-                et += np.timedelta64(float(et_words[n]), et_words[n+1])
+                et += np.timedelta64(float(et_words[n]), et_words[n + 1])
         except:
             raise
     except:
         raise
 
-logger.debug('Start date: ' + str(st))
-logger.debug('End date: ' + str(et))
+logger.debug("Start date: " + str(st))
+logger.debug("End date: " + str(et))
 
 
 # Get names of all projects and sites to be processed.
@@ -147,7 +128,7 @@ else:
 
 
 if args.cadence:
-    cadence = dt64.parse_timedelta64(args.cadence, 's')
+    cadence = dt64.parse_timedelta64(args.cadence, "s")
     agg_mname, agg_fname = ap.tools.lookup_module_name(args.aggregate)
     agg_module = import_module(agg_mname)
     agg_func = getattr(agg_module, agg_fname)
@@ -155,7 +136,7 @@ else:
     cadence = None
 
 if args.post_cadence:
-    post_cadence = dt64.parse_timedelta64(args.post_cadence, 's')
+    post_cadence = dt64.parse_timedelta64(args.post_cadence, "s")
     pa_mname, pa_fname = ap.tools.lookup_module_name(args.post_aggregate)
     pa_module = import_module(pa_mname)
     post_agg_func = getattr(pa_module, pa_fname)
@@ -170,7 +151,7 @@ for n in range(len(project_list)):
 
     kwargs = {}
     if project in archive and site in archive[project]:
-        kwargs['archive'] = archive[project][site]
+        kwargs["archive"] = archive[project][site]
 
     # Get mag data archive to use for source data
     if project in archive and site in archive[project]:
@@ -184,32 +165,29 @@ for n in range(len(project_list)):
     else:
         qdc_archive = None
 
-
-    logger.debug('Processing %s/%s' % (project, site))
+    logger.debug("Processing %s/%s" % (project, site))
 
     # Attempt to import missing projects
     if project not in ap.projects:
         try:
-            import_module('auroraplot.datasets.' + project.lower())
+            import_module("auroraplot.datasets." + project.lower())
         except:
             pass
 
     ax = None
 
-    archive, ad = ap.get_archive_info(project, site, 'MagData', \
-                                      archive=archive)
-    qdc_archive, qdc_ad = ap.get_archive_info(project, site, 'MagQDC', \
-                                              archive=qdc_archive)
+    archive, ad = ap.get_archive_info(project, site, "MagData", archive=archive)
+    qdc_archive, qdc_ad = ap.get_archive_info(project, site, "MagQDC", archive=qdc_archive)
 
     # Tune start/end times to avoid requesting data outside of
     # operational period
-    site_st = ap.get_site_info(project, site, 'start_time')
+    site_st = ap.get_site_info(project, site, "start_time")
     if site_st is None or site_st < st:
         site_st = st
     else:
         site_st = dt64.floor(site_st, day)
 
-    site_et = ap.get_site_info(project, site, 'end_time')
+    site_et = ap.get_site_info(project, site, "end_time")
     if site_et is None or site_et > et:
         site_et = et
     else:
@@ -222,45 +200,42 @@ for n in range(len(project_list)):
             if args.only_missing:
                 mag_qdc = ap.magdata.load_qdc(project, site, t1)
                 if mag_qdc is not None and mag_qdc.data.size != 0 and not np.any(np.isnan(mag_qdc.data)):
-                    logger.info('QDC for %s/%s %s already exists', project, site, dt64.strftime(t1, '%Y-%m-%d'))
+                    logger.info("QDC for %s/%s %s already exists", project, site, dt64.strftime(t1, "%Y-%m-%d"))
                     continue
 
             kwargs = {}
             if cadence:
-                kwargs['cadence'] = cadence
-                kwargs['aggregate'] = agg_func
+                kwargs["cadence"] = cadence
+                kwargs["aggregate"] = agg_func
 
-            mag_data = ap.load_data(project, site, 'MagData', t1, t2,
-                                    archive=archive,
-                                    raise_all=args.raise_all,
-                                    **kwargs)
+            mag_data = ap.load_data(
+                project, site, "MagData", t1, t2, archive=archive, raise_all=args.raise_all, **kwargs
+            )
             if mag_data is not None:
 
                 if post_cadence:
-                    mag_data.set_cadence(post_cadence,
-                                         aggregate=post_agg_func,
-                                         inplace=True)
+                    mag_data.set_cadence(post_cadence, aggregate=post_agg_func, inplace=True)
 
                 mag_qdc = mag_data.make_qdc(smooth=args.smooth, plot=args.plot)
 
                 if args.filename:
                     filename = args.filename
                 else:
-                    filename = dt64.strftime(t1, qdc_ad['path'])
+                    filename = dt64.strftime(t1, qdc_ad["path"])
 
                 # Expand with project, site, time etc
                 filename = dt64.strftime(t1, filename)
                 if args.dry_run:
-                    logger.info('Dry run, not saving QDC to ' + dt64.strftime(t1, filename))
+                    logger.info("Dry run, not saving QDC to " + dt64.strftime(t1, filename))
                 else:
-                    if 'save_converter' in qdc_ad:
+                    if "save_converter" in qdc_ad:
                         # Use a dedicated save method and format if present
                         mag_qdc.save(archive=qdc_archive, path=filename)
                     else:
                         # For compatibility fall back to savetxt method
-                        with smart_open(dt64.strftime(t1, filename), 'w') as fh:
-                            fmt = ['%d']
-                            fmt.extend(['%.3f'] * len(qdc_ad['channels']))
+                        with smart_open(dt64.strftime(t1, filename), "w") as fh:
+                            fmt = ["%d"]
+                            fmt.extend(["%.3f"] * len(qdc_ad["channels"]))
                             mag_qdc.savetxt(fh, fmt=fmt)
 
         finally:

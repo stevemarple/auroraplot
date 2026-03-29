@@ -7,10 +7,10 @@ class QdcAlgorithmBase(object):
         pass
 
     def get_processing(self) -> str:
-        raise NotImplementedError('Class must be derived and the process() function implemented')
+        raise NotImplementedError("Class must be derived and the process() function implemented")
 
     def process(self, data: List[np.ndarray]) -> np.ndarray:
-        raise NotImplementedError('Class must be derived and the process() function implemented')
+        raise NotImplementedError("Class must be derived and the process() function implemented")
 
 
 class UpperEnvelope(QdcAlgorithmBase):
@@ -19,13 +19,14 @@ class UpperEnvelope(QdcAlgorithmBase):
     :param rows: list of integers corresponding to the sorted rows, with 0 being the highest values at each sidereal
                time. When the list contains multiple values those rows are combined using numpy.mean.
     """
+
     def __init__(self, rows: Optional[List[int]] = None):
         super().__init__()
         self.rows: List[int] = [1, 2] if rows is None else list(rows)
-        assert len(self.rows) > 0, 'rows must not be empty'
+        assert len(self.rows) > 0, "rows must not be empty"
 
     def get_processing(self) -> str:
-        return f'Created by UpperEnvelope, rows={self.rows}'
+        return f"Created by UpperEnvelope, rows={self.rows}"
 
     def process(self, data: List[np.ndarray]) -> np.ndarray:
         """

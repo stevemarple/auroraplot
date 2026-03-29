@@ -11,11 +11,11 @@ class CachedFunc(object):
     defined so that the object can be called in exactly the same way
     as the original function that was passed to the class constructor.
     """
-    
+
     def __init__(self, func, cache_class=cachetools.LRUCache, **kwargs):
         self.cache = cache_class(**kwargs)
         self.func = func
 
-    @cachetools.cachedmethod(operator.attrgetter('cache'))
+    @cachetools.cachedmethod(operator.attrgetter("cache"))
     def __call__(self, *args, **kwargs):
         return self.func(*args, **kwargs)

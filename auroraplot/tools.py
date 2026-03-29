@@ -70,16 +70,12 @@ class smart_open:
 
     """
 
-    def __init__(self,
-                 filename,
-                 mode='r',
-                 temp_ext='.tmp',
-                 delete_temp_on_error=True):
+    def __init__(self, filename, mode="r", temp_ext=".tmp", delete_temp_on_error=True):
         self.filename = filename
         self.mode = mode
         # Modes which rely on an existing file should not change the name
-        if temp_ext is None or 'r' in self.mode or 'x' in self.mode or 'a' in self.mode or '+' in self.mode:
-            self.temp_ext = ''
+        if temp_ext is None or "r" in self.mode or "x" in self.mode or "a" in self.mode or "+" in self.mode:
+            self.temp_ext = ""
         else:
             self.temp_ext = temp_ext
         self.delete_temp_on_error = delete_temp_on_error
@@ -87,10 +83,8 @@ class smart_open:
 
     def __enter__(self):
         d = os.path.dirname(self.filename)
-        if (not os.path.exists(d) and
-            ('w' in self.mode or 'x' in self.mode
-             or 'a' in self.mode or '+' in self.mode)):
-            logger.debug('creating directory %s', d)
+        if not os.path.exists(d) and ("w" in self.mode or "x" in self.mode or "a" in self.mode or "+" in self.mode):
+            logger.debug("creating directory %s", d)
             os.makedirs(d)
         self.file = open(self.filename + self.temp_ext, self.mode)
         return self.file
@@ -101,8 +95,7 @@ class smart_open:
                 self.file.close()
             if self.file.name != self.filename:
                 if exc_type is None:
-                    logger.debug('renaming %s to %s',
-                                 self.file.name, self.filename)
+                    logger.debug("renaming %s to %s", self.file.name, self.filename)
                     os.rename(self.file.name, self.filename)
                 elif self.delete_temp_on_error:
                     os.remove(self.file.name)
@@ -138,12 +131,10 @@ def minimise_sign_error(a, b):
     return imbalance, True
 
 
-def fit_data(data, ref_data, err_func=None, tolerance=None,
-             max_iterations=50, full_output=False, plot_fit=False):
+def fit_data(data, ref_data, err_func=None, tolerance=None, max_iterations=50, full_output=False, plot_fit=False):
 
     # Assume datasets are aligned in time already
-    assert not np.all(np.logical_or(np.isnan(data), np.isnan(ref_data))), \
-        'No common samples which are not NaN'
+    assert not np.all(np.logical_or(np.isnan(data), np.isnan(ref_data))), "No common samples which are not NaN"
 
     # Calculate initial starting values to iterate between
     e = data - ref_data
@@ -157,8 +148,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
     non_nan_idx = np.where(np.isfinite(data)[0])[0][0]
     if tolerance is None:
         # Compute tolerance which will be solved in less than max iterations.
-        tolerance = (data1[non_nan_idx] - data2[non_nan_idx]) \
-            / 2**(max_iterations-3)
+        tolerance = (data1[non_nan_idx] - data2[non_nan_idx]) / 2 ** (max_iterations - 3)
 
     iterations = 0
     while True:
@@ -191,8 +181,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
             if not has_sign:
                 # Compute the direction to move in, indicate this by
                 # setting the sign of test_error accordingly
-                test_error2, tmp = err_func(test_data + 0.5*tolerance,
-                                            ref_data)
+                test_error2, tmp = err_func(test_data + 0.5 * tolerance, ref_data)
 
                 if test_error > test_error2:
                     test_error = -test_error  # Too low
@@ -203,7 +192,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                     # The errors are equal? Could loop, trying a
                     # bigger step size, say for 10 times. Seems
                     # unlikely.
-                    raise Exception('Cannot find direction to iterate')
+                    raise Exception("Cannot find direction to iterate")
 
             if test_error > 0:
                 # Too high, go halfway between test_data and data2
@@ -214,20 +203,22 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
                 e2 = test_error
 
         if iterations >= max_iterations:
-            mesg = ('No solution after %(max_iterations)d iterations, ' +
-                    'tolerance: %(tolerance)g, ' +
-                    'difference: %(difference)g, ') % locals()
+            mesg = (
+                "No solution after %(max_iterations)d iterations, "
+                + "tolerance: %(tolerance)g, "
+                + "difference: %(difference)g, "
+            ) % locals()
             raise Exception(mesg)
 
     if full_output:
-        stats = {'iterations': iterations,
-                 'error': data[non_nan_idx] - test_data[non_nan_idx],
-                 'tolerance': tolerance,
-                 'difference': difference,
-                 }
+        stats = {
+            "iterations": iterations,
+            "error": data[non_nan_idx] - test_data[non_nan_idx],
+            "tolerance": tolerance,
+            "difference": difference,
+        }
 
-        return test_data, data[non_nan_idx] - test_data[non_nan_idx], \
-            stats
+        return test_data, data[non_nan_idx] - test_data[non_nan_idx], stats
     else:
         return test_data
 
@@ -297,14 +288,14 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     order_range = range(order + 1)
     half_window = (window_size - 1) // 2
     # precompute coefficients
-    b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
+    b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window + 1)])
     m = np.linalg.pinv(b).A[deriv] * rate**deriv * factorial(deriv)
     # pad the signal at the extremes with
     # values taken from the signal itself
-    firstvals = y[0] - np.abs(y[1:half_window+1][::-1] - y[0])
-    lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
+    firstvals = y[0] - np.abs(y[1 : half_window + 1][::-1] - y[0])
+    lastvals = y[-1] + np.abs(y[-half_window - 1 : -1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve(m[::-1], y, mode='valid')
+    return np.convolve(m[::-1], y, mode="valid")
 
 
 def sgolay_filt(data, window_size, order):
@@ -317,7 +308,7 @@ def sgolay_filt(data, window_size, order):
         nominal cadence of the data. No conversion to regular data is
         performed.
     order: order of fit
-    
+
     returns: modified auroraplot.data object
     """
     r = copy.deepcopy(data)
@@ -331,10 +322,7 @@ def sgolay_filt(data, window_size, order):
     return r
 
 
-def walk_data_archives(callback, project,
-                       site_list=None,
-                       data_type_list=None,
-                       archive_list=None):
+def walk_data_archives(callback, project, site_list=None, data_type_list=None, archive_list=None):
     """Walk through a project's data archives
 
     The callback function is called once for each data archive, with the parameters
@@ -346,17 +334,17 @@ def walk_data_archives(callback, project,
 
     for site in site_list:
         if data_type_list is None:
-            dt_list = ap.projects[project]['sites'][site]['data_types'].keys()
+            dt_list = ap.projects[project]["sites"][site]["data_types"].keys()
         else:
             dt_list = data_type_list
 
         for data_type in dt_list:
-            dtv = ap.projects[project]['sites'][site]['data_types'][data_type]
+            dtv = ap.projects[project]["sites"][site]["data_types"][data_type]
             # If only one archive and default not set then make it the
             # default before adding copies
             dtv_keys = list(dtv.keys())
-            if len(dtv_keys) == 1 and dtv_keys[0] != 'default':
-                dtv['default'] = dtv_keys[0]
+            if len(dtv_keys) == 1 and dtv_keys[0] != "default":
+                dtv["default"] = dtv_keys[0]
 
             if archive_list is None:
                 a_list = dtv_keys
@@ -364,43 +352,33 @@ def walk_data_archives(callback, project,
                 a_list = archive_list
 
             for archive in a_list:
-                if archive == 'default':
+                if archive == "default":
                     continue
                 callback(project, site, data_type, archive, dtv[archive])
 
 
-def change_load_data_paths(project,
-                           replace,
-                           site_list=None,
-                           data_type_list=None,
-                           archive_list=None,
-                           load_converter=None,
-                           cache_dir=None):
+def change_load_data_paths(
+    project, replace, site_list=None, data_type_list=None, archive_list=None, load_converter=None, cache_dir=None
+):
     """Helper function for changing paths used when loading data
 
     change_load_data_paths is intended to be called from within
     auroraplot_custom.py to alter the paths used when loading data,
     for instance to modify the URLs to local file paths
     """
+
     def callback(project, site, data_type, archive, archive_data):
-        orig_archive = 'original_' + archive
-        if orig_archive not in ap.projects[project]['sites'][site]['data_types'][data_type]:
+        orig_archive = "original_" + archive
+        if orig_archive not in ap.projects[project]["sites"][site]["data_types"][data_type]:
             # Keep a copy of the original
-            ap.projects[project]['sites'][site]['data_types'][data_type][orig_archive] = copy.deepcopy(archive_data)
-        if not hasattr(archive_data['path'], '__call__'):
-            archive_data['path'] = replace(archive_data['path'], project, site, data_type, archive)
+            ap.projects[project]["sites"][site]["data_types"][data_type][orig_archive] = copy.deepcopy(archive_data)
+        if not hasattr(archive_data["path"], "__call__"):
+            archive_data["path"] = replace(archive_data["path"], project, site, data_type, archive)
 
-    walk_data_archives(callback,
-                       project,
-                       site_list=site_list,
-                       data_type_list=data_type_list,
-                       archive_list=archive_list)
+    walk_data_archives(callback, project, site_list=site_list, data_type_list=data_type_list, archive_list=archive_list)
 
 
-def cache_data_files(cache_dir, project,
-                     site_list=None,
-                     data_type_list=None,
-                     archive_list=None):
+def cache_data_files(cache_dir, project, site_list=None, data_type_list=None, archive_list=None):
     """Helper function for caching data locally
 
     cache_data_files is intended to be called from within
@@ -408,17 +386,13 @@ def cache_data_files(cache_dir, project,
     """
 
     def callback(project, site, data_type, archive, archive_data):
-        archive_data['cache_dir'] = os.path.join(cache_dir, project, site)
+        archive_data["cache_dir"] = os.path.join(cache_dir, project, site)
 
-    walk_data_archives(callback,
-                       project,
-                       site_list=site_list,
-                       data_type_list=data_type_list,
-                       archive_list=archive_list)
+    walk_data_archives(callback, project, site_list=site_list, data_type_list=data_type_list, archive_list=archive_list)
 
 
 def lookup_module_name(s):
-    last_dot = s.rindex('.')
+    last_dot = s.rindex(".")
     module = s[:last_dot]
-    name = s[(last_dot+1):]
+    name = s[(last_dot + 1) :]
     return module, name
