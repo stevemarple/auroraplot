@@ -1213,10 +1213,14 @@ class Datetime64Formatter(Formatter):
         elif fmt is None:
             xadi = self.axis.get_data_interval()
             if np.all(np.isfinite(xadi)):
-                data_interval = np.timedelta64(int(np.diff(xadi)), units)
+                xadi_diff = np.diff(xadi)
             else:
                 # Nothing plotted, so use current limits for time range
-                data_interval = np.timedelta64(int(np.diff(self.axis.get_view_interval())), units)
+                xadi_diff = np.diff(self.axis.get_view_interval())
+            if isinstance(xadi_diff, np.ndarray):
+                # In earlier versions of numpy diff() could return a scalar
+                xadi_diff = xadi_diff[0]
+            data_interval = np.timedelta64(int(xadi_diff), units)
 
             tick_locs = self.axis.get_ticklocs()
             if len(tick_locs) >= 2:
