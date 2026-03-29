@@ -234,7 +234,7 @@ def fit_data(data, ref_data, err_func=None, tolerance=None,
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     # Savitzky-Golay filter, from Scipy cookbook,
-    # http://wiki.scipy.org/Cookbook/SavitzkyGolay
+    # https://wiki.scipy.org/Cookbook/SavitzkyGolay
     r"""Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and
