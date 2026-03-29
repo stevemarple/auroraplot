@@ -1,13 +1,13 @@
 """Analyse and plot space weather datasets."""
 
 __author__ = "Steve Marple"
-__version__ = "0.7.1"
 __license__ = "MIT"
 
 import copy
 import gzip
 import importlib
 import logging
+from pathlib import Path
 import netrc
 import re
 import shutil
@@ -35,6 +35,22 @@ except ImportError:
     from scipy.stats import nanmean
     from scipy.stats import nanmedian
     from scipy.stats import nanstd
+
+
+__package__ = "auroraplot"
+
+try:
+    # Obtain the version from the package manager; this is unlikely to work in a development environment.
+    __version__ = importlib.metadata.version(__package__)
+except importlib.metadata.PackageNotFoundError:
+    # Obtain the version number from the file that should be shipped with the package. This won't work in a
+    # development environment because the file is created on-the-fly when generating sdist and wheel packages.
+    version_file = Path(__file__).with_name("_version.py")
+    if version_file.exists():
+        __version__ = version_file.read_text().strip()
+    else:
+        __version__ = "0.0.0"
+
 
 logger = logging.getLogger(__name__)
 

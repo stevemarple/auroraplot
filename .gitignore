@@ -42,3 +42,6 @@ nosetests.xml
 .ipynb_checkpoints
 
 !auroraplot/bin
+
+# Auto-generated, do not commit to git
+src/auroraplot/_version.py
