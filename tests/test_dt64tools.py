@@ -19,6 +19,7 @@ from auroraplot.dt64tools import (
     lmst_to_utc,
     strftime,
     to_dhms,
+    to_ydhms,
     utc_to_lmst,
     wrap_day,
 )
@@ -40,6 +41,14 @@ class TestDt64tools(unittest.TestCase):
         np.timedelta64(1, "m") + np.timedelta64(10, "ms"),
         np.timedelta64(1, "h") + np.timedelta64(5, "s"),
         np.timedelta64(1, "D") + np.timedelta64(12, "h"),
+    ]
+    test_timedeltas_with_years_list = [
+        np.timedelta64(1, "s"),
+        np.timedelta64(1, "m") + np.timedelta64(10, "ms"),
+        np.timedelta64(1, "h") + np.timedelta64(5, "s"),
+        np.timedelta64(1, "D") + np.timedelta64(12, "h"),
+        np.timedelta64(1, "Y"),
+        np.timedelta64(10, "Y"),
     ]
 
     @staticmethod
@@ -131,6 +140,43 @@ class TestDt64tools(unittest.TestCase):
             for a, b in zip(to_dhms(ts), expected):
                 self.assertAlmostEqual(a, b, delta=0.000001, msg=f"Incorrect result for {ts}")
 
+    def test_to_ydhms(self):
+        expected_list = [
+            (0, 0, 0, 0, 1),
+            (0, 0, 0, 1, 0.01),
+            (0, 0, 1, 0, 5),
+            (0, 1, 12, 0, 0),
+            (1, 0, 0, 0, 0),
+            (10, 0, 0, 0, 0),
+        ]
+        for ts, expected in zip(self.test_timedeltas_list, expected_list):
+            for a, b in zip(to_ydhms(ts), expected):
+                self.assertAlmostEqual(a, b, delta=0.000001, msg=f"Incorrect result for {ts}")
+
+    def test_to_str(self):
+        expected_datetimes_list = [
+            "1970-01-01",
+            "1970-01-02",
+            "1996-01-01",
+            "2000-07-14",
+            "2000-07-14T14:00:00",
+            "2030-01-01T12:34:56",
+        ]
+        # Test datetime64
+        for t, expected in zip(self.test_dates_list, expected_datetimes_list):
+            self.assertEqual(expected, dt64.to_str(t))
+
+        expected_timedeltas_list = [
+            "1s",
+            "1m 0.010s",
+            "1h 5s",
+            "1d 12h",
+            "1y",
+            "10y",
+        ]
+        # Test timedelta64
+        for ts, expected in zip(self.test_timedeltas_with_years_list, expected_timedeltas_list):
+            self.assertEqual(expected, dt64.to_str(ts))
 
     def test_julian_date(self):
         # Results from https://www.fourmilab.ch/cgi-bin/Earth
