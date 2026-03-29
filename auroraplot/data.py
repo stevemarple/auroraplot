@@ -470,6 +470,42 @@ integration intv. : {self.integration_interval!r}
     def data_description(self):
         return 'Data'
 
+    def get_project(self) -> str:
+        return self.project
+
+    def get_site(self) -> str:
+        return self.site
+
+    def get_channels(self):
+        return self.channels
+
+    def get_start_time(self):
+        return self.start_time
+
+    def get_end_time(self):
+        return self.end_time
+
+    def get_sample_start_time(self):
+        return self.sample_start_time
+
+    def get_sample_end_time(self):
+        return self.sample_end_time
+
+    def get_integration_interval(self):
+        return self.integration_interval
+
+    def get_nominal_cadence(self):
+        return self.nominal_cadence
+
+    def get_data(self):
+        return self.data
+
+    def get_units(self):
+        return self.units
+
+    def get_processing(self ):
+        return self.processing
+
     def assert_valid(self):
         import re
         try:
