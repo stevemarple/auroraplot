@@ -41,6 +41,11 @@ jobs:
         run: |
           ~/venv.d/auroraplot/bin/python -m build
 
+      - name: Test wheel package is installable
+        run: |
+          ~/venv.d/auroraplot/bin/pip uninstall --yes auroraplot
+          ~/venv.d/auroraplot/bin/pip install "$(find dist -iname '*.whl')"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
