@@ -45,6 +45,10 @@ def pickle_load(path: PathType):
         return pickle.load(f)
 
 
+def save_fig(fh: plt.Figure, path: PathType):
+    plt.savefig(str(path), dpi=150)
+
+
 def main():
     # Set default values for figure
     mpl.rcParams["figure.facecolor"] = "w"
@@ -83,13 +87,15 @@ def main():
     print(power_data)
     fh = plt.figure()
     ah = fh.gca()
-    power_data.plot(channels=["50"], axes=ah, label="Original")
+    power_data.plot(channels=["50"], axes=ah, label="Original data")
     plt.show(block=False)
 
     sliding_median_filter = auroraplot.filter.SlidingMedianFilter(window=np.timedelta64(590, "s"), cadence=qdc_cadence)
     smoothed_power_data = sliding_median_filter(power_data, inplace=False)
     print(smoothed_power_data)
-    smoothed_power_data.plot(channels=["50"], axes=ah, label="Smoothed", color="red")
+    smoothed_power_data.plot(channels=["50"], axes=ah, label="Smoothed data", color="red")
+    ah.legend()
+    plt.show(block=False)
     pickle_save(smoothed_power_data, save_dir / "smoothed_power_data")
 
     qdc_algorithm = UpperEnvelope(rows=[1, 2])
@@ -108,6 +114,33 @@ def main():
     ah_qdc = fh_qdc.gca()
     qdc.plot(channels=["50"], title="QDC comparison", axes=ah_qdc, label="Original")
     smoothed_qdc.plot(channels=["50"], axes=ah_qdc, label="Savitzky-Golay filter 2h window", color="red")
+    ah_qdc.legend()
+    save_fig(fh_qdc, save_dir / "qdc_comparison.png")
+    plt.show(block=False)
+
+    aligned_qdc = smoothed_qdc.align(power_data)
+    pickle_save(aligned_qdc, save_dir / "aligned_qdc.png")
+    fh_aligned = plt.figure()
+    ah_aligned = fh_aligned.gca()
+    power_data.plot(channels=["50"], title="Aligned QDC comparison", axes=ah_aligned, label="Power")
+    aligned_qdc.plot(channels=["50"], axes=ah_aligned, label="QDC", color="red")
+    save_fig(fh_aligned, save_dir / "aligned_qdc")
+    plt.show(block=False)
+
+    # Plot the aligned QDC back onto the original power plot
+    plt.figure(fh)
+    aligned_qdc.plot(channels=["50"], axes=ah, label="QDC", color="orange", linewidth=2)
+    ah.legend()
+    save_fig(fh, save_dir / "rio_power.png")
+    plt.show(block=False)
+
+    absorption = power_data.calculate_absorption(smoothed_qdc)
+    print(absorption)
+    pickle_save(absorption, save_dir / "absorption")
+    absorption.plot()
+    save_fig(absorption, save_dir / "absorption.png")
+    plt.show(block=False)
+
     plt.show()
 
 
