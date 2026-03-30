@@ -691,14 +691,15 @@ integration intv. : {self.integration_interval!r}
     def format_project_site(self):
         return ap.format_project_site(self.project, self.site)
 
-    def make_title(self, subtitle=None, start_time=None, end_time=None):
+    def make_title(self, subtitle=None, start_time=None, end_time=None, sidereal_day=False):
         s = [self.format_project_site()]
         if subtitle:
             s.append(subtitle)
         else:
             s.append(self.data_description())
 
-        s.append(dt64.fmt_dt64_range(start_time or self.start_time, end_time or self.end_time))
+        if not sidereal_day:
+            s.append(dt64.fmt_dt64_range(start_time or self.start_time, end_time or self.end_time))
         return "\n".join(s)
 
     def plot(

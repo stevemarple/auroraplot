@@ -385,6 +385,8 @@ class RioQDC(RioData):
         if end_time is None:
             # end_time = self.end_time
             end_time = self.get_sample_end_time()[-1]
+        if title is None:
+            title = self.make_title(sidereal_day=True)
 
         r = RioData.plot(
             self,
