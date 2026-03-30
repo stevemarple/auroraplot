@@ -1,26 +1,113 @@
+from __future__ import annotations
 import copy
 import logging
-import re
-from typing import List, Tuple
-
-from urllib.request import urlopen
-from urllib.parse import urlparse
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
-import numpy.fft
 import matplotlib.pyplot as plt
 
 import auroraplot as ap
-import auroraplot.riodata.qdc_algorithms
 from auroraplot import get_site_info
 from auroraplot.data import Data, DataProcessingError, generic_load_converter
 import auroraplot.dt64tools as dt64
-import auroraplot.tools
 import math
 import scipy.interpolate
-import warnings
 
 logger = logging.getLogger(__name__)
+
+
+def load_qdc(
+    project,
+    site,
+    time,
+    archive=None,
+    channels=None,
+    path=None,
+    tries=1,
+    realtime=False,
+    load_function=None,
+    full_output=False,
+) -> Optional[Union[RioQDC, dict]]:
+    data_type = "RioQDC"
+    archive, ad = ap.get_archive_info(project, site, data_type, archive=archive)
+    if channels is not None:
+        # Ensure it is a 1D numpy array
+        channels = np.array(channels).flatten()
+        for c in channels:
+            if c not in ad["channels"]:
+                raise ValueError("Unknown channel (%s)" % str(c))
+    else:
+        channels = ad["channels"]
+
+    if path is None:
+        path = ad["path"]
+
+    if load_function is None:
+        load_function = ad.get("load_function", None)
+
+    if tries is None:
+        tries = 1
+
+    if load_function:
+        # Pass responsibility for loading to some other
+        # function. Parameters have already been checked.
+        return load_function(
+            project,
+            site,
+            data_type,
+            time,
+            archive=archive,
+            channels=channels,
+            path=path,
+            tries=tries,
+            full_output=full_output,
+        )
+    data = []
+
+    t = dt64.get_start_of_month(time)
+
+    if realtime:
+        # For realtime use the QDC for the month is (was) not
+        # available, so use the previous month's QDC
+        t = dt64.get_start_of_previous_month(t)
+
+        # Early in the month the previous motnh's QDC was probably not
+        # computed, so use the month before that
+        qdc_rollover_day = ad.get("qdc_rollover_day", 4)
+        if dt64.get_day_of_month(time) < qdc_rollover_day:
+            t = dt64.get_start_of_previous_month(t)
+
+    for n in range(tries):
+        try:
+            if hasattr(path, "__call__"):
+                # Function: call it with relevant information to get the path
+                file_name = path(t, project=project, site=site, data_type=data_type, archive=archive, channels=channels)
+            else:
+                file_name = dt64.strftime(t, path)
+
+            logger.info("loading " + file_name)
+
+            r = ad["load_converter"](
+                file_name,
+                ad,
+                project=project,
+                site=site,
+                data_type=data_type,
+                start_time=np.timedelta64(0, "h"),
+                end_time=np.timedelta64(24, "h"),
+                archive=archive,
+                channels=channels,
+                path=path,
+            )
+            if r is not None:
+                r.extract(inplace=True, channels=channels)
+                return dict(rioqdc=r, tries=n + 1, maxtries=tries) if full_output else r
+
+        finally:
+            # Go to start of previous month
+            t = dt64.get_start_of_month(t - np.timedelta64(24, "h"))
+
+    return None
 
 
 class RioData(Data):
@@ -290,6 +377,50 @@ class RioPower(RioData):
         qdc.data = qdc_data
         return qdc
 
+    def calculate_absorption(
+        self, qdc: Optional[RioQDC] = None, obliquity_factors=None, qdc_archive=None, qdc_tries=1
+    ) -> RioAbs:
+        if qdc is None:
+            qdc = load_qdc(
+                project=self.get_project(),
+                site=self.get_site(),
+                time=self.get_start_time(),
+                archive=qdc_archive,
+                channels=self.get_channels(),
+            )
+        aligned_qdc = qdc.align(self)
+
+        r = RioAbs(
+            project=self.get_project(),
+            site=self.get_site(),
+            channels=self.get_channels(),
+            start_time=self.get_start_time(),
+            end_time=self.get_end_time(),
+            sample_start_time=self.get_sample_start_time(),
+            sample_end_time=self.get_sample_end_time(),
+            integration_interval=self.get_integration_interval(),
+            nominal_cadence=self.get_nominal_cadence(),
+            data=None,
+            units="dB",
+            sort=False,
+            processing=None,
+        )
+        r.data = aligned_qdc.get_data() - self.get_data()
+        if obliquity_factors is not None:
+            if np.isscalar(obliquity_factors):
+                r.data /= obliquity_factors
+            elif isinstance(obliquity_factors, np.ndarray):
+                if obliquity_factors.ndim == 1 and obliquity_factors.size == len(self.get_channels()):
+                    for cn in range(len(self.get_channels())):
+                        r.data[cn, :] /= obliquity_factors[cn]
+                elif obliquity_factors.shape == r.data.shape:
+                    r.data /= obliquity_factors
+                else:
+                    raise ValueError(
+                        f"obliquity_factors shape ({obliquity_factors.shape}) incompatible with results shape {r.data.shape}"
+                    )
+        return r
+
 
 class RioAbs(RioData):
     """Class to manipulate and display riometer absorption data."""
@@ -405,3 +536,58 @@ class RioQDC(RioData):
 
     def data_description(self):
         return "Riometer QDC"
+
+    def align(
+        self,
+        align_to: Data = None,
+    ) -> RioPower:
+
+        if isinstance(align_to, RioQDC) or not isinstance(align_to, Data):
+            raise TypeError(f"Cannot align a {type(self)} type to a {type(align_to)} type")
+
+        align_to_mst = align_to.get_mean_sample_time()
+        # time_units = dt64.get_units(align_to_mst)
+        time_units = "ms"
+        sidereal_day = dt64.get_sidereal_day(time_units)
+        xi = dt64.get_sidereal_time_offset(align_to_mst, align_to.get_site_info("longitude"), units=time_units)
+        xi = xi.astype(f"timedelta64[{time_units}]").astype("float64")
+        print(f"xi: {xi}   {xi.shape}   {xi.dtype}")
+
+        # Get a numpy array of all the mean sample times
+        mst = self.get_mean_sample_time()
+        # Want an array where the ends wrap
+        mst_idx = list(range(len(mst)))
+        mst_idx.append(0)
+        mst_idx.insert(0, len(mst) - 1)
+        x = mst[mst_idx]
+        # Fix the copied values
+        x[0] -= sidereal_day
+        x[-1] += sidereal_day
+        x = x.astype(f"timedelta64[{time_units}]").astype("float64")
+        print(f"x: {x}   {x.shape}   {x.dtype}")
+
+        r = RioPower(
+            project=self.get_project(),
+            site=self.get_site(),
+            channels=self.get_channels(),
+            start_time=align_to.get_start_time(),
+            end_time=align_to.get_end_time(),
+            sample_start_time=align_to_mst,
+            sample_end_time=align_to_mst,
+            units=self.units,
+            data=np.ndarray([len(self.get_channels()), len(align_to_mst)], dtype="float"),
+        )
+        r.data[:] = np.nan
+        print(r)
+        print(f"x: {x.shape}")
+        print(f"xi: {xi.shape}")
+
+        for cn in range(len(self.get_channels())):
+            # y = [self.data[cn, -1], self.data[cn, :], self.data[cn, 0]]
+            y = self.data[cn, mst_idx]
+            print(f"y: {y.shape}")
+            interp_func = scipy.interpolate.interp1d(x, y, kind="linear")
+
+            r.data[cn, :] = interp_func(xi)
+
+        return r
